@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Social MBBET — OS</title>
+<link rel="stylesheet" href="shared/styles.css">
+<style>
+/* ══════════════════════════════════════════════
+   SOCIAL MBBET — Exclusive Styles
+══════════════════════════════════════════════ */
+
+/* Status chips per contenuto */
+.stato-chip {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 3px;
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  white-space: nowrap; font-family: var(--mono);
+}
+.s-idea     { background:rgba(107,114,128,.1); color:#9ca3af; border:1px solid rgba(107,114,128,.2); }
+.s-scrivere { background:var(--blue-bg); color:var(--blue); border:1px solid var(--blue-b); }
+.s-script   { background:var(--cyan-bg); color:var(--cyan); border:1px solid var(--cyan-b); }
+.s-registrare{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b);}
+.s-montare  { background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-b);}
+.s-revisione{ background:var(--gold-bg); color:var(--gold); border:1px solid var(--gold-border);}
+.s-approvato{ background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);}
+.s-pubblicato{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(74,222,128,.3);}
+.s-scartato { background:var(--red-bg);  color:var(--red);  border:1px solid var(--red-b);}
+
+/* Rischio chip */
+.risk-basso { background:var(--green-bg); color:var(--green); border:1px solid var(--green-b); }
+.risk-medio { background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-b);}
+.risk-alto  { background:var(--red-bg);   color:var(--red);   border:1px solid var(--red-b);  }
+.risk-chip  { display:inline-flex;align-items:center;padding:2px 8px;border-radius:3px;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-family:var(--mono);}
+
+/* Piattaforma */
+.pf-ig  { color:#f72585; }
+.pf-tt  { color:#69c9d0; }
+.pf-yt  { color:#ff0000; }
+
+/* ── CALENDAR ── */
+.cal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.cal-nav { display: flex; align-items: center; gap: 8px; }
+.cal-nav button {
+  width: 28px; height: 28px; border-radius: var(--r1);
+  background: var(--s2); border: 1px solid var(--b1);
+  color: var(--t2); cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.cal-nav button:hover { border-color: var(--gold-border); color: var(--gold); }
+.cal-month { font-size: 14px; font-weight: 700; color: var(--t1); font-family: var(--mono); }
+.cal-views { display: flex; gap: 4px; }
+.cal-view-btn {
+  padding: 4px 10px; border-radius: var(--r1);
+  background: transparent; border: 1px solid var(--b1);
+  color: var(--t3); font-size: 10.5px; font-weight: 600;
+  cursor: pointer; font-family: var(--font); transition: all .15s;
+}
+.cal-view-btn.on { background: var(--gold-bg); border-color: var(--gold-border); color: var(--gold); }
+
+.cal-grid-month {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  gap: 2px;
+}
+.cal-dow {
+  padding: 6px 4px; text-align: center;
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--t3); font-family: var(--mono);
+}
+.cal-day {
+  min-height: 72px; border-radius: var(--r1);
+  background: var(--s2); border: 1px solid var(--b0);
+  padding: 5px 6px; cursor: pointer; transition: border-color .15s;
+  overflow: hidden;
+}
+.cal-day:hover { border-color: var(--b1); }
+.cal-day.today { border-color: var(--gold-border); }
+.cal-day.other-month { opacity: .35; }
+.cal-day-num {
+  font-size: 10.5px; font-weight: 700; font-family: var(--mono);
+  color: var(--t2); margin-bottom: 3px;
+}
+.cal-day.today .cal-day-num { color: var(--gold); }
+.cal-post-chip {
+  font-size: 9px; font-weight: 600; padding: 1px 4px;
+  border-radius: 2px; margin-bottom: 2px; display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; line-height: 1.4;
+}
+.cal-post-chip:hover { filter: brightness(1.2); }
+
+/* Week view */
+.cal-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+.week-col { background: var(--s2); border: 1px solid var(--b0); border-radius: var(--r2); min-height: 200px; }
+.week-col-head {
+  padding: 8px; text-align: center; border-bottom: 1px solid var(--b0);
+  font-size: 10px; font-weight: 700; font-family: var(--mono); color: var(--t3);
+}
+.week-col-head.today { color: var(--gold); }
+.week-col-body { padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+.week-post-item {
+  padding: 5px 7px; border-radius: var(--r1); font-size: 10.5px; font-weight: 600;
+  cursor: pointer; transition: filter .15s; border: 1px solid transparent;
+}
+.week-post-item:hover { filter: brightness(1.15); }
+
+/* ── CONTENT LIST ── */
+.content-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--b0);
+  cursor: pointer; transition: background .1s;
+}
+.content-row:hover { background: rgba(255,255,255,.02); }
+.content-row:last-child { border-bottom: none; }
+.cr-tipo { width: 70px; flex-shrink: 0; }
+.cr-titolo { flex: 1; font-size: 12.5px; font-weight: 600; color: var(--t1); min-width: 0; }
+.cr-autore { font-size: 11px; color: var(--t3); width: 70px; flex-shrink: 0; font-family: var(--mono); }
+.cr-data   { font-size: 11px; color: var(--t3); width: 80px; flex-shrink: 0; font-family: var(--mono); }
+.cr-stato  { width: 100px; flex-shrink: 0; }
+.cr-rischio{ width: 70px; flex-shrink: 0; }
+
+/* ── GUARDIAN ── */
+.guardian-wrap {
+  display: grid; grid-template-columns: 1fr 340px;
+  gap: 16px; height: calc(100vh - 200px);
+}
+.guardian-editor {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.guardian-ta {
+  flex: 1; width: 100%; padding: 14px; resize: none;
+  background: var(--s2); border: 1px solid var(--b1);
+  border-radius: var(--r2); color: var(--t1);
+  font-size: 13px; font-family: var(--font); outline: none;
+  transition: border-color .15s; line-height: 1.7;
+  min-height: 280px;
+}
+.guardian-ta:focus { border-color: var(--gold-border); }
+.guardian-preview {
+  flex: 1; padding: 14px; background: var(--s2);
+  border: 1px solid var(--b1); border-radius: var(--r2);
+  font-size: 13px; line-height: 1.7; overflow-y: auto;
+  display: none; color: var(--t1);
+}
+.guardian-preview.visible { display: block; }
+.gh-panel {
+  display: flex; flex-direction: column; gap: 12px;
+  overflow-y: auto;
+}
+.gh-panel:has(.gh-empty) { justify-content: center; }
+.gh-empty { padding:32px 20px; color:var(--t3); font-size:12.5px; text-align:center;
+  border:1px dashed var(--b1); border-radius:var(--r2); background:var(--s2); }
+.gh-empty .gh-empty-icon { font-size:28px; margin-bottom:10px; opacity:.7; }
+.gh-score-card {
+  background: var(--s2); border: 1px solid var(--b0);
+  border-radius: var(--r2); padding: 16px;
+}
+.gh-score-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--t3); margin-bottom: 8px; font-family: var(--mono); }
+.gh-score-num {
+  font-size: 40px; font-weight: 900; font-family: var(--mono);
+  line-height: 1; margin-bottom: 6px;
+}
+.gh-score-desc { font-size: 12px; color: var(--t2); }
+.gh-bar-wrap { height: 5px; background: var(--b0); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.gh-bar { height: 100%; border-radius: 3px; transition: width .6s var(--ease); }
+
+.gh-matches { display: flex; flex-direction: column; gap: 8px; }
+.gh-match {
+  background: var(--s2); border: 1px solid var(--b0);
+  border-radius: var(--r2); padding: 12px;
+}
+.gh-match-word {
+  font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 4px; font-family: var(--mono);
+}
+.gh-match-cat { font-size: 10px; color: var(--t3); margin-bottom: 6px; }
+.gh-match-alt {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.gh-alt {
+  padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: 600;
+  background: var(--green-bg); color: var(--green); border: 1px solid var(--green-b);
+  cursor: pointer; font-family: var(--font); transition: all .15s;
+}
+.gh-alt:hover { filter: brightness(1.1); }
+
+/* Highlight nel testo */
+.hw-alto  { background: rgba(239,68,68,.25); border-bottom: 1.5px solid var(--red); border-radius: 2px; color: var(--red); }
+.hw-medio { background: rgba(249,115,22,.2); border-bottom: 1.5px solid var(--orange); border-radius: 2px; color: var(--orange); }
+.hw-basso { background: rgba(212,168,67,.15); border-bottom: 1.5px solid var(--gold); border-radius: 2px; color: var(--gold); }
+
+/* ── PIANO 30gg ── */
+.piano-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px;
+}
+.piano-week {
+  background: var(--s2); border: 1px solid var(--b0);
+  border-radius: var(--r2); overflow: hidden;
+}
+.piano-week-head {
+  padding: 10px 14px; background: rgba(0,0,0,.2);
+  border-bottom: 1px solid var(--b0);
+  font-size: 11px; font-weight: 700; color: var(--t1);
+}
+.piano-week-theme { font-size: 9.5px; color: var(--gold); margin-top: 2px; font-family: var(--mono); }
+.piano-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 9px 14px; border-bottom: 1px solid var(--b0);
+  font-size: 11px; cursor: pointer; transition: background .1s;
+}
+.piano-item:last-child { border-bottom: none; }
+.piano-item:hover { background: rgba(255,255,255,.02); }
+.piano-tipo {
+  font-size: 8.5px; font-weight: 800; padding: 1px 5px;
+  border-radius: 2px; background: var(--s3); color: var(--t2);
+  font-family: var(--mono); text-transform: uppercase;
+  flex-shrink: 0; margin-top: 1px; letter-spacing: .5px;
+}
+.piano-titolo { color: var(--t1); font-weight: 500; flex: 1; min-width: 0; }
+.piano-ob { font-size: 9.5px; color: var(--t3); font-family: var(--mono); margin-top: 2px; }
+
+/* Modal social */
+.social-modal .modal-box { max-width: 780px; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><h1>MBBET</h1><p>Operating System</p></div>
+    <form onsubmit="handleLogin(event)">
+      <input type="email" id="l-email" class="login-input" placeholder="Email" required autocomplete="email">
+      <input type="password" id="l-pwd" class="login-input" placeholder="Password" required autocomplete="current-password">
+      <button type="submit" class="login-btn" id="l-btn">Accedi</button>
+    </form>
+    <div id="login-err"></div>
+  </div>
+</div>
+
+<div class="app-layout" id="app" style="display:none">
+  <nav id="sidebar"></nav>
+  <div id="main">
+    <div id="topbar"></div>
+    <div id="page">
+
+      <!-- TABS -->
+      <div class="tabs" style="margin-bottom:0;border-bottom:1px solid var(--b0);margin-bottom:20px">
+        <div class="tab active" onclick="showTab('calendario',this)">Calendario</div>
+        <div class="tab" onclick="showTab('contenuti',this)">Contenuti</div>
+        <div class="tab" onclick="showTab('guardian',this)">Guardian</div>
+        <div class="tab" onclick="showTab('piano',this)">Piano 30gg</div>
+      </div>
+
+      <!-- CALENDARIO -->
+      <div id="tab-calendario">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="cal-nav">
+            <button onclick="calNav(-1)">‹</button>
+            <span class="cal-month" id="cal-month-label">—</span>
+            <button onclick="calNav(1)">›</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="cal-views">
+              <button class="cal-view-btn on" onclick="calView('month',this)">Mese</button>
+              <button class="cal-view-btn" onclick="calView('week',this)">Settimana</button>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openNewPost()">+ Contenuto</button>
+          </div>
+        </div>
+        <div id="cal-body">
+          <div class="state-box"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- CONTENUTI -->
+      <div id="tab-contenuti" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="f-stato" style="width:auto;min-width:140px" onchange="loadContenuti()">
+              <option value="">Tutti gli stati</option>
+              <option>IDEA</option><option>DA SCRIVERE</option><option>SCRIPT PRONTO</option>
+              <option>DA REGISTRARE</option><option>REGISTRATO</option><option>DA MONTARE</option>
+              <option>DA REVISIONARE</option><option>APPROVATO</option><option>PROGRAMMATO</option>
+              <option>PUBBLICATO</option><option>SCARTATO</option>
+            </select>
+            <select id="f-tipo" style="width:auto;min-width:120px" onchange="loadContenuti()">
+              <option value="">Tutti i tipi</option>
+              <option>REEL</option><option>STORIA</option><option>POST</option>
+              <option>CAROSELLO</option><option>EDUCATIONAL</option><option>TESTIMONIANZA</option>
+              <option>DIETRO LE QUINTE</option>
+            </select>
+            <select id="f-autore" style="width:auto;min-width:110px" onchange="loadContenuti()">
+              <option value="">Tutti</option>
+              <option>Mary</option><option>Manuele</option><option>Serena</option><option>Samuele</option>
+            </select>
+            <select id="f-rischio" style="width:auto;min-width:110px" onchange="loadContenuti()">
+              <option value="">Tutti i rischi</option>
+              <option>basso</option><option>medio</option><option>alto</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewPost()">+ Contenuto</button>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3>Contenuti Social</h3>
+            <span id="contenuti-count" style="font-size:11px;color:var(--t3);font-family:var(--mono)">—</span>
+          </div>
+          <div style="padding:0">
+            <div style="display:flex;align-items:center;gap:0;padding:8px 16px;border-bottom:1px solid var(--b0)">
+              <div class="cr-tipo" style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Tipo</div>
+              <div class="cr-titolo" style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Titolo</div>
+              <div class="cr-autore" style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Autore</div>
+              <div class="cr-data" style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Data</div>
+              <div class="cr-stato" style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Stato</div>
+              <div class="cr-rischio" style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Rischio</div>
+            </div>
+            <div id="contenuti-list">
+              <div class="state-box"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GUARDIAN -->
+      <div id="tab-guardian" style="display:none">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div>
+            <h2 style="font-size:16px;font-weight:700;margin-bottom:4px">MBBET Social Guardian</h2>
+            <p style="font-size:12px;color:var(--t3)">Analizza script e caption — evidenzia parole a rischio — suggerisce alternative sicure.</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="clearGuardian()">Pulisci</button>
+            <button class="btn btn-primary btn-sm" onclick="analyzeText()">Analizza</button>
+          </div>
+        </div>
+        <div class="guardian-wrap">
+          <div class="guardian-editor">
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:2px">
+              <div style="font-size:10.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Testo da analizzare</div>
+              <div style="display:flex;gap:4px;margin-left:auto">
+                <button class="cal-view-btn on" id="btn-edit" onclick="showGuardianEdit()">Modifica</button>
+                <button class="cal-view-btn" id="btn-preview" onclick="showGuardianPreview()">Preview</button>
+              </div>
+            </div>
+            <textarea class="guardian-ta" id="guardian-input" placeholder="Incolla qui lo script, la caption, l'hook o il testo del contenuto..."></textarea>
+            <div class="guardian-preview" id="guardian-preview"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <select id="guardian-tipo" style="width:auto;min-width:130px">
+                <option value="">Tipo contenuto</option>
+                <option>REEL</option><option>STORIA</option><option>POST</option>
+                <option>CAROSELLO</option><option>CAPTION</option><option>SCRIPT</option><option>HOOK</option>
+              </select>
+              <select id="guardian-pf" style="width:auto;min-width:130px">
+                <option value="">Piattaforma</option>
+                <option>Instagram</option><option>TikTok</option><option>YouTube</option>
+              </select>
+            </div>
+          </div>
+          <div class="gh-panel" id="gh-panel">
+            <!-- populated by analyzeText() -->
+            <div class="gh-empty">
+              <div class="gh-empty-icon">🛡️</div>
+              Incolla il testo e premi <strong style="color:var(--gold)">Analizza</strong><br>per ottenere un report di rischio.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIANO 30gg -->
+      <div id="tab-piano" style="display:none">
+        <div style="margin-bottom:20px">
+          <h2 style="font-size:16px;font-weight:700;margin-bottom:6px">Piano Editoriale 30 Giorni</h2>
+          <p style="font-size:12px;color:var(--t3)">Strategia di ripartenza social MBBET — Zero parole sensibili — Focus su fiducia, brand e educazione.</p>
+        </div>
+        <div class="piano-grid" id="piano-grid">
+          <div class="state-box"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+    </div><!-- /page -->
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<!-- MODAL NUOVO CONTENUTO -->
+<div class="modal social-modal" id="modal-post">
+  <div class="modal-box modal-box-lg">
+    <div class="modal-head">
+      <h3 id="modal-post-title">Nuovo Contenuto</h3>
+      <button class="close-btn" onclick="closeModal('modal-post')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Titolo *</label>
+            <input type="text" id="p-titolo" placeholder="Titolo del contenuto">
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="p-tipo">
+              <option>REEL</option><option>STORIA</option><option>POST</option>
+              <option>CAROSELLO</option><option>EDUCATIONAL</option><option>TESTIMONIANZA</option>
+              <option>DIETRO LE QUINTE</option><option>AVVISO</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Piattaforma</label>
+            <select id="p-pf">
+              <option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Multi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Assegnato a</label>
+            <select id="p-ass">
+              <option value="">—</option>
+              <option>Mary</option><option>Manuele</option><option>Serena</option><option>Samuele</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data Pubblicazione</label>
+            <input type="date" id="p-data">
+          </div>
+          <div class="form-group">
+            <label>Obiettivo</label>
+            <select id="p-ob">
+              <option value="">—</option>
+              <option value="brand_awareness">Brand Awareness</option>
+              <option value="educazione">Educazione</option>
+              <option value="fiducia">Fiducia</option>
+              <option value="social_proof">Social Proof</option>
+              <option value="engagement">Engagement</option>
+              <option value="lead">Lead</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Hook</label>
+          <input type="text" id="p-hook" placeholder="La frase di apertura che cattura l'attenzione...">
+        </div>
+        <div class="form-group">
+          <label>Script / Testo</label>
+          <textarea id="p-script" placeholder="Scrivi lo script del video o il corpo del testo..." style="min-height:120px"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Caption</label>
+          <textarea id="p-caption" placeholder="Caption per la didascalia del post..." style="min-height:60px"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>CTA</label>
+            <input type="text" id="p-cta" placeholder="Call to action...">
+          </div>
+          <div class="form-group">
+            <label>Stato</label>
+            <select id="p-stato">
+              <option>IDEA</option><option>DA SCRIVERE</option><option>SCRIPT PRONTO</option>
+              <option>DA REGISTRARE</option><option>REGISTRATO</option><option>DA MONTARE</option>
+              <option>DA REVISIONARE</option><option>APPROVATO</option><option>PROGRAMMATO</option>
+              <option>PUBBLICATO</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <input type="text" id="p-note" placeholder="Note interne...">
+        </div>
+      </div>
+      <!-- Guardian quick check -->
+      <div style="margin-top:16px;padding:12px 14px;background:var(--s2);border:1px solid var(--b0);border-radius:var(--r2)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:10.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px">Guardian Check</span>
+          <button class="btn btn-sm btn-ghost" onclick="quickGuardianCheck()">Analizza script</button>
+        </div>
+        <div id="modal-guard-result" style="font-size:11.5px;color:var(--t3)">Premi "Analizza script" per verificare il rischio del testo.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-post')">Annulla</button>
+      <button class="btn btn-primary" onclick="savePost()">Salva Contenuto</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared/supabase.min.js"></script>
+<script src="shared/auth.js"></script>
+<script src="shared/utils.js"></script>
+<script src="shared/layout.js"></script>
+<script>
+
+// ── INIT ──────────────────────────────────────────────────────────
+function onLoginSuccess() {
+  if (!requireSection('social')) return;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initLayout('social', 'Social MBBET', '<button class="btn btn-primary btn-sm" onclick="openNewPost()">+ Contenuto</button>');
+  renderCalendar();
+  loadPiano();
+}
+
+initAuth(onLoginSuccess, function onFail() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+});
+
+async function handleLogin(e) {
+  e.preventDefault();
+  var btn=document.getElementById('l-btn'), err=document.getElementById('login-err');
+  btn.textContent='Accesso...'; btn.disabled=true; err.style.display='none';
+  var res=await doLogin(document.getElementById('l-email').value.trim(),document.getElementById('l-pwd').value);
+  if(res.error){err.textContent='Email o password non validi.';err.style.display='block';btn.textContent='Accedi';btn.disabled=false;return;}
+  onLoginSuccess();
+}
+
+// ── TABS ──────────────────────────────────────────────────────────
+var TABS = ['calendario','contenuti','guardian','piano'];
+function showTab(id, el) {
+  TABS.forEach(function(t){ document.getElementById('tab-'+t).style.display='none'; });
+  document.getElementById('tab-'+id).style.display='';
+  document.querySelectorAll('.tabs .tab').forEach(function(t){ t.classList.remove('active'); });
+  if(el) el.classList.add('active');
+  if(id==='contenuti') loadContenuti();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CALENDARIO
+// ═══════════════════════════════════════════════════════════════
+var calCurrent = new Date();
+var calViewMode = 'month';
+var calPosts = {};
+
+var STATO_COLORS = {
+  'IDEA':         {bg:'rgba(107,114,128,.25)',c:'#9ca3af'},
+  'DA SCRIVERE':  {bg:'rgba(96,165,250,.25)', c:'#60a5fa'},
+  'SCRIPT PRONTO':{bg:'rgba(34,211,238,.25)', c:'#22d3ee'},
+  'DA REGISTRARE':{bg:'rgba(249,115,22,.25)', c:'#f97316'},
+  'REGISTRATO':   {bg:'rgba(167,139,250,.25)',c:'#a78bfa'},
+  'DA MONTARE':   {bg:'rgba(167,139,250,.3)', c:'#a78bfa'},
+  'DA REVISIONARE':{bg:'rgba(212,168,67,.25)',c:'#d4a843'},
+  'APPROVATO':    {bg:'rgba(34,197,94,.25)',  c:'#22c55e'},
+  'PROGRAMMATO':  {bg:'rgba(34,197,94,.3)',   c:'#4ade80'},
+  'PUBBLICATO':   {bg:'rgba(34,197,94,.4)',   c:'#4ade80'},
+  'SCARTATO':     {bg:'rgba(239,68,68,.2)',   c:'#ef4444'}
+};
+
+async function loadCalPosts(year, month) {
+  var from = new Date(year,month,1).toISOString().slice(0,10);
+  var to   = new Date(year,month+1,0).toISOString().slice(0,10);
+  calPosts = {};
+  try {
+    var r = await db.from('social_posts').select('id,titolo,stato,tipo_contenuto,data_pubblicazione')
+      .gte('data_pubblicazione',from).lte('data_pubblicazione',to).order('data_pubblicazione');
+    (r.data||[]).forEach(function(p){
+      var d = p.data_pubblicazione;
+      if(!calPosts[d]) calPosts[d]=[];
+      calPosts[d].push(p);
+    });
+  } catch(e) {}
+}
+
+async function renderCalendar() {
+  var el = document.getElementById('cal-body');
+  var y = calCurrent.getFullYear(), m = calCurrent.getMonth();
+  var lbl = document.getElementById('cal-month-label');
+  if(lbl) lbl.textContent = new Date(y,m,1).toLocaleString('it-IT',{month:'long',year:'numeric'}).toUpperCase();
+  el.innerHTML = '<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
+  await loadCalPosts(y,m);
+  if(calViewMode==='month') renderMonth(y,m,el);
+  else renderWeek(el);
+}
+
+function renderMonth(y,m,el) {
+  var today = new Date().toISOString().slice(0,10);
+  var firstDay = new Date(y,m,1).getDay();
+  var firstMon = (firstDay+6)%7;
+  var daysInMonth = new Date(y,m+1,0).getDate();
+  var daysInPrev  = new Date(y,m,0).getDate();
+  var h = '<div class="cal-grid-month">';
+  var dows=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  dows.forEach(function(d){ h+='<div class="cal-dow">'+d+'</div>'; });
+  var cells=[], prevStart=daysInPrev-firstMon+1;
+  for(var i=0;i<firstMon;i++) cells.push({day:prevStart+i,month:m-1,year:y,other:true});
+  for(var d=1;d<=daysInMonth;d++) cells.push({day:d,month:m,year:y,other:false});
+  var rest=42-cells.length;
+  for(var j=1;j<=rest;j++) cells.push({day:j,month:m+1,year:y,other:true});
+  cells.forEach(function(c){
+    var dateStr = new Date(c.year,c.month,c.day).toISOString().slice(0,10);
+    var isToday = dateStr===today;
+    h+='<div class="cal-day'+(c.other?' other-month':'')+(isToday?' today':'')+'" onclick="calDayClick(\''+dateStr+'\')">';
+    h+='<div class="cal-day-num">'+c.day+'</div>';
+    (calPosts[dateStr]||[]).forEach(function(p){
+      var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+      h+='<div class="cal-post-chip" style="background:'+sc.bg+';color:'+sc.c+'" onclick="event.stopPropagation();openPost(\''+p.id+'\')">'+escHtml(p.titolo||'—')+'</div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+function renderWeek(el) {
+  var dow=calCurrent.getDay(), offset=(dow+6)%7;
+  var monday=new Date(calCurrent); monday.setDate(monday.getDate()-offset);
+  var today=new Date().toISOString().slice(0,10);
+  var days=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  var h='<div class="cal-week">';
+  for(var i=0;i<7;i++){
+    var d=new Date(monday); d.setDate(d.getDate()+i);
+    var ds=d.toISOString().slice(0,10);
+    var isToday=ds===today;
+    h+='<div class="week-col">';
+    h+='<div class="week-col-head'+(isToday?' today':'')+'">'+days[i]+' '+d.getDate()+'</div>';
+    h+='<div class="week-col-body">';
+    (calPosts[ds]||[]).forEach(function(p){
+      var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+      h+='<div class="week-post-item" style="background:'+sc.bg+';color:'+sc.c+';border-color:'+sc.c+'22" onclick="openPost(\''+p.id+'\')">';
+      h+=escHtml(p.titolo||'—')+'</div>';
+    });
+    h+='</div></div>';
+  }
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+function calNav(dir) {
+  if(calViewMode==='month') calCurrent.setMonth(calCurrent.getMonth()+dir);
+  else calCurrent.setDate(calCurrent.getDate()+dir*7);
+  renderCalendar();
+}
+function calView(mode, btn) {
+  calViewMode=mode;
+  document.querySelectorAll('.cal-view-btn').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  renderCalendar();
+}
+function calDayClick(date) {
+  document.getElementById('p-data').value=date;
+  openNewPost();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTENUTI
+// ═══════════════════════════════════════════════════════════════
+async function loadContenuti() {
+  var list=document.getElementById('contenuti-list');
+  list.innerHTML='<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
+  var stato  =document.getElementById('f-stato').value;
+  var tipo   =document.getElementById('f-tipo').value;
+  var autore =document.getElementById('f-autore').value;
+  var rischio=document.getElementById('f-rischio').value;
+  try {
+    var q=db.from('social_posts').select('id,titolo,tipo_contenuto,assegnato_a,data_pubblicazione,stato,livello_rischio').order('created_at',{ascending:false}).limit(100);
+    if(stato)   q=q.eq('stato',stato);
+    if(tipo)    q=q.eq('tipo_contenuto',tipo);
+    if(autore)  q=q.eq('assegnato_a',autore);
+    if(rischio) q=q.eq('livello_rischio',rischio);
+    var r=await q;
+    var rows=r.data||[];
+    document.getElementById('contenuti-count').textContent=rows.length+' contenuti';
+    if(!rows.length){ list.innerHTML='<div class="state-box">Nessun contenuto trovato</div>'; return; }
+    list.innerHTML=rows.map(function(p){
+      var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+      var rc=p.livello_rischio==='alto'?'risk-alto':p.livello_rischio==='medio'?'risk-medio':'risk-basso';
+      return '<div class="content-row" onclick="openPost(\''+p.id+'\')">' +
+        '<div class="cr-tipo"><span class="stato-chip" style="background:rgba(255,255,255,.06);color:var(--t2);border-color:var(--b1)">'+escHtml(p.tipo_contenuto||'—')+'</span></div>'+
+        '<div class="cr-titolo">'+escHtml(p.titolo||'—')+'</div>'+
+        '<div class="cr-autore">'+escHtml(p.assegnato_a||'—')+'</div>'+
+        '<div class="cr-data">'+fd(p.data_pubblicazione)+'</div>'+
+        '<div class="cr-stato"><span class="stato-chip" style="background:'+sc.bg+';color:'+sc.c+';border-color:'+sc.c+'33">'+escHtml(p.stato||'—')+'</span></div>'+
+        '<div class="cr-rischio"><span class="risk-chip '+rc+'">'+escHtml(p.livello_rischio||'basso')+'</span></div>'+
+        '</div>';
+    }).join('');
+  } catch(e){ list.innerHTML='<div class="state-box state-err">Errore caricamento</div>'; }
+}
+
+// ── POST MODAL ─────────────────────────────────────────────────
+var editingPostId=null;
+function openNewPost() {
+  editingPostId=null;
+  document.getElementById('modal-post-title').textContent='Nuovo Contenuto';
+  ['p-titolo','p-hook','p-script','p-caption','p-cta','p-note'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('p-tipo').value='REEL';
+  document.getElementById('p-pf').value='Instagram';
+  document.getElementById('p-stato').value='IDEA';
+  document.getElementById('modal-guard-result').textContent='Premi "Analizza script" per verificare il rischio del testo.';
+  openModal('modal-post');
+}
+async function openPost(id) {
+  try {
+    var r=await db.from('social_posts').select('*').eq('id',id).single();
+    if(!r.data) return;
+    var p=r.data; editingPostId=id;
+    document.getElementById('modal-post-title').textContent='Modifica Contenuto';
+    document.getElementById('p-titolo').value=p.titolo||'';
+    document.getElementById('p-tipo').value=p.tipo_contenuto||'REEL';
+    document.getElementById('p-pf').value=p.piattaforma||'Instagram';
+    document.getElementById('p-ass').value=p.assegnato_a||'';
+    document.getElementById('p-data').value=p.data_pubblicazione||'';
+    document.getElementById('p-ob').value=p.obiettivo||'';
+    document.getElementById('p-hook').value=p.hook||'';
+    document.getElementById('p-script').value=p.script||'';
+    document.getElementById('p-caption').value=p.caption||'';
+    document.getElementById('p-cta').value=p.cta||'';
+    document.getElementById('p-stato').value=p.stato||'IDEA';
+    document.getElementById('p-note').value=p.note||'';
+    openModal('modal-post');
+  } catch(e){ toast('Errore apertura contenuto','error'); }
+}
+async function savePost() {
+  var titolo=document.getElementById('p-titolo').value.trim();
+  if(!titolo){ toast('Inserisci un titolo','warning'); return; }
+  var script=document.getElementById('p-script').value;
+  var caption=document.getElementById('p-caption').value;
+  var hook=document.getElementById('p-hook').value;
+  var riskResult=runGuardian(script+' '+caption+' '+hook);
+  var payload={
+    titolo:titolo,
+    tipo_contenuto:document.getElementById('p-tipo').value,
+    piattaforma:document.getElementById('p-pf').value,
+    assegnato_a:document.getElementById('p-ass').value||null,
+    data_pubblicazione:document.getElementById('p-data').value||null,
+    obiettivo:document.getElementById('p-ob').value||null,
+    hook:hook||null, script:script||null, caption:caption||null,
+    cta:document.getElementById('p-cta').value||null,
+    stato:document.getElementById('p-stato').value,
+    note:document.getElementById('p-note').value||null,
+    livello_rischio:riskResult.level,
+    parole_rischiose:riskResult.found.map(function(m){ return m.parola; }),
+    revisione_necessaria:riskResult.level==='alto',
+    updated_at:new Date().toISOString()
+  };
+  try {
+    var err;
+    if(editingPostId){ var r=await db.from('social_posts').update(payload).eq('id',editingPostId); err=r.error; }
+    else { var r2=await db.from('social_posts').insert(payload); err=r2.error; }
+    if(err) throw err;
+    closeModal('modal-post');
+    toast(editingPostId?'Contenuto aggiornato':'Contenuto salvato','success');
+    calPosts={};
+    renderCalendar();
+    if(document.getElementById('tab-contenuti').style.display!=='none') loadContenuti();
+  } catch(e){ toast('Errore salvataggio: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GUARDIAN
+// ═══════════════════════════════════════════════════════════════
+var RISK_WORDS_LOCAL = [
+  {parola:'scommessa',        categoria:'gambling',   livello_rischio:'alto',  alternativa_sicura:'strategia'},
+  {parola:'scommesse',        categoria:'gambling',   livello_rischio:'alto',  alternativa_sicura:'operazioni'},
+  {parola:'betting',          categoria:'gambling',   livello_rischio:'alto',  alternativa_sicura:'metodo operativo'},
+  {parola:'vincita sicura',   categoria:'promesse',   livello_rischio:'alto',  alternativa_sicura:'risultato verificabile'},
+  {parola:'guadagno garantito',categoria:'promesse',  livello_rischio:'alto',  alternativa_sicura:'percorso strutturato'},
+  {parola:'soldi facili',     categoria:'promesse',   livello_rischio:'alto',  alternativa_sicura:'opportunità di crescita'},
+  {parola:'casinò',           categoria:'gambling',   livello_rischio:'alto',  alternativa_sicura:'piattaforma'},
+  {parola:'casino',           categoria:'gambling',   livello_rischio:'alto',  alternativa_sicura:'piattaforma'},
+  {parola:'bonus senza rischio',categoria:'promesse', livello_rischio:'alto',  alternativa_sicura:'opportunità gestita'},
+  {parola:'profitto certo',   categoria:'promesse',   livello_rischio:'alto',  alternativa_sicura:'margine operativo'},
+  {parola:'metodo infallibile',categoria:'promesse',  livello_rischio:'alto',  alternativa_sicura:'metodo collaudato'},
+  {parola:'gambling',         categoria:'gambling',   livello_rischio:'alto',  alternativa_sicura:'gestione'},
+  {parola:'guadagno facile',  categoria:'promesse',   livello_rischio:'alto',  alternativa_sicura:'percorso formativo'},
+  {parola:'rendita passiva',  categoria:'promesse',   livello_rischio:'medio', alternativa_sicura:'entrata ricorrente'},
+  {parola:'bookmaker',        categoria:'gambling',   livello_rischio:'medio', alternativa_sicura:'operatore'},
+  {parola:'puntata',          categoria:'gambling',   livello_rischio:'medio', alternativa_sicura:'operazione'},
+  {parola:'puntate',          categoria:'gambling',   livello_rischio:'medio', alternativa_sicura:'operazioni'},
+  {parola:'scommettere',      categoria:'gambling',   livello_rischio:'alto',  alternativa_sicura:'operare'},
+  {parola:'bet',              categoria:'gambling',   livello_rischio:'medio', alternativa_sicura:'operazione'},
+  {parola:'odds',             categoria:'gambling',   livello_rischio:'basso', alternativa_sicura:'quota'},
+  {parola:'guadagni',         categoria:'promesse',   livello_rischio:'basso', alternativa_sicura:'risultati'},
+  {parola:'ricchi',           categoria:'promesse',   livello_rischio:'basso', alternativa_sicura:'indipendenti'},
+  {parola:'fare soldi',       categoria:'promesse',   livello_rischio:'medio', alternativa_sicura:'costruire un percorso'},
+  {parola:'senza rischio',    categoria:'promesse',   livello_rischio:'alto',  alternativa_sicura:'con metodo'},
+  {parola:'gioco',            categoria:'gambling',   livello_rischio:'basso', alternativa_sicura:'procedura'},
+  {parola:'gioca',            categoria:'gambling',   livello_rischio:'basso', alternativa_sicura:'opera'}
+];
+
+var riskWordsDB = null;
+
+async function loadRiskWords() {
+  if(riskWordsDB) return riskWordsDB;
+  try {
+    var r = await db.from('social_risk_words').select('*').eq('attiva',true);
+    if(r.data && r.data.length) { riskWordsDB=r.data; return riskWordsDB; }
+  } catch(e) {}
+  riskWordsDB=RISK_WORDS_LOCAL;
+  return riskWordsDB;
+}
+
+function runGuardian(text) {
+  var words = riskWordsDB || RISK_WORDS_LOCAL;
+  var lower = text.toLowerCase();
+  var found = [];
+  words.forEach(function(w) {
+    if(lower.indexOf(w.parola.toLowerCase())>=0) {
+      found.push(w);
+    }
+  });
+  var score=0;
+  found.forEach(function(m){ score+=(m.livello_rischio==='alto'?30:m.livello_rischio==='medio'?12:4); });
+  score=Math.min(score,100);
+  var level=score>60?'alto':score>25?'medio':'basso';
+  return {score:score,level:level,found:found};
+}
+
+function highlightText(text, found) {
+  var result=escHtml(text);
+  found.forEach(function(m){
+    var word=escHtml(m.parola);
+    var cls='hw-'+(m.livello_rischio||'basso');
+    var re=new RegExp('('+word+')', 'gi');
+    result=result.replace(re,'<mark class="'+cls+'">$1</mark>');
+  });
+  return result;
+}
+
+async function analyzeText() {
+  var text=document.getElementById('guardian-input').value.trim();
+  if(!text){ toast('Inserisci un testo da analizzare','warning'); return; }
+  await loadRiskWords();
+  var result=runGuardian(text);
+  renderGuardianResult(result, text);
+  showGuardianPreview();
+}
+
+function renderGuardianResult(result, text) {
+  var scoreColor=result.level==='alto'?'var(--red)':result.level==='medio'?'var(--orange)':'var(--green)';
+  var barColor=scoreColor;
+  var h='';
+  // Score card
+  h+='<div class="gh-score-card">';
+  h+='<div class="gh-score-label">Punteggio Rischio</div>';
+  h+='<div class="gh-score-num" style="color:'+scoreColor+'">'+result.score+'</div>';
+  h+='<div class="gh-score-desc">Livello: <strong style="color:'+scoreColor+'">'+result.level.toUpperCase()+'</strong>';
+  if(result.level==='alto') h+=' — Revisione obbligatoria prima della pubblicazione.';
+  else if(result.level==='medio') h+=' — Revisione consigliata. Alcune parole potrebbero essere rischiose.';
+  else h+=' — Testo relativamente sicuro. Verifica sempre prima di pubblicare.';
+  h+='</div>';
+  h+='<div class="gh-bar-wrap"><div class="gh-bar" style="width:'+result.score+'%;background:'+barColor+'"></div></div>';
+  h+='</div>';
+
+  // Preview highlighted
+  document.getElementById('guardian-preview').innerHTML='<div style="white-space:pre-wrap">'+highlightText(text,result.found)+'</div>';
+
+  // Matches
+  if(result.found.length) {
+    h+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-family:var(--mono);margin:4px 0 2px">'+result.found.length+' parole rilevate</div>';
+    h+='<div class="gh-matches">';
+    var seen={};
+    result.found.forEach(function(m){
+      if(seen[m.parola]) return; seen[m.parola]=1;
+      var rc='risk-'+m.livello_rischio;
+      h+='<div class="gh-match">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
+      h+='<div class="gh-match-word">'+escHtml(m.parola)+'</div>';
+      h+='<span class="risk-chip '+rc+'">'+m.livello_rischio+'</span>';
+      h+='</div>';
+      h+='<div class="gh-match-cat">Categoria: '+escHtml(m.categoria||'—')+'</div>';
+      if(m.alternativa_sicura){
+        h+='<div class="gh-match-alt">';
+        h+='<span style="font-size:10px;color:var(--t3)">Usa invece:</span>';
+        m.alternativa_sicura.split(',').forEach(function(alt){
+          h+='<button class="gh-alt" onclick="insertAlt(\''+escHtml(m.parola)+'\',\''+escHtml(alt.trim())+'\')" title="Sostituisci nel testo">'+escHtml(alt.trim())+'</button>';
+        });
+        h+='</div>';
+      }
+      h+='</div>';
+    });
+    h+='</div>';
+  } else {
+    h+='<div style="padding:16px;background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--r2);font-size:12px;color:var(--green);font-weight:600">Nessuna parola rischiosa rilevata.</div>';
+  }
+
+  document.getElementById('gh-panel').innerHTML=h;
+}
+
+function insertAlt(from, to) {
+  var ta=document.getElementById('guardian-input');
+  var re=new RegExp(from,'gi');
+  ta.value=ta.value.replace(re,to);
+  toast('Parola sostituita: '+from+' → '+to,'success');
+}
+
+function showGuardianEdit() {
+  document.getElementById('guardian-input').style.display='';
+  document.getElementById('guardian-preview').classList.remove('visible');
+  document.getElementById('btn-edit').classList.add('on');
+  document.getElementById('btn-preview').classList.remove('on');
+}
+function showGuardianPreview() {
+  var text=document.getElementById('guardian-input').value;
+  if(!document.getElementById('guardian-preview').innerHTML || !text) { showGuardianEdit(); return; }
+  document.getElementById('guardian-input').style.display='none';
+  document.getElementById('guardian-preview').classList.add('visible');
+  document.getElementById('btn-preview').classList.add('on');
+  document.getElementById('btn-edit').classList.remove('on');
+}
+function clearGuardian() {
+  document.getElementById('guardian-input').value='';
+  document.getElementById('guardian-preview').innerHTML='';
+  document.getElementById('gh-panel').innerHTML='<div class="gh-empty"><div class="gh-empty-icon">🛡️</div>Incolla il testo e premi <strong style="color:var(--gold)">Analizza</strong>.</div>';
+  showGuardianEdit();
+}
+
+async function quickGuardianCheck() {
+  await loadRiskWords();
+  var text=[
+    document.getElementById('p-script').value,
+    document.getElementById('p-caption').value,
+    document.getElementById('p-hook').value
+  ].join(' ');
+  if(!text.trim()){ document.getElementById('modal-guard-result').textContent='Nessun testo da analizzare.'; return; }
+  var r=runGuardian(text);
+  var el=document.getElementById('modal-guard-result');
+  var scoreColor=r.level==='alto'?'var(--red)':r.level==='medio'?'var(--orange)':'var(--green)';
+  var msg='Punteggio: <strong style="color:'+scoreColor+'">'+r.score+'/100 — '+r.level.toUpperCase()+'</strong>';
+  if(r.found.length) msg+='<br>Parole rilevate: <em>'+r.found.map(function(m){ return m.parola; }).join(', ')+'</em>';
+  else msg+='<br>Nessuna parola rischiosa trovata.';
+  el.innerHTML=msg;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PIANO 30 GG
+// ═══════════════════════════════════════════════════════════════
+var PIANO_LOCAL = {
+  1: {
+    tema:'Chi Siamo',
+    contenuti:[
+      {tipo:'REEL',        titolo:'Chi è MBBET?',                     ob:'brand_awareness'},
+      {tipo:'CAROSELLO',   titolo:'Il team MBBET — 4 persone, 1 metodo', ob:'brand_awareness'},
+      {tipo:'STORIA',      titolo:'Un giorno con noi',                ob:'brand_awareness'},
+      {tipo:'REEL',        titolo:'Le domande che ci fanno di più',    ob:'educazione'},
+      {tipo:'POST',        titolo:'I nostri valori in 3 punti',        ob:'fiducia'}
+    ]
+  },
+  2: {
+    tema:'Il Metodo MBBET',
+    contenuti:[
+      {tipo:'REEL',        titolo:'Come funziona il nostro metodo',    ob:'educazione'},
+      {tipo:'POST',        titolo:'Cosa NON diciamo mai ai clienti',   ob:'fiducia'},
+      {tipo:'CAROSELLO',   titolo:'Il processo di onboarding',         ob:'educazione'},
+      {tipo:'STORIA',      titolo:'Dietro le quinte dell\'operatività',ob:'brand_awareness'},
+      {tipo:'EDUCATIONAL', titolo:'Educazione finanziaria — Ep.1',     ob:'educazione'}
+    ]
+  },
+  3: {
+    tema:'Casi Studio & FAQ',
+    contenuti:[
+      {tipo:'REEL',        titolo:'Caso studio: il percorso guidato',  ob:'social_proof'},
+      {tipo:'CAROSELLO',   titolo:'3 errori comuni da evitare',        ob:'educazione'},
+      {tipo:'REEL',        titolo:'Come gestiamo un profilo da zero',  ob:'educazione'},
+      {tipo:'REEL',        titolo:'FAQ puntata 2 — Le vostre domande', ob:'engagement'},
+      {tipo:'TESTIMONIANZA',titolo:'Esperienza di un nostro cliente',   ob:'social_proof'}
+    ]
+  },
+  4: {
+    tema:'Valori & Vision',
+    contenuti:[
+      {tipo:'POST',        titolo:'Trasparenza prima di tutto',         ob:'fiducia'},
+      {tipo:'REEL',        titolo:'Perché la formazione è tutto',       ob:'educazione'},
+      {tipo:'REEL',        titolo:'Il futuro di MBBET',                 ob:'brand_awareness'},
+      {tipo:'STORIA',      titolo:'Team talk — settimana di bilancio',  ob:'brand_awareness'},
+      {tipo:'POST',        titolo:'Grazie alla nostra community',       ob:'engagement'}
+    ]
+  }
+};
+
+var OB_LABELS = {
+  brand_awareness:'Brand', educazione:'Edu', fiducia:'Trust',
+  social_proof:'Prova', engagement:'Eng', lead:'Lead'
+};
+
+async function loadPiano() {
+  var el=document.getElementById('piano-grid');
+  var weeks={1:{},2:{},3:{},4:{}};
+  var usedDB=false;
+  try {
+    var r=await db.from('social_content_ideas').select('*').order('settimana_piano,created_at');
+    if(r.data&&r.data.length){
+      r.data.forEach(function(item){
+        var w=item.settimana_piano||1;
+        if(!weeks[w]) weeks[w]={tema:'Settimana '+w,contenuti:[]};
+        weeks[w].contenuti=weeks[w].contenuti||[];
+        weeks[w].contenuti.push({tipo:item.tipo||'POST',titolo:item.titolo,ob:item.obiettivo});
+      });
+      usedDB=true;
+    }
+  } catch(e) {}
+  if(!usedDB) weeks=PIANO_LOCAL;
+  var h='<div class="piano-grid">';
+  [1,2,3,4].forEach(function(w){
+    var wk=weeks[w]||{tema:'Settimana '+w,contenuti:[]};
+    h+='<div class="piano-week">';
+    h+='<div class="piano-week-head">Settimana '+w+'<div class="piano-week-theme">'+escHtml(wk.tema||'')+'</div></div>';
+    (wk.contenuti||[]).forEach(function(c){
+      h+='<div class="piano-item">';
+      h+='<span class="piano-tipo">'+escHtml(c.tipo||'—')+'</span>';
+      h+='<div><div class="piano-titolo">'+escHtml(c.titolo||'—')+'</div>';
+      h+='<div class="piano-ob">'+escHtml(OB_LABELS[c.ob]||c.ob||'—')+'</div></div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  el.outerHTML=h;
+}
+
+// Preload risk words at startup
+loadRiskWords();
+</script>
+</body>
+</html>

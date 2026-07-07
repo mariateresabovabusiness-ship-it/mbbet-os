@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MBBET OS — Revenue & Finanza</title>
+<script>try{var _h=window.location.hash,_l=localStorage.getItem('mbbet_v2_session');if((_h&&_h.indexOf('#mbbet=')===0)||_l)document.documentElement.classList.add('mb-auth');}catch(e){}</script>
+<style>html.mb-auth #ls{display:none!important}</style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050714;--gold:#f5c842;--glow-g:rgba(245,200,66,.28);--green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;--tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--br:rgba(255,255,255,.07);--sb:224px}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;overflow:hidden;font-size:14px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(245,200,66,.2);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes countUp{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+
+/* SIDEBAR */
+.sb{width:var(--sb);height:100vh;flex-shrink:0;background:rgba(3,4,14,.99);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;position:relative;z-index:30}
+.sb::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(245,200,66,.25) 30%,rgba(245,200,66,.25) 70%,transparent)}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.sb-crown{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 28px var(--glow-g)}
+.sb-nm{font-size:14px;font-weight:900;letter-spacing:1.5px;color:var(--gold)}
+.sb-sub{font-size:8px;color:var(--tx3);letter-spacing:2px;margin-top:2px}
+.sb-sec{padding:13px 16px 3px;font-size:8px;font-weight:800;color:var(--tx4);letter-spacing:2.5px}
+.sb-lnk{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--tx3);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:.14s;text-decoration:none;position:relative}
+.sb-lnk:hover{color:var(--tx2);background:rgba(255,255,255,.022);border-left-color:rgba(245,200,66,.2)}
+.sb-lnk.act{color:var(--gold);background:rgba(245,200,66,.08);border-left-color:var(--gold);font-weight:700}
+.sb-lnk.act::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--gold);box-shadow:0 0 16px var(--glow-g)}
+.sb-lnk .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.05)}
+.sb-mode{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.14);border-radius:9px;padding:9px 12px}
+.sb-ml{font-size:8px;color:var(--tx3);letter-spacing:1.5px;margin-bottom:4px}
+.sb-mv{font-size:13px;font-weight:800;color:var(--gold)}
+
+/* TOPBAR */
+.pg{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:62px;padding:0 20px;flex-shrink:0;display:flex;align-items:center;gap:10px;background:rgba(3,4,14,.98);border-bottom:1px solid rgba(255,255,255,.06);position:relative;z-index:20}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,200,66,.25),transparent)}
+.tb-back{display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx3);text-decoration:none;transition:.14s;flex-shrink:0}
+.tb-back:hover{border-color:rgba(245,200,66,.3);color:var(--gold)}
+.tb-title{flex:1;text-align:center}
+.tb-g{font-size:18px;font-weight:900;letter-spacing:3px;color:var(--gold);text-shadow:0 0 28px var(--glow-g)}
+.tb-sub{font-size:9px;color:var(--tx3);margin-top:3px}
+.tb-usr{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;flex-shrink:0}
+.tb-av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000}
+.tb-nm{font-size:11px;font-weight:700;color:var(--tx2)}
+.tb-rl{font-size:9px;color:var(--tx3)}
+.tb-logout{width:26px;height:26px;border-radius:6px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.15);cursor:pointer;font-size:11px;color:var(--red);display:flex;align-items:center;justify-content:center;transition:.14s;margin-left:4px}
+.tb-logout:hover{background:rgba(255,87,87,.18)}
+
+/* TABS */
+.tabs-bar{display:flex;gap:0;padding:0 20px;background:rgba(3,4,14,.95);border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;overflow-x:auto}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab-btn{padding:14px 18px;font-size:12px;font-weight:700;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;transition:.14s;letter-spacing:.4px;white-space:nowrap;flex-shrink:0}
+.tab-btn:hover{color:var(--tx2)}
+.tab-btn.act{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* CONTENT */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.inner{flex:1;overflow-y:auto;padding:22px 24px 40px}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.kpi-row-6{grid-template-columns:repeat(3,1fr)}
+.kpi-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px 20px;animation:fadeUp .3s ease both;transition:.18s;cursor:default}
+.kpi-card:hover{border-color:rgba(255,255,255,.13);transform:translateY(-1px)}
+.kpi-label{font-size:8px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;margin-bottom:8px}
+.kpi-val{font-size:26px;font-weight:900;animation:countUp .5s ease both}
+.kpi-sub{font-size:10px;color:var(--tx3);margin-top:5px}
+.kpi-delta{font-size:10px;font-weight:700;margin-top:4px}
+
+/* SECTION TITLE */
+.sec-t{font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-t::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+
+/* CARDS / PANELS */
+.panel{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.panel-hdr{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:9px 14px;font-size:8.5px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap}
+.data-table td{padding:11px 14px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx2)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,.018)}
+.badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;display:inline-block}
+.badge-g{background:rgba(0,229,138,.1);color:var(--green);border:1px solid rgba(0,229,138,.22)}
+.badge-r{background:rgba(255,87,87,.1);color:var(--red);border:1px solid rgba(255,87,87,.22)}
+.badge-b{background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.22)}
+.badge-gold{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.22)}
+.badge-o{background:rgba(255,138,61,.1);color:var(--orange);border:1px solid rgba(255,138,61,.22)}
+
+/* OP CARDS */
+.op-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.op-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px;transition:.18s}
+.op-card:hover{border-color:rgba(255,255,255,.13);transform:translateY(-1px)}
+.op-card-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.op-av{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#000;flex-shrink:0}
+.op-nm{font-size:13px;font-weight:800;color:var(--tx)}
+.op-rl{font-size:10px;color:var(--tx3);margin-top:2px}
+.op-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.op-stat-item{background:rgba(255,255,255,.03);border-radius:9px;padding:10px 12px}
+.op-stat-v{font-size:16px;font-weight:900}
+.op-stat-l{font-size:9px;color:var(--tx3);margin-top:2px;letter-spacing:.5px}
+
+/* DIVISIONE */
+.div-ring{position:relative;display:flex;align-items:center;justify-content:center}
+.div-socio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.div-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:22px;text-align:center}
+.div-pct{font-size:48px;font-weight:900;line-height:1}
+.div-nm{font-size:12px;font-weight:700;color:var(--tx2);margin:8px 0 4px}
+.div-euro{font-size:22px;font-weight:900}
+.div-sub{font-size:10px;color:var(--tx3);margin-top:4px}
+
+/* SPESE FORM */
+.sp-form{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px;margin-bottom:18px}
+.sp-form-grid{display:grid;grid-template-columns:1fr 1fr 120px 140px 100px auto;gap:12px;align-items:end}
+.fg-check{display:flex;align-items:center;gap:7px;padding-bottom:9px}
+.fg-check input{width:15px;height:15px;accent-color:var(--gold);cursor:pointer}
+.fg-check label{font-size:10px;color:var(--tx3);cursor:pointer;user-select:none}
+.badge-ricorrente{display:inline-block;padding:1px 7px;border-radius:8px;font-size:8.5px;font-weight:800;background:rgba(247,204,70,.12);border:1px solid rgba(247,204,70,.3);color:var(--gold);margin-left:6px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:8.5px;font-weight:700;color:var(--tx3);letter-spacing:1.5px}
+.fg input,.fg select{padding:9px 13px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:9px;color:var(--tx);font-size:13px;outline:none;transition:.18s;font-family:inherit;width:100%;-webkit-appearance:none}
+.fg input:focus,.fg select:focus{border-color:rgba(245,200,66,.42);background:rgba(245,200,66,.04)}
+.btn-add{padding:10px 20px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:9px;color:#000;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.16s;height:40px}
+.btn-add:hover{opacity:.9;transform:translateY(-1px)}
+.btn-del{background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.18);border-radius:7px;color:var(--red);cursor:pointer;padding:5px 10px;font-size:11px;transition:.14s}
+.btn-del:hover{background:rgba(255,87,87,.2)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.filter-sel{padding:7px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:var(--tx2);font-size:12px;outline:none;font-family:inherit;cursor:pointer;-webkit-appearance:none}
+.filter-sel:focus{border-color:rgba(245,200,66,.3)}
+.filter-lbl{font-size:10px;color:var(--tx3);font-weight:700}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 20px;color:var(--tx3)}
+.empty-ic{font-size:40px;margin-bottom:12px;opacity:.4}
+
+/* MESE INDICATOR */
+.mese-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:20px;font-size:10px;font-weight:700;color:var(--gold);margin-bottom:16px}
+
+/* LOGIN */
+#ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.li-box{background:rgba(10,13,32,.99);border:1px solid rgba(245,200,66,.18);border-radius:20px;padding:40px 36px;width:340px}
+.li-logo{text-align:center;margin-bottom:28px}
+.li-t{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.li-s{font-size:10px;color:var(--tx3);margin-top:4px}
+.li-f{display:flex;flex-direction:column;gap:12px}
+.li-inp{padding:11px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx);font-size:13px;outline:none;width:100%;font-family:inherit}
+.li-inp:focus{border-color:rgba(245,200,66,.4)}
+.li-btn{padding:12px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:10px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:1px}
+.li-err{font-size:11px;color:var(--red);text-align:center;min-height:16px}
+
+@media(max-width:900px){
+  .sb{display:none}
+  .kpi-row,.kpi-row-6{grid-template-columns:1fr 1fr}
+  .sp-form-grid{grid-template-columns:1fr 1fr}
+  .op-grid{grid-template-columns:1fr}
+  .div-socio-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:540px){
+  .kpi-row,.kpi-row-6{grid-template-columns:1fr}
+  .inner{padding:14px 14px 40px}
+}
+</style>
+</head>
+<body>
+<div id="app" style="display:flex;height:100%;flex-direction:row">
+<div class="sb">
+  <div class="sb-logo">
+    <div class="sb-crown">&#128081;</div>
+    <div><div class="sb-nm">MBBET OS</div><div class="sb-sub">SISTEMA OPERATIVO</div></div>
+  </div>
+  <div class="sb-sec">NAVIGAZIONE</div>
+  <a class="sb-lnk" onclick="navTo('index.html')"><span class="ic">&#127968;</span>Hub Centrale</a>
+  <a class="sb-lnk" onclick="navTo('01_clienti.html')"><span class="ic">&#128100;</span>CRM Clienti</a>
+  <a class="sb-lnk" onclick="navTo('02_bonus.html')"><span class="ic">&#127919;</span>Bookmaker</a>
+  <a class="sb-lnk" onclick="navTo('03_team.html')"><span class="ic">&#128101;</span>Team</a>
+  <a class="sb-lnk act"><span class="ic">&#128184;</span>Revenue & Finanza</a>
+  <a class="sb-lnk" onclick="navTo('07_collab.html')"><span class="ic">&#129309;</span>Collaboratori</a>
+  <a class="sb-lnk" onclick="navTo('09_social.html')"><span class="ic">&#128241;</span>Social MBBET</a>
+  <a class="sb-lnk" onclick="navTo('10_onboarding_cliente.html')"><span class="ic">&#128203;</span>Modulo Cliente</a>
+  <a class="sb-lnk" onclick="navTo('06_import.html')"><span class="ic">&#128229;</span>Import Clienti</a>
+  <div class="sb-bot">
+    <div class="sb-mode"><div class="sb-ml">RUOLO ATTIVO</div><div class="sb-mv" id="sb-role">—</div></div>
+  </div>
+</div>
+
+<div class="pg">
+  <div class="topbar">
+    <a class="tb-back" onclick="navTo('index.html')">&#8592; Hub</a>
+    <div class="tb-title">
+      <div class="tb-g">REVENUE & FINANZA</div>
+      <div class="tb-sub" id="tb-sub">RICAVI · SPESE · OPERATORI · DIVISIONE UTILE</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:20px">
+      <button onclick="shiftMese(-1)" style="background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;padding:0 2px">◀</button>
+      <span id="g-mese-lbl" style="font-size:11px;font-weight:800;color:var(--gold);white-space:nowrap;min-width:90px;text-align:center">Luglio 2026</span>
+      <button onclick="shiftMese(1)" style="background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;padding:0 2px">▶</button>
+    </div>
+    <div class="tb-usr">
+      <div class="tb-av" id="tb-av">MB</div>
+      <div><div class="tb-nm" id="tb-nm">—</div><div class="tb-rl" id="tb-rl">—</div></div>
+      <div class="tb-logout" onclick="doLogout()">&#10005;</div>
+    </div>
+  </div>
+
+  <div class="tabs-bar">
+    <div class="tab-btn act" onclick="switchTab('overview',this)">&#128200; Overview</div>
+    <div class="tab-btn" onclick="switchTab('entrate',this)">&#128176; Entrate</div>
+    <div class="tab-btn" onclick="switchTab('spese',this)">&#128197; Spese</div>
+    <div class="tab-btn" onclick="switchTab('operatori',this)">&#128101; Per Operatore</div>
+    <div class="tab-btn" onclick="switchTab('divisione',this)">&#129568; Divisione Utile</div>
+    <div class="tab-btn" onclick="switchTab('tasse',this)">&#128181; Tasse</div>
+  </div>
+
+  <div class="content">
+  <div class="inner" id="main-inner">
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <div id="tab-overview">
+      <div class="mese-pill" id="mese-lbl">&#128197; Luglio 2026</div>
+      <div class="kpi-row kpi-row-6" id="kpi-overview"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="panel-title">&#128200; ANDAMENTO MENSILE</div>
+            <div style="display:flex;gap:4px">
+              <span onclick="setOvPeriod('3m',this)" class="filter-sel" style="padding:4px 10px;cursor:pointer;font-size:10px;color:var(--gold)">3M</span>
+              <span onclick="setOvPeriod('6m',this)" class="filter-sel" style="padding:4px 10px;cursor:pointer;font-size:10px">6M</span>
+              <span onclick="setOvPeriod('12m',this)" class="filter-sel" style="padding:4px 10px;cursor:pointer;font-size:10px">12M</span>
+            </div>
+          </div>
+          <div style="padding:14px;height:180px"><canvas id="ov-chart" style="width:100%;height:100%"></canvas></div>
+          <div style="padding:0 16px 14px;display:flex;gap:16px">
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx3)"><div style="width:10px;height:3px;background:var(--gold);border-radius:2px"></div>Ricavi</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx3)"><div style="width:10px;height:3px;background:var(--green);border-radius:2px"></div>Pagato clienti</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx3)"><div style="width:10px;height:3px;background:var(--blue);border-radius:2px"></div>Utile</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">&#127941; TOP OPERATORI MESE</div></div>
+          <div id="top-ops-list" style="padding:8px 0"></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-hdr">
+          <div class="panel-title">&#128176; CAPITALE ATTIVO NELLE OPERAZIONI</div>
+          <div id="cap-tot-lbl" style="font-size:13px;font-weight:900;color:var(--cyan)"></div>
+        </div>
+        <div style="padding:14px;font-size:10px;color:var(--tx3)">Soldi attualmente depositati/impegnati nei bonus ancora in corso (non prelevati) — deposito meno prelievo, o saldo bookmaker se registrato a mano.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid rgba(255,255,255,.05)">
+          <div style="padding:14px;border-right:1px solid rgba(255,255,255,.05)">
+            <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--tx3);margin-bottom:10px">PER OPERATORE</div>
+            <div id="cap-per-op"></div>
+          </div>
+          <div style="padding:14px">
+            <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--tx3);margin-bottom:10px">PER BOOKMAKER</div>
+            <div id="cap-per-bk"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">&#128202; STORICO MESI</div><div id="anno-lbl" style="font-size:10px;color:var(--tx3)">Anno corrente</div></div>
+        <div style="overflow-x:auto"><table class="data-table" id="storico-table"></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ ENTRATE ═══ -->
+    <div id="tab-entrate" style="display:none">
+      <div class="filter-bar">
+        <span class="filter-lbl">Mese:</span>
+        <select class="filter-sel" id="f-mese" onchange="renderEntrate()">
+          <option value="0">Tutti</option>
+          <option value="1">Gennaio</option><option value="2">Febbraio</option>
+          <option value="3">Marzo</option><option value="4">Aprile</option>
+          <option value="5">Maggio</option><option value="6">Giugno</option>
+          <option value="7" selected>Luglio</option><option value="8">Agosto</option>
+          <option value="9">Settembre</option><option value="10">Ottobre</option>
+          <option value="11">Novembre</option><option value="12">Dicembre</option>
+        </select>
+        <select class="filter-sel" id="f-anno" onchange="renderEntrate()">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+        </select>
+        <select class="filter-sel" id="f-stato" onchange="renderEntrate()">
+          <option value="">Tutti gli stati</option>
+          <option value="FATTO">Completati</option>
+          <option value="IN_CORSO">In corso</option>
+        </select>
+        <span class="filter-lbl" id="ent-count" style="margin-left:auto"></span>
+      </div>
+      <div class="panel">
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr>
+              <th>CLIENTE</th><th>OPERATORE</th><th>BOOKMAKER</th><th>STATO</th>
+              <th style="text-align:right">RICAVO</th><th style="text-align:right">PAGATO CLI.</th>
+              <th style="text-align:right">COSTI</th><th style="text-align:right">UTILE</th>
+              <th>MESE</th>
+            </tr></thead>
+            <tbody id="entrate-body">
+              <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--tx3)">Caricamento...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="sp-form" style="margin-top:22px">
+        <div class="sec-t" style="margin-bottom:16px">&#43; ENTRATA EXTRA (non legata a un bonus cliente)</div>
+        <div class="sp-form-grid" style="grid-template-columns:1fr 1fr 120px 140px auto">
+          <div class="fg"><label>DESCRIZIONE</label><input type="text" id="ee-desc" placeholder="Es: Referral bookmaker, consulenza..."></div>
+          <div class="fg"><label>CATEGORIA</label>
+            <select id="ee-cat">
+              <option>Referral &amp; Affiliazione</option>
+              <option>Consulenze &amp; Servizi</option>
+              <option>Rimborso</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div class="fg"><label>IMPORTO €</label><input type="number" id="ee-imp" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="fg"><label>DATA</label><input type="date" id="ee-data"></div>
+          <button class="btn-add" onclick="addEntrataExtra()">+ Aggiungi</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">&#128176; ENTRATE EXTRA REGISTRATE</div>
+          <div id="ee-tot-lbl" style="font-size:12px;font-weight:700;color:var(--green)">— €</div>
+        </div>
+        <div id="ee-empty" class="empty-state" style="display:none">
+          <div class="empty-ic">&#128176;</div>
+          <div style="font-weight:700;margin-bottom:4px">Nessuna entrata extra</div>
+          <div style="font-size:12px">Aggiungila con il form sopra</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>DATA</th><th>DESCRIZIONE</th><th>CATEGORIA</th><th style="text-align:right">IMPORTO</th><th></th></tr></thead>
+            <tbody id="entrate-extra-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SPESE ═══ -->
+    <div id="tab-spese" style="display:none">
+      <div class="kpi-row" id="kpi-spese" style="margin-bottom:16px"></div>
+      <div class="sp-form">
+        <div class="sec-t" style="margin-bottom:16px">&#43; REGISTRA SPESA</div>
+        <div class="sp-form-grid">
+          <div class="fg"><label>DESCRIZIONE</label><input type="text" id="sp-desc" placeholder="Es: Abbonamento VPN, Hosting..."></div>
+          <div class="fg"><label>CATEGORIA</label>
+            <select id="sp-cat">
+              <option>Abbonamenti &amp; Software</option>
+              <option>Marketing &amp; Pubblicità</option>
+              <option>Strumenti &amp; Operatività</option>
+              <option>Consulenze &amp; Servizi</option>
+              <option>Tasse &amp; Commissioni</option>
+              <option>Rimborsi &amp; Penali</option>
+              <option>Altro</option>
+            </select>
+          </div>
+          <div class="fg"><label>IMPORTO €</label><input type="number" id="sp-imp" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="fg"><label>DATA</label><input type="date" id="sp-data"></div>
+          <div class="fg-check"><input type="checkbox" id="sp-ricorrente"><label for="sp-ricorrente">Ricorrente<br>(mensile)</label></div>
+          <button class="btn-add" onclick="addSpesa()">+ Aggiungi</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="panel-title">&#128197; SPESE REGISTRATE</div>
+          <div id="sp-tot-lbl" style="font-size:12px;font-weight:700;color:var(--red)">— €</div>
+        </div>
+        <div id="sp-empty" class="empty-state" style="display:none">
+          <div class="empty-ic">&#128197;</div>
+          <div style="font-weight:700;margin-bottom:4px">Nessuna spesa</div>
+          <div style="font-size:12px">Aggiungi la prima spesa con il form sopra</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>DATA</th><th>DESCRIZIONE</th><th>CATEGORIA</th><th style="text-align:right">IMPORTO</th><th></th></tr></thead>
+            <tbody id="spese-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PER OPERATORE ═══ -->
+    <div id="tab-operatori" style="display:none">
+      <div class="mese-pill" id="op-mese-lbl">&#128197; Luglio 2026</div>
+      <div class="filter-bar">
+        <span class="filter-lbl">Periodo:</span>
+        <select class="filter-sel" id="op-f-mese" onchange="renderOperatori()">
+          <option value="0">Tutti i mesi</option>
+          <option value="1">Gennaio</option><option value="2">Febbraio</option>
+          <option value="3">Marzo</option><option value="4">Aprile</option>
+          <option value="5">Maggio</option><option value="6">Giugno</option>
+          <option value="7" selected>Luglio</option><option value="8">Agosto</option>
+          <option value="9">Settembre</option><option value="10">Ottobre</option>
+          <option value="11">Novembre</option><option value="12">Dicembre</option>
+        </select>
+        <select class="filter-sel" id="op-f-anno" onchange="renderOperatori()">
+          <option value="2026" selected>2026</option><option value="2025">2025</option>
+        </select>
+      </div>
+      <div class="op-grid" id="op-cards"></div>
+    </div>
+
+    <!-- ═══ DIVISIONE ═══ -->
+    <div id="tab-divisione" style="display:none">
+      <div class="kpi-row" id="div-kpi" style="margin-bottom:20px"></div>
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-hdr">
+          <div class="panel-title">&#9881; CONFIGURAZIONE SPLIT SOCI (4 soci)</div>
+        </div>
+        <div style="padding:18px">
+          <div class="sp-form-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
+            <div class="fg"><label>MARY %</label><input type="number" id="split-mary" min="0" max="100" step="1" oninput="onSplitInput()"></div>
+            <div class="fg"><label>MANUELE %</label><input type="number" id="split-manuele" min="0" max="100" step="1" oninput="onSplitInput()"></div>
+            <div class="fg"><label>SERENA %</label><input type="number" id="split-serena" min="0" max="100" step="1" oninput="onSplitInput()"></div>
+            <div class="fg"><label>SAMUELE %</label><input type="number" id="split-samuele" min="0" max="100" step="1" oninput="onSplitInput()"></div>
+          </div>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <div id="split-tot-lbl" style="font-size:12px;font-weight:800"></div>
+            <button class="btn-add" onclick="saveSplitConfig()">&#128190; Salva Split</button>
+            <div style="font-size:10.5px;color:var(--tx3)">Le spese generali vengono dedotte prima della divisione. La somma deve fare 100%.</div>
+          </div>
+        </div>
+      </div>
+      <div class="div-socio-grid" id="div-cards"></div>
+      <div class="panel" style="margin-top:18px">
+        <div class="panel-hdr"><div class="panel-title">&#128202; DETTAGLIO CALCOLO</div></div>
+        <div id="div-dettaglio" style="padding:16px"></div>
+      </div>
+    </div>
+
+    <!-- ═══ TASSE ═══ -->
+    <div id="tab-tasse" style="display:none">
+      <div style="font-size:10.5px;color:var(--tx3);margin-bottom:14px">&#8505; Il regime forfettario è individuale: qui si calcola solo per <b style="color:var(--tx2)">Mary</b> e <b style="color:var(--tx2)">Manuele</b>, sulla loro quota personale di fatturato. Serena e Samuele non sono inclusi in questo calcolo.</div>
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-hdr"><div class="panel-title">&#9881; CONFIGURAZIONE REGIME FORFETTARIO</div></div>
+        <div style="padding:18px">
+          <div class="sp-form-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
+            <div class="fg"><label>COEFFICIENTE REDDITIVITÀ %</label><input type="number" id="tx-coeff" min="1" max="100" step="1"></div>
+            <div class="fg"><label>ALIQUOTA IMPOSTA SOSTITUTIVA</label>
+              <select id="tx-aliquota"><option value="15">15% (ordinaria)</option><option value="5">5% (agevolata primi 5 anni)</option></select>
+            </div>
+            <div class="fg"><label>CONTRIBUTI INPS %</label><input type="number" id="tx-inps" min="0" max="50" step="0.01"></div>
+            <div class="fg"><label>SOGLIA ANNUA REGIME €</label><input type="number" id="tx-soglia" min="0" step="1000"></div>
+          </div>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <button class="btn-add" onclick="saveTasseConfig()">&#128190; Salva Configurazione</button>
+            <div style="font-size:10.5px;color:var(--tx3)">&#9888; Valori indicativi, uguali per entrambi — verifica sempre con il tuo commercialista prima di versare imposte reali.</div>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-row" id="kpi-tasse" style="margin-bottom:20px"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="tasse-persone-grid"></div>
+    </div>
+
+  </div>
+  </div>
+</div>
+</div>
+
+<!-- LOGIN -->
+<div id="ls" style="display:flex">
+  <div class="li-box">
+    <div class="li-logo"><div class="li-t">&#128081; MBBET OS</div><div class="li-s">ACCESSO RISERVATO</div></div>
+    <div class="li-f">
+      <input class="li-inp" type="email" id="li-e" placeholder="Email">
+      <input class="li-inp" type="password" id="li-p" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+      <div class="li-err" id="l-err"></div>
+      <button class="li-btn" onclick="login()">ENTRA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/**
+ * Skipped minification because the original files appears to be already minified.
+ * Original file: /npm/@supabase/supabase-js@2.50.0/dist/umd/supabase.js
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.supabase=t():e.supabase=t()}(self,(()=>(()=>{"use strict";var e={745:(e,t,s)=>{s.r(t),s.d(t,{AuthAdminApi:()=>be,AuthApiError:()=>u,AuthClient:()=>ke,AuthError:()=>c,AuthImplicitGrantRedirectError:()=>m,AuthInvalidCredentialsError:()=>w,AuthInvalidJwtError:()=>j,AuthInvalidTokenResponseError:()=>y,AuthPKCEGrantCodeExchangeError:()=>b,AuthRetryableFetchError:()=>k,AuthSessionMissingError:()=>g,AuthUnknownError:()=>f,AuthWeakPasswordError:()=>T,CustomAuthError:()=>p,GoTrueAdminApi:()=>le,GoTrueClient:()=>_e,NavigatorLockAcquireTimeoutError:()=>fe,SIGN_OUT_SCOPES:()=>ae,isAuthApiError:()=>d,isAuthError:()=>h,isAuthImplicitGrantRedirectError:()=>_,isAuthRetryableFetchError:()=>S,isAuthSessionMissingError:()=>v,isAuthWeakPasswordError:()=>E,lockInternals:()=>ue,navigatorLock:()=>ge,processLock:()=>ye});const r="2.70.0",i=3e4,n={"X-Client-Info":`gotrue-js/${r}`},o="X-Supabase-Api-Version",a={"2024-01-01":{timestamp:Date.parse("2024-01-01T00:00:00.0Z"),name:"2024-01-01"}},l=/^([a-z0-9_-]{4})*($|[a-z0-9_-]{3}$|[a-z0-9_-]{2}$)$/i;class c extends Error{constructor(e,t,s){super(e),this.__isAuthError=!0,this.name="AuthError",this.status=t,this.code=s}}function h(e){return"object"==typeof e&&null!==e&&"__isAuthError"in e}class u extends c{constructor(e,t,s){super(e,t,s),this.name="AuthApiError",this.status=t,this.code=s}}function d(e){return h(e)&&"AuthApiError"===e.name}class f extends c{constructor(e,t){super(e),this.name="AuthUnknownError",this.originalError=t}}class p extends c{constructor(e,t,s,r){super(e,s,r),this.name=t,this.status=s}}class g extends p{constructor(){super("Auth session missing!","AuthSessionMissingError",400,void 0)}}function v(e){return h(e)&&"AuthSessionMissingError"===e.name}class y extends p{constructor(){super("Auth session or user missing","AuthInvalidTokenResponseError",500,void 0)}}class w extends p{constructor(e){super(e,"AuthInvalidCredentialsError",400,void 0)}}class m extends p{constructor(e,t=null){super(e,"AuthImplicitGrantRedirectError",500,void 0),this.details=null,this.details=t}toJSON(){return{name:this.name,message:this.message,status:this.status,details:this.details}}}function _(e){return h(e)&&"AuthImplicitGrantRedirectError"===e.name}class b extends p{constructor(e,t=null){super(e,"AuthPKCEGrantCodeExchangeError",500,void 0),this.details=null,this.details=t}toJSON(){return{name:this.name,message:this.message,status:this.status,details:this.details}}}class k extends p{constructor(e,t){super(e,"AuthRetryableFetchError",t,void 0)}}function S(e){return h(e)&&"AuthRetryableFetchError"===e.name}class T extends p{constructor(e,t,s){super(e,"AuthWeakPasswordError",t,"weak_password"),this.reasons=s}}function E(e){return h(e)&&"AuthWeakPasswordError"===e.name}class j extends p{constructor(e){super(e,"AuthInvalidJwtError",400,"invalid_jwt")}}const O="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".split(""),P=" \t\n\r=".split(""),A=(()=>{const e=new Array(128);for(let t=0;t<e.length;t+=1)e[t]=-1;for(let t=0;t<P.length;t+=1)e[P[t].charCodeAt(0)]=-2;for(let t=0;t<O.length;t+=1)e[O[t].charCodeAt(0)]=t;return e})();function $(e,t,s){if(null!==e)for(t.queue=t.queue<<8|e,t.queuedBits+=8;t.queuedBits>=6;){const e=t.queue>>t.queuedBits-6&63;s(O[e]),t.queuedBits-=6}else if(t.queuedBits>0)for(t.queue=t.queue<<6-t.queuedBits,t.queuedBits=6;t.queuedBits>=6;){const e=t.queue>>t.queuedBits-6&63;s(O[e]),t.queuedBits-=6}}function x(e,t,s){const r=A[e];if(!(r>-1)){if(-2===r)return;throw new Error(`Invalid Base64-URL character "${String.fromCharCode(e)}"`)}for(t.queue=t.queue<<6|r,t.queuedBits+=6;t.queuedBits>=8;)s(t.queue>>t.queuedBits-8&255),t.queuedBits-=8}function C(e){const t=[],s=e=>{t.push(String.fromCodePoint(e))},r={utf8seq:0,codepoint:0},i={queue:0,queuedBits:0},n=e=>{!function(e,t,s){if(0===t.utf8seq){if(e<=127)return void s(e);for(let s=1;s<6;s+=1)if(!(e>>7-s&1)){t.utf8seq=s;break}if(2===t.utf8seq)t.codepoint=31&e;else if(3===t.utf8seq)t.codepoint=15&e;else{if(4!==t.utf8seq)throw new Error("Invalid UTF-8 sequence");t.codepoint=7&e}t.utf8seq-=1}else if(t.utf8seq>0){if(e<=127)throw new Error("Invalid UTF-8 sequence");t.codepoint=t.codepoint<<6|63&e,t.utf8seq-=1,0===t.utf8seq&&s(t.codepoint)}}(e,r,s)};for(let t=0;t<e.length;t+=1)x(e.charCodeAt(t),i,n);return t.join("")}function I(e,t){if(!(e<=127)){if(e<=2047)return t(192|e>>6),void t(128|63&e);if(e<=65535)return t(224|e>>12),t(128|e>>6&63),void t(128|63&e);if(e<=1114111)return t(240|e>>18),t(128|e>>12&63),t(128|e>>6&63),void t(128|63&e);throw new Error(`Unrecognized Unicode codepoint: ${e.toString(16)}`)}t(e)}function R(e){const t=[],s={queue:0,queuedBits:0},r=e=>{t.push(e)};for(let t=0;t<e.length;t+=1)x(e.charCodeAt(t),s,r);return new Uint8Array(t)}function L(e){const t=[],s={queue:0,queuedBits:0},r=e=>{t.push(e)};return e.forEach((e=>$(e,s,r))),$(null,s,r),t.join("")}const U=()=>"undefined"!=typeof window&&"undefined"!=typeof document,D={tested:!1,writable:!1},N=()=>{if(!U())return!1;try{if("object"!=typeof globalThis.localStorage)return!1}catch(e){return!1}if(D.tested)return D.writable;const e=`lswt-${Math.random()}${Math.random()}`;try{globalThis.localStorage.setItem(e,e),globalThis.localStorage.removeItem(e),D.tested=!0,D.writable=!0}catch(e){D.tested=!0,D.writable=!1}return D.writable},F=e=>{let t;return t=e||("undefined"==typeof fetch?(...e)=>Promise.resolve().then(s.bind(s,907)).then((({default:t})=>t(...e))):fetch),(...e)=>t(...e)},M=e=>"object"==typeof e&&null!==e&&"status"in e&&"ok"in e&&"json"in e&&"function"==typeof e.json,B=async(e,t,s)=>{await e.setItem(t,JSON.stringify(s))},q=async(e,t)=>{const s=await e.getItem(t);if(!s)return null;try{return JSON.parse(s)}catch(e){return s}},H=async(e,t)=>{await e.removeItem(t)};class z{constructor(){this.promise=new z.promiseConstructor(((e,t)=>{this.resolve=e,this.reject=t}))}}function J(e){const t=e.split(".");if(3!==t.length)throw new j("Invalid JWT structure");for(let e=0;e<t.length;e++)if(!l.test(t[e]))throw new j("JWT not in base64url format");return{header:JSON.parse(C(t[0])),payload:JSON.parse(C(t[1])),signature:R(t[2]),raw:{header:t[0],payload:t[1]}}}function W(e){return("0"+e.toString(16)).substr(-2)}async function K(e,t,s=!1){const r=function(){const e=new Uint32Array(56);if("undefined"==typeof crypto){const e="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~",t=e.length;let s="";for(let r=0;r<56;r++)s+=e.charAt(Math.floor(Math.random()*t));return s}return crypto.getRandomValues(e),Array.from(e,W).join("")}();let i=r;s&&(i+="/PASSWORD_RECOVERY"),await B(e,`${t}-code-verifier`,i);const n=await async function(e){if("undefined"==typeof crypto||void 0===crypto.subtle||"undefined"==typeof TextEncoder)return console.warn("WebCrypto API is not supported. Code challenge method will default to use plain instead of sha256."),e;const t=await async function(e){const t=(new TextEncoder).encode(e),s=await crypto.subtle.digest("SHA-256",t),r=new Uint8Array(s);return Array.from(r).map((e=>String.fromCharCode(e))).join("")}(e);return btoa(t).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}(r);return[n,r===n?"plain":"s256"]}z.promiseConstructor=Promise;const G=/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[0-1])$/i,V=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;function Y(e){if(!V.test(e))throw new Error("@supabase/auth-js: Expected parameter to be UUID but is not")}const X=e=>e.msg||e.message||e.error_description||e.error||JSON.stringify(e),Q=[502,503,504];async function Z(e){var t;if(!M(e))throw new k(X(e),0);if(Q.includes(e.status))throw new k(X(e),e.status);let s,r;try{s=await e.json()}catch(e){throw new f(X(e),e)}const i=function(e){const t=e.headers.get(o);if(!t)return null;if(!t.match(G))return null;try{return new Date(`${t}T00:00:00.0Z`)}catch(e){return null}}(e);if(i&&i.getTime()>=a["2024-01-01"].timestamp&&"object"==typeof s&&s&&"string"==typeof s.code?r=s.code:"object"==typeof s&&s&&"string"==typeof s.error_code&&(r=s.error_code),r){if("weak_password"===r)throw new T(X(s),e.status,(null===(t=s.weak_password)||void 0===t?void 0:t.reasons)||[]);if("session_not_found"===r)throw new g}else if("object"==typeof s&&s&&"object"==typeof s.weak_password&&s.weak_password&&Array.isArray(s.weak_password.reasons)&&s.weak_password.reasons.length&&s.weak_password.reasons.reduce(((e,t)=>e&&"string"==typeof t),!0))throw new T(X(s),e.status,s.weak_password.reasons);throw new u(X(s),e.status||500,r)}async function ee(e,t,s,r){var i;const n=Object.assign({},null==r?void 0:r.headers);n[o]||(n[o]=a["2024-01-01"].name),(null==r?void 0:r.jwt)&&(n.Authorization=`Bearer ${r.jwt}`);const l=null!==(i=null==r?void 0:r.query)&&void 0!==i?i:{};(null==r?void 0:r.redirectTo)&&(l.redirect_to=r.redirectTo);const c=Object.keys(l).length?"?"+new URLSearchParams(l).toString():"",h=await async function(e,t,s,r,i,n){const o=((e,t,s,r)=>{const i={method:e,headers:(null==t?void 0:t.headers)||{}};return"GET"===e?i:(i.headers=Object.assign({"Content-Type":"application/json;charset=UTF-8"},null==t?void 0:t.headers),i.body=JSON.stringify(r),Object.assign(Object.assign({},i),s))})(t,r,{},n);let a;try{a=await e(s,Object.assign({},o))}catch(e){throw console.error(e),new k(X(e),0)}if(a.ok||await Z(a),null==r?void 0:r.noResolveJson)return a;try{return await a.json()}catch(e){await Z(e)}}(e,t,s+c,{headers:n,noResolveJson:null==r?void 0:r.noResolveJson},0,null==r?void 0:r.body);return(null==r?void 0:r.xform)?null==r?void 0:r.xform(h):{data:Object.assign({},h),error:null}}function te(e){var t;let s=null;var r;return function(e){return e.access_token&&e.refresh_token&&e.expires_in}(e)&&(s=Object.assign({},e),e.expires_at||(s.expires_at=(r=e.expires_in,Math.round(Date.now()/1e3)+r))),{data:{session:s,user:null!==(t=e.user)&&void 0!==t?t:e},error:null}}function se(e){const t=te(e);return!t.error&&e.weak_password&&"object"==typeof e.weak_password&&Array.isArray(e.weak_password.reasons)&&e.weak_password.reasons.length&&e.weak_password.message&&"string"==typeof e.weak_password.message&&e.weak_password.reasons.reduce(((e,t)=>e&&"string"==typeof t),!0)&&(t.data.weak_password=e.weak_password),t}function re(e){var t;return{data:{user:null!==(t=e.user)&&void 0!==t?t:e},error:null}}function ie(e){return{data:e,error:null}}function ne(e){const{action_link:t,email_otp:s,hashed_token:r,redirect_to:i,verification_type:n}=e,o=function(e,t){var s={};for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&t.indexOf(r)<0&&(s[r]=e[r]);if(null!=e&&"function"==typeof Object.getOwnPropertySymbols){var i=0;for(r=Object.getOwnPropertySymbols(e);i<r.length;i++)t.indexOf(r[i])<0&&Object.prototype.propertyIsEnumerable.call(e,r[i])&&(s[r[i]]=e[r[i]])}return s}(e,["action_link","email_otp","hashed_token","redirect_to","verification_type"]);return{data:{properties:{action_link:t,email_otp:s,hashed_token:r,redirect_to:i,verification_type:n},user:Object.assign({},o)},error:null}}function oe(e){return e}const ae=["global","local","others"];class le{constructor({url:e="",headers:t={},fetch:s}){this.url=e,this.headers=t,this.fetch=F(s),this.mfa={listFactors:this._listFactors.bind(this),deleteFactor:this._deleteFactor.bind(this)}}async signOut(e,t=ae[0]){if(ae.indexOf(t)<0)throw new Error(`@supabase/auth-js: Parameter scope must be one of ${ae.join(", ")}`);try{return await ee(this.fetch,"POST",`${this.url}/logout?scope=${t}`,{headers:this.headers,jwt:e,noResolveJson:!0}),{data:null,error:null}}catch(e){if(h(e))return{data:null,error:e};throw e}}async inviteUserByEmail(e,t={}){try{return await ee(this.fetch,"POST",`${this.url}/invite`,{body:{email:e,data:t.data},headers:this.headers,redirectTo:t.redirectTo,xform:re})}catch(e){if(h(e))return{data:{user:null},error:e};throw e}}async generateLink(e){try{const{options:t}=e,s=function(e,t){var s={};for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&t.indexOf(r)<0&&(s[r]=e[r]);if(null!=e&&"function"==typeof Object.getOwnPropertySymbols){var i=0;for(r=Object.getOwnPropertySymbols(e);i<r.length;i++)t.indexOf(r[i])<0&&Object.prototype.propertyIsEnumerable.call(e,r[i])&&(s[r[i]]=e[r[i]])}return s}(e,["options"]),r=Object.assign(Object.assign({},s),t);return"newEmail"in s&&(r.new_email=null==s?void 0:s.newEmail,delete r.newEmail),await ee(this.fetch,"POST",`${this.url}/admin/generate_link`,{body:r,headers:this.headers,xform:ne,redirectTo:null==t?void 0:t.redirectTo})}catch(e){if(h(e))return{data:{properties:null,user:null},error:e};throw e}}async createUser(e){try{return await ee(this.fetch,"POST",`${this.url}/admin/users`,{body:e,headers:this.headers,xform:re})}catch(e){if(h(e))return{data:{user:null},error:e};throw e}}async listUsers(e){var t,s,r,i,n,o,a;try{const l={nextPage:null,lastPage:0,total:0},c=await ee(this.fetch,"GET",`${this.url}/admin/users`,{headers:this.headers,noResolveJson:!0,query:{page:null!==(s=null===(t=null==e?void 0:e.page)||void 0===t?void 0:t.toString())&&void 0!==s?s:"",per_page:null!==(i=null===(r=null==e?void 0:e.perPage)||void 0===r?void 0:r.toString())&&void 0!==i?i:""},xform:oe});if(c.error)throw c.error;const h=await c.json(),u=null!==(n=c.headers.get("x-total-count"))&&void 0!==n?n:0,d=null!==(a=null===(o=c.headers.get("link"))||void 0===o?void 0:o.split(","))&&void 0!==a?a:[];return d.length>0&&(d.forEach((e=>{const t=parseInt(e.split(";")[0].split("=")[1].substring(0,1)),s=JSON.parse(e.split(";")[1].split("=")[1]);l[`${s}Page`]=t})),l.total=parseInt(u)),{data:Object.assign(Object.assign({},h),l),error:null}}catch(e){if(h(e))return{data:{users:[]},error:e};throw e}}async getUserById(e){Y(e);try{return await ee(this.fetch,"GET",`${this.url}/admin/users/${e}`,{headers:this.headers,xform:re})}catch(e){if(h(e))return{data:{user:null},error:e};throw e}}async updateUserById(e,t){Y(e);try{return await ee(this.fetch,"PUT",`${this.url}/admin/users/${e}`,{body:t,headers:this.headers,xform:re})}catch(e){if(h(e))return{data:{user:null},error:e};throw e}}async deleteUser(e,t=!1){Y(e);try{return await ee(this.fetch,"DELETE",`${this.url}/admin/users/${e}`,{headers:this.headers,body:{should_soft_delete:t},xform:re})}catch(e){if(h(e))return{data:{user:null},error:e};throw e}}async _listFactors(e){Y(e.userId);try{const{data:t,error:s}=await ee(this.fetch,"GET",`${this.url}/admin/users/${e.userId}/factors`,{headers:this.headers,xform:e=>({data:{factors:e},error:null})});return{data:t,error:s}}catch(e){if(h(e))return{data:null,error:e};throw e}}async _deleteFactor(e){Y(e.userId),Y(e.id);try{return{data:await ee(this.fetch,"DELETE",`${this.url}/admin/users/${e.userId}/factors/${e.id}`,{headers:this.headers}),error:null}}catch(e){if(h(e))return{data:null,error:e};throw e}}}const ce={getItem:e=>N()?globalThis.localStorage.getItem(e):null,setItem:(e,t)=>{N()&&globalThis.localStorage.setItem(e,t)},removeItem:e=>{N()&&globalThis.localStorage.removeItem(e)}};function he(e={}){return{getItem:t=>e[t]||null,setItem:(t,s)=>{e[t]=s},removeItem:t=>{delete e[t]}}}const ue={debug:!!(globalThis&&N()&&globalThis.localStorage&&"true"===globalThis.localStorage.getItem("supabase.gotrue-js.locks.debug"))};class de extends Error{constructor(e){super(e),this.isAcquireTimeout=!0}}class fe extends de{}class pe extends de{}async function ge(e,t,s){ue.debug&&console.log("@supabase/gotrue-js: navigatorLock: acquire lock",e,t);const r=new globalThis.AbortController;return t>0&&setTimeout((()=>{r.abort(),ue.debug&&console.log("@supabase/gotrue-js: navigatorLock acquire timed out",e)}),t),await Promise.resolve().then((()=>globalThis.navigator.locks.request(e,0===t?{mode:"exclusive",ifAvailable:!0}:{mode:"exclusive",signal:r.signal},(async r=>{if(!r){if(0===t)throw ue.debug&&console.log("@supabase/gotrue-js: navigatorLock: not immediately available",e),new fe(`Acquiring an exclusive Navigator LockManager lock "${e}" immediately failed`);if(ue.debug)try{const e=await globalThis.navigator.locks.query();console.log("@supabase/gotrue-js: Navigator LockManager state",JSON.stringify(e,null,"  "))}catch(e){console.warn("@supabase/gotrue-js: Error when querying Navigator LockManager state",e)}return console.warn("@supabase/gotrue-js: Navigator LockManager returned a null lock when using #request without ifAvailable set to true, it appears this browser is not following the LockManager spec https://developer.mozilla.org/en-US/docs/Web/API/LockManager/request"),await s()}ue.debug&&console.log("@supabase/gotrue-js: navigatorLock: acquired",e,r.name);try{return await s()}finally{ue.debug&&console.log("@supabase/gotrue-js: navigatorLock: released",e,r.name)}}))))}const ve={};async function ye(e,t,s){var r;const i=null!==(r=ve[e])&&void 0!==r?r:Promise.resolve(),n=Promise.race([i.catch((()=>null)),t>=0?new Promise(((s,r)=>{setTimeout((()=>{r(new pe(`Acquring process lock with name "${e}" timed out`))}),t)})):null].filter((e=>e))).catch((e=>{if(e&&e.isAcquireTimeout)throw e;return null})).then((async()=>await s()));return ve[e]=n.catch((async e=>{if(e&&e.isAcquireTimeout)return await i,null;throw e})),await n}!function(){if("object"!=typeof globalThis)try{Object.defineProperty(Object.prototype,"__magic__",{get:function(){return this},configurable:!0}),__magic__.globalThis=__magic__,delete Object.prototype.__magic__}catch(e){"undefined"!=typeof self&&(self.globalThis=self)}}();const we={url:"http://localhost:9999",storageKey:"supabase.auth.token",autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,headers:n,flowType:"implicit",debug:!1,hasCustomAuthorizationHeader:!1};async function me(e,t,s){return await s()}class _e{constructor(e){var t,s;this.memoryStorage=null,this.stateChangeEmitters=new Map,this.autoRefreshTicker=null,this.visibilityChangedCallback=null,this.refreshingDeferred=null,this.initializePromise=null,this.detectSessionInUrl=!0,this.hasCustomAuthorizationHeader=!1,this.suppressGetSessionWarning=!1,this.lockAcquired=!1,this.pendingInLock=[],this.broadcastChannel=null,this.logger=console.log,this.instanceID=_e.nextInstanceID,_e.nextInstanceID+=1,this.instanceID>0&&U()&&console.warn("Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.");const r=Object.assign(Object.assign({},we),e);if(this.logDebugMessages=!!r.debug,"function"==typeof r.debug&&(this.logger=r.debug),this.persistSession=r.persistSession,this.storageKey=r.storageKey,this.autoRefreshToken=r.autoRefreshToken,this.admin=new le({url:r.url,headers:r.headers,fetch:r.fetch}),this.url=r.url,this.headers=r.headers,this.fetch=F(r.fetch),this.lock=r.lock||me,this.detectSessionInUrl=r.detectSessionInUrl,this.flowType=r.flowType,this.hasCustomAuthorizationHeader=r.hasCustomAuthorizationHeader,r.lock?this.lock=r.lock:U()&&(null===(t=null===globalThis||void 0===globalThis?void 0:globalThis.navigator)||void 0===t?void 0:t.locks)?this.lock=ge:this.lock=me,this.jwks={keys:[]},this.jwks_cached_at=Number.MIN_SAFE_INTEGER,this.mfa={verify:this._verify.bind(this),enroll:this._enroll.bind(this),unenroll:this._unenroll.bind(this),challenge:this._challenge.bind(this),listFactors:this._listFactors.bind(this),challengeAndVerify:this._challengeAndVerify.bind(this),getAuthenticatorAssuranceLevel:this._getAuthenticatorAssuranceLevel.bind(this)},this.persistSession?r.storage?this.storage=r.storage:N()?this.storage=ce:(this.memoryStorage={},this.storage=he(this.memoryStorage)):(this.memoryStorage={},this.storage=he(this.memoryStorage)),U()&&globalThis.BroadcastChannel&&this.persistSession&&this.storageKey){try{this.broadcastChannel=new globalThis.BroadcastChannel(this.storageKey)}catch(e){console.error("Failed to create a new BroadcastChannel, multi-tab state changes will not be available",e)}null===(s=this.broadcastChannel)||void 0===s||s.addEventListener("message",(async e=>{this._debug("received broadcast notification from other tab or client",e),await this._notifyAllSubscribers(e.data.event,e.data.session,!1)}))}this.initialize()}_debug(...e){return this.logDebugMessages&&this.logger(`GoTrueClient@${this.instanceID} (${r}) ${(new Date).toISOString()}`,...e),this}async initialize(){return this.initializePromise||(this.initializePromise=(async()=>await this._acquireLock(-1,(async()=>await this._initialize())))()),await this.initializePromise}async _initialize(){var e;try{const t=function(e){const t={},s=new URL(e);if(s.hash&&"#"===s.hash[0])try{new URLSearchParams(s.hash.substring(1)).forEach(((e,s)=>{t[s]=e}))}catch(e){}return s.searchParams.forEach(((e,s)=>{t[s]=e})),t}(window.location.href);let s="none";if(this._isImplicitGrantCallback(t)?s="implicit":await this._isPKCECallback(t)&&(s="pkce"),U()&&this.detectSessionInUrl&&"none"!==s){const{data:r,error:i}=await this._getSessionFromURL(t,s);if(i){if(this._debug("#_initialize()","error detecting session from URL",i),_(i)){const t=null===(e=i.details)||void 0===e?void 0:e.code;if("identity_already_exists"===t||"identity_not_found"===t||"single_identity_not_deletable"===t)return{error:i}}return await this._removeSession(),{error:i}}const{session:n,redirectType:o}=r;return this._debug("#_initialize()","detected session in URL",n,"redirect type",o),await this._saveSession(n),setTimeout((async()=>{"recovery"===o?await this._notifyAllSubscribers("PASSWORD_RECOVERY",n):await this._notifyAllSubscribers("SIGNED_IN",n)}),0),{error:null}}return await this._recoverAndRefresh(),{error:null}}catch(e){return h(e)?{error:e}:{error:new f("Unexpected error during initialization",e)}}finally{await this._handleVisibilityChange(),this._debug("#_initialize()","end")}}async signInAnonymously(e){var t,s,r;try{const i=await ee(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{data:null!==(s=null===(t=null==e?void 0:e.options)||void 0===t?void 0:t.data)&&void 0!==s?s:{},gotrue_meta_security:{captcha_token:null===(r=null==e?void 0:e.options)||void 0===r?void 0:r.captchaToken}},xform:te}),{data:n,error:o}=i;if(o||!n)return{data:{user:null,session:null},error:o};const a=n.session,l=n.user;return n.session&&(await this._saveSession(n.session),await this._notifyAllSubscribers("SIGNED_IN",a)),{data:{user:l,session:a},error:null}}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async signUp(e){var t,s,r;try{let i;if("email"in e){const{email:s,password:r,options:n}=e;let o=null,a=null;"pkce"===this.flowType&&([o,a]=await K(this.storage,this.storageKey)),i=await ee(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,redirectTo:null==n?void 0:n.emailRedirectTo,body:{email:s,password:r,data:null!==(t=null==n?void 0:n.data)&&void 0!==t?t:{},gotrue_meta_security:{captcha_token:null==n?void 0:n.captchaToken},code_challenge:o,code_challenge_method:a},xform:te})}else{if(!("phone"in e))throw new w("You must provide either an email or phone number and a password");{const{phone:t,password:n,options:o}=e;i=await ee(this.fetch,"POST",`${this.url}/signup`,{headers:this.headers,body:{phone:t,password:n,data:null!==(s=null==o?void 0:o.data)&&void 0!==s?s:{},channel:null!==(r=null==o?void 0:o.channel)&&void 0!==r?r:"sms",gotrue_meta_security:{captcha_token:null==o?void 0:o.captchaToken}},xform:te})}}const{data:n,error:o}=i;if(o||!n)return{data:{user:null,session:null},error:o};const a=n.session,l=n.user;return n.session&&(await this._saveSession(n.session),await this._notifyAllSubscribers("SIGNED_IN",a)),{data:{user:l,session:a},error:null}}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async signInWithPassword(e){try{let t;if("email"in e){const{email:s,password:r,options:i}=e;t=await ee(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{email:s,password:r,gotrue_meta_security:{captcha_token:null==i?void 0:i.captchaToken}},xform:se})}else{if(!("phone"in e))throw new w("You must provide either an email or phone number and a password");{const{phone:s,password:r,options:i}=e;t=await ee(this.fetch,"POST",`${this.url}/token?grant_type=password`,{headers:this.headers,body:{phone:s,password:r,gotrue_meta_security:{captcha_token:null==i?void 0:i.captchaToken}},xform:se})}}const{data:s,error:r}=t;return r?{data:{user:null,session:null},error:r}:s&&s.session&&s.user?(s.session&&(await this._saveSession(s.session),await this._notifyAllSubscribers("SIGNED_IN",s.session)),{data:Object.assign({user:s.user,session:s.session},s.weak_password?{weakPassword:s.weak_password}:null),error:r}):{data:{user:null,session:null},error:new y}}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async signInWithOAuth(e){var t,s,r,i;return await this._handleProviderSignIn(e.provider,{redirectTo:null===(t=e.options)||void 0===t?void 0:t.redirectTo,scopes:null===(s=e.options)||void 0===s?void 0:s.scopes,queryParams:null===(r=e.options)||void 0===r?void 0:r.queryParams,skipBrowserRedirect:null===(i=e.options)||void 0===i?void 0:i.skipBrowserRedirect})}async exchangeCodeForSession(e){return await this.initializePromise,this._acquireLock(-1,(async()=>this._exchangeCodeForSession(e)))}async signInWithWeb3(e){const{chain:t}=e;if("solana"===t)return await this.signInWithSolana(e);throw new Error(`@supabase/auth-js: Unsupported chain "${t}"`)}async signInWithSolana(e){var t,s,r,i,n,o,a,l,c,u,d,f;let p,g;if("message"in e)p=e.message,g=e.signature;else{const{chain:h,wallet:d,statement:f,options:v}=e;let y;if(U())if("object"==typeof d)y=d;else{const e=window;if(!("solana"in e)||"object"!=typeof e.solana||!("signIn"in e.solana&&"function"==typeof e.solana.signIn||"signMessage"in e.solana&&"function"==typeof e.solana.signMessage))throw new Error("@supabase/auth-js: No compatible Solana wallet interface on the window object (window.solana) detected. Make sure the user already has a wallet installed and connected for this app. Prefer passing the wallet interface object directly to signInWithWeb3({ chain: 'solana', wallet: resolvedUserWallet }) instead.");y=e.solana}else{if("object"!=typeof d||!(null==v?void 0:v.url))throw new Error("@supabase/auth-js: Both wallet and url must be specified in non-browser environments.");y=d}const w=new URL(null!==(t=null==v?void 0:v.url)&&void 0!==t?t:window.location.href);if("signIn"in y&&y.signIn){const e=await y.signIn(Object.assign(Object.assign(Object.assign({issuedAt:(new Date).toISOString()},null==v?void 0:v.signInWithSolana),{version:"1",domain:w.host,uri:w.href}),f?{statement:f}:null));let t;if(Array.isArray(e)&&e[0]&&"object"==typeof e[0])t=e[0];else{if(!(e&&"object"==typeof e&&"signedMessage"in e&&"signature"in e))throw new Error("@supabase/auth-js: Wallet method signIn() returned unrecognized value");t=e}if(!("signedMessage"in t&&"signature"in t&&("string"==typeof t.signedMessage||t.signedMessage instanceof Uint8Array)&&t.signature instanceof Uint8Array))throw new Error("@supabase/auth-js: Wallet method signIn() API returned object without signedMessage and signature fields");p="string"==typeof t.signedMessage?t.signedMessage:(new TextDecoder).decode(t.signedMessage),g=t.signature}else{if(!("signMessage"in y&&"function"==typeof y.signMessage&&"publicKey"in y&&"object"==typeof y&&y.publicKey&&"toBase58"in y.publicKey&&"function"==typeof y.publicKey.toBase58))throw new Error("@supabase/auth-js: Wallet does not have a compatible signMessage() and publicKey.toBase58() API");p=[`${w.host} wants you to sign in with your Solana account:`,y.publicKey.toBase58(),...f?["",f,""]:[""],"Version: 1",`URI: ${w.href}`,`Issued At: ${null!==(r=null===(s=null==v?void 0:v.signInWithSolana)||void 0===s?void 0:s.issuedAt)&&void 0!==r?r:(new Date).toISOString()}`,...(null===(i=null==v?void 0:v.signInWithSolana)||void 0===i?void 0:i.notBefore)?[`Not Before: ${v.signInWithSolana.notBefore}`]:[],...(null===(n=null==v?void 0:v.signInWithSolana)||void 0===n?void 0:n.expirationTime)?[`Expiration Time: ${v.signInWithSolana.expirationTime}`]:[],...(null===(o=null==v?void 0:v.signInWithSolana)||void 0===o?void 0:o.chainId)?[`Chain ID: ${v.signInWithSolana.chainId}`]:[],...(null===(a=null==v?void 0:v.signInWithSolana)||void 0===a?void 0:a.nonce)?[`Nonce: ${v.signInWithSolana.nonce}`]:[],...(null===(l=null==v?void 0:v.signInWithSolana)||void 0===l?void 0:l.requestId)?[`Request ID: ${v.signInWithSolana.requestId}`]:[],...(null===(u=null===(c=null==v?void 0:v.signInWithSolana)||void 0===c?void 0:c.resources)||void 0===u?void 0:u.length)?["Resources",...v.signInWithSolana.resources.map((e=>`- ${e}`))]:[]].join("\n");const e=await y.signMessage((new TextEncoder).encode(p),"utf8");if(!(e&&e instanceof Uint8Array))throw new Error("@supabase/auth-js: Wallet signMessage() API returned an recognized value");g=e}}try{const{data:t,error:s}=await ee(this.fetch,"POST",`${this.url}/token?grant_type=web3`,{headers:this.headers,body:Object.assign({chain:"solana",message:p,signature:L(g)},(null===(d=e.options)||void 0===d?void 0:d.captchaToken)?{gotrue_meta_security:{captcha_token:null===(f=e.options)||void 0===f?void 0:f.captchaToken}}:null),xform:te});if(s)throw s;return t&&t.session&&t.user?(t.session&&(await this._saveSession(t.session),await this._notifyAllSubscribers("SIGNED_IN",t.session)),{data:Object.assign({},t),error:s}):{data:{user:null,session:null},error:new y}}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async _exchangeCodeForSession(e){const t=await q(this.storage,`${this.storageKey}-code-verifier`),[s,r]=(null!=t?t:"").split("/");try{const{data:t,error:i}=await ee(this.fetch,"POST",`${this.url}/token?grant_type=pkce`,{headers:this.headers,body:{auth_code:e,code_verifier:s},xform:te});if(await H(this.storage,`${this.storageKey}-code-verifier`),i)throw i;return t&&t.session&&t.user?(t.session&&(await this._saveSession(t.session),await this._notifyAllSubscribers("SIGNED_IN",t.session)),{data:Object.assign(Object.assign({},t),{redirectType:null!=r?r:null}),error:i}):{data:{user:null,session:null,redirectType:null},error:new y}}catch(e){if(h(e))return{data:{user:null,session:null,redirectType:null},error:e};throw e}}async signInWithIdToken(e){try{const{options:t,provider:s,token:r,access_token:i,nonce:n}=e,o=await ee(this.fetch,"POST",`${this.url}/token?grant_type=id_token`,{headers:this.headers,body:{provider:s,id_token:r,access_token:i,nonce:n,gotrue_meta_security:{captcha_token:null==t?void 0:t.captchaToken}},xform:te}),{data:a,error:l}=o;return l?{data:{user:null,session:null},error:l}:a&&a.session&&a.user?(a.session&&(await this._saveSession(a.session),await this._notifyAllSubscribers("SIGNED_IN",a.session)),{data:a,error:l}):{data:{user:null,session:null},error:new y}}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async signInWithOtp(e){var t,s,r,i,n;try{if("email"in e){const{email:r,options:i}=e;let n=null,o=null;"pkce"===this.flowType&&([n,o]=await K(this.storage,this.storageKey));const{error:a}=await ee(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{email:r,data:null!==(t=null==i?void 0:i.data)&&void 0!==t?t:{},create_user:null===(s=null==i?void 0:i.shouldCreateUser)||void 0===s||s,gotrue_meta_security:{captcha_token:null==i?void 0:i.captchaToken},code_challenge:n,code_challenge_method:o},redirectTo:null==i?void 0:i.emailRedirectTo});return{data:{user:null,session:null},error:a}}if("phone"in e){const{phone:t,options:s}=e,{data:o,error:a}=await ee(this.fetch,"POST",`${this.url}/otp`,{headers:this.headers,body:{phone:t,data:null!==(r=null==s?void 0:s.data)&&void 0!==r?r:{},create_user:null===(i=null==s?void 0:s.shouldCreateUser)||void 0===i||i,gotrue_meta_security:{captcha_token:null==s?void 0:s.captchaToken},channel:null!==(n=null==s?void 0:s.channel)&&void 0!==n?n:"sms"}});return{data:{user:null,session:null,messageId:null==o?void 0:o.message_id},error:a}}throw new w("You must provide either an email or phone number.")}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async verifyOtp(e){var t,s;try{let r,i;"options"in e&&(r=null===(t=e.options)||void 0===t?void 0:t.redirectTo,i=null===(s=e.options)||void 0===s?void 0:s.captchaToken);const{data:n,error:o}=await ee(this.fetch,"POST",`${this.url}/verify`,{headers:this.headers,body:Object.assign(Object.assign({},e),{gotrue_meta_security:{captcha_token:i}}),redirectTo:r,xform:te});if(o)throw o;if(!n)throw new Error("An error occurred on token verification.");const a=n.session,l=n.user;return(null==a?void 0:a.access_token)&&(await this._saveSession(a),await this._notifyAllSubscribers("recovery"==e.type?"PASSWORD_RECOVERY":"SIGNED_IN",a)),{data:{user:l,session:a},error:null}}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async signInWithSSO(e){var t,s,r;try{let i=null,n=null;return"pkce"===this.flowType&&([i,n]=await K(this.storage,this.storageKey)),await ee(this.fetch,"POST",`${this.url}/sso`,{body:Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},"providerId"in e?{provider_id:e.providerId}:null),"domain"in e?{domain:e.domain}:null),{redirect_to:null!==(s=null===(t=e.options)||void 0===t?void 0:t.redirectTo)&&void 0!==s?s:void 0}),(null===(r=null==e?void 0:e.options)||void 0===r?void 0:r.captchaToken)?{gotrue_meta_security:{captcha_token:e.options.captchaToken}}:null),{skip_http_redirect:!0,code_challenge:i,code_challenge_method:n}),headers:this.headers,xform:ie})}catch(e){if(h(e))return{data:null,error:e};throw e}}async reauthenticate(){return await this.initializePromise,await this._acquireLock(-1,(async()=>await this._reauthenticate()))}async _reauthenticate(){try{return await this._useSession((async e=>{const{data:{session:t},error:s}=e;if(s)throw s;if(!t)throw new g;const{error:r}=await ee(this.fetch,"GET",`${this.url}/reauthenticate`,{headers:this.headers,jwt:t.access_token});return{data:{user:null,session:null},error:r}}))}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async resend(e){try{const t=`${this.url}/resend`;if("email"in e){const{email:s,type:r,options:i}=e,{error:n}=await ee(this.fetch,"POST",t,{headers:this.headers,body:{email:s,type:r,gotrue_meta_security:{captcha_token:null==i?void 0:i.captchaToken}},redirectTo:null==i?void 0:i.emailRedirectTo});return{data:{user:null,session:null},error:n}}if("phone"in e){const{phone:s,type:r,options:i}=e,{data:n,error:o}=await ee(this.fetch,"POST",t,{headers:this.headers,body:{phone:s,type:r,gotrue_meta_security:{captcha_token:null==i?void 0:i.captchaToken}}});return{data:{user:null,session:null,messageId:null==n?void 0:n.message_id},error:o}}throw new w("You must provide either an email or phone number and a type")}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async getSession(){return await this.initializePromise,await this._acquireLock(-1,(async()=>this._useSession((async e=>e))))}async _acquireLock(e,t){this._debug("#_acquireLock","begin",e);try{if(this.lockAcquired){const e=this.pendingInLock.length?this.pendingInLock[this.pendingInLock.length-1]:Promise.resolve(),s=(async()=>(await e,await t()))();return this.pendingInLock.push((async()=>{try{await s}catch(e){}})()),s}return await this.lock(`lock:${this.storageKey}`,e,(async()=>{this._debug("#_acquireLock","lock acquired for storage key",this.storageKey);try{this.lockAcquired=!0;const e=t();for(this.pendingInLock.push((async()=>{try{await e}catch(e){}})()),await e;this.pendingInLock.length;){const e=[...this.pendingInLock];await Promise.all(e),this.pendingInLock.splice(0,e.length)}return await e}finally{this._debug("#_acquireLock","lock released for storage key",this.storageKey),this.lockAcquired=!1}}))}finally{this._debug("#_acquireLock","end")}}async _useSession(e){this._debug("#_useSession","begin");try{const t=await this.__loadSession();return await e(t)}finally{this._debug("#_useSession","end")}}async __loadSession(){this._debug("#__loadSession()","begin"),this.lockAcquired||this._debug("#__loadSession()","used outside of an acquired lock!",(new Error).stack);try{let e=null;const t=await q(this.storage,this.storageKey);if(this._debug("#getSession()","session from storage",t),null!==t&&(this._isValidSession(t)?e=t:(this._debug("#getSession()","session from storage is not valid"),await this._removeSession())),!e)return{data:{session:null},error:null};const s=!!e.expires_at&&1e3*e.expires_at-Date.now()<9e4;if(this._debug("#__loadSession()",`session has${s?"":" not"} expired`,"expires_at",e.expires_at),!s){if(this.storage.isServer){let t=this.suppressGetSessionWarning;e=new Proxy(e,{get:(e,s,r)=>(t||"user"!==s||(console.warn("Using the user object as returned from supabase.auth.getSession() or from some supabase.auth.onAuthStateChange() events could be insecure! This value comes directly from the storage medium (usually cookies on the server) and may not be authentic. Use supabase.auth.getUser() instead which authenticates the data by contacting the Supabase Auth server."),t=!0,this.suppressGetSessionWarning=!0),Reflect.get(e,s,r))})}return{data:{session:e},error:null}}const{session:r,error:i}=await this._callRefreshToken(e.refresh_token);return i?{data:{session:null},error:i}:{data:{session:r},error:null}}finally{this._debug("#__loadSession()","end")}}async getUser(e){return e?await this._getUser(e):(await this.initializePromise,await this._acquireLock(-1,(async()=>await this._getUser())))}async _getUser(e){try{return e?await ee(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:e,xform:re}):await this._useSession((async e=>{var t,s,r;const{data:i,error:n}=e;if(n)throw n;return(null===(t=i.session)||void 0===t?void 0:t.access_token)||this.hasCustomAuthorizationHeader?await ee(this.fetch,"GET",`${this.url}/user`,{headers:this.headers,jwt:null!==(r=null===(s=i.session)||void 0===s?void 0:s.access_token)&&void 0!==r?r:void 0,xform:re}):{data:{user:null},error:new g}}))}catch(e){if(h(e))return v(e)&&(await this._removeSession(),await H(this.storage,`${this.storageKey}-code-verifier`)),{data:{user:null},error:e};throw e}}async updateUser(e,t={}){return await this.initializePromise,await this._acquireLock(-1,(async()=>await this._updateUser(e,t)))}async _updateUser(e,t={}){try{return await this._useSession((async s=>{const{data:r,error:i}=s;if(i)throw i;if(!r.session)throw new g;const n=r.session;let o=null,a=null;"pkce"===this.flowType&&null!=e.email&&([o,a]=await K(this.storage,this.storageKey));const{data:l,error:c}=await ee(this.fetch,"PUT",`${this.url}/user`,{headers:this.headers,redirectTo:null==t?void 0:t.emailRedirectTo,body:Object.assign(Object.assign({},e),{code_challenge:o,code_challenge_method:a}),jwt:n.access_token,xform:re});if(c)throw c;return n.user=l.user,await this._saveSession(n),await this._notifyAllSubscribers("USER_UPDATED",n),{data:{user:n.user},error:null}}))}catch(e){if(h(e))return{data:{user:null},error:e};throw e}}async setSession(e){return await this.initializePromise,await this._acquireLock(-1,(async()=>await this._setSession(e)))}async _setSession(e){try{if(!e.access_token||!e.refresh_token)throw new g;const t=Date.now()/1e3;let s=t,r=!0,i=null;const{payload:n}=J(e.access_token);if(n.exp&&(s=n.exp,r=s<=t),r){const{session:t,error:s}=await this._callRefreshToken(e.refresh_token);if(s)return{data:{user:null,session:null},error:s};if(!t)return{data:{user:null,session:null},error:null};i=t}else{const{data:r,error:n}=await this._getUser(e.access_token);if(n)throw n;i={access_token:e.access_token,refresh_token:e.refresh_token,user:r.user,token_type:"bearer",expires_in:s-t,expires_at:s},await this._saveSession(i),await this._notifyAllSubscribers("SIGNED_IN",i)}return{data:{user:i.user,session:i},error:null}}catch(e){if(h(e))return{data:{session:null,user:null},error:e};throw e}}async refreshSession(e){return await this.initializePromise,await this._acquireLock(-1,(async()=>await this._refreshSession(e)))}async _refreshSession(e){try{return await this._useSession((async t=>{var s;if(!e){const{data:r,error:i}=t;if(i)throw i;e=null!==(s=r.session)&&void 0!==s?s:void 0}if(!(null==e?void 0:e.refresh_token))throw new g;const{session:r,error:i}=await this._callRefreshToken(e.refresh_token);return i?{data:{user:null,session:null},error:i}:r?{data:{user:r.user,session:r},error:null}:{data:{user:null,session:null},error:null}}))}catch(e){if(h(e))return{data:{user:null,session:null},error:e};throw e}}async _getSessionFromURL(e,t){try{if(!U())throw new m("No browser detected.");if(e.error||e.error_description||e.error_code)throw new m(e.error_description||"Error in URL with unspecified error_description",{error:e.error||"unspecified_error",code:e.error_code||"unspecified_code"});switch(t){case"implicit":if("pkce"===this.flowType)throw new b("Not a valid PKCE flow url.");break;case"pkce":if("implicit"===this.flowType)throw new m("Not a valid implicit grant flow url.")}if("pkce"===t){if(this._debug("#_initialize()","begin","is PKCE flow",!0),!e.code)throw new b("No code detected.");const{data:t,error:s}=await this._exchangeCodeForSession(e.code);if(s)throw s;const r=new URL(window.location.href);return r.searchParams.delete("code"),window.history.replaceState(window.history.state,"",r.toString()),{data:{session:t.session,redirectType:null},error:null}}const{provider_token:s,provider_refresh_token:r,access_token:n,refresh_token:o,expires_in:a,expires_at:l,token_type:c}=e;if(!(n&&a&&o&&c))throw new m("No session defined in URL");const h=Math.round(Date.now()/1e3),u=parseInt(a);let d=h+u;l&&(d=parseInt(l));const f=d-h;1e3*f<=i&&console.warn(`@supabase/gotrue-js: Session as retrieved from URL expires in ${f}s, should have been closer to ${u}s`);const p=d-u;h-p>=120?console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued over 120s ago, URL could be stale",p,d,h):h-p<0&&console.warn("@supabase/gotrue-js: Session as retrieved from URL was issued in the future? Check the device clock for skew",p,d,h);const{data:g,error:v}=await this._getUser(n);if(v)throw v;const y={provider_token:s,provider_refresh_token:r,access_token:n,expires_in:u,expires_at:d,refresh_token:o,token_type:c,user:g.user};return window.location.hash="",this._debug("#_getSessionFromURL()","clearing window.location.hash"),{data:{session:y,redirectType:e.type},error:null}}catch(e){if(h(e))return{data:{session:null,redirectType:null},error:e};throw e}}_isImplicitGrantCallback(e){return Boolean(e.access_token||e.error_description)}async _isPKCECallback(e){const t=await q(this.storage,`${this.storageKey}-code-verifier`);return!(!e.code||!t)}async signOut(e={scope:"global"}){return await this.initializePromise,await this._acquireLock(-1,(async()=>await this._signOut(e)))}async _signOut({scope:e}={scope:"global"}){return await this._useSession((async t=>{var s;const{data:r,error:i}=t;if(i)return{error:i};const n=null===(s=r.session)||void 0===s?void 0:s.access_token;if(n){const{error:t}=await this.admin.signOut(n,e);if(t&&(!d(t)||404!==t.status&&401!==t.status&&403!==t.status))return{error:t}}return"others"!==e&&(await this._removeSession(),await H(this.storage,`${this.storageKey}-code-verifier`)),{error:null}}))}onAuthStateChange(e){const t="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,(function(e){const t=16*Math.random()|0;return("x"==e?t:3&t|8).toString(16)})),s={id:t,callback:e,unsubscribe:()=>{this._debug("#unsubscribe()","state change callback with id removed",t),this.stateChangeEmitters.delete(t)}};return this._debug("#onAuthStateChange()","registered callback with id",t),this.stateChangeEmitters.set(t,s),(async()=>{await this.initializePromise,await this._acquireLock(-1,(async()=>{this._emitInitialSession(t)}))})(),{data:{subscription:s}}}async _emitInitialSession(e){return await this._useSession((async t=>{var s,r;try{const{data:{session:r},error:i}=t;if(i)throw i;await(null===(s=this.stateChangeEmitters.get(e))||void 0===s?void 0:s.callback("INITIAL_SESSION",r)),this._debug("INITIAL_SESSION","callback id",e,"session",r)}catch(t){await(null===(r=this.stateChangeEmitters.get(e))||void 0===r?void 0:r.callback("INITIAL_SESSION",null)),this._debug("INITIAL_SESSION","callback id",e,"error",t),console.error(t)}}))}async resetPasswordForEmail(e,t={}){let s=null,r=null;"pkce"===this.flowType&&([s,r]=await K(this.storage,this.storageKey,!0));try{return await ee(this.fetch,"POST",`${this.url}/recover`,{body:{email:e,code_challenge:s,code_challenge_method:r,gotrue_meta_security:{captcha_token:t.captchaToken}},headers:this.headers,redirectTo:t.redirectTo})}catch(e){if(h(e))return{data:null,error:e};throw e}}async getUserIdentities(){var e;try{const{data:t,error:s}=await this.getUser();if(s)throw s;return{data:{identities:null!==(e=t.user.identities)&&void 0!==e?e:[]},error:null}}catch(e){if(h(e))return{data:null,error:e};throw e}}async linkIdentity(e){var t;try{const{data:s,error:r}=await this._useSession((async t=>{var s,r,i,n,o;const{data:a,error:l}=t;if(l)throw l;const c=await this._getUrlForProvider(`${this.url}/user/identities/authorize`,e.provider,{redirectTo:null===(s=e.options)||void 0===s?void 0:s.redirectTo,scopes:null===(r=e.options)||void 0===r?void 0:r.scopes,queryParams:null===(i=e.options)||void 0===i?void 0:i.queryParams,skipBrowserRedirect:!0});return await ee(this.fetch,"GET",c,{headers:this.headers,jwt:null!==(o=null===(n=a.session)||void 0===n?void 0:n.access_token)&&void 0!==o?o:void 0})}));if(r)throw r;return U()&&!(null===(t=e.options)||void 0===t?void 0:t.skipBrowserRedirect)&&window.location.assign(null==s?void 0:s.url),{data:{provider:e.provider,url:null==s?void 0:s.url},error:null}}catch(t){if(h(t))return{data:{provider:e.provider,url:null},error:t};throw t}}async unlinkIdentity(e){try{return await this._useSession((async t=>{var s,r;const{data:i,error:n}=t;if(n)throw n;return await ee(this.fetch,"DELETE",`${this.url}/user/identities/${e.identity_id}`,{headers:this.headers,jwt:null!==(r=null===(s=i.session)||void 0===s?void 0:s.access_token)&&void 0!==r?r:void 0})}))}catch(e){if(h(e))return{data:null,error:e};throw e}}async _refreshAccessToken(e){const t=`#_refreshAccessToken(${e.substring(0,5)}...)`;this._debug(t,"begin");try{const n=Date.now();return await(s=async s=>(s>0&&await async function(e){return await new Promise((t=>{setTimeout((()=>t(null)),e)}))}(200*Math.pow(2,s-1)),this._debug(t,"refreshing attempt",s),await ee(this.fetch,"POST",`${this.url}/token?grant_type=refresh_token`,{body:{refresh_token:e},headers:this.headers,xform:te})),r=(e,t)=>{const s=200*Math.pow(2,e);return t&&S(t)&&Date.now()+s-n<i},new Promise(((e,t)=>{(async()=>{for(let i=0;i<1/0;i++)try{const t=await s(i);if(!r(i,null))return void e(t)}catch(e){if(!r(i,e))return void t(e)}})()})))}catch(e){if(this._debug(t,"error",e),h(e))return{data:{session:null,user:null},error:e};throw e}finally{this._debug(t,"end")}var s,r}_isValidSession(e){return"object"==typeof e&&null!==e&&"access_token"in e&&"refresh_token"in e&&"expires_at"in e}async _handleProviderSignIn(e,t){const s=await this._getUrlForProvider(`${this.url}/authorize`,e,{redirectTo:t.redirectTo,scopes:t.scopes,queryParams:t.queryParams});return this._debug("#_handleProviderSignIn()","provider",e,"options",t,"url",s),U()&&!t.skipBrowserRedirect&&window.location.assign(s),{data:{provider:e,url:s},error:null}}async _recoverAndRefresh(){var e;const t="#_recoverAndRefresh()";this._debug(t,"begin");try{const s=await q(this.storage,this.storageKey);if(this._debug(t,"session from storage",s),!this._isValidSession(s))return this._debug(t,"session is not valid"),void(null!==s&&await this._removeSession());const r=1e3*(null!==(e=s.expires_at)&&void 0!==e?e:1/0)-Date.now()<9e4;if(this._debug(t,`session has${r?"":" not"} expired with margin of 90000s`),r){if(this.autoRefreshToken&&s.refresh_token){const{error:e}=await this._callRefreshToken(s.refresh_token);e&&(console.error(e),S(e)||(this._debug(t,"refresh failed with a non-retryable error, removing the session",e),await this._removeSession()))}}else await this._notifyAllSubscribers("SIGNED_IN",s)}catch(e){return this._debug(t,"error",e),void console.error(e)}finally{this._debug(t,"end")}}async _callRefreshToken(e){var t,s;if(!e)throw new g;if(this.refreshingDeferred)return this.refreshingDeferred.promise;const r=`#_callRefreshToken(${e.substring(0,5)}...)`;this._debug(r,"begin");try{this.refreshingDeferred=new z;const{data:t,error:s}=await this._refreshAccessToken(e);if(s)throw s;if(!t.session)throw new g;await this._saveSession(t.session),await this._notifyAllSubscribers("TOKEN_REFRESHED",t.session);const r={session:t.session,error:null};return this.refreshingDeferred.resolve(r),r}catch(e){if(this._debug(r,"error",e),h(e)){const s={session:null,error:e};return S(e)||await this._removeSession(),null===(t=this.refreshingDeferred)||void 0===t||t.resolve(s),s}throw null===(s=this.refreshingDeferred)||void 0===s||s.reject(e),e}finally{this.refreshingDeferred=null,this._debug(r,"end")}}async _notifyAllSubscribers(e,t,s=!0){const r=`#_notifyAllSubscribers(${e})`;this._debug(r,"begin",t,`broadcast = ${s}`);try{this.broadcastChannel&&s&&this.broadcastChannel.postMessage({event:e,session:t});const r=[],i=Array.from(this.stateChangeEmitters.values()).map((async s=>{try{await s.callback(e,t)}catch(e){r.push(e)}}));if(await Promise.all(i),r.length>0){for(let e=0;e<r.length;e+=1)console.error(r[e]);throw r[0]}}finally{this._debug(r,"end")}}async _saveSession(e){this._debug("#_saveSession()",e),this.suppressGetSessionWarning=!0,await B(this.storage,this.storageKey,e)}async _removeSession(){this._debug("#_removeSession()"),await H(this.storage,this.storageKey),await this._notifyAllSubscribers("SIGNED_OUT",null)}_removeVisibilityChangedCallback(){this._debug("#_removeVisibilityChangedCallback()");const e=this.visibilityChangedCallback;this.visibilityChangedCallback=null;try{e&&U()&&(null===window||void 0===window?void 0:window.removeEventListener)&&window.removeEventListener("visibilitychange",e)}catch(e){console.error("removing visibilitychange callback failed",e)}}async _startAutoRefresh(){await this._stopAutoRefresh(),this._debug("#_startAutoRefresh()");const e=setInterval((()=>this._autoRefreshTokenTick()),i);this.autoRefreshTicker=e,e&&"object"==typeof e&&"function"==typeof e.unref?e.unref():"undefined"!=typeof Deno&&"function"==typeof Deno.unrefTimer&&Deno.unrefTimer(e),setTimeout((async()=>{await this.initializePromise,await this._autoRefreshTokenTick()}),0)}async _stopAutoRefresh(){this._debug("#_stopAutoRefresh()");const e=this.autoRefreshTicker;this.autoRefreshTicker=null,e&&clearInterval(e)}async startAutoRefresh(){this._removeVisibilityChangedCallback(),await this._startAutoRefresh()}async stopAutoRefresh(){this._removeVisibilityChangedCallback(),await this._stopAutoRefresh()}async _autoRefreshTokenTick(){this._debug("#_autoRefreshTokenTick()","begin");try{await this._acquireLock(0,(async()=>{try{const e=Date.now();try{return await this._useSession((async t=>{const{data:{session:s}}=t;if(!s||!s.refresh_token||!s.expires_at)return void this._debug("#_autoRefreshTokenTick()","no session");const r=Math.floor((1e3*s.expires_at-e)/i);this._debug("#_autoRefreshTokenTick()",`access token expires in ${r} ticks, a tick lasts 30000ms, refresh threshold is 3 ticks`),r<=3&&await this._callRefreshToken(s.refresh_token)}))}catch(e){console.error("Auto refresh tick failed with error. This is likely a transient error.",e)}}finally{this._debug("#_autoRefreshTokenTick()","end")}}))}catch(e){if(!(e.isAcquireTimeout||e instanceof de))throw e;this._debug("auto refresh token tick lock not available")}}async _handleVisibilityChange(){if(this._debug("#_handleVisibilityChange()"),!U()||!(null===window||void 0===window?void 0:window.addEventListener))return this.autoRefreshToken&&this.startAutoRefresh(),!1;try{this.visibilityChangedCallback=async()=>await this._onVisibilityChanged(!1),null===window||void 0===window||window.addEventListener("visibilitychange",this.visibilityChangedCallback),await this._onVisibilityChanged(!0)}catch(e){console.error("_handleVisibilityChange",e)}}async _onVisibilityChanged(e){const t=`#_onVisibilityChanged(${e})`;this._debug(t,"visibilityState",document.visibilityState),"visible"===document.visibilityState?(this.autoRefreshToken&&this._startAutoRefresh(),e||(await this.initializePromise,await this._acquireLock(-1,(async()=>{"visible"===document.visibilityState?await this._recoverAndRefresh():this._debug(t,"acquired the lock to recover the session, but the browser visibilityState is no longer visible, aborting")})))):"hidden"===document.visibilityState&&this.autoRefreshToken&&this._stopAutoRefresh()}async _getUrlForProvider(e,t,s){const r=[`provider=${encodeURIComponent(t)}`];if((null==s?void 0:s.redirectTo)&&r.push(`redirect_to=${encodeURIComponent(s.redirectTo)}`),(null==s?void 0:s.scopes)&&r.push(`scopes=${encodeURIComponent(s.scopes)}`),"pkce"===this.flowType){const[e,t]=await K(this.storage,this.storageKey),s=new URLSearchParams({code_challenge:`${encodeURIComponent(e)}`,code_challenge_method:`${encodeURIComponent(t)}`});r.push(s.toString())}if(null==s?void 0:s.queryParams){const e=new URLSearchParams(s.queryParams);r.push(e.toString())}return(null==s?void 0:s.skipBrowserRedirect)&&r.push(`skip_http_redirect=${s.skipBrowserRedirect}`),`${e}?${r.join("&")}`}async _unenroll(e){try{return await this._useSession((async t=>{var s;const{data:r,error:i}=t;return i?{data:null,error:i}:await ee(this.fetch,"DELETE",`${this.url}/factors/${e.factorId}`,{headers:this.headers,jwt:null===(s=null==r?void 0:r.session)||void 0===s?void 0:s.access_token})}))}catch(e){if(h(e))return{data:null,error:e};throw e}}async _enroll(e){try{return await this._useSession((async t=>{var s,r;const{data:i,error:n}=t;if(n)return{data:null,error:n};const o=Object.assign({friendly_name:e.friendlyName,factor_type:e.factorType},"phone"===e.factorType?{phone:e.phone}:{issuer:e.issuer}),{data:a,error:l}=await ee(this.fetch,"POST",`${this.url}/factors`,{body:o,headers:this.headers,jwt:null===(s=null==i?void 0:i.session)||void 0===s?void 0:s.access_token});return l?{data:null,error:l}:("totp"===e.factorType&&(null===(r=null==a?void 0:a.totp)||void 0===r?void 0:r.qr_code)&&(a.totp.qr_code=`data:image/svg+xml;utf-8,${a.totp.qr_code}`),{data:a,error:null})}))}catch(e){if(h(e))return{data:null,error:e};throw e}}async _verify(e){return this._acquireLock(-1,(async()=>{try{return await this._useSession((async t=>{var s;const{data:r,error:i}=t;if(i)return{data:null,error:i};const{data:n,error:o}=await ee(this.fetch,"POST",`${this.url}/factors/${e.factorId}/verify`,{body:{code:e.code,challenge_id:e.challengeId},headers:this.headers,jwt:null===(s=null==r?void 0:r.session)||void 0===s?void 0:s.access_token});return o?{data:null,error:o}:(await this._saveSession(Object.assign({expires_at:Math.round(Date.now()/1e3)+n.expires_in},n)),await this._notifyAllSubscribers("MFA_CHALLENGE_VERIFIED",n),{data:n,error:o})}))}catch(e){if(h(e))return{data:null,error:e};throw e}}))}async _challenge(e){return this._acquireLock(-1,(async()=>{try{return await this._useSession((async t=>{var s;const{data:r,error:i}=t;return i?{data:null,error:i}:await ee(this.fetch,"POST",`${this.url}/factors/${e.factorId}/challenge`,{body:{channel:e.channel},headers:this.headers,jwt:null===(s=null==r?void 0:r.session)||void 0===s?void 0:s.access_token})}))}catch(e){if(h(e))return{data:null,error:e};throw e}}))}async _challengeAndVerify(e){const{data:t,error:s}=await this._challenge({factorId:e.factorId});return s?{data:null,error:s}:await this._verify({factorId:e.factorId,challengeId:t.id,code:e.code})}async _listFactors(){const{data:{user:e},error:t}=await this.getUser();if(t)return{data:null,error:t};const s=(null==e?void 0:e.factors)||[],r=s.filter((e=>"totp"===e.factor_type&&"verified"===e.status)),i=s.filter((e=>"phone"===e.factor_type&&"verified"===e.status));return{data:{all:s,totp:r,phone:i},error:null}}async _getAuthenticatorAssuranceLevel(){return this._acquireLock(-1,(async()=>await this._useSession((async e=>{var t,s;const{data:{session:r},error:i}=e;if(i)return{data:null,error:i};if(!r)return{data:{currentLevel:null,nextLevel:null,currentAuthenticationMethods:[]},error:null};const{payload:n}=J(r.access_token);let o=null;n.aal&&(o=n.aal);let a=o;return(null!==(s=null===(t=r.user.factors)||void 0===t?void 0:t.filter((e=>"verified"===e.status)))&&void 0!==s?s:[]).length>0&&(a="aal2"),{data:{currentLevel:o,nextLevel:a,currentAuthenticationMethods:n.amr||[]},error:null}}))))}async fetchJwk(e,t={keys:[]}){let s=t.keys.find((t=>t.kid===e));if(s)return s;if(s=this.jwks.keys.find((t=>t.kid===e)),s&&this.jwks_cached_at+6e5>Date.now())return s;const{data:r,error:i}=await ee(this.fetch,"GET",`${this.url}/.well-known/jwks.json`,{headers:this.headers});if(i)throw i;if(!r.keys||0===r.keys.length)throw new j("JWKS is empty");if(this.jwks=r,this.jwks_cached_at=Date.now(),s=r.keys.find((t=>t.kid===e)),!s)throw new j("No matching signing key found in JWKS");return s}async getClaims(e,t={keys:[]}){try{let s=e;if(!s){const{data:e,error:t}=await this.getSession();if(t||!e.session)return{data:null,error:t};s=e.session.access_token}const{header:r,payload:i,signature:n,raw:{header:o,payload:a}}=J(s);if(function(e){if(!e)throw new Error("Missing exp claim");if(e<=Math.floor(Date.now()/1e3))throw new Error("JWT has expired")}(i.exp),!r.kid||"HS256"===r.alg||!("crypto"in globalThis)||!("subtle"in globalThis.crypto)){const{error:e}=await this.getUser(s);if(e)throw e;return{data:{claims:i,header:r,signature:n},error:null}}const l=function(e){switch(e){case"RS256":return{name:"RSASSA-PKCS1-v1_5",hash:{name:"SHA-256"}};case"ES256":return{name:"ECDSA",namedCurve:"P-256",hash:{name:"SHA-256"}};default:throw new Error("Invalid alg claim")}}(r.alg),c=await this.fetchJwk(r.kid,t),h=await crypto.subtle.importKey("jwk",c,l,!0,["verify"]);if(!await crypto.subtle.verify(l,h,n,function(e){const t=[];return function(e,t){for(let s=0;s<e.length;s+=1){let r=e.charCodeAt(s);if(r>55295&&r<=56319){const t=1024*(r-55296)&65535;r=65536+(e.charCodeAt(s+1)-56320&65535|t),s+=1}I(r,t)}}(e,(e=>t.push(e))),new Uint8Array(t)}(`${o}.${a}`)))throw new j("Invalid JWT signature");return{data:{claims:i,header:r,signature:n},error:null}}catch(e){if(h(e))return{data:null,error:e};throw e}}}_e.nextInstanceID=0;const be=le,ke=_e},227:(e,t,s)=>{s.r(t),s.d(t,{FunctionRegion:()=>a,FunctionsClient:()=>l,FunctionsError:()=>r,FunctionsFetchError:()=>i,FunctionsHttpError:()=>o,FunctionsRelayError:()=>n});class r extends Error{constructor(e,t="FunctionsError",s){super(e),this.name=t,this.context=s}}class i extends r{constructor(e){super("Failed to send a request to the Edge Function","FunctionsFetchError",e)}}class n extends r{constructor(e){super("Relay Error invoking the Edge Function","FunctionsRelayError",e)}}class o extends r{constructor(e){super("Edge Function returned a non-2xx status code","FunctionsHttpError",e)}}var a;!function(e){e.Any="any",e.ApNortheast1="ap-northeast-1",e.ApNortheast2="ap-northeast-2",e.ApSouth1="ap-south-1",e.ApSoutheast1="ap-southeast-1",e.ApSoutheast2="ap-southeast-2",e.CaCentral1="ca-central-1",e.EuCentral1="eu-central-1",e.EuWest1="eu-west-1",e.EuWest2="eu-west-2",e.EuWest3="eu-west-3",e.SaEast1="sa-east-1",e.UsEast1="us-east-1",e.UsWest1="us-west-1",e.UsWest2="us-west-2"}(a||(a={}));class l{constructor(e,{headers:t={},customFetch:r,region:i=a.Any}={}){this.url=e,this.headers=t,this.region=i,this.fetch=(e=>{let t;return t=e||("undefined"==typeof fetch?(...e)=>Promise.resolve().then(s.bind(s,907)).then((({default:t})=>t(...e))):fetch),(...e)=>t(...e)})(r)}setAuth(e){this.headers.Authorization=`Bearer ${e}`}invoke(e,t={}){var s,r,a,l,c;return r=this,a=void 0,c=function*(){try{const{headers:r,method:a,body:l}=t;let c,h={},{region:u}=t;u||(u=this.region),u&&"any"!==u&&(h["x-region"]=u),l&&(r&&!Object.prototype.hasOwnProperty.call(r,"Content-Type")||!r)&&("undefined"!=typeof Blob&&l instanceof Blob||l instanceof ArrayBuffer?(h["Content-Type"]="application/octet-stream",c=l):"string"==typeof l?(h["Content-Type"]="text/plain",c=l):"undefined"!=typeof FormData&&l instanceof FormData?c=l:(h["Content-Type"]="application/json",c=JSON.stringify(l)));const d=yield this.fetch(`${this.url}/${e}`,{method:a||"POST",headers:Object.assign(Object.assign(Object.assign({},h),this.headers),r),body:c}).catch((e=>{throw new i(e)})),f=d.headers.get("x-relay-error");if(f&&"true"===f)throw new n(d);if(!d.ok)throw new o(d);let p,g=(null!==(s=d.headers.get("Content-Type"))&&void 0!==s?s:"text/plain").split(";")[0].trim();return p="application/json"===g?yield d.json():"application/octet-stream"===g?yield d.blob():"text/event-stream"===g?d:"multipart/form-data"===g?yield d.formData():yield d.text(),{data:p,error:null}}catch(e){return{data:null,error:e}}},new((l=void 0)||(l=Promise))((function(e,t){function s(e){try{n(c.next(e))}catch(e){t(e)}}function i(e){try{n(c.throw(e))}catch(e){t(e)}}function n(t){var r;t.done?e(t.value):(r=t.value,r instanceof l?r:new l((function(e){e(r)}))).then(s,i)}n((c=c.apply(r,a||[])).next())}))}}},907:(e,t,s)=>{s.r(t),s.d(t,{Headers:()=>o,Request:()=>a,Response:()=>l,default:()=>n,fetch:()=>i});var r=function(){if("undefined"!=typeof self)return self;if("undefined"!=typeof window)return window;if(void 0!==s.g)return s.g;throw new Error("unable to locate global object")}();const i=r.fetch,n=r.fetch.bind(r),o=r.Headers,a=r.Request,l=r.Response},660:function(e,t,s){var r=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});const i=r(s(907)),n=r(s(818));t.default=class{constructor(e){this.shouldThrowOnError=!1,this.method=e.method,this.url=e.url,this.headers=e.headers,this.schema=e.schema,this.body=e.body,this.shouldThrowOnError=e.shouldThrowOnError,this.signal=e.signal,this.isMaybeSingle=e.isMaybeSingle,e.fetch?this.fetch=e.fetch:"undefined"==typeof fetch?this.fetch=i.default:this.fetch=fetch}throwOnError(){return this.shouldThrowOnError=!0,this}setHeader(e,t){return this.headers=Object.assign({},this.headers),this.headers[e]=t,this}then(e,t){void 0===this.schema||(["GET","HEAD"].includes(this.method)?this.headers["Accept-Profile"]=this.schema:this.headers["Content-Profile"]=this.schema),"GET"!==this.method&&"HEAD"!==this.method&&(this.headers["Content-Type"]="application/json");let s=(0,this.fetch)(this.url.toString(),{method:this.method,headers:this.headers,body:JSON.stringify(this.body),signal:this.signal}).then((async e=>{var t,s,r;let i=null,o=null,a=null,l=e.status,c=e.statusText;if(e.ok){if("HEAD"!==this.method){const t=await e.text();""===t||(o="text/csv"===this.headers.Accept||this.headers.Accept&&this.headers.Accept.includes("application/vnd.pgrst.plan+text")?t:JSON.parse(t))}const r=null===(t=this.headers.Prefer)||void 0===t?void 0:t.match(/count=(exact|planned|estimated)/),n=null===(s=e.headers.get("content-range"))||void 0===s?void 0:s.split("/");r&&n&&n.length>1&&(a=parseInt(n[1])),this.isMaybeSingle&&"GET"===this.method&&Array.isArray(o)&&(o.length>1?(i={code:"PGRST116",details:`Results contain ${o.length} rows, application/vnd.pgrst.object+json requires 1 row`,hint:null,message:"JSON object requested, multiple (or no) rows returned"},o=null,a=null,l=406,c="Not Acceptable"):o=1===o.length?o[0]:null)}else{const t=await e.text();try{i=JSON.parse(t),Array.isArray(i)&&404===e.status&&(o=[],i=null,l=200,c="OK")}catch(s){404===e.status&&""===t?(l=204,c="No Content"):i={message:t}}if(i&&this.isMaybeSingle&&(null===(r=null==i?void 0:i.details)||void 0===r?void 0:r.includes("0 rows"))&&(i=null,l=200,c="OK"),i&&this.shouldThrowOnError)throw new n.default(i)}return{error:i,data:o,count:a,status:l,statusText:c}}));return this.shouldThrowOnError||(s=s.catch((e=>{var t,s,r;return{error:{message:`${null!==(t=null==e?void 0:e.name)&&void 0!==t?t:"FetchError"}: ${null==e?void 0:e.message}`,details:`${null!==(s=null==e?void 0:e.stack)&&void 0!==s?s:""}`,hint:"",code:`${null!==(r=null==e?void 0:e.code)&&void 0!==r?r:""}`},data:null,count:null,status:0,statusText:""}}))),s.then(e,t)}returns(){return this}overrideTypes(){return this}}},961:function(e,t,s){var r=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});const i=r(s(45)),n=r(s(825)),o=s(530);class a{constructor(e,{headers:t={},schema:s,fetch:r}={}){this.url=e,this.headers=Object.assign(Object.assign({},o.DEFAULT_HEADERS),t),this.schemaName=s,this.fetch=r}from(e){const t=new URL(`${this.url}/${e}`);return new i.default(t,{headers:Object.assign({},this.headers),schema:this.schemaName,fetch:this.fetch})}schema(e){return new a(this.url,{headers:this.headers,schema:e,fetch:this.fetch})}rpc(e,t={},{head:s=!1,get:r=!1,count:i}={}){let o;const a=new URL(`${this.url}/rpc/${e}`);let l;s||r?(o=s?"HEAD":"GET",Object.entries(t).filter((([e,t])=>void 0!==t)).map((([e,t])=>[e,Array.isArray(t)?`{${t.join(",")}}`:`${t}`])).forEach((([e,t])=>{a.searchParams.append(e,t)}))):(o="POST",l=t);const c=Object.assign({},this.headers);return i&&(c.Prefer=`count=${i}`),new n.default({method:o,url:a,headers:c,schema:this.schemaName,body:l,fetch:this.fetch,allowEmpty:!1})}}t.default=a},818:(e,t)=>{Object.defineProperty(t,"__esModule",{value:!0});class s extends Error{constructor(e){super(e.message),this.name="PostgrestError",this.details=e.details,this.hint=e.hint,this.code=e.code}}t.default=s},825:function(e,t,s){var r=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});const i=r(s(261));class n extends i.default{eq(e,t){return this.url.searchParams.append(e,`eq.${t}`),this}neq(e,t){return this.url.searchParams.append(e,`neq.${t}`),this}gt(e,t){return this.url.searchParams.append(e,`gt.${t}`),this}gte(e,t){return this.url.searchParams.append(e,`gte.${t}`),this}lt(e,t){return this.url.searchParams.append(e,`lt.${t}`),this}lte(e,t){return this.url.searchParams.append(e,`lte.${t}`),this}like(e,t){return this.url.searchParams.append(e,`like.${t}`),this}likeAllOf(e,t){return this.url.searchParams.append(e,`like(all).{${t.join(",")}}`),this}likeAnyOf(e,t){return this.url.searchParams.append(e,`like(any).{${t.join(",")}}`),this}ilike(e,t){return this.url.searchParams.append(e,`ilike.${t}`),this}ilikeAllOf(e,t){return this.url.searchParams.append(e,`ilike(all).{${t.join(",")}}`),this}ilikeAnyOf(e,t){return this.url.searchParams.append(e,`ilike(any).{${t.join(",")}}`),this}is(e,t){return this.url.searchParams.append(e,`is.${t}`),this}in(e,t){const s=Array.from(new Set(t)).map((e=>"string"==typeof e&&new RegExp("[,()]").test(e)?`"${e}"`:`${e}`)).join(",");return this.url.searchParams.append(e,`in.(${s})`),this}contains(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cs.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cs.{${t.join(",")}}`):this.url.searchParams.append(e,`cs.${JSON.stringify(t)}`),this}containedBy(e,t){return"string"==typeof t?this.url.searchParams.append(e,`cd.${t}`):Array.isArray(t)?this.url.searchParams.append(e,`cd.{${t.join(",")}}`):this.url.searchParams.append(e,`cd.${JSON.stringify(t)}`),this}rangeGt(e,t){return this.url.searchParams.append(e,`sr.${t}`),this}rangeGte(e,t){return this.url.searchParams.append(e,`nxl.${t}`),this}rangeLt(e,t){return this.url.searchParams.append(e,`sl.${t}`),this}rangeLte(e,t){return this.url.searchParams.append(e,`nxr.${t}`),this}rangeAdjacent(e,t){return this.url.searchParams.append(e,`adj.${t}`),this}overlaps(e,t){return"string"==typeof t?this.url.searchParams.append(e,`ov.${t}`):this.url.searchParams.append(e,`ov.{${t.join(",")}}`),this}textSearch(e,t,{config:s,type:r}={}){let i="";"plain"===r?i="pl":"phrase"===r?i="ph":"websearch"===r&&(i="w");const n=void 0===s?"":`(${s})`;return this.url.searchParams.append(e,`${i}fts${n}.${t}`),this}match(e){return Object.entries(e).forEach((([e,t])=>{this.url.searchParams.append(e,`eq.${t}`)})),this}not(e,t,s){return this.url.searchParams.append(e,`not.${t}.${s}`),this}or(e,{foreignTable:t,referencedTable:s=t}={}){const r=s?`${s}.or`:"or";return this.url.searchParams.append(r,`(${e})`),this}filter(e,t,s){return this.url.searchParams.append(e,`${t}.${s}`),this}}t.default=n},45:function(e,t,s){var r=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});const i=r(s(825));t.default=class{constructor(e,{headers:t={},schema:s,fetch:r}){this.url=e,this.headers=t,this.schema=s,this.fetch=r}select(e,{head:t=!1,count:s}={}){const r=t?"HEAD":"GET";let n=!1;const o=(null!=e?e:"*").split("").map((e=>/\s/.test(e)&&!n?"":('"'===e&&(n=!n),e))).join("");return this.url.searchParams.set("select",o),s&&(this.headers.Prefer=`count=${s}`),new i.default({method:r,url:this.url,headers:this.headers,schema:this.schema,fetch:this.fetch,allowEmpty:!1})}insert(e,{count:t,defaultToNull:s=!0}={}){const r=[];if(this.headers.Prefer&&r.push(this.headers.Prefer),t&&r.push(`count=${t}`),s||r.push("missing=default"),this.headers.Prefer=r.join(","),Array.isArray(e)){const t=e.reduce(((e,t)=>e.concat(Object.keys(t))),[]);if(t.length>0){const e=[...new Set(t)].map((e=>`"${e}"`));this.url.searchParams.set("columns",e.join(","))}}return new i.default({method:"POST",url:this.url,headers:this.headers,schema:this.schema,body:e,fetch:this.fetch,allowEmpty:!1})}upsert(e,{onConflict:t,ignoreDuplicates:s=!1,count:r,defaultToNull:n=!0}={}){const o=[`resolution=${s?"ignore":"merge"}-duplicates`];if(void 0!==t&&this.url.searchParams.set("on_conflict",t),this.headers.Prefer&&o.push(this.headers.Prefer),r&&o.push(`count=${r}`),n||o.push("missing=default"),this.headers.Prefer=o.join(","),Array.isArray(e)){const t=e.reduce(((e,t)=>e.concat(Object.keys(t))),[]);if(t.length>0){const e=[...new Set(t)].map((e=>`"${e}"`));this.url.searchParams.set("columns",e.join(","))}}return new i.default({method:"POST",url:this.url,headers:this.headers,schema:this.schema,body:e,fetch:this.fetch,allowEmpty:!1})}update(e,{count:t}={}){const s=[];return this.headers.Prefer&&s.push(this.headers.Prefer),t&&s.push(`count=${t}`),this.headers.Prefer=s.join(","),new i.default({method:"PATCH",url:this.url,headers:this.headers,schema:this.schema,body:e,fetch:this.fetch,allowEmpty:!1})}delete({count:e}={}){const t=[];return e&&t.push(`count=${e}`),this.headers.Prefer&&t.unshift(this.headers.Prefer),this.headers.Prefer=t.join(","),new i.default({method:"DELETE",url:this.url,headers:this.headers,schema:this.schema,fetch:this.fetch,allowEmpty:!1})}}},261:function(e,t,s){var r=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0});const i=r(s(660));class n extends i.default{select(e){let t=!1;const s=(null!=e?e:"*").split("").map((e=>/\s/.test(e)&&!t?"":('"'===e&&(t=!t),e))).join("");return this.url.searchParams.set("select",s),this.headers.Prefer&&(this.headers.Prefer+=","),this.headers.Prefer+="return=representation",this}order(e,{ascending:t=!0,nullsFirst:s,foreignTable:r,referencedTable:i=r}={}){const n=i?`${i}.order`:"order",o=this.url.searchParams.get(n);return this.url.searchParams.set(n,`${o?`${o},`:""}${e}.${t?"asc":"desc"}${void 0===s?"":s?".nullsfirst":".nullslast"}`),this}limit(e,{foreignTable:t,referencedTable:s=t}={}){const r=void 0===s?"limit":`${s}.limit`;return this.url.searchParams.set(r,`${e}`),this}range(e,t,{foreignTable:s,referencedTable:r=s}={}){const i=void 0===r?"offset":`${r}.offset`,n=void 0===r?"limit":`${r}.limit`;return this.url.searchParams.set(i,`${e}`),this.url.searchParams.set(n,""+(t-e+1)),this}abortSignal(e){return this.signal=e,this}single(){return this.headers.Accept="application/vnd.pgrst.object+json",this}maybeSingle(){return"GET"===this.method?this.headers.Accept="application/json":this.headers.Accept="application/vnd.pgrst.object+json",this.isMaybeSingle=!0,this}csv(){return this.headers.Accept="text/csv",this}geojson(){return this.headers.Accept="application/geo+json",this}explain({analyze:e=!1,verbose:t=!1,settings:s=!1,buffers:r=!1,wal:i=!1,format:n="text"}={}){var o;const a=[e?"analyze":null,t?"verbose":null,s?"settings":null,r?"buffers":null,i?"wal":null].filter(Boolean).join("|"),l=null!==(o=this.headers.Accept)&&void 0!==o?o:"application/json";return this.headers.Accept=`application/vnd.pgrst.plan+${n}; for="${l}"; options=${a};`,this}rollback(){var e;return(null!==(e=this.headers.Prefer)&&void 0!==e?e:"").trim().length>0?this.headers.Prefer+=",tx=rollback":this.headers.Prefer="tx=rollback",this}returns(){return this}}t.default=n},530:(e,t,s)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.DEFAULT_HEADERS=void 0;const r=s(519);t.DEFAULT_HEADERS={"X-Client-Info":`postgrest-js/${r.version}`}},279:function(e,t,s){var r=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0}),t.PostgrestError=t.PostgrestBuilder=t.PostgrestTransformBuilder=t.PostgrestFilterBuilder=t.PostgrestQueryBuilder=t.PostgrestClient=void 0;const i=r(s(961));t.PostgrestClient=i.default;const n=r(s(45));t.PostgrestQueryBuilder=n.default;const o=r(s(825));t.PostgrestFilterBuilder=o.default;const a=r(s(261));t.PostgrestTransformBuilder=a.default;const l=r(s(660));t.PostgrestBuilder=l.default;const c=r(s(818));t.PostgrestError=c.default,t.default={PostgrestClient:i.default,PostgrestQueryBuilder:n.default,PostgrestFilterBuilder:o.default,PostgrestTransformBuilder:a.default,PostgrestBuilder:l.default,PostgrestError:c.default}},519:(e,t)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.version=void 0,t.version="2.50.0"},803:(e,t,s)=>{let r;s.r(t),s.d(t,{REALTIME_CHANNEL_STATES:()=>$,REALTIME_LISTEN_TYPES:()=>O,REALTIME_POSTGRES_CHANGES_LISTEN_EVENT:()=>j,REALTIME_PRESENCE_LISTEN_EVENTS:()=>E,REALTIME_SUBSCRIBE_STATES:()=>P,RealtimeChannel:()=>x,RealtimeClient:()=>I,RealtimePresence:()=>A}),r="undefined"==typeof window?s(591):window.WebSocket;const i=r,n={"X-Client-Info":"realtime-js/2.11.10"};var o,a,l,c,h,u;!function(e){e[e.connecting=0]="connecting",e[e.open=1]="open",e[e.closing=2]="closing",e[e.closed=3]="closed"}(o||(o={})),function(e){e.closed="closed",e.errored="errored",e.joined="joined",e.joining="joining",e.leaving="leaving"}(a||(a={})),function(e){e.close="phx_close",e.error="phx_error",e.join="phx_join",e.reply="phx_reply",e.leave="phx_leave",e.access_token="access_token"}(l||(l={})),function(e){e.websocket="websocket"}(c||(c={})),function(e){e.Connecting="connecting",e.Open="open",e.Closing="closing",e.Closed="closed"}(h||(h={}));class d{constructor(){this.HEADER_LENGTH=1}decode(e,t){return e.constructor===ArrayBuffer?t(this._binaryDecode(e)):t("string"==typeof e?JSON.parse(e):{})}_binaryDecode(e){const t=new DataView(e),s=new TextDecoder;return this._decodeBroadcast(e,t,s)}_decodeBroadcast(e,t,s){const r=t.getUint8(1),i=t.getUint8(2);let n=this.HEADER_LENGTH+2;const o=s.decode(e.slice(n,n+r));n+=r;const a=s.decode(e.slice(n,n+i));return n+=i,{ref:null,topic:o,event:a,payload:JSON.parse(s.decode(e.slice(n,e.byteLength)))}}}class f{constructor(e,t){this.callback=e,this.timerCalc=t,this.timer=void 0,this.tries=0,this.callback=e,this.timerCalc=t}reset(){this.tries=0,clearTimeout(this.timer)}scheduleTimeout(){clearTimeout(this.timer),this.timer=setTimeout((()=>{this.tries=this.tries+1,this.callback()}),this.timerCalc(this.tries+1))}}!function(e){e.abstime="abstime",e.bool="bool",e.date="date",e.daterange="daterange",e.float4="float4",e.float8="float8",e.int2="int2",e.int4="int4",e.int4range="int4range",e.int8="int8",e.int8range="int8range",e.json="json",e.jsonb="jsonb",e.money="money",e.numeric="numeric",e.oid="oid",e.reltime="reltime",e.text="text",e.time="time",e.timestamp="timestamp",e.timestamptz="timestamptz",e.timetz="timetz",e.tsrange="tsrange",e.tstzrange="tstzrange"}(u||(u={}));const p=(e,t,s={})=>{var r;const i=null!==(r=s.skipTypes)&&void 0!==r?r:[];return Object.keys(t).reduce(((s,r)=>(s[r]=g(r,e,t,i),s)),{})},g=(e,t,s,r)=>{const i=t.find((t=>t.name===e)),n=null==i?void 0:i.type,o=s[e];return n&&!r.includes(n)?v(n,o):y(o)},v=(e,t)=>{if("_"===e.charAt(0)){const s=e.slice(1,e.length);return b(t,s)}switch(e){case u.bool:return w(t);case u.float4:case u.float8:case u.int2:case u.int4:case u.int8:case u.numeric:case u.oid:return m(t);case u.json:case u.jsonb:return _(t);case u.timestamp:return k(t);case u.abstime:case u.date:case u.daterange:case u.int4range:case u.int8range:case u.money:case u.reltime:case u.text:case u.time:case u.timestamptz:case u.timetz:case u.tsrange:case u.tstzrange:default:return y(t)}},y=e=>e,w=e=>{switch(e){case"t":return!0;case"f":return!1;default:return e}},m=e=>{if("string"==typeof e){const t=parseFloat(e);if(!Number.isNaN(t))return t}return e},_=e=>{if("string"==typeof e)try{return JSON.parse(e)}catch(t){return console.log(`JSON parse error: ${t}`),e}return e},b=(e,t)=>{if("string"!=typeof e)return e;const s=e.length-1,r=e[s];if("{"===e[0]&&"}"===r){let r;const i=e.slice(1,s);try{r=JSON.parse("["+i+"]")}catch(e){r=i?i.split(","):[]}return r.map((e=>v(t,e)))}return e},k=e=>"string"==typeof e?e.replace(" ","T"):e,S=e=>{let t=e;return t=t.replace(/^ws/i,"http"),t=t.replace(/(\/socket\/websocket|\/socket|\/websocket)\/?$/i,""),t.replace(/\/+$/,"")};class T{constructor(e,t,s={},r=1e4){this.channel=e,this.event=t,this.payload=s,this.timeout=r,this.sent=!1,this.timeoutTimer=void 0,this.ref="",this.receivedResp=null,this.recHooks=[],this.refEvent=null}resend(e){this.timeout=e,this._cancelRefEvent(),this.ref="",this.refEvent=null,this.receivedResp=null,this.sent=!1,this.send()}send(){this._hasReceived("timeout")||(this.startTimeout(),this.sent=!0,this.channel.socket.push({topic:this.channel.topic,event:this.event,payload:this.payload,ref:this.ref,join_ref:this.channel._joinRef()}))}updatePayload(e){this.payload=Object.assign(Object.assign({},this.payload),e)}receive(e,t){var s;return this._hasReceived(e)&&t(null===(s=this.receivedResp)||void 0===s?void 0:s.response),this.recHooks.push({status:e,callback:t}),this}startTimeout(){this.timeoutTimer||(this.ref=this.channel.socket._makeRef(),this.refEvent=this.channel._replyEventName(this.ref),this.channel._on(this.refEvent,{},(e=>{this._cancelRefEvent(),this._cancelTimeout(),this.receivedResp=e,this._matchReceive(e)})),this.timeoutTimer=setTimeout((()=>{this.trigger("timeout",{})}),this.timeout))}trigger(e,t){this.refEvent&&this.channel._trigger(this.refEvent,{status:e,response:t})}destroy(){this._cancelRefEvent(),this._cancelTimeout()}_cancelRefEvent(){this.refEvent&&this.channel._off(this.refEvent,{})}_cancelTimeout(){clearTimeout(this.timeoutTimer),this.timeoutTimer=void 0}_matchReceive({status:e,response:t}){this.recHooks.filter((t=>t.status===e)).forEach((e=>e.callback(t)))}_hasReceived(e){return this.receivedResp&&this.receivedResp.status===e}}var E,j,O,P;!function(e){e.SYNC="sync",e.JOIN="join",e.LEAVE="leave"}(E||(E={}));class A{constructor(e,t){this.channel=e,this.state={},this.pendingDiffs=[],this.joinRef=null,this.caller={onJoin:()=>{},onLeave:()=>{},onSync:()=>{}};const s=(null==t?void 0:t.events)||{state:"presence_state",diff:"presence_diff"};this.channel._on(s.state,{},(e=>{const{onJoin:t,onLeave:s,onSync:r}=this.caller;this.joinRef=this.channel._joinRef(),this.state=A.syncState(this.state,e,t,s),this.pendingDiffs.forEach((e=>{this.state=A.syncDiff(this.state,e,t,s)})),this.pendingDiffs=[],r()})),this.channel._on(s.diff,{},(e=>{const{onJoin:t,onLeave:s,onSync:r}=this.caller;this.inPendingSyncState()?this.pendingDiffs.push(e):(this.state=A.syncDiff(this.state,e,t,s),r())})),this.onJoin(((e,t,s)=>{this.channel._trigger("presence",{event:"join",key:e,currentPresences:t,newPresences:s})})),this.onLeave(((e,t,s)=>{this.channel._trigger("presence",{event:"leave",key:e,currentPresences:t,leftPresences:s})})),this.onSync((()=>{this.channel._trigger("presence",{event:"sync"})}))}static syncState(e,t,s,r){const i=this.cloneDeep(e),n=this.transformState(t),o={},a={};return this.map(i,((e,t)=>{n[e]||(a[e]=t)})),this.map(n,((e,t)=>{const s=i[e];if(s){const r=t.map((e=>e.presence_ref)),i=s.map((e=>e.presence_ref)),n=t.filter((e=>i.indexOf(e.presence_ref)<0)),l=s.filter((e=>r.indexOf(e.presence_ref)<0));n.length>0&&(o[e]=n),l.length>0&&(a[e]=l)}else o[e]=t})),this.syncDiff(i,{joins:o,leaves:a},s,r)}static syncDiff(e,t,s,r){const{joins:i,leaves:n}={joins:this.transformState(t.joins),leaves:this.transformState(t.leaves)};return s||(s=()=>{}),r||(r=()=>{}),this.map(i,((t,r)=>{var i;const n=null!==(i=e[t])&&void 0!==i?i:[];if(e[t]=this.cloneDeep(r),n.length>0){const s=e[t].map((e=>e.presence_ref)),r=n.filter((e=>s.indexOf(e.presence_ref)<0));e[t].unshift(...r)}s(t,n,r)})),this.map(n,((t,s)=>{let i=e[t];if(!i)return;const n=s.map((e=>e.presence_ref));i=i.filter((e=>n.indexOf(e.presence_ref)<0)),e[t]=i,r(t,i,s),0===i.length&&delete e[t]})),e}static map(e,t){return Object.getOwnPropertyNames(e).map((s=>t(s,e[s])))}static transformState(e){return e=this.cloneDeep(e),Object.getOwnPropertyNames(e).reduce(((t,s)=>{const r=e[s];return t[s]="metas"in r?r.metas.map((e=>(e.presence_ref=e.phx_ref,delete e.phx_ref,delete e.phx_ref_prev,e))):r,t}),{})}static cloneDeep(e){return JSON.parse(JSON.stringify(e))}onJoin(e){this.caller.onJoin=e}onLeave(e){this.caller.onLeave=e}onSync(e){this.caller.onSync=e}inPendingSyncState(){return!this.joinRef||this.joinRef!==this.channel._joinRef()}}!function(e){e.ALL="*",e.INSERT="INSERT",e.UPDATE="UPDATE",e.DELETE="DELETE"}(j||(j={})),function(e){e.BROADCAST="broadcast",e.PRESENCE="presence",e.POSTGRES_CHANGES="postgres_changes",e.SYSTEM="system"}(O||(O={})),function(e){e.SUBSCRIBED="SUBSCRIBED",e.TIMED_OUT="TIMED_OUT",e.CLOSED="CLOSED",e.CHANNEL_ERROR="CHANNEL_ERROR"}(P||(P={}));const $=a;class x{constructor(e,t={config:{}},s){this.topic=e,this.params=t,this.socket=s,this.bindings={},this.state=a.closed,this.joinedOnce=!1,this.pushBuffer=[],this.subTopic=e.replace(/^realtime:/i,""),this.params.config=Object.assign({broadcast:{ack:!1,self:!1},presence:{key:""},private:!1},t.config),this.timeout=this.socket.timeout,this.joinPush=new T(this,l.join,this.params,this.timeout),this.rejoinTimer=new f((()=>this._rejoinUntilConnected()),this.socket.reconnectAfterMs),this.joinPush.receive("ok",(()=>{this.state=a.joined,this.rejoinTimer.reset(),this.pushBuffer.forEach((e=>e.send())),this.pushBuffer=[]})),this._onClose((()=>{this.rejoinTimer.reset(),this.socket.log("channel",`close ${this.topic} ${this._joinRef()}`),this.state=a.closed,this.socket._remove(this)})),this._onError((e=>{this._isLeaving()||this._isClosed()||(this.socket.log("channel",`error ${this.topic}`,e),this.state=a.errored,this.rejoinTimer.scheduleTimeout())})),this.joinPush.receive("timeout",(()=>{this._isJoining()&&(this.socket.log("channel",`timeout ${this.topic}`,this.joinPush.timeout),this.state=a.errored,this.rejoinTimer.scheduleTimeout())})),this._on(l.reply,{},((e,t)=>{this._trigger(this._replyEventName(t),e)})),this.presence=new A(this),this.broadcastEndpointURL=S(this.socket.endPoint)+"/api/broadcast",this.private=this.params.config.private||!1}subscribe(e,t=this.timeout){var s,r;if(this.socket.isConnected()||this.socket.connect(),this.joinedOnce)throw"tried to subscribe multiple times. 'subscribe' can only be called a single time per channel instance";{const{config:{broadcast:i,presence:n,private:o}}=this.params;this._onError((t=>null==e?void 0:e(P.CHANNEL_ERROR,t))),this._onClose((()=>null==e?void 0:e(P.CLOSED)));const l={},c={broadcast:i,presence:n,postgres_changes:null!==(r=null===(s=this.bindings.postgres_changes)||void 0===s?void 0:s.map((e=>e.filter)))&&void 0!==r?r:[],private:o};this.socket.accessTokenValue&&(l.access_token=this.socket.accessTokenValue),this.updateJoinPayload(Object.assign({config:c},l)),this.joinedOnce=!0,this._rejoin(t),this.joinPush.receive("ok",(async({postgres_changes:t})=>{var s;if(this.socket.setAuth(),void 0!==t){const r=this.bindings.postgres_changes,i=null!==(s=null==r?void 0:r.length)&&void 0!==s?s:0,n=[];for(let s=0;s<i;s++){const i=r[s],{filter:{event:o,schema:l,table:c,filter:h}}=i,u=t&&t[s];if(!u||u.event!==o||u.schema!==l||u.table!==c||u.filter!==h)return this.unsubscribe(),this.state=a.errored,void(null==e||e(P.CHANNEL_ERROR,new Error("mismatch between server and client bindings for postgres changes")));n.push(Object.assign(Object.assign({},i),{id:u.id}))}return this.bindings.postgres_changes=n,void(e&&e(P.SUBSCRIBED))}null==e||e(P.SUBSCRIBED)})).receive("error",(t=>{this.state=a.errored,null==e||e(P.CHANNEL_ERROR,new Error(JSON.stringify(Object.values(t).join(", ")||"error")))})).receive("timeout",(()=>{null==e||e(P.TIMED_OUT)}))}return this}presenceState(){return this.presence.state}async track(e,t={}){return await this.send({type:"presence",event:"track",payload:e},t.timeout||this.timeout)}async untrack(e={}){return await this.send({type:"presence",event:"untrack"},e)}on(e,t,s){return this._on(e,t,s)}async send(e,t={}){var s,r;if(this._canPush()||"broadcast"!==e.type)return new Promise((s=>{var r,i,n;const o=this._push(e.type,e,t.timeout||this.timeout);"broadcast"!==e.type||(null===(n=null===(i=null===(r=this.params)||void 0===r?void 0:r.config)||void 0===i?void 0:i.broadcast)||void 0===n?void 0:n.ack)||s("ok"),o.receive("ok",(()=>s("ok"))),o.receive("error",(()=>s("error"))),o.receive("timeout",(()=>s("timed out")))}));{const{event:i,payload:n}=e,o={method:"POST",headers:{Authorization:this.socket.accessTokenValue?`Bearer ${this.socket.accessTokenValue}`:"",apikey:this.socket.apiKey?this.socket.apiKey:"","Content-Type":"application/json"},body:JSON.stringify({messages:[{topic:this.subTopic,event:i,payload:n,private:this.private}]})};try{const e=await this._fetchWithTimeout(this.broadcastEndpointURL,o,null!==(s=t.timeout)&&void 0!==s?s:this.timeout);return await(null===(r=e.body)||void 0===r?void 0:r.cancel()),e.ok?"ok":"error"}catch(e){return"AbortError"===e.name?"timed out":"error"}}}updateJoinPayload(e){this.joinPush.updatePayload(e)}unsubscribe(e=this.timeout){this.state=a.leaving;const t=()=>{this.socket.log("channel",`leave ${this.topic}`),this._trigger(l.close,"leave",this._joinRef())};return this.joinPush.destroy(),new Promise((s=>{const r=new T(this,l.leave,{},e);r.receive("ok",(()=>{t(),s("ok")})).receive("timeout",(()=>{t(),s("timed out")})).receive("error",(()=>{s("error")})),r.send(),this._canPush()||r.trigger("ok",{})}))}teardown(){this.pushBuffer.forEach((e=>e.destroy())),this.rejoinTimer&&clearTimeout(this.rejoinTimer.timer),this.joinPush.destroy()}async _fetchWithTimeout(e,t,s){const r=new AbortController,i=setTimeout((()=>r.abort()),s),n=await this.socket.fetch(e,Object.assign(Object.assign({},t),{signal:r.signal}));return clearTimeout(i),n}_push(e,t,s=this.timeout){if(!this.joinedOnce)throw`tried to push '${e}' to '${this.topic}' before joining. Use channel.subscribe() before pushing events`;let r=new T(this,e,t,s);return this._canPush()?r.send():(r.startTimeout(),this.pushBuffer.push(r)),r}_onMessage(e,t,s){return t}_isMember(e){return this.topic===e}_joinRef(){return this.joinPush.ref}_trigger(e,t,s){var r,i;const n=e.toLocaleLowerCase(),{close:o,error:a,leave:c,join:h}=l;if(s&&[o,a,c,h].indexOf(n)>=0&&s!==this._joinRef())return;let u=this._onMessage(n,t,s);if(t&&!u)throw"channel onMessage callbacks must return the payload, modified or unmodified";["insert","update","delete"].includes(n)?null===(r=this.bindings.postgres_changes)||void 0===r||r.filter((e=>{var t,s,r;return"*"===(null===(t=e.filter)||void 0===t?void 0:t.event)||(null===(r=null===(s=e.filter)||void 0===s?void 0:s.event)||void 0===r?void 0:r.toLocaleLowerCase())===n})).map((e=>e.callback(u,s))):null===(i=this.bindings[n])||void 0===i||i.filter((e=>{var s,r,i,o,a,l;if(["broadcast","presence","postgres_changes"].includes(n)){if("id"in e){const n=e.id,o=null===(s=e.filter)||void 0===s?void 0:s.event;return n&&(null===(r=t.ids)||void 0===r?void 0:r.includes(n))&&("*"===o||(null==o?void 0:o.toLocaleLowerCase())===(null===(i=t.data)||void 0===i?void 0:i.type.toLocaleLowerCase()))}{const s=null===(a=null===(o=null==e?void 0:e.filter)||void 0===o?void 0:o.event)||void 0===a?void 0:a.toLocaleLowerCase();return"*"===s||s===(null===(l=null==t?void 0:t.event)||void 0===l?void 0:l.toLocaleLowerCase())}}return e.type.toLocaleLowerCase()===n})).map((e=>{if("object"==typeof u&&"ids"in u){const e=u.data,{schema:t,table:s,commit_timestamp:r,type:i,errors:n}=e,o={schema:t,table:s,commit_timestamp:r,eventType:i,new:{},old:{},errors:n};u=Object.assign(Object.assign({},o),this._getPayloadRecords(e))}e.callback(u,s)}))}_isClosed(){return this.state===a.closed}_isJoined(){return this.state===a.joined}_isJoining(){return this.state===a.joining}_isLeaving(){return this.state===a.leaving}_replyEventName(e){return`chan_reply_${e}`}_on(e,t,s){const r=e.toLocaleLowerCase(),i={type:r,filter:t,callback:s};return this.bindings[r]?this.bindings[r].push(i):this.bindings[r]=[i],this}_off(e,t){const s=e.toLocaleLowerCase();return this.bindings[s]=this.bindings[s].filter((e=>{var r;return!((null===(r=e.type)||void 0===r?void 0:r.toLocaleLowerCase())===s&&x.isEqual(e.filter,t))})),this}static isEqual(e,t){if(Object.keys(e).length!==Object.keys(t).length)return!1;for(const s in e)if(e[s]!==t[s])return!1;return!0}_rejoinUntilConnected(){this.rejoinTimer.scheduleTimeout(),this.socket.isConnected()&&this._rejoin()}_onClose(e){this._on(l.close,{},e)}_onError(e){this._on(l.error,{},(t=>e(t)))}_canPush(){return this.socket.isConnected()&&this._isJoined()}_rejoin(e=this.timeout){this._isLeaving()||(this.socket._leaveOpenTopic(this.topic),this.state=a.joining,this.joinPush.resend(e))}_getPayloadRecords(e){const t={new:{},old:{}};return"INSERT"!==e.type&&"UPDATE"!==e.type||(t.new=p(e.columns,e.record)),"UPDATE"!==e.type&&"DELETE"!==e.type||(t.old=p(e.columns,e.old_record)),t}}const C=()=>{};class I{constructor(e,t){var r;this.accessTokenValue=null,this.apiKey=null,this.channels=new Array,this.endPoint="",this.httpEndpoint="",this.headers=n,this.params={},this.timeout=1e4,this.heartbeatIntervalMs=25e3,this.heartbeatTimer=void 0,this.pendingHeartbeatRef=null,this.heartbeatCallback=C,this.ref=0,this.logger=C,this.conn=null,this.sendBuffer=[],this.serializer=new d,this.stateChangeCallbacks={open:[],close:[],error:[],message:[]},this.accessToken=null,this._resolveFetch=e=>{let t;return t=e||("undefined"==typeof fetch?(...e)=>Promise.resolve().then(s.bind(s,907)).then((({default:t})=>t(...e))):fetch),(...e)=>t(...e)},this.endPoint=`${e}/${c.websocket}`,this.httpEndpoint=S(e),(null==t?void 0:t.transport)?this.transport=t.transport:this.transport=null,(null==t?void 0:t.params)&&(this.params=t.params),(null==t?void 0:t.headers)&&(this.headers=Object.assign(Object.assign({},this.headers),t.headers)),(null==t?void 0:t.timeout)&&(this.timeout=t.timeout),(null==t?void 0:t.logger)&&(this.logger=t.logger),((null==t?void 0:t.logLevel)||(null==t?void 0:t.log_level))&&(this.logLevel=t.logLevel||t.log_level,this.params=Object.assign(Object.assign({},this.params),{log_level:this.logLevel})),(null==t?void 0:t.heartbeatIntervalMs)&&(this.heartbeatIntervalMs=t.heartbeatIntervalMs);const i=null===(r=null==t?void 0:t.params)||void 0===r?void 0:r.apikey;if(i&&(this.accessTokenValue=i,this.apiKey=i),this.reconnectAfterMs=(null==t?void 0:t.reconnectAfterMs)?t.reconnectAfterMs:e=>[1e3,2e3,5e3,1e4][e-1]||1e4,this.encode=(null==t?void 0:t.encode)?t.encode:(e,t)=>t(JSON.stringify(e)),this.decode=(null==t?void 0:t.decode)?t.decode:this.serializer.decode.bind(this.serializer),this.reconnectTimer=new f((async()=>{this.disconnect(),this.connect()}),this.reconnectAfterMs),this.fetch=this._resolveFetch(null==t?void 0:t.fetch),null==t?void 0:t.worker){if("undefined"!=typeof window&&!window.Worker)throw new Error("Web Worker is not supported");this.worker=(null==t?void 0:t.worker)||!1,this.workerUrl=null==t?void 0:t.workerUrl}this.accessToken=(null==t?void 0:t.accessToken)||null}connect(){if(!this.conn){if(this.transport||(this.transport=i),this.transport){const e="undefined"!=typeof window&&this.transport===window.WebSocket;return this.conn=e?new this.transport(this.endpointURL()):new this.transport(this.endpointURL(),void 0,{headers:this.headers}),void this.setupConnection()}this.conn=new R(this.endpointURL(),void 0,{close:()=>{this.conn=null}})}}endpointURL(){return this._appendParams(this.endPoint,Object.assign({},this.params,{vsn:"1.0.0"}))}disconnect(e,t){this.conn&&(this.conn.onclose=function(){},e?this.conn.close(e,null!=t?t:""):this.conn.close(),this.conn=null,this.heartbeatTimer&&clearInterval(this.heartbeatTimer),this.reconnectTimer.reset(),this.channels.forEach((e=>e.teardown())))}getChannels(){return this.channels}async removeChannel(e){const t=await e.unsubscribe();return this.channels=this.channels.filter((t=>t._joinRef!==e._joinRef)),0===this.channels.length&&this.disconnect(),t}async removeAllChannels(){const e=await Promise.all(this.channels.map((e=>e.unsubscribe())));return this.channels=[],this.disconnect(),e}log(e,t,s){this.logger(e,t,s)}connectionState(){switch(this.conn&&this.conn.readyState){case o.connecting:return h.Connecting;case o.open:return h.Open;case o.closing:return h.Closing;default:return h.Closed}}isConnected(){return this.connectionState()===h.Open}channel(e,t={config:{}}){const s=`realtime:${e}`,r=this.getChannels().find((e=>e.topic===s));if(r)return r;{const s=new x(`realtime:${e}`,t,this);return this.channels.push(s),s}}push(e){const{topic:t,event:s,payload:r,ref:i}=e,n=()=>{this.encode(e,(e=>{var t;null===(t=this.conn)||void 0===t||t.send(e)}))};this.log("push",`${t} ${s} (${i})`,r),this.isConnected()?n():this.sendBuffer.push(n)}async setAuth(e=null){let t=e||this.accessToken&&await this.accessToken()||this.accessTokenValue;this.accessTokenValue!=t&&(this.accessTokenValue=t,this.channels.forEach((e=>{t&&e.updateJoinPayload({access_token:t,version:this.headers&&this.headers["X-Client-Info"]}),e.joinedOnce&&e._isJoined()&&e._push(l.access_token,{access_token:t})})))}async sendHeartbeat(){var e;if(this.isConnected()){if(this.pendingHeartbeatRef)return this.pendingHeartbeatRef=null,this.log("transport","heartbeat timeout. Attempting to re-establish connection"),this.heartbeatCallback("timeout"),void(null===(e=this.conn)||void 0===e||e.close(1e3,"hearbeat timeout"));this.pendingHeartbeatRef=this._makeRef(),this.push({topic:"phoenix",event:"heartbeat",payload:{},ref:this.pendingHeartbeatRef}),this.heartbeatCallback("sent"),await this.setAuth()}else this.heartbeatCallback("disconnected")}onHeartbeat(e){this.heartbeatCallback=e}flushSendBuffer(){this.isConnected()&&this.sendBuffer.length>0&&(this.sendBuffer.forEach((e=>e())),this.sendBuffer=[])}_makeRef(){let e=this.ref+1;return e===this.ref?this.ref=0:this.ref=e,this.ref.toString()}_leaveOpenTopic(e){let t=this.channels.find((t=>t.topic===e&&(t._isJoined()||t._isJoining())));t&&(this.log("transport",`leaving duplicate topic "${e}"`),t.unsubscribe())}_remove(e){this.channels=this.channels.filter((t=>t.topic!==e.topic))}setupConnection(){this.conn&&(this.conn.binaryType="arraybuffer",this.conn.onopen=()=>this._onConnOpen(),this.conn.onerror=e=>this._onConnError(e),this.conn.onmessage=e=>this._onConnMessage(e),this.conn.onclose=e=>this._onConnClose(e))}_onConnMessage(e){this.decode(e.data,(e=>{let{topic:t,event:s,payload:r,ref:i}=e;"phoenix"===t&&"phx_reply"===s&&this.heartbeatCallback("ok"==e.payload.status?"ok":"error"),i&&i===this.pendingHeartbeatRef&&(this.pendingHeartbeatRef=null),this.log("receive",`${r.status||""} ${t} ${s} ${i&&"("+i+")"||""}`,r),Array.from(this.channels).filter((e=>e._isMember(t))).forEach((e=>e._trigger(s,r,i))),this.stateChangeCallbacks.message.forEach((t=>t(e)))}))}_onConnOpen(){if(this.log("transport",`connected to ${this.endpointURL()}`),this.flushSendBuffer(),this.reconnectTimer.reset(),this.worker){this.workerUrl?this.log("worker",`starting worker for from ${this.workerUrl}`):this.log("worker","starting default worker");const e=this._workerObjectUrl(this.workerUrl);this.workerRef=new Worker(e),this.workerRef.onerror=e=>{this.log("worker","worker error",e.message),this.workerRef.terminate()},this.workerRef.onmessage=e=>{"keepAlive"===e.data.event&&this.sendHeartbeat()},this.workerRef.postMessage({event:"start",interval:this.heartbeatIntervalMs})}else this.heartbeatTimer&&clearInterval(this.heartbeatTimer),this.heartbeatTimer=setInterval((()=>this.sendHeartbeat()),this.heartbeatIntervalMs);this.stateChangeCallbacks.open.forEach((e=>e()))}_onConnClose(e){this.log("transport","close",e),this._triggerChanError(),this.heartbeatTimer&&clearInterval(this.heartbeatTimer),this.reconnectTimer.scheduleTimeout(),this.stateChangeCallbacks.close.forEach((t=>t(e)))}_onConnError(e){this.log("transport",e.message),this._triggerChanError(),this.stateChangeCallbacks.error.forEach((t=>t(e)))}_triggerChanError(){this.channels.forEach((e=>e._trigger(l.error)))}_appendParams(e,t){if(0===Object.keys(t).length)return e;const s=e.match(/\?/)?"&":"?";return`${e}${s}${new URLSearchParams(t)}`}_workerObjectUrl(e){let t;if(e)t=e;else{const e=new Blob(['\n  addEventListener("message", (e) => {\n    if (e.data.event === "start") {\n      setInterval(() => postMessage({ event: "keepAlive" }), e.data.interval);\n    }\n  });'],{type:"application/javascript"});t=URL.createObjectURL(e)}return t}}class R{constructor(e,t,s){this.binaryType="arraybuffer",this.onclose=()=>{},this.onerror=()=>{},this.onmessage=()=>{},this.onopen=()=>{},this.readyState=o.connecting,this.send=()=>{},this.url=null,this.url=e,this.close=s.close}}},623:(e,t,s)=>{s.r(t),s.d(t,{StorageApiError:()=>n,StorageClient:()=>T,StorageError:()=>r,StorageUnknownError:()=>o,isStorageError:()=>i});class r extends Error{constructor(e){super(e),this.__isStorageError=!0,this.name="StorageError"}}function i(e){return"object"==typeof e&&null!==e&&"__isStorageError"in e}class n extends r{constructor(e,t){super(e),this.name="StorageApiError",this.status=t}toJSON(){return{name:this.name,message:this.message,status:this.status}}}class o extends r{constructor(e,t){super(e),this.name="StorageUnknownError",this.originalError=t}}const a=e=>{let t;return t=e||("undefined"==typeof fetch?(...e)=>Promise.resolve().then(s.bind(s,907)).then((({default:t})=>t(...e))):fetch),(...e)=>t(...e)},l=e=>{if(Array.isArray(e))return e.map((e=>l(e)));if("function"==typeof e||e!==Object(e))return e;const t={};return Object.entries(e).forEach((([e,s])=>{const r=e.replace(/([-_][a-z])/gi,(e=>e.toUpperCase().replace(/[-_]/g,"")));t[r]=l(s)})),t};var c=function(e,t,s,r){return new(s||(s=Promise))((function(i,n){function o(e){try{l(r.next(e))}catch(e){n(e)}}function a(e){try{l(r.throw(e))}catch(e){n(e)}}function l(e){var t;e.done?i(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,a)}l((r=r.apply(e,t||[])).next())}))};const h=e=>e.msg||e.message||e.error_description||e.error||JSON.stringify(e),u=(e,t,r)=>c(void 0,void 0,void 0,(function*(){const i=yield(a=void 0,l=void 0,c=void 0,u=function*(){return"undefined"==typeof Response?(yield Promise.resolve().then(s.bind(s,907))).Response:Response},new(c||(c=Promise))((function(e,t){function s(e){try{i(u.next(e))}catch(e){t(e)}}function r(e){try{i(u.throw(e))}catch(e){t(e)}}function i(t){var i;t.done?e(t.value):(i=t.value,i instanceof c?i:new c((function(e){e(i)}))).then(s,r)}i((u=u.apply(a,l||[])).next())})));var a,l,c,u;e instanceof i&&!(null==r?void 0:r.noResolveJson)?e.json().then((s=>{t(new n(h(s),e.status||500))})).catch((e=>{t(new o(h(e),e))})):t(new o(h(e),e))})),d=(e,t,s,r)=>{const i={method:e,headers:(null==t?void 0:t.headers)||{}};return"GET"===e?i:(i.headers=Object.assign({"Content-Type":"application/json"},null==t?void 0:t.headers),r&&(i.body=JSON.stringify(r)),Object.assign(Object.assign({},i),s))};function f(e,t,s,r,i,n){return c(this,void 0,void 0,(function*(){return new Promise(((o,a)=>{e(s,d(t,r,i,n)).then((e=>{if(!e.ok)throw e;return(null==r?void 0:r.noResolveJson)?e:e.json()})).then((e=>o(e))).catch((e=>u(e,a,r)))}))}))}function p(e,t,s,r){return c(this,void 0,void 0,(function*(){return f(e,"GET",t,s,r)}))}function g(e,t,s,r,i){return c(this,void 0,void 0,(function*(){return f(e,"POST",t,r,i,s)}))}function v(e,t,s,r,i){return c(this,void 0,void 0,(function*(){return f(e,"DELETE",t,r,i,s)}))}var y=function(e,t,s,r){return new(s||(s=Promise))((function(i,n){function o(e){try{l(r.next(e))}catch(e){n(e)}}function a(e){try{l(r.throw(e))}catch(e){n(e)}}function l(e){var t;e.done?i(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,a)}l((r=r.apply(e,t||[])).next())}))};const w={limit:100,offset:0,sortBy:{column:"name",order:"asc"}},m={cacheControl:"3600",contentType:"text/plain;charset=UTF-8",upsert:!1};class _{constructor(e,t={},s,r){this.url=e,this.headers=t,this.bucketId=s,this.fetch=a(r)}uploadOrUpdate(e,t,s,r){return y(this,void 0,void 0,(function*(){try{let i;const n=Object.assign(Object.assign({},m),r);let o=Object.assign(Object.assign({},this.headers),"POST"===e&&{"x-upsert":String(n.upsert)});const a=n.metadata;"undefined"!=typeof Blob&&s instanceof Blob?(i=new FormData,i.append("cacheControl",n.cacheControl),a&&i.append("metadata",this.encodeMetadata(a)),i.append("",s)):"undefined"!=typeof FormData&&s instanceof FormData?(i=s,i.append("cacheControl",n.cacheControl),a&&i.append("metadata",this.encodeMetadata(a))):(i=s,o["cache-control"]=`max-age=${n.cacheControl}`,o["content-type"]=n.contentType,a&&(o["x-metadata"]=this.toBase64(this.encodeMetadata(a)))),(null==r?void 0:r.headers)&&(o=Object.assign(Object.assign({},o),r.headers));const l=this._removeEmptyFolders(t),c=this._getFinalPath(l),h=yield this.fetch(`${this.url}/object/${c}`,Object.assign({method:e,body:i,headers:o},(null==n?void 0:n.duplex)?{duplex:n.duplex}:{})),u=yield h.json();return h.ok?{data:{path:l,id:u.Id,fullPath:u.Key},error:null}:{data:null,error:u}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}upload(e,t,s){return y(this,void 0,void 0,(function*(){return this.uploadOrUpdate("POST",e,t,s)}))}uploadToSignedUrl(e,t,s,r){return y(this,void 0,void 0,(function*(){const n=this._removeEmptyFolders(e),o=this._getFinalPath(n),a=new URL(this.url+`/object/upload/sign/${o}`);a.searchParams.set("token",t);try{let e;const t=Object.assign({upsert:m.upsert},r),i=Object.assign(Object.assign({},this.headers),{"x-upsert":String(t.upsert)});"undefined"!=typeof Blob&&s instanceof Blob?(e=new FormData,e.append("cacheControl",t.cacheControl),e.append("",s)):"undefined"!=typeof FormData&&s instanceof FormData?(e=s,e.append("cacheControl",t.cacheControl)):(e=s,i["cache-control"]=`max-age=${t.cacheControl}`,i["content-type"]=t.contentType);const o=yield this.fetch(a.toString(),{method:"PUT",body:e,headers:i}),l=yield o.json();return o.ok?{data:{path:n,fullPath:l.Key},error:null}:{data:null,error:l}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}createSignedUploadUrl(e,t){return y(this,void 0,void 0,(function*(){try{let s=this._getFinalPath(e);const i=Object.assign({},this.headers);(null==t?void 0:t.upsert)&&(i["x-upsert"]="true");const n=yield g(this.fetch,`${this.url}/object/upload/sign/${s}`,{},{headers:i}),o=new URL(this.url+n.url),a=o.searchParams.get("token");if(!a)throw new r("No token returned by API");return{data:{signedUrl:o.toString(),path:e,token:a},error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}update(e,t,s){return y(this,void 0,void 0,(function*(){return this.uploadOrUpdate("PUT",e,t,s)}))}move(e,t,s){return y(this,void 0,void 0,(function*(){try{return{data:yield g(this.fetch,`${this.url}/object/move`,{bucketId:this.bucketId,sourceKey:e,destinationKey:t,destinationBucket:null==s?void 0:s.destinationBucket},{headers:this.headers}),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}copy(e,t,s){return y(this,void 0,void 0,(function*(){try{return{data:{path:(yield g(this.fetch,`${this.url}/object/copy`,{bucketId:this.bucketId,sourceKey:e,destinationKey:t,destinationBucket:null==s?void 0:s.destinationBucket},{headers:this.headers})).Key},error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}createSignedUrl(e,t,s){return y(this,void 0,void 0,(function*(){try{let r=this._getFinalPath(e),i=yield g(this.fetch,`${this.url}/object/sign/${r}`,Object.assign({expiresIn:t},(null==s?void 0:s.transform)?{transform:s.transform}:{}),{headers:this.headers});const n=(null==s?void 0:s.download)?`&download=${!0===s.download?"":s.download}`:"";return i={signedUrl:encodeURI(`${this.url}${i.signedURL}${n}`)},{data:i,error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}createSignedUrls(e,t,s){return y(this,void 0,void 0,(function*(){try{const r=yield g(this.fetch,`${this.url}/object/sign/${this.bucketId}`,{expiresIn:t,paths:e},{headers:this.headers}),i=(null==s?void 0:s.download)?`&download=${!0===s.download?"":s.download}`:"";return{data:r.map((e=>Object.assign(Object.assign({},e),{signedUrl:e.signedURL?encodeURI(`${this.url}${e.signedURL}${i}`):null}))),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}download(e,t){return y(this,void 0,void 0,(function*(){const s=void 0!==(null==t?void 0:t.transform)?"render/image/authenticated":"object",r=this.transformOptsToQueryString((null==t?void 0:t.transform)||{}),n=r?`?${r}`:"";try{const t=this._getFinalPath(e),r=yield p(this.fetch,`${this.url}/${s}/${t}${n}`,{headers:this.headers,noResolveJson:!0});return{data:yield r.blob(),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}info(e){return y(this,void 0,void 0,(function*(){const t=this._getFinalPath(e);try{const e=yield p(this.fetch,`${this.url}/object/info/${t}`,{headers:this.headers});return{data:l(e),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}exists(e){return y(this,void 0,void 0,(function*(){const t=this._getFinalPath(e);try{return yield function(e,t,s){return c(this,void 0,void 0,(function*(){return f(e,"HEAD",t,Object.assign(Object.assign({},s),{noResolveJson:!0}),undefined)}))}(this.fetch,`${this.url}/object/${t}`,{headers:this.headers}),{data:!0,error:null}}catch(e){if(i(e)&&e instanceof o){const t=e.originalError;if([400,404].includes(null==t?void 0:t.status))return{data:!1,error:e}}throw e}}))}getPublicUrl(e,t){const s=this._getFinalPath(e),r=[],i=(null==t?void 0:t.download)?`download=${!0===t.download?"":t.download}`:"";""!==i&&r.push(i);const n=void 0!==(null==t?void 0:t.transform)?"render/image":"object",o=this.transformOptsToQueryString((null==t?void 0:t.transform)||{});""!==o&&r.push(o);let a=r.join("&");return""!==a&&(a=`?${a}`),{data:{publicUrl:encodeURI(`${this.url}/${n}/public/${s}${a}`)}}}remove(e){return y(this,void 0,void 0,(function*(){try{return{data:yield v(this.fetch,`${this.url}/object/${this.bucketId}`,{prefixes:e},{headers:this.headers}),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}list(e,t,s){return y(this,void 0,void 0,(function*(){try{const r=Object.assign(Object.assign(Object.assign({},w),t),{prefix:e||""});return{data:yield g(this.fetch,`${this.url}/object/list/${this.bucketId}`,r,{headers:this.headers},s),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}encodeMetadata(e){return JSON.stringify(e)}toBase64(e){return"undefined"!=typeof Buffer?Buffer.from(e).toString("base64"):btoa(e)}_getFinalPath(e){return`${this.bucketId}/${e}`}_removeEmptyFolders(e){return e.replace(/^\/|\/$/g,"").replace(/\/+/g,"/")}transformOptsToQueryString(e){const t=[];return e.width&&t.push(`width=${e.width}`),e.height&&t.push(`height=${e.height}`),e.resize&&t.push(`resize=${e.resize}`),e.format&&t.push(`format=${e.format}`),e.quality&&t.push(`quality=${e.quality}`),t.join("&")}}const b={"X-Client-Info":"storage-js/2.7.1"};var k=function(e,t,s,r){return new(s||(s=Promise))((function(i,n){function o(e){try{l(r.next(e))}catch(e){n(e)}}function a(e){try{l(r.throw(e))}catch(e){n(e)}}function l(e){var t;e.done?i(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,a)}l((r=r.apply(e,t||[])).next())}))};class S{constructor(e,t={},s){this.url=e,this.headers=Object.assign(Object.assign({},b),t),this.fetch=a(s)}listBuckets(){return k(this,void 0,void 0,(function*(){try{return{data:yield p(this.fetch,`${this.url}/bucket`,{headers:this.headers}),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}getBucket(e){return k(this,void 0,void 0,(function*(){try{return{data:yield p(this.fetch,`${this.url}/bucket/${e}`,{headers:this.headers}),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}createBucket(e,t={public:!1}){return k(this,void 0,void 0,(function*(){try{return{data:yield g(this.fetch,`${this.url}/bucket`,{id:e,name:e,public:t.public,file_size_limit:t.fileSizeLimit,allowed_mime_types:t.allowedMimeTypes},{headers:this.headers}),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}updateBucket(e,t){return k(this,void 0,void 0,(function*(){try{const s=yield function(e,t,s,r){return c(this,void 0,void 0,(function*(){return f(e,"PUT",t,r,undefined,s)}))}(this.fetch,`${this.url}/bucket/${e}`,{id:e,name:e,public:t.public,file_size_limit:t.fileSizeLimit,allowed_mime_types:t.allowedMimeTypes},{headers:this.headers});return{data:s,error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}emptyBucket(e){return k(this,void 0,void 0,(function*(){try{return{data:yield g(this.fetch,`${this.url}/bucket/${e}/empty`,{},{headers:this.headers}),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}deleteBucket(e){return k(this,void 0,void 0,(function*(){try{return{data:yield v(this.fetch,`${this.url}/bucket/${e}`,{},{headers:this.headers}),error:null}}catch(e){if(i(e))return{data:null,error:e};throw e}}))}}class T extends S{constructor(e,t={},s){super(e,t,s)}from(e){return new _(this.url,this.headers,e,this.fetch)}}},787:function(e,t,s){var r=this&&this.__awaiter||function(e,t,s,r){return new(s||(s=Promise))((function(i,n){function o(e){try{l(r.next(e))}catch(e){n(e)}}function a(e){try{l(r.throw(e))}catch(e){n(e)}}function l(e){var t;e.done?i(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,a)}l((r=r.apply(e,t||[])).next())}))};Object.defineProperty(t,"__esModule",{value:!0});const i=s(227),n=s(279),o=s(803),a=s(623),l=s(985),c=s(720),h=s(793),u=s(689);t.default=class{constructor(e,t,s){var r,i,o;if(this.supabaseUrl=e,this.supabaseKey=t,!e)throw new Error("supabaseUrl is required.");if(!t)throw new Error("supabaseKey is required.");const a=(0,h.ensureTrailingSlash)(e),u=new URL(a);this.realtimeUrl=new URL("realtime/v1",u),this.realtimeUrl.protocol=this.realtimeUrl.protocol.replace("http","ws"),this.authUrl=new URL("auth/v1",u),this.storageUrl=new URL("storage/v1",u),this.functionsUrl=new URL("functions/v1",u);const d=`sb-${u.hostname.split(".")[0]}-auth-token`,f={db:l.DEFAULT_DB_OPTIONS,realtime:l.DEFAULT_REALTIME_OPTIONS,auth:Object.assign(Object.assign({},l.DEFAULT_AUTH_OPTIONS),{storageKey:d}),global:l.DEFAULT_GLOBAL_OPTIONS},p=(0,h.applySettingDefaults)(null!=s?s:{},f);this.storageKey=null!==(r=p.auth.storageKey)&&void 0!==r?r:"",this.headers=null!==(i=p.global.headers)&&void 0!==i?i:{},p.accessToken?(this.accessToken=p.accessToken,this.auth=new Proxy({},{get:(e,t)=>{throw new Error(`@supabase/supabase-js: Supabase Client is configured with the accessToken option, accessing supabase.auth.${String(t)} is not possible`)}})):this.auth=this._initSupabaseAuthClient(null!==(o=p.auth)&&void 0!==o?o:{},this.headers,p.global.fetch),this.fetch=(0,c.fetchWithAuth)(t,this._getAccessToken.bind(this),p.global.fetch),this.realtime=this._initRealtimeClient(Object.assign({headers:this.headers,accessToken:this._getAccessToken.bind(this)},p.realtime)),this.rest=new n.PostgrestClient(new URL("rest/v1",u).href,{headers:this.headers,schema:p.db.schema,fetch:this.fetch}),p.accessToken||this._listenForAuthEvents()}get functions(){return new i.FunctionsClient(this.functionsUrl.href,{headers:this.headers,customFetch:this.fetch})}get storage(){return new a.StorageClient(this.storageUrl.href,this.headers,this.fetch)}from(e){return this.rest.from(e)}schema(e){return this.rest.schema(e)}rpc(e,t={},s={}){return this.rest.rpc(e,t,s)}channel(e,t={config:{}}){return this.realtime.channel(e,t)}getChannels(){return this.realtime.getChannels()}removeChannel(e){return this.realtime.removeChannel(e)}removeAllChannels(){return this.realtime.removeAllChannels()}_getAccessToken(){var e,t;return r(this,void 0,void 0,(function*(){if(this.accessToken)return yield this.accessToken();const{data:s}=yield this.auth.getSession();return null!==(t=null===(e=s.session)||void 0===e?void 0:e.access_token)&&void 0!==t?t:null}))}_initSupabaseAuthClient({autoRefreshToken:e,persistSession:t,detectSessionInUrl:s,storage:r,storageKey:i,flowType:n,lock:o,debug:a},l,c){const h={Authorization:`Bearer ${this.supabaseKey}`,apikey:`${this.supabaseKey}`};return new u.SupabaseAuthClient({url:this.authUrl.href,headers:Object.assign(Object.assign({},h),l),storageKey:i,autoRefreshToken:e,persistSession:t,detectSessionInUrl:s,storage:r,flowType:n,lock:o,debug:a,fetch:c,hasCustomAuthorizationHeader:"Authorization"in this.headers})}_initRealtimeClient(e){return new o.RealtimeClient(this.realtimeUrl.href,Object.assign(Object.assign({},e),{params:Object.assign({apikey:this.supabaseKey},null==e?void 0:e.params)}))}_listenForAuthEvents(){return this.auth.onAuthStateChange(((e,t)=>{this._handleTokenChanged(e,"CLIENT",null==t?void 0:t.access_token)}))}_handleTokenChanged(e,t,s){"TOKEN_REFRESHED"!==e&&"SIGNED_IN"!==e||this.changedAccessToken===s?"SIGNED_OUT"===e&&(this.realtime.setAuth(),"STORAGE"==t&&this.auth.signOut(),this.changedAccessToken=void 0):this.changedAccessToken=s}}},440:function(e,t,s){var r=this&&this.__createBinding||(Object.create?function(e,t,s,r){void 0===r&&(r=s);var i=Object.getOwnPropertyDescriptor(t,s);i&&!("get"in i?!t.__esModule:i.writable||i.configurable)||(i={enumerable:!0,get:function(){return t[s]}}),Object.defineProperty(e,r,i)}:function(e,t,s,r){void 0===r&&(r=s),e[r]=t[s]}),i=this&&this.__exportStar||function(e,t){for(var s in e)"default"===s||Object.prototype.hasOwnProperty.call(t,s)||r(t,e,s)},n=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(t,"__esModule",{value:!0}),t.createClient=t.SupabaseClient=t.FunctionRegion=t.FunctionsError=t.FunctionsRelayError=t.FunctionsFetchError=t.FunctionsHttpError=t.PostgrestError=void 0;const o=n(s(787));i(s(745),t);var a=s(279);Object.defineProperty(t,"PostgrestError",{enumerable:!0,get:function(){return a.PostgrestError}});var l=s(227);Object.defineProperty(t,"FunctionsHttpError",{enumerable:!0,get:function(){return l.FunctionsHttpError}}),Object.defineProperty(t,"FunctionsFetchError",{enumerable:!0,get:function(){return l.FunctionsFetchError}}),Object.defineProperty(t,"FunctionsRelayError",{enumerable:!0,get:function(){return l.FunctionsRelayError}}),Object.defineProperty(t,"FunctionsError",{enumerable:!0,get:function(){return l.FunctionsError}}),Object.defineProperty(t,"FunctionRegion",{enumerable:!0,get:function(){return l.FunctionRegion}}),i(s(803),t);var c=s(787);Object.defineProperty(t,"SupabaseClient",{enumerable:!0,get:function(){return n(c).default}}),t.createClient=(e,t,s)=>new o.default(e,t,s)},689:(e,t,s)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.SupabaseAuthClient=void 0;const r=s(745);class i extends r.AuthClient{constructor(e){super(e)}}t.SupabaseAuthClient=i},985:(e,t,s)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.DEFAULT_REALTIME_OPTIONS=t.DEFAULT_AUTH_OPTIONS=t.DEFAULT_DB_OPTIONS=t.DEFAULT_GLOBAL_OPTIONS=t.DEFAULT_HEADERS=void 0;const r=s(560);let i="";i="undefined"!=typeof Deno?"deno":"undefined"!=typeof document?"web":"undefined"!=typeof navigator&&"ReactNative"===navigator.product?"react-native":"node",t.DEFAULT_HEADERS={"X-Client-Info":`supabase-js-${i}/${r.version}`},t.DEFAULT_GLOBAL_OPTIONS={headers:t.DEFAULT_HEADERS},t.DEFAULT_DB_OPTIONS={schema:"public"},t.DEFAULT_AUTH_OPTIONS={autoRefreshToken:!0,persistSession:!0,detectSessionInUrl:!0,flowType:"implicit"},t.DEFAULT_REALTIME_OPTIONS={}},720:function(e,t,s){var r=this&&this.__createBinding||(Object.create?function(e,t,s,r){void 0===r&&(r=s);var i=Object.getOwnPropertyDescriptor(t,s);i&&!("get"in i?!t.__esModule:i.writable||i.configurable)||(i={enumerable:!0,get:function(){return t[s]}}),Object.defineProperty(e,r,i)}:function(e,t,s,r){void 0===r&&(r=s),e[r]=t[s]}),i=this&&this.__setModuleDefault||(Object.create?function(e,t){Object.defineProperty(e,"default",{enumerable:!0,value:t})}:function(e,t){e.default=t}),n=this&&this.__importStar||function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var s in e)"default"!==s&&Object.prototype.hasOwnProperty.call(e,s)&&r(t,e,s);return i(t,e),t},o=this&&this.__awaiter||function(e,t,s,r){return new(s||(s=Promise))((function(i,n){function o(e){try{l(r.next(e))}catch(e){n(e)}}function a(e){try{l(r.throw(e))}catch(e){n(e)}}function l(e){var t;e.done?i(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,a)}l((r=r.apply(e,t||[])).next())}))};Object.defineProperty(t,"__esModule",{value:!0}),t.fetchWithAuth=t.resolveHeadersConstructor=t.resolveFetch=void 0;const a=n(s(907));t.resolveFetch=e=>{let t;return t=e||("undefined"==typeof fetch?a.default:fetch),(...e)=>t(...e)},t.resolveHeadersConstructor=()=>"undefined"==typeof Headers?a.Headers:Headers,t.fetchWithAuth=(e,s,r)=>{const i=(0,t.resolveFetch)(r),n=(0,t.resolveHeadersConstructor)();return(t,r)=>o(void 0,void 0,void 0,(function*(){var o;const a=null!==(o=yield s())&&void 0!==o?o:e;let l=new n(null==r?void 0:r.headers);return l.has("apikey")||l.set("apikey",e),l.has("Authorization")||l.set("Authorization",`Bearer ${a}`),i(t,Object.assign(Object.assign({},r),{headers:l}))}))}},793:function(e,t){var s=this&&this.__awaiter||function(e,t,s,r){return new(s||(s=Promise))((function(i,n){function o(e){try{l(r.next(e))}catch(e){n(e)}}function a(e){try{l(r.throw(e))}catch(e){n(e)}}function l(e){var t;e.done?i(e.value):(t=e.value,t instanceof s?t:new s((function(e){e(t)}))).then(o,a)}l((r=r.apply(e,t||[])).next())}))};Object.defineProperty(t,"__esModule",{value:!0}),t.applySettingDefaults=t.isBrowser=t.ensureTrailingSlash=t.uuid=void 0,t.uuid=function(){return"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,(function(e){var t=16*Math.random()|0;return("x"==e?t:3&t|8).toString(16)}))},t.ensureTrailingSlash=function(e){return e.endsWith("/")?e:e+"/"},t.isBrowser=()=>"undefined"!=typeof window,t.applySettingDefaults=function(e,t){var r,i;const{db:n,auth:o,realtime:a,global:l}=e,{db:c,auth:h,realtime:u,global:d}=t,f={db:Object.assign(Object.assign({},c),n),auth:Object.assign(Object.assign({},h),o),realtime:Object.assign(Object.assign({},u),a),global:Object.assign(Object.assign(Object.assign({},d),l),{headers:Object.assign(Object.assign({},null!==(r=null==d?void 0:d.headers)&&void 0!==r?r:{}),null!==(i=null==l?void 0:l.headers)&&void 0!==i?i:{})}),accessToken:()=>s(this,void 0,void 0,(function*(){return""}))};return e.accessToken?f.accessToken=e.accessToken:delete f.accessToken,f}},560:(e,t)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.version=void 0,t.version="2.50.0"},591:e=>{e.exports=function(){throw new Error("ws does not work in the browser. Browser clients must use the native WebSocket object")}}},t={};function s(r){var i=t[r];if(void 0!==i)return i.exports;var n=t[r]={exports:{}};return e[r].call(n.exports,n,n.exports,s),n.exports}return s.d=(e,t)=>{for(var r in t)s.o(t,r)&&!s.o(e,r)&&Object.defineProperty(e,r,{enumerable:!0,get:t[r]})},s.g=function(){if("object"==typeof globalThis)return globalThis;try{return this||new Function("return this")()}catch(e){if("object"==typeof window)return window}}(),s.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),s.r=e=>{"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},s(440)})()));
+</script>
+<script>
+// MBBET OS — Auth v4
+var SUPA_URL  = 'https://ntwqfuvcosvzpqrfpipn.supabase.co';
+var SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+var db = supabase.createClient(SUPA_URL, SUPA_ANON);
+
+var LOCAL_USERS = {
+  'dm.businessita@gmail.com': { password: 'Luna2002@',  nome: 'Mary Bova', ruolo: 'SOCIO_ADMIN' },
+  'manuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Manuele',   ruolo: 'SOCIO' },
+  'serena@mbbet.it':          { password: 'Mbbet2024!', nome: 'Serena',    ruolo: 'OPERATORE' },
+  'samuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Samuele',   ruolo: 'COLLAB' }
+};
+
+var SESSION_KEY = 'mbbet_v2_session';
+var currentUser = null;
+var currentRole = 'VIEWER';
+var currentNome = '';
+
+var ROLE_SECTIONS = {
+  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social'],
+  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social'],
+  'OPERATORE':     ['clienti','bonus','task','social'],
+  'COLLAB':        ['clienti','bonus','social'],
+  'REFERRAL':      ['report'],
+  'VIEWER':        ['clienti'],
+  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social']
+};
+
+var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
+var ROLE_COLORS  = {'SOCIO_ADMIN':'#f59e0b','SOCIO':'#d97706','OPERATORE':'#3b82f6','COLLAB':'#a78bfa','REFERRAL':'#10b981','VIEWER':'#6b7280','ADMIN_TECNICO':'#ef4444'};
+
+// ── Leggi sessione: prima da URL hash, poi da localStorage ──────────────────
+function _readSession() {
+  // Prova hash (#mbbet=base64)
+  try {
+    var h = window.location.hash || '';
+    if (h.indexOf('#mbbet=') === 0) {
+      var s = JSON.parse(decodeURIComponent(atob(h.slice(7))));
+      if (s && s.email && s.ruolo) {
+        try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch(e) {}
+        try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
+        return s;
+      }
+    }
+  } catch(e) {}
+  // Prova localStorage
+  try {
+    var r = localStorage.getItem(SESSION_KEY);
+    if (r) { var s2 = JSON.parse(r); if (s2 && s2.email && s2.ruolo) return s2; }
+  } catch(e) {}
+  return null;
+}
+
+// ── Init Auth ────────────────────────────────────────────────────────────────
+function initAuth(onSuccess, onFail) {
+  var s = _readSession();
+  if (s) {
+    currentUser = { email: s.email };
+    currentNome = s.nome || s.email;
+    currentRole = s.ruolo || 'VIEWER';
+    if (onSuccess) { onSuccess(); return; }
+  }
+  if (onFail) onFail();
+}
+
+// ── Login / Logout ───────────────────────────────────────────────────────────
+function doLogin(email, password) {
+  var key = (email || '').toLowerCase().trim();
+  var u = LOCAL_USERS[key];
+  if (!u) return { error: 'Email non trovata' };
+  if (u.password !== password) return { error: 'Password non corretta' };
+  currentUser = { email: key };
+  currentNome = u.nome;
+  currentRole = u.ruolo;
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ email: key, nome: u.nome, ruolo: u.ruolo })); } catch(e) {}
+  return { data: { user: currentUser } };
+}
+
+function doLogout() {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+  currentUser = null; currentRole = 'VIEWER'; currentNome = '';
+  window.location.href = 'index.html';
+}
+
+// ── Navigazione con sessione nel hash ────────────────────────────────────────
+function navTo(url) {
+  var raw = null;
+  // Prima prova localStorage
+  try { raw = localStorage.getItem(SESSION_KEY); } catch(e) {}
+  // Fallback: usa currentUser in memoria
+  if (!raw && currentUser) {
+    try { raw = JSON.stringify({ email: currentUser.email, nome: currentNome, ruolo: currentRole }); } catch(e) {}
+  }
+  if (raw) {
+    try {
+      window.location.href = url + '#mbbet=' + btoa(encodeURIComponent(raw));
+      return;
+    } catch(e) {}
+  }
+  window.location.href = url;
+}
+
+// ── Permessi ─────────────────────────────────────────────────────────────────
+function canAccess(s) { return (ROLE_SECTIONS[currentRole] || []).indexOf(s) >= 0; }
+function isSocioAdmin() { return currentRole === 'SOCIO_ADMIN'; }
+function isSocio()      { return currentRole === 'SOCIO_ADMIN' || currentRole === 'SOCIO'; }
+function canWrite()     { return ['SOCIO_ADMIN','SOCIO','OPERATORE','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
+function canDelete()    { return currentRole === 'SOCIO_ADMIN' || currentRole === 'ADMIN_TECNICO'; }
+function seeFinanze()   { return ['SOCIO_ADMIN','SOCIO','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
+
+</script>
+<script>
+/* ══ GLOBALS ══ */
+var _bns=[], _spese=[], _entrateExtra=[], _ops=[], _ovPeriod='3m';
+/* ══ GLOBAL MESE ══ */
+var MESE_KEY='mbbet_mese';
+var MESI_NOMI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+function getGlobalMese(){
+  try{var s=localStorage.getItem(MESE_KEY);if(s){var p=JSON.parse(s);if(p&&p.m&&p.anno)return p;}}catch(e){}
+  var n=new Date();return{m:n.getMonth()+1,anno:n.getFullYear()};
+}
+function setGlobalMese(m,anno){
+  localStorage.setItem(MESE_KEY,JSON.stringify({m:m,anno:anno}));
+  syncMeseDropdowns();
+  if(typeof renderOverview==='function')renderOverview();
+  if(typeof renderEntrate==='function')renderEntrate();
+  if(typeof renderOperatori==='function')renderOperatori();
+  if(typeof renderSpese==='function')renderSpese();
+  if(typeof renderDivisione==='function')renderDivisione();
+}
+function shiftMese(d){
+  var gm=getGlobalMese(),m=gm.m+d,anno=gm.anno;
+  if(m<1){m=12;anno--;}if(m>12){m=1;anno++;}
+  setGlobalMese(m,anno);
+}
+function syncMeseDropdowns(){
+  var gm=getGlobalMese();
+  if(g('f-mese'))g('f-mese').value=gm.m;
+  if(g('f-anno'))g('f-anno').value=gm.anno;
+  if(g('op-f-mese'))g('op-f-mese').value=gm.m;
+  if(g('op-f-anno'))g('op-f-anno').value=gm.anno;
+  if(g('g-mese-lbl'))g('g-mese-lbl').textContent=MESI_NOMI[gm.m-1]+' '+gm.anno;
+  if(g('mese-lbl'))g('mese-lbl').innerHTML='&#128197; '+MESI_NOMI[gm.m-1]+' '+gm.anno;
+  if(g('op-mese-lbl'))g('op-mese-lbl').innerHTML='&#128197; '+MESI_NOMI[gm.m-1]+' '+gm.anno;
+}
+var MESI=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+var MESI_FULL=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+function g(id){return document.getElementById(id);}
+function fmt(n){return (parseFloat(n)||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtK(n){n=parseFloat(n)||0;return n>=1000?(n/1000).toFixed(1)+'K':fmt(n);}
+function navTo(p){window.location.href=p;}
+
+/* ══ TABS ══ */
+function switchTab(name,el){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('act');});
+  el.classList.add('act');
+  ['overview','entrate','spese','operatori','divisione','tasse'].forEach(function(t){
+    g('tab-'+t).style.display=t===name?'block':'none';
+  });
+  if(name==='entrate'){renderEntrate();renderEntrateExtra();}
+  if(name==='operatori')renderOperatori();
+  if(name==='divisione')renderDivisione();
+  if(name==='spese')renderSpese();
+  if(name==='overview')renderOverview();
+  if(name==='tasse')renderTasse();
+}
+
+/* ══ LOAD ══ */
+async function loadAll(){
+  try{
+    // Carica bonus completo
+    var rb=await db.from('bonus').select('id,cliente,operatore,bookmaker,ric_real,pag_cli,costi_extra,perc_op,perc_collab,nome_collab,comp_referral,stato,mese_operativo,anno_operativo,deposito,prelievo,saldo_bk,updated_at,created_at').order('created_at',{ascending:false});
+    _bns=rb.data||[];
+    // Spese ed entrate extra condivise da Supabase
+    await loadSpeseDb();
+    await loadEntrateExtraDb();
+    await loadTasseConfig();
+    await loadSplitConfig();
+    // Avvia render
+    renderOverview();
+    renderSpese();
+  }catch(e){console.warn('loadAll:',e);}
+}
+
+/* ══ CALCOLI BASE ══ */
+function calcTotali(bns,soloFatto){
+  var rows=soloFatto?bns.filter(function(b){return b.stato==='FATTO';}):bns;
+  var ric=0,pag=0,costi=0,compOp=0,compCollab=0,compRef=0;
+  rows.forEach(function(b){
+    var r=parseFloat(b.ric_real)||0,p=parseFloat(b.pag_cli)||0,c=parseFloat(b.costi_extra)||0;
+    ric+=r; pag+=p; costi+=c;
+    compOp+=r*(parseFloat(b.perc_op)||0)/100;
+    compCollab+=r*(parseFloat(b.perc_collab)||0)/100;
+    compRef+=parseFloat(b.comp_referral)||0;
+  });
+  var speseTot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var entrateExtraTot=_entrateExtra.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var utile=Math.max(ric+entrateExtraTot-pag-compOp-compCollab-compRef-costi-speseTot,0);
+  return {ric:ric,pag:pag,costi:costi,compOp:compOp,compCollab:compCollab,compRef:compRef,utile:utile,speseTot:speseTot,entrateExtraTot:entrateExtraTot,cnt:rows.length};
+}
+
+function bnsOfMonth(mese,anno){
+  return _bns.filter(function(b){return b.mese_operativo==mese&&b.anno_operativo==anno;});
+}
+
+/* ══ OVERVIEW ══ */
+function capitaleRiga(b){
+  var saldo=parseFloat(b.saldo_bk)||0;
+  if(saldo>0)return saldo;
+  var dep=parseFloat(b.deposito)||0,prel=parseFloat(b.prelievo)||0;
+  return Math.max(dep-prel,0);
+}
+function renderCapitaleAttivo(){
+  var attive=_bns.filter(function(b){return b.stato==='IN_CORSO';});
+  var byOp={},byBk={},totale=0;
+  attive.forEach(function(b){
+    var cap=capitaleRiga(b);totale+=cap;
+    var op=b.operatore||'Non assegnato';
+    if(!byOp[op])byOp[op]={nm:op,cap:0,cnt:0};
+    byOp[op].cap+=cap;byOp[op].cnt++;
+    var bk=b.bookmaker||'—';
+    if(!byBk[bk])byBk[bk]={nm:bk,cap:0,cnt:0};
+    byBk[bk].cap+=cap;byBk[bk].cnt++;
+  });
+  if(g('cap-tot-lbl'))g('cap-tot-lbl').textContent='€ '+fmt(totale)+' totali';
+  function renderList(obj){
+    var arr=Object.values(obj).sort(function(a,b){return b.cap-a.cap;});
+    if(!arr.length)return '<div style="font-size:11px;color:var(--tx3);padding:8px 0">Nessuna operazione in corso</div>';
+    return arr.map(function(x){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<span style="font-size:11.5px;color:var(--tx2)">'+x.nm+' <span style="color:var(--tx4);font-size:9.5px">('+x.cnt+')</span></span>'+
+        '<span style="font-size:12px;font-weight:700;color:var(--cyan)">€ '+fmt(x.cap)+'</span>'+
+        '</div>';
+    }).join('');
+  }
+  if(g('cap-per-op'))g('cap-per-op').innerHTML=renderList(byOp);
+  if(g('cap-per-bk'))g('cap-per-bk').innerHTML=renderList(byBk);
+}
+function renderOverview(){
+  var gm=getGlobalMese(),m=gm.m,a=gm.anno;
+  var mnome=MESI_FULL[m-1]+' '+a;
+  if(g('mese-lbl'))g('mese-lbl').innerHTML='&#128197; '+mnome;
+  if(g('op-mese-lbl'))g('op-mese-lbl').innerHTML='&#128197; '+mnome;
+
+  var bMese=bnsOfMonth(m,a);
+  var totMese=calcTotali(bMese,false);
+  var totFatto=calcTotali(_bns,true);
+  var totAll=calcTotali(_bns,false);
+  renderCapitaleAttivo();
+
+  // KPI
+  var kpis=[
+    {l:'RICAVI MESE',v:'€ '+fmt(totMese.ric),s:bMese.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--gold)'},
+    {l:'PAGATO CLIENTI',v:'€ '+fmt(totMese.pag),s:'Mese corrente',c:'var(--red)'},
+    {l:'UTILE NETTO',v:'€ '+fmt(totMese.utile),s:totMese.ric>0?Math.round(totMese.utile/totMese.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'},
+    {l:'RICAVI TOTALI',v:'€ '+fmt(totFatto.ric),s:totFatto.cnt+' bonus completati',c:'var(--cyan)'},
+    {l:'COMPENSI OP.',v:'€ '+fmt(totAll.compOp),s:'Stimati su ric_real×perc_op',c:'var(--blue)'},
+    {l:'SPESE GENERALI',v:'€ '+fmt(totAll.speseTot),s:_spese.length+' voci registrate',c:'var(--orange)'},
+    {l:'ENTRATE EXTRA',v:'€ '+fmt(totAll.entrateExtraTot),s:_entrateExtra.length+' voci (non da bonus)',c:'var(--teal)'}
+  ];
+  if(g('kpi-overview'))g('kpi-overview').innerHTML=kpis.map(function(k,i){
+    return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
+      '<div class="kpi-label">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+(k.c)+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div>'+
+      '</div>';
+  }).join('');
+
+  buildOvChart();
+  buildTopOps(m,a);
+  buildStorico(a);
+}
+
+function setOvPeriod(p,el){
+  _ovPeriod=p;
+  document.querySelectorAll('#tab-overview .filter-sel').forEach(function(e){e.style.color='var(--tx3)';});
+  el.style.color='var(--gold)';
+  buildOvChart();
+}
+
+function buildOvChart(){
+  var cv=g('ov-chart');if(!cv)return;
+  var cont=cv.parentElement;cv.width=cont.clientWidth||400;cv.height=cont.clientHeight||160;
+  var cx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  cx.clearRect(0,0,W,H);
+  var now=new Date(),months=[];
+  var nm=_ovPeriod==='12m'?12:_ovPeriod==='6m'?6:3;
+  for(var i=nm-1;i>=0;i--){
+    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({m:d.getMonth()+1,a:d.getFullYear(),l:MESI[d.getMonth()]});
+  }
+  var series=months.map(function(mo){
+    var b=bnsOfMonth(mo.m,mo.a);
+    var ric=b.reduce(function(s,x){return s+(parseFloat(x.ric_real)||0);},0);
+    var pag=b.reduce(function(s,x){return s+(parseFloat(x.pag_cli)||0);},0);
+    var utile=Math.max(ric-pag,0);
+    return {l:mo.l,ric:ric,pag:pag,utile:utile};
+  });
+  var maxV=Math.max.apply(null,series.map(function(s){return Math.max(s.ric,s.pag,s.utile,1);}));
+  var pL=8,pR=8,pT=10,pB=20,cW=W-pL-pR,cH=H-pT-pB;
+  var n=series.length,slot=cW/n;
+  // Grid
+  [.25,.5,.75,1].forEach(function(r){
+    var y=pT+cH*(1-r);cx.beginPath();cx.moveTo(pL,y);cx.lineTo(W-pR,y);
+    cx.strokeStyle='rgba(255,255,255,.04)';cx.lineWidth=1;cx.stroke();
+  });
+  // Lines
+  function drawLine(vals,col){
+    var pts=vals.map(function(v,i){return {x:pL+slot*i+slot/2,y:pT+cH*(1-v/maxV)};});
+    if(pts.length<2)return;
+    cx.beginPath();cx.moveTo(pts[0].x,pts[0].y);
+    for(var i=1;i<pts.length;i++){var cp=(pts[i-1].x+pts[i].x)/2;cx.bezierCurveTo(cp,pts[i-1].y,cp,pts[i].y,pts[i].x,pts[i].y);}
+    cx.strokeStyle=col;cx.lineWidth=2;cx.stroke();
+    // Area
+    cx.save();cx.beginPath();cx.moveTo(pts[0].x,pT+cH);cx.lineTo(pts[0].x,pts[0].y);
+    for(var i=1;i<pts.length;i++){var cp=(pts[i-1].x+pts[i].x)/2;cx.bezierCurveTo(cp,pts[i-1].y,cp,pts[i].y,pts[i].x,pts[i].y);}
+    cx.lineTo(pts[pts.length-1].x,pT+cH);cx.closePath();
+    var ag=cx.createLinearGradient(0,pT,0,pT+cH);
+    var rgb=col==='#f5c842'?'245,200,66':col==='#00e58a'?'0,229,138':'79,157,255';
+    ag.addColorStop(0,'rgba('+rgb+',.12)');ag.addColorStop(1,'rgba('+rgb+',.01)');
+    cx.fillStyle=ag;cx.fill();cx.restore();
+    // Dot finale
+    cx.fillStyle=col;cx.beginPath();cx.arc(pts[pts.length-1].x,pts[pts.length-1].y,3.5,0,Math.PI*2);cx.fill();
+    cx.fillStyle='#fff';cx.beginPath();cx.arc(pts[pts.length-1].x,pts[pts.length-1].y,1.5,0,Math.PI*2);cx.fill();
+  }
+  drawLine(series.map(function(s){return s.pag;}),'#00e58a');
+  drawLine(series.map(function(s){return s.utile;}),'#4f9dff');
+  drawLine(series.map(function(s){return s.ric;}),'#f5c842');
+  // X labels
+  cx.fillStyle='rgba(107,131,160,.8)';cx.font='bold 8px system-ui,sans-serif';cx.textAlign='center';cx.textBaseline='top';
+  series.forEach(function(s,i){cx.fillText(s.l,pL+slot*i+slot/2,pT+cH+4);});
+}
+
+function buildTopOps(m,a){
+  var el=g('top-ops-list');if(!el)return;
+  var bMese=bnsOfMonth(m,a);
+  var byOp={};
+  bMese.forEach(function(b){
+    var op=b.operatore||'—';
+    if(!byOp[op])byOp[op]={ric:0,cnt:0,op:op};
+    byOp[op].ric+=(parseFloat(b.ric_real)||0);
+    byOp[op].cnt++;
+  });
+  var sorted=Object.values(byOp).sort(function(a,b){return b.ric-a.ric;}).slice(0,6);
+  var maxR=sorted.length?Math.max.apply(null,sorted.map(function(x){return x.ric||1;})):1;
+  if(!sorted.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--tx3);font-size:12px">Nessun dato per il mese</div>';return;}
+  el.innerHTML=sorted.map(function(op){
+    var pct=maxR?Math.round(op.ric/maxR*100):0;
+    var nm=op.op.split(' ').slice(0,2).join(' ');
+    return '<div style="padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:5px">'+
+      '<span style="font-size:12px;font-weight:700">'+nm+'</span>'+
+      '<span style="font-size:12px;color:var(--gold);font-weight:900">€ '+fmt(op.ric)+'</span></div>'+
+      '<div style="height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden">'+
+      '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--gold),#ff8a3d);border-radius:2px;transition:.6s"></div></div>'+
+      '<div style="font-size:9px;color:var(--tx3);margin-top:3px">'+op.cnt+' bonus</div>'+
+      '</div>';
+  }).join('');
+}
+
+function buildStorico(anno){
+  var el=g('storico-table');if(!el)return;
+  var rows=[];
+  for(var mn=1;mn<=12;mn++){
+    var b=bnsOfMonth(mn,anno);
+    var ric=b.reduce(function(s,x){return s+(parseFloat(x.ric_real)||0);},0);
+    var pag=b.reduce(function(s,x){return s+(parseFloat(x.pag_cli)||0);},0);
+    var fatto=b.filter(function(x){return x.stato==='FATTO';}).length;
+    var inCorso=b.filter(function(x){return x.stato==='IN_CORSO';}).length;
+    var utile=Math.max(ric-pag,0);
+    rows.push({mn:mn,anno:anno,ric:ric,pag:pag,utile:utile,fatto:fatto,inCorso:inCorso,tot:b.length});
+  }
+  var maxRic=Math.max.apply(null,rows.map(function(r){return r.ric||1;}));
+  var now=new Date();
+  el.innerHTML='<thead><tr><th>MESE</th><th style="text-align:right">RICAVI</th><th style="text-align:right">PAG. CLI.</th><th style="text-align:right">UTILE</th><th>COMPLETATI</th><th>IN CORSO</th><th>TREND</th></tr></thead><tbody>'+
+    rows.map(function(r){
+      var isCurr=(r.mn===now.getMonth()+1&&r.anno===now.getFullYear());
+      var pct=maxRic?Math.round(r.ric/maxRic*100):0;
+      return '<tr style="'+(isCurr?'background:rgba(245,200,66,.04);':'')+'">'+
+        '<td style="font-weight:'+(isCurr?'800':'600')+';color:'+(isCurr?'var(--gold)':'var(--tx2)')+'\'">'+MESI_FULL[r.mn-1]+(isCurr?' <span style="font-size:8px;background:rgba(245,200,66,.15);padding:1px 6px;border-radius:4px;color:var(--gold)">ATTUALE</span>':'')+'</td>'+
+        '<td style="text-align:right;color:var(--gold);font-weight:700">'+( r.ric>0?'€ '+fmt(r.ric):'—')+'</td>'+
+        '<td style="text-align:right;color:var(--red)">'+( r.pag>0?'€ '+fmt(r.pag):'—')+'</td>'+
+        '<td style="text-align:right;color:var(--green);font-weight:700">'+( r.utile>0?'€ '+fmt(r.utile):'—')+'</td>'+
+        '<td style="color:var(--green)">'+( r.fatto?r.fatto+' bonus':'—')+'</td>'+
+        '<td style="color:var(--blue)">'+( r.inCorso?r.inCorso:'—')+'</td>'+
+        '<td><div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;width:80px">'+
+        '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--gold),var(--orange));transition:.6s;border-radius:2px"></div></div></td>'+
+        '</tr>';
+    }).join('')+'</tbody>';
+}
+
+/* ══ ENTRATE ══ */
+function renderEntrate(){
+  var mn=parseInt((g('f-mese')||{}).value||0);
+  var an=parseInt((g('f-anno')||{}).value||2026);
+  var stato=(g('f-stato')||{}).value||''
+  var rows=_bns.filter(function(b){
+    if(mn&&b.mese_operativo!=mn)return false;
+    if(an&&b.anno_operativo!=an)return false;
+    if(stato&&b.stato!==stato)return false;
+    return (parseFloat(b.ric_real)||0)>0||(parseFloat(b.pag_cli)||0)>0||stato;
+  });
+  if(g('ent-count'))g('ent-count').textContent=rows.length+' righe';
+  var body=g('entrate-body');if(!body)return;
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--tx3)">Nessun dato per il periodo selezionato</td></tr>';
+    return;
+  }
+  var statoMap={'FATTO':'badge-g','IN_CORSO':'badge-b','LIBERO':'','GIA_REGISTRATO':'badge-gold','LIMITATO':'badge-r'};
+  body.innerHTML=rows.map(function(b){
+    var ric=parseFloat(b.ric_real)||0,pag=parseFloat(b.pag_cli)||0,cst=parseFloat(b.costi_extra)||0;
+    var utile=ric-pag-cst-(ric*(parseFloat(b.perc_op)||0)/100);
+    return '<tr>'+
+      '<td style="font-weight:600">'+( b.cliente||'—')+'</td>'+
+      '<td style="color:var(--tx3);font-size:11px">'+( b.operatore||'—')+'</td>'+
+      '<td>'+( b.bookmaker||'—')+'</td>'+
+      '<td><span class="badge '+(statoMap[b.stato]||'')+'">'+( b.stato||'')+'</span></td>'+
+      '<td style="text-align:right;color:var(--gold);font-weight:700">'+( ric>0?'€ '+fmt(ric):'—')+'</td>'+
+      '<td style="text-align:right;color:var(--red)">'+( pag>0?'€ '+fmt(pag):'—')+'</td>'+
+      '<td style="text-align:right;color:var(--tx3)">'+( cst>0?'€ '+fmt(cst):'—')+'</td>'+
+      '<td style="text-align:right;color:'+(utile>0?'var(--green)':'var(--red)')+';font-weight:700">'+( (ric>0||pag>0)?'€ '+fmt(utile):'—')+'</td>'+
+      '<td style="color:var(--tx3);font-size:11px">'+(b.mese_operativo?MESI[b.mese_operativo-1]+' '+b.anno_operativo:'—')+'</td>'+
+      '</tr>';
+  }).join('');
+}
+
+/* ══ SPESE ══ */
+async function loadSpeseDb(){
+  try{
+    var r=await db.from('spese').select('*').order('data',{ascending:false});
+    _spese=(r.data||[]).map(function(s){return{id:s.id,desc:s.descrizione,cat:s.categoria,imp:s.importo,data:s.data,ricorrente:!!s.ricorrente};});
+  }catch(e){_spese=[];}
+}
+
+var SP_CAT_COL={
+  'Abbonamenti & Software':'badge-b','Marketing & Pubblicità':'badge-gold',
+  'Strumenti & Operatività':'badge-o','Consulenze & Servizi':'badge-b',
+  'Tasse & Commissioni':'badge-r','Rimborsi & Penali':'badge-r',
+  // retrocompatibilità con categorie vecchie già registrate
+  'Strumenti':'badge-o','Marketing':'badge-gold','Operatività':'badge-o',
+  'Pagamento Operatore':'badge-b','Pagamento Collab':'badge-b','Software':'badge-b'
+};
+
+function renderSpese(){
+  var body=g('spese-body'),empty=g('sp-empty');
+  var tot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var ricorrenti=_spese.filter(function(x){return x.ricorrente;});
+  var totRic=ricorrenti.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  if(g('sp-tot-lbl'))g('sp-tot-lbl').textContent='- € '+fmt(tot);
+  var kpi=g('kpi-spese');
+  if(kpi)kpi.innerHTML=[
+    {l:'TOTALE SPESE',v:'€ '+fmt(tot),s:_spese.length+' voci',c:'var(--red)'},
+    {l:'ABBONAMENTI RICORRENTI / MESE',v:'€ '+fmt(totRic),s:ricorrenti.length+' voci fisse',c:'var(--gold)'},
+    {l:'SPESE UNA TANTUM',v:'€ '+fmt(tot-totRic),s:(_spese.length-ricorrenti.length)+' voci',c:'var(--tx2)'}
+  ].map(function(k,i){
+    return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
+      '<div class="kpi-label">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+(k.c)+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div>'+
+      '</div>';
+  }).join('');
+  if(!_spese.length){if(body)body.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  if(body)body.innerHTML=_spese.map(function(s,i){
+    return '<tr>'+
+      '<td style="color:var(--tx3);font-size:11px">'+s.data+'</td>'+
+      '<td style="font-weight:600">'+s.desc+(s.ricorrente?'<span class="badge-ricorrente">RICORRENTE</span>':'')+'</td>'+
+      '<td><span class="badge '+(SP_CAT_COL[s.cat]||'badge-r')+'">'+s.cat+'</span></td>'+
+      '<td style="text-align:right;color:var(--red);font-weight:700">- € '+fmt(s.imp)+'</td>'+
+      '<td><button class="btn-del" onclick="delSpesa('+(i)+')">&#128465;</button></td>'+
+      '</tr>';
+  }).join('');
+}
+
+async function addSpesa(){
+  var desc=(g('sp-desc')||{}).value||'';desc=desc.trim();
+  var cat=(g('sp-cat')||{}).value||'Altro';
+  var imp=parseFloat((g('sp-imp')||{}).value)||0;
+  var data=(g('sp-data')||{}).value||new Date().toISOString().slice(0,10);
+  var ricorrente=!!(g('sp-ricorrente')||{}).checked;
+  if(!desc||!imp){alert('Inserisci descrizione e importo.');return;}
+  var res=await db.from('spese').insert({descrizione:desc,categoria:cat,importo:imp,data:data,ricorrente:ricorrente}).select();
+  if(res.error){alert('Errore salvataggio spesa: '+res.error.message);return;}
+  await loadSpeseDb();
+  g('sp-desc').value='';g('sp-imp').value='';g('sp-ricorrente').checked=false;
+  renderSpese();renderOverview();
+}
+async function delSpesa(i){
+  if(!confirm('Eliminare?'))return;
+  var s=_spese[i];if(!s)return;
+  var res=await db.from('spese').delete().eq('id',s.id);
+  if(res.error){alert('Errore eliminazione: '+res.error.message);return;}
+  await loadSpeseDb();
+  renderSpese();renderOverview();
+}
+
+/* ══ ENTRATE EXTRA (incassi non legati a un bonus cliente) ══ */
+var EE_CAT_COL={'Referral & Affiliazione':'badge-gold','Consulenze & Servizi':'badge-b','Rimborso':'badge-o','Altro':'badge-r'};
+async function loadEntrateExtraDb(){
+  try{
+    var r=await db.from('entrate_extra').select('*').order('data',{ascending:false});
+    _entrateExtra=(r.data||[]).map(function(s){return{id:s.id,desc:s.descrizione,cat:s.categoria,imp:s.importo,data:s.data};});
+  }catch(e){_entrateExtra=[];}
+}
+function renderEntrateExtra(){
+  var body=g('entrate-extra-body'),empty=g('ee-empty');
+  var tot=_entrateExtra.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  if(g('ee-tot-lbl'))g('ee-tot-lbl').textContent='+ € '+fmt(tot);
+  if(!_entrateExtra.length){if(body)body.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  if(body)body.innerHTML=_entrateExtra.map(function(s,i){
+    return '<tr>'+
+      '<td style="color:var(--tx3);font-size:11px">'+s.data+'</td>'+
+      '<td style="font-weight:600">'+s.desc+'</td>'+
+      '<td><span class="badge '+(EE_CAT_COL[s.cat]||'badge-r')+'">'+s.cat+'</span></td>'+
+      '<td style="text-align:right;color:var(--green);font-weight:700">+ € '+fmt(s.imp)+'</td>'+
+      '<td><button class="btn-del" onclick="delEntrataExtra('+(i)+')">&#128465;</button></td>'+
+      '</tr>';
+  }).join('');
+}
+async function addEntrataExtra(){
+  var desc=(g('ee-desc')||{}).value||'';desc=desc.trim();
+  var cat=(g('ee-cat')||{}).value||'Altro';
+  var imp=parseFloat((g('ee-imp')||{}).value)||0;
+  var data=(g('ee-data')||{}).value||new Date().toISOString().slice(0,10);
+  if(!desc||!imp){alert('Inserisci descrizione e importo.');return;}
+  var res=await db.from('entrate_extra').insert({descrizione:desc,categoria:cat,importo:imp,data:data}).select();
+  if(res.error){alert('Errore salvataggio entrata: '+res.error.message);return;}
+  await loadEntrateExtraDb();
+  g('ee-desc').value='';g('ee-imp').value='';
+  renderEntrateExtra();renderOverview();
+}
+async function delEntrataExtra(i){
+  if(!confirm('Eliminare?'))return;
+  var s=_entrateExtra[i];if(!s)return;
+  var res=await db.from('entrate_extra').delete().eq('id',s.id);
+  if(res.error){alert('Errore eliminazione: '+res.error.message);return;}
+  await loadEntrateExtraDb();
+  renderEntrateExtra();renderOverview();
+}
+
+/* ══ TASSE — Regime Forfettario ══ */
+var TASSE_DEFAULTS={coeff:67,aliquota:15,inps:26.07,soglia:85000};
+var _tasseCfg={coeff:67,aliquota:15,inps:26.07,soglia:85000};
+
+async function loadTasseConfig(){
+  try{
+    var r=await db.from('config').select('*').in('chiave',['tasse_coefficiente','tasse_aliquota','tasse_inps_perc','tasse_soglia']);
+    (r.data||[]).forEach(function(c){
+      if(c.chiave==='tasse_coefficiente')_tasseCfg.coeff=parseFloat(c.valore)||TASSE_DEFAULTS.coeff;
+      if(c.chiave==='tasse_aliquota')_tasseCfg.aliquota=parseFloat(c.valore)||TASSE_DEFAULTS.aliquota;
+      if(c.chiave==='tasse_inps_perc')_tasseCfg.inps=parseFloat(c.valore)||TASSE_DEFAULTS.inps;
+      if(c.chiave==='tasse_soglia')_tasseCfg.soglia=parseFloat(c.valore)||TASSE_DEFAULTS.soglia;
+    });
+  }catch(e){}
+}
+
+function fillTasseForm(){
+  if(g('tx-coeff'))g('tx-coeff').value=_tasseCfg.coeff;
+  if(g('tx-aliquota'))g('tx-aliquota').value=_tasseCfg.aliquota;
+  if(g('tx-inps'))g('tx-inps').value=_tasseCfg.inps;
+  if(g('tx-soglia'))g('tx-soglia').value=_tasseCfg.soglia;
+}
+
+async function saveTasseConfig(){
+  _tasseCfg.coeff=parseFloat((g('tx-coeff')||{}).value)||TASSE_DEFAULTS.coeff;
+  _tasseCfg.aliquota=parseFloat((g('tx-aliquota')||{}).value)||TASSE_DEFAULTS.aliquota;
+  _tasseCfg.inps=parseFloat((g('tx-inps')||{}).value)||TASSE_DEFAULTS.inps;
+  _tasseCfg.soglia=parseFloat((g('tx-soglia')||{}).value)||TASSE_DEFAULTS.soglia;
+  var rows=[
+    {chiave:'tasse_coefficiente',valore:String(_tasseCfg.coeff)},
+    {chiave:'tasse_aliquota',valore:String(_tasseCfg.aliquota)},
+    {chiave:'tasse_inps_perc',valore:String(_tasseCfg.inps)},
+    {chiave:'tasse_soglia',valore:String(_tasseCfg.soglia)}
+  ];
+  try{
+    for(var i=0;i<rows.length;i++){await db.from('config').upsert(rows[i],{onConflict:'chiave'});}
+    showToast('Configurazione tasse salvata','ok');
+  }catch(e){alert('Errore salvataggio: '+e.message);}
+  renderTasse();
+}
+
+/* Base imponibile per le tasse: NON è il fatturato lordo — vanno tolti prima
+   i compensi operatori/collab/referral e i costi, perché quei soldi non
+   restano a Mary/Manuele e non vanno "in fattura" loro. */
+function utileNettoAnno(anno){
+  var ric=0,pag=0,costi=0,compOp=0,compCollab=0,compRef=0;
+  _bns.filter(function(b){return b.anno_operativo==anno;}).forEach(function(b){
+    var r=parseFloat(b.ric_real)||0,p=parseFloat(b.pag_cli)||0,c=parseFloat(b.costi_extra)||0;
+    ric+=r;pag+=p;costi+=c;
+    compOp+=r*(parseFloat(b.perc_op)||0)/100;
+    compCollab+=r*(parseFloat(b.perc_collab)||0)/100;
+    compRef+=parseFloat(b.comp_referral)||0;
+  });
+  var speseAnno=_spese.filter(function(x){return (x.data||'').slice(0,4)===String(anno);}).reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var extraAnno=_entrateExtra.filter(function(x){return (x.data||'').slice(0,4)===String(anno);}).reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  return Math.max(ric+extraAnno-pag-compOp-compCollab-compRef-costi-speseAnno,0);
+}
+
+function calcTassePersona(nome,pct,fatturatoTotale,col){
+  var fatturato=fatturatoTotale*(pct/100);
+  var imponibile=fatturato*(_tasseCfg.coeff/100);
+  var imposta=imponibile*(_tasseCfg.aliquota/100);
+  var inps=imponibile*(_tasseCfg.inps/100);
+  var totAccantonare=imposta+inps;
+  var meseCorrente=new Date().getMonth()+1;
+  var accantonoMensile=totAccantonare/meseCorrente;
+  var sogliaPct=Math.min(100,Math.round(fatturato/_tasseCfg.soglia*100));
+  return {nome:nome,col:col,fatturato:fatturato,imponibile:imponibile,imposta:imposta,inps:inps,totAccantonare:totAccantonare,accantonoMensile:accantonoMensile,sogliaPct:sogliaPct};
+}
+function renderTasse(){
+  fillTasseForm();
+  var anno=new Date().getFullYear();
+  var baseImponibileAzienda=utileNettoAnno(anno);
+  var pctMary=_splitPct.mary||0, pctManuele=_splitPct.manuele||0;
+  var tMary=calcTassePersona('Mary',pctMary,baseImponibileAzienda,'#f7cc46');
+  var tManuele=calcTassePersona('Manuele',pctManuele,baseImponibileAzienda,'#5aaaff');
+  tMary.pctLabelSrc=pctMary;tManuele.pctLabelSrc=pctManuele;
+
+  var kpis=[
+    {l:'UTILE NETTO AZIENDA ANNO '+anno,v:'€ '+fmt(baseImponibileAzienda),s:'Già senza compensi operatori/collab/costi',c:'var(--gold)'},
+    {l:'QUOTA MARY ('+pctMary+'%)',v:'€ '+fmt(tMary.fatturato),s:'da accantonare € '+fmt(tMary.totAccantonare),c:'#f7cc46'},
+    {l:'QUOTA MANUELE ('+pctManuele+'%)',v:'€ '+fmt(tManuele.fatturato),s:'da accantonare € '+fmt(tManuele.totAccantonare),c:'#5aaaff'}
+  ];
+  var kpi=g('kpi-tasse');
+  if(kpi)kpi.innerHTML=kpis.map(function(k,i){
+    return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
+      '<div class="kpi-label">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+(k.c)+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div>'+
+      '</div>';
+  }).join('');
+
+  var grid=g('tasse-persone-grid');
+  if(grid)grid.innerHTML=
+    renderPersonaTasseCardSimple(tMary)+renderPersonaTasseCardSimple(tManuele);
+}
+function renderPersonaTasseCardSimple(t){
+  var barCol=t.sogliaPct>=90?'var(--red)':t.sogliaPct>=70?'var(--orange)':'var(--green)';
+  return '<div class="panel">'+
+    '<div class="panel-hdr"><div class="panel-title" style="color:'+t.col+'">&#128100; '+t.nome+'</div></div>'+
+    '<div style="padding:16px">'+
+    '<div style="height:9px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden;margin-bottom:6px">'+
+      '<div style="height:100%;border-radius:5px;width:'+t.sogliaPct+'%;background:'+barCol+'"></div>'+
+    '</div>'+
+    '<div style="font-size:10px;color:var(--tx3);margin-bottom:14px">€ '+fmt(t.fatturato)+' su € '+fmt(_tasseCfg.soglia)+' soglia ('+t.sogliaPct+'%)'+(t.sogliaPct>=90?' <b style="color:var(--red)">— vicino al limite</b>':'')+'</div>'+
+    '<div style="font-size:12.5px;line-height:2.1;color:var(--tx2)">'+
+      '<div>Fatturato personale (quota '+t.pctLabelSrc+'%): <b style="color:'+t.col+'">€ '+fmt(t.fatturato)+'</b></div>'+
+      '<div>&times; Coefficiente redditività ('+_tasseCfg.coeff+'%) = Imponibile: <b style="color:var(--cyan)">€ '+fmt(t.imponibile)+'</b></div>'+
+      '<div>&times; Imposta sostitutiva ('+_tasseCfg.aliquota+'%): <b style="color:var(--red)">€ '+fmt(t.imposta)+'</b></div>'+
+      '<div>&times; Contributi INPS ('+_tasseCfg.inps+'%): <b style="color:var(--orange)">€ '+fmt(t.inps)+'</b></div>'+
+      '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)">Da accantonare: <b style="color:var(--purple);font-size:15px">€ '+fmt(t.totAccantonare)+'</b> &nbsp;(~€ '+fmt(t.accantonoMensile)+'/mese)</div>'+
+    '</div></div></div>';
+}
+
+/* ══ PER OPERATORE ══ */
+function renderOperatori(){
+  var mn=parseInt((g('op-f-mese')||{}).value||0);
+  var an=parseInt((g('op-f-anno')||{}).value||2026);
+  var bns=mn?_bns.filter(function(b){return b.mese_operativo==mn&&b.anno_operativo==an;}):_bns;
+  var byOp={};
+  bns.forEach(function(b){
+    var op=b.operatore||'Non assegnato';
+    if(!byOp[op])byOp[op]={nm:op,ric:0,pag:0,compOp:0,fatto:0,inCorso:0,tot:0};
+    var r=parseFloat(b.ric_real)||0;
+    byOp[op].ric+=r;
+    byOp[op].pag+=(parseFloat(b.pag_cli)||0);
+    byOp[op].compOp+=r*(parseFloat(b.perc_op)||0)/100;
+    if(b.stato==='FATTO')byOp[op].fatto++;
+    if(b.stato==='IN_CORSO')byOp[op].inCorso++;
+    byOp[op].tot++;
+  });
+  var sorted=Object.values(byOp).sort(function(a,b){return b.ric-a.ric;});
+  var el=g('op-cards');if(!el)return;
+  if(!sorted.length){el.innerHTML='<div style="padding:40px;text-align:center;color:var(--tx3)">Nessun dato</div>';return;}
+  var cols=['#5aaaff','#c4a4f8','#22eeff','#00f093','#f7cc46','#ff9040','#c4a4f8','#22eeff','#ff4f4f','#00f093','#ff9040'];
+  el.innerHTML=sorted.map(function(op,i){
+    var col=cols[i%cols.length];
+    var ini=op.nm.split(' ').map(function(w){return w[0]||''}).join('').toUpperCase().slice(0,2);
+    var utileStimato=Math.max(op.ric-op.pag-op.compOp,0);
+    return '<div class="op-card">'+
+      '<div class="op-card-top">'+
+      '<div class="op-av" style="background:linear-gradient(145deg,rgba(0,0,0,.4),'+col+'44);border:1px solid '+col+'44;color:'+col+'">'+ini+'</div>'+
+      '<div><div class="op-nm">'+op.nm.split(' ').slice(0,2).join(' ')+'</div><div class="op-rl">'+op.tot+' bonus totali</div></div></div>'+
+      '<div class="op-stats">'+
+      '<div class="op-stat-item"><div class="op-stat-v" style="color:var(--gold)">€ '+fmtK(op.ric)+'</div><div class="op-stat-l">RICAVI</div></div>'+
+      '<div class="op-stat-item"><div class="op-stat-v" style="color:var(--blue)">€ '+fmtK(op.compOp)+'</div><div class="op-stat-l">COMPENSO</div></div>'+
+      '<div class="op-stat-item"><div class="op-stat-v" style="color:var(--green)">'+op.fatto+'</div><div class="op-stat-l">COMPLETATI</div></div>'+
+      '<div class="op-stat-item"><div class="op-stat-v" style="color:var(--orange)">'+op.inCorso+'</div><div class="op-stat-l">IN CORSO</div></div>'+
+      '</div></div>';
+  }).join('');
+}
+
+/* ══ DIVISIONE — 4 soci ══ */
+var SOCI=[
+  {key:'mary',nm:'Mary Bova',col:'#f7cc46'},
+  {key:'manuele',nm:'Manuele',col:'#5aaaff'},
+  {key:'serena',nm:'Serena',col:'#c4a4f8'},
+  {key:'samuele',nm:'Samuele',col:'#00f093'}
+];
+var SPLIT_DEFAULTS={mary:25,manuele:25,serena:25,samuele:25};
+var _splitPct={mary:25,manuele:25,serena:25,samuele:25};
+
+async function loadSplitConfig(){
+  try{
+    var r=await db.from('config').select('*').in('chiave',['div_pct_mary','div_pct_manuele','div_pct_serena','div_pct_samuele']);
+    (r.data||[]).forEach(function(c){
+      var key=c.chiave.replace('div_pct_','');
+      if(SPLIT_DEFAULTS.hasOwnProperty(key))_splitPct[key]=parseFloat(c.valore)||SPLIT_DEFAULTS[key];
+    });
+  }catch(e){}
+}
+function fillSplitForm(){
+  SOCI.forEach(function(s){var el=g('split-'+s.key);if(el)el.value=_splitPct[s.key];});
+  updateSplitTotLbl();
+}
+function onSplitInput(){
+  SOCI.forEach(function(s){var el=g('split-'+s.key);if(el)_splitPct[s.key]=parseFloat(el.value)||0;});
+  updateSplitTotLbl();
+  renderDivisione();
+}
+function updateSplitTotLbl(){
+  var tot=SOCI.reduce(function(s,soc){return s+(_splitPct[soc.key]||0);},0);
+  var el=g('split-tot-lbl');
+  if(el){el.textContent='Totale: '+tot+'%'+(tot!==100?'  ⚠ deve fare 100%':'  ✓');el.style.color=tot!==100?'var(--red)':'var(--green)';}
+}
+async function saveSplitConfig(){
+  var tot=SOCI.reduce(function(s,soc){return s+(_splitPct[soc.key]||0);},0);
+  if(tot!==100){alert('La somma delle percentuali deve fare 100% (ora fa '+tot+'%).');return;}
+  try{
+    for(var i=0;i<SOCI.length;i++){
+      var k=SOCI[i].key;
+      await db.from('config').upsert({chiave:'div_pct_'+k,valore:String(_splitPct[k])},{onConflict:'chiave'});
+    }
+    showToast('Split soci salvato','ok');
+  }catch(e){alert('Errore salvataggio: '+e.message);}
+  renderDivisione();
+}
+
+function utileNettoTotale(){
+  var tot=calcTotali(_bns,false);
+  var speseTot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var entrateExtraTot=_entrateExtra.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  return Math.max(tot.ric+entrateExtraTot-tot.pag-tot.compOp-tot.compCollab-tot.compRef-speseTot-tot.costi,0);
+}
+
+function renderDivisione(){
+  fillSplitForm();
+  var tot=calcTotali(_bns,false);
+  var speseTot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var utileNetto=utileNettoTotale();
+
+  // KPI
+  var kpiEl=g('div-kpi');
+  if(kpiEl)kpiEl.innerHTML=[
+    {l:'RICAVI TOTALI',v:'€ '+fmt(tot.ric),c:'var(--gold)'},
+    {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),c:'var(--red)'},
+    {l:'COMPENSI OPERATORI',v:'€ '+fmt(tot.compOp),c:'var(--blue)'},
+    {l:'SPESE GENERALI',v:'€ '+fmt(speseTot),c:'var(--orange)'},
+    {l:'COMP. COLLAB/REF',v:'€ '+fmt(tot.compCollab+tot.compRef),c:'var(--purple)'},
+    {l:'UTILE NETTO SOCI',v:'€ '+fmt(utileNetto),c:'var(--green)'}
+  ].map(function(k,i){
+    return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
+      '<div class="kpi-label">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+(k.c)+'">'+k.v+'</div></div>';
+  }).join('');
+
+  // Cards soci (4)
+  var cardsEl=g('div-cards');
+  if(cardsEl)cardsEl.innerHTML=SOCI.map(function(s){
+    var pct=_splitPct[s.key]||0;
+    var euro=utileNetto*pct/100;
+    return '<div class="div-card" style="border-top:3px solid '+s.col+'">'+
+      '<div class="div-pct" style="color:'+s.col+'">'+pct+'%</div>'+
+      '<div class="div-nm">'+s.nm+'</div>'+
+      '<div class="div-euro" style="color:'+s.col+'">€ '+fmt(euro)+'</div>'+
+      '<div class="div-sub">Quota utile netto</div>'+
+      '</div>';
+  }).join('');
+
+  // Dettaglio
+  var detEl=g('div-dettaglio');
+  if(detEl)detEl.innerHTML=[
+    {l:'Ricavi lordi',v:tot.ric,c:'var(--gold)',sign:'+'},
+    {l:'Pagato ai clienti',v:-tot.pag,c:'var(--red)',sign:'-'},
+    {l:'Compensi operatori (~perc_op)',v:-tot.compOp,c:'var(--blue)',sign:'-'},
+    {l:'Compensi collab + referral',v:-(tot.compCollab+tot.compRef),c:'var(--purple)',sign:'-'},
+    {l:'Costi extra',v:-tot.costi,c:'var(--orange)',sign:'-'},
+    {l:'Spese generali',v:-speseTot,c:'var(--orange)',sign:'-'},
+    {l:'Utile netto soci',v:utileNetto,c:'var(--green)',sign:'=',bold:true}
+  ].map(function(r){
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<span style="font-size:12px;font-weight:'+(r.bold?'800':'500')+';color:'+( r.bold?'var(--tx)':'var(--tx2)')+'">'+r.sign+' '+r.l+'</span>'+
+      '<span style="font-size:13px;font-weight:'+(r.bold?'900':'700')+';color:'+r.c+'">'+( r.v>=0?'€ '+fmt(r.v):'- € '+fmt(-r.v))+'</span>'+
+      '</div>';
+  }).join('');
+}
+
+/* ══ LOGIN / BOOT ══ */
+function login(){
+  var em=(g('li-e')||{}).value||'';em=em.trim();
+  var pw=(g('li-p')||{}).value||''
+  var err=g('l-err');if(err)err.textContent='';
+  if(!em||!pw){if(err)err.textContent='Inserisci email e password';return;}
+  var res=doLogin(em,pw);
+  if(res&&res.error){if(err)err.textContent=res.error;return;}
+  boot();
+}
+function boot(){
+  var ls=g('ls');if(ls)ls.style.display='none';
+  var ini=(currentNome||'MB').split(' ').map(function(w){return w[0]||''}).join('').toUpperCase().slice(0,2);
+  if(g('tb-av'))g('tb-av').textContent=ini;
+  if(g('tb-nm'))g('tb-nm').textContent=currentNome;
+  if(g('tb-rl'))g('tb-rl').textContent=(currentRole||''). replace(/_/g,' ');
+  if(g('sb-role'))g('sb-role').textContent=(currentRole||''). replace(/_/g,' ');
+  if(g('sp-data'))g('sp-data').value=new Date().toISOString().slice(0,10);
+  syncMeseDropdowns();
+  loadAll();
+}
+window.addEventListener('DOMContentLoaded',function(){
+  try{initAuth(function(){boot();},function(){var ls=g('ls');if(ls)ls.style.display='flex';setTimeout(function(){var e=g('li-e');if(e)e.focus();},80);});}
+  catch(e){var ls=g('ls');if(ls)ls.style.display='flex';}
+});
+</script>
+</body>
+</html>

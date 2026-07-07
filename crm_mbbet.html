@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM CLIENTI — MBBET</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;
+  --gold:#f59e0b;--gold2:#fbbf24;
+  --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
+  --green:#10b981;--red:#ef4444;--orange:#f97316;
+  --blue:#3b82f6;--purple:#a78bfa;--gray:#6b7280;
+}
+body{background:var(--navy);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;height:100vh;overflow:hidden;font-size:14px}
+/* ── LOGIN SCREEN ── */
+#login-screen{position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{width:360px;background:var(--navy2);border:1px solid var(--border);border-radius:16px;padding:36px 32px}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo h1{font-size:26px;font-weight:900;color:var(--gold);letter-spacing:3px;margin-bottom:4px}
+.login-logo p{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:2px}
+.login-box input{display:block;width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;margin-bottom:12px;outline:none}
+.login-box input:focus{border-color:var(--gold)}
+.login-btn{width:100%;background:var(--gold);color:#000;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.5px;transition:background .1s}
+.login-btn:hover{background:var(--gold2)}
+.login-btn:disabled{background:var(--navy3);color:var(--muted);cursor:not-allowed}
+#login-err{margin-top:12px;padding:8px 12px;background:rgba(239,68,68,.1);border:1px solid var(--red);border-radius:6px;color:var(--red);font-size:12px;display:none}
+.login-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--muted)}
+/* ── USER HEADER ── */
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px}
+.user-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#000}
+.user-nome{font-weight:700}
+.user-ruolo-tag{font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700}
+.r-socio-admin{background:rgba(245,158,11,.2);color:var(--gold)}
+.r-socio{background:rgba(245,158,11,.1);color:var(--gold2)}
+.r-operatore{background:rgba(59,130,246,.15);color:var(--blue)}
+.r-collab{background:rgba(167,139,250,.15);color:var(--purple)}
+.r-referral{background:rgba(16,185,129,.15);color:var(--green)}
+.r-viewer{background:rgba(107,114,128,.15);color:var(--gray)}
+.r-admin-tecnico{background:rgba(239,68,68,.15);color:var(--red)}
+.logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 6px;border-radius:4px}
+.logout-btn:hover{color:var(--red)}
+#sb{width:210px;min-width:210px;background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{padding:16px;border-bottom:2px solid var(--gold);text-align:center}
+.sb-logo h1{font-size:17px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.sb-logo small{font-size:10px;color:var(--muted)}
+.sb-kpi{padding:8px 14px;border-bottom:1px solid var(--border)}
+.sb-kpi-row{display:flex;justify-content:space-between;padding:2px 0;font-size:11px}
+.sb-kpi-row span:first-child{color:var(--muted)}
+.sb-kpi-row span:last-child{font-weight:700;color:var(--gold)}
+.nav-label{font-size:10px;font-weight:700;color:var(--muted);padding:8px 14px 2px;text-transform:uppercase;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:var(--muted);font-size:13px;border-left:3px solid transparent;transition:all .1s}
+.nav-item:hover{background:rgba(245,158,11,.08);color:var(--text)}
+.nav-item.active{background:rgba(245,158,11,.12);color:var(--gold);border-left-color:var(--gold);font-weight:700}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--navy2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;min-height:50px}
+.topbar h2{font-size:16px;font-weight:700;flex:1}
+#view{flex:1;overflow-y:auto;padding:20px}
+.btn{padding:6px 14px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:all .1s}
+.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:var(--gold2)}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#2563eb}
+.btn-red{background:var(--red);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-ghost{background:var(--navy3);color:var(--text)}.btn-ghost:hover{background:#475569}
+.btn-sm{padding:4px 10px;font-size:11px}
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.card-title{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.card-val{font-size:24px;font-weight:800}
+.card-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.tbl-wrap{background:var(--navy2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--navy3);padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:9px 12px;border-top:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.b-green{background:rgba(16,185,129,.15);color:var(--green)}
+.b-red{background:rgba(239,68,68,.15);color:var(--red)}
+.b-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+.b-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.b-gold{background:rgba(245,158,11,.15);color:var(--gold)}
+.b-gray{background:rgba(107,114,128,.15);color:var(--gray)}
+.b-purple{background:rgba(167,139,250,.15);color:var(--purple)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:100%;max-width:680px;padding:22px;margin:auto}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-hd h3{font-size:17px;font-weight:800;color:var(--gold)}
+.modal-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1}
+.modal-ft{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.form-full{grid-column:1/-1}
+.form-sec{font-size:11px;font-weight:700;color:var(--gold);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:3px;text-transform:uppercase}
+input,select,textarea{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-size:13px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:70px}
+.cb-row{display:flex;align-items:center;gap:8px;margin:4px 0}
+.cb-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
+.cb-row label{margin:0;text-transform:none;font-size:13px;color:var(--text)}
+.accept-box{background:rgba(239,68,68,.08);border:2px solid var(--red);border-radius:8px;padding:14px;margin-top:8px}
+.accept-box p{font-size:12px;color:var(--text);margin-bottom:8px;line-height:1.5}
+.accept-box label{color:var(--red);font-size:13px;font-weight:700;text-transform:none}
+.q-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.q-label{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.q-list{list-style:none;display:flex;flex-direction:column;gap:3px}
+.q-list li{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.q-list li:last-child{border-bottom:none}
+.q-empty{color:var(--muted);font-style:italic;font-size:12px}
+.team-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.team-av{width:44px;height:44px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#000;margin-bottom:10px}
+.team-stat{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px}
+.team-stat:last-child{border-bottom:none}
+.idea-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.idea-card h4{font-size:13px;font-weight:700;margin-bottom:5px}
+.idea-card p{font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5}
+.idea-meta{display:flex;flex-wrap:wrap;gap:4px}
+.ideas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.empty{text-align:center;padding:40px;color:var(--muted)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:40px;color:var(--muted)}
+#toasts{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:6px}
+.toast{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;animation:tin .2s ease;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.t-ok{background:#065f46;border:1px solid var(--green)}
+.t-err{background:#7f1d1d;border:1px solid var(--red)}
+.t-info{background:var(--navy3);border:1px solid var(--border)}
+@keyframes tin{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.gold{color:var(--gold)} .green{color:var(--green)} .red{color:var(--red)} .blue{color:var(--blue)} .muted{color:var(--muted)} .bold{font-weight:700}
+.inr-mai td:first-child{border-left:4px solid var(--red)}
+.inr-rich td:first-child{border-left:4px solid var(--orange)}
+.inr-risp td:first-child{border-left:4px solid var(--blue)}
+.inr-riatt td:first-child{border-left:4px solid var(--green)}
+.inr-tras td:first-child{border-left:4px solid var(--gray)}
+/* ── NOTIFICHE ── */
+.notif-btn{position:relative;background:var(--navy3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:18px;display:flex;align-items:center;gap:4px;color:var(--text)}
+.notif-btn:hover{border-color:var(--gold)}
+.notif-dot{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;font-size:10px;font-weight:700;width:18px;height:18px;display:flex;align-items:center;justify-content:center;display:none}
+.notif-dot.visible{display:flex}
+.notif-panel{display:none;position:fixed;top:56px;right:16px;width:340px;background:var(--navy2);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:200;max-height:440px;overflow:hidden;flex-direction:column}
+.notif-panel.open{display:flex}
+.notif-ph{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.notif-ph h4{font-size:13px;font-weight:700;color:var(--gold)}
+.notif-list{overflow-y:auto;flex:1}
+.notif-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.notif-item:hover{background:rgba(255,255,255,.03)}
+.notif-item.unread{border-left:3px solid var(--gold)}
+.notif-item.unread-red{border-left:3px solid var(--red)}
+.notif-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.notif-msg{font-size:11px;color:var(--muted);line-height:1.4}
+.notif-ts{font-size:10px;color:var(--gray);margin-top:3px}
+.notif-empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
+/* ── REAL-TIME PULSE ── */
+.rt-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN SCREEN ══════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1>🎯 MBBET</h1>
+      <p>CRM Clienti</p>
+    </div>
+    <form onsubmit="doLogin(event)">
+      <input type="email" id="l-email" placeholder="Email" required autocomplete="email">
+      <input type="password" id="l-pwd" placeholder="Password" required autocomplete="current-password">
+      <button type="submit" class="login-btn" id="l-btn">Accedi</button>
+    </form>
+    <div id="login-err"></div>
+    <div class="login-footer">MBBET Match Betting · Accesso riservato</div>
+  </div>
+</div>
+
+<nav id="sb">
+  <div class="sb-logo"><h1>🎯 MBBET</h1><small>CRM CLIENTI · v3.0</small></div>
+  <div class="sb-kpi">
+    <div class="sb-kpi-row"><span>Clienti attivi</span><span id="k-cli">—</span></div>
+    <div class="sb-kpi-row"><span>Bonus attivi</span><span id="k-bns">—</span></div>
+    <div class="sb-kpi-row"><span>Margine</span><span id="k-mar">—</span></div>
+  </div>
+  <div class="nav-label">Principale</div>
+  <div class="nav-item active" data-section="dash" onclick="nav('dash')">🏠 Dashboard</div>
+  <div class="nav-item" data-section="clienti" onclick="nav('clienti')">👥 Clienti</div>
+  <div class="nav-item" data-section="bonus" onclick="nav('bonus')">🎰 Bonus</div>
+  <div class="nav-label">Operativo</div>
+  <div class="nav-item" data-section="task" onclick="nav('task')">✅ Task</div>
+  <div class="nav-item" data-section="penali" onclick="nav('penali')">⚠️ Penali</div>
+  <div class="nav-item" data-section="inattivi" onclick="nav('inattivi')">💤 Clienti Inattivi</div>
+  <div class="nav-item" data-section="finanze" onclick="nav('finanze')">💰 Finanze</div>
+  <div class="nav-label">Analytics</div>
+  <div class="nav-item" data-section="economia" onclick="nav('economia')">📊 Economia Master</div>
+  <div class="nav-item" data-section="etica" onclick="nav('etica')">⚖️ Etica Economica</div>
+  <div class="nav-item" data-section="team" onclick="nav('team')">👔 Team MBBET</div>
+  <div class="nav-item" data-section="collab" onclick="nav('collab')">🤝 Collab</div>
+  <div class="nav-label">Sistema</div>
+  <div class="nav-item" data-section="ideas" onclick="nav('ideas')">💡 Ideas Engine</div>
+  <div class="nav-item" data-section="config" onclick="nav('config')">⚙️ Config</div>
+</nav>
+
+<div id="main">
+  <div class="topbar">
+    <h2 id="tb-title">🏠 Dashboard</h2>
+    <div id="tb-act"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+      <span class="rt-dot" id="rt-dot" title="Real-time connesso"></span>
+      <span style="font-size:10px;color:var(--muted)" id="rt-label">live</span>
+      <div class="notif-btn" onclick="toggleNotif()" id="notif-btn">
+        🔔
+        <div class="notif-dot" id="notif-dot">0</div>
+      </div>
+      <div class="user-chip" id="user-chip" style="display:none">
+        <div class="user-av" id="user-av" style="background:var(--gold)">?</div>
+        <div>
+          <div class="user-nome" id="user-nome">—</div>
+          <span class="user-ruolo-tag" id="user-ruolo-tag">—</span>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Esci">✕</button>
+      </div>
+    </div>
+  </div>
+  <!-- PANNELLO NOTIFICHE -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-ph">
+      <h4>🔔 Notifiche</h4>
+      <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Segna tutte lette</button>
+    </div>
+    <div class="notif-list" id="notif-list"><div class="notif-empty">Nessuna notifica</div></div>
+  </div>
+  <div id="view"><div class="loading"><div class="spinner"></div></div></div>
+</div>
+
+<!-- MODAL NUOVO CLIENTE -->
+<div class="modal-overlay" id="m-cli">
+  <div class="modal">
+    <div class="modal-hd"><h3>➕ Nuovo Cliente</h3><button class="modal-x" onclick="closeM('m-cli')">×</button></div>
+    <form onsubmit="salvaCli(event)">
+      <div class="form-sec">Anagrafica</div>
+      <div class="form-grid">
+        <div><label>Nome *</label><input name="nome" required></div>
+        <div><label>Telefono</label><input name="tel"></div>
+        <div><label>Email</label><input name="email" type="email"></div>
+        <div><label>Email Siti</label><input name="email_siti"></div>
+      </div>
+      <div class="form-sec">Operatore & Provenienza</div>
+      <div class="form-grid">
+        <div><label>Operatore *</label><select name="operatore" required><option value="">Seleziona...</option><option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option></select></div>
+        <div><label>Tipologia</label><select name="tipologia"><option>Organico</option><option>Referral</option><option>Collab</option><option>Social</option><option>Altro</option></select></div>
+        <div><label>Referral</label><input name="referral"></div>
+        <div><label>Collab</label><input name="collab"></div>
+      </div>
+      <div class="form-sec">Accessi</div>
+      <div class="form-grid">
+        <div>
+          <div class="cb-row"><input type="checkbox" name="spid" id="c-spid"><label for="c-spid">SPID disponibile</label></div>
+          <div class="cb-row"><input type="checkbox" name="cc" id="c-cc"><label for="c-cc">Carta di Credito</label></div>
+        </div>
+        <div><label>Link Drive</label><input name="drive_url"></div>
+        <div><label>Stato Accettazione</label><select name="stato_acc"><option>In Attesa</option><option>Accettato</option><option>Rifiutato</option></select></div>
+        <div><label>Data Prima Op.</label><input name="data_prima_op" type="date"></div>
+      </div>
+      <div class="form-sec">Classificazione</div>
+      <div class="form-grid">
+        <div><label>Stato</label><select name="stato"><option>ATTIVO</option><option>SOSPESO</option><option>CHIUSO</option></select></div>
+        <div><label>Tipo Cliente</label><select name="tipologia_cli"><option>Nuovo</option><option>Ripreso</option><option>VIP</option></select></div>
+        <div class="form-full"><label>Note</label><textarea name="note"></textarea></div>
+      </div>
+      <div class="form-sec">Accettazione Obbligatoria</div>
+      <div class="accept-box">
+        <p>Il cliente deve accettare le condizioni operative ed economiche di MBBET prima di procedere.</p>
+        <div class="cb-row"><input type="checkbox" name="accettazione" id="c-acc" required><label for="c-acc">IL CLIENTE HA ACCETTATO le condizioni di MBBET ✓</label></div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn btn-ghost" onclick="closeM('m-cli')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva Cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL NUOVO BONUS -->
+<div class="modal-overlay" id="m-bns">
+  <div class="modal">
+    <div class="modal-hd"><h3>🎰 Nuovo Bonus</h3><button class="modal-x" onclick="closeM('m-bns')">×</button></div>
+    <form onsubmit="salvaBns(event)">
+      <div class="form-grid">
+        <div><label>Cliente ID</label><input name="id_cli" id="b-idcli"></div>
+        <div><label>Nome Cliente</label><input name="cliente" id="b-nomecli"></div>
+        <div><label>Bookmaker *</label><select name="bookmaker" required id="b-bk"><option value="">Seleziona...</option></select></div>
+        <div><label>Tier</label><select name="tier"><option>S+</option><option>S</option><option>A</option><option>B</option><option>C</option></select></div>
+        <div><label>Operatore</label><select name="operatore"><option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option></select></div>
+        <div><label>% Operatore</label><input name="perc_op" type="number" value="20" step="0.01"></div>
+        <div><label>Ricavo Previsto</label><input name="ric_prev" type="number" step="0.01" value="0"></div>
+        <div><label>Priorita</label><select name="priorita"><option>ALTA</option><option>MEDIA</option><option>BASSA</option></select></div>
+        <div><label>Stato</label><select name="stato"><option>LIBERO</option><option>IN LAVORAZIONE</option><option>IN ATTESA</option><option>COMPLETATO</option><option>BLOCCATO</option></select></div>
+        <div><label>Prossima Azione</label><input name="pross_azione"></div>
+        <div class="form-full"><label>Note</label><textarea name="note" style="min-height:50px"></textarea></div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn btn-ghost" onclick="closeM('m-bns')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL NUOVO TASK -->
+<div class="modal-overlay" id="m-task">
+  <div class="modal">
+    <div class="modal-hd"><h3>✅ Nuovo Task</h3><button class="modal-x" onclick="closeM('m-task')">×</button></div>
+    <form onsubmit="salvaTask(event)">
+      <div class="form-grid">
+        <div><label>Priorita</label><select name="priorita"><option>ALTA</option><option>MEDIA</option><option>BASSA</option></select></div>
+        <div><label>Tipo</label><select name="tipo"><option>Chiamata</option><option>Documento</option><option>Bonus</option><option>Pagamento</option><option>Follow-up</option><option>Altro</option></select></div>
+        <div><label>Cliente ID</label><input name="id_cli"></div>
+        <div><label>Nome Cliente</label><input name="nome_cli"></div>
+        <div><label>Operatore</label><select name="operatore"><option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option></select></div>
+        <div><label>Scadenza</label><input name="scadenza" type="datetime-local"></div>
+        <div class="form-full"><label>Descrizione *</label><input name="descrizione" required></div>
+        <div class="form-full"><label>Note</label><textarea name="note" style="min-height:50px"></textarea></div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn btn-ghost" onclick="closeM('m-task')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL AGGIORNA BONUS -->
+<div class="modal-overlay" id="m-bns-upd">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-hd"><h3>💰 Aggiorna Ricavo Bonus</h3><button class="modal-x" onclick="closeM('m-bns-upd')">×</button></div>
+    <form onsubmit="salvaAggiornaBns(event)">
+      <input type="hidden" name="id">
+      <div style="background:var(--navy3);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px" id="bns-upd-info"></div>
+      <div class="form-grid">
+        <div><label>Ricavo Reale (EUR)</label><input name="ric_real" type="number" step="0.01" value="0" required></div>
+        <div><label>Pagato al Cliente (EUR)</label><input name="pag_cli" type="number" step="0.01" value="0" required></div>
+        <div><label>% Operatore</label><input name="perc_op" type="number" step="0.01" value="20"></div>
+        <div><label>% Collab</label><input name="perc_collab" type="number" step="0.01" value="0"></div>
+        <div><label>% Referral</label><input name="perc_referral" type="number" step="0.01" value="0"></div>
+        <div><label>Costi Extra (EUR)</label><input name="costi_extra" type="number" step="0.01" value="0"></div>
+        <div><label>Stato</label><select name="stato"><option>IN LAVORAZIONE</option><option>IN ATTESA</option><option>COMPLETATO</option><option>BLOCCATO</option><option>LIBERO</option></select></div>
+        <div><label>Prossima Azione</label><input name="pross_azione"></div>
+        <div class="form-full"><label>Note</label><textarea name="note" style="min-height:50px"></textarea></div>
+      </div>
+      <!-- Anteprima calcolo in tempo reale -->
+      <div id="econ-preview" style="background:var(--navy);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;line-height:2">
+        <strong class="gold">Anteprima distribuzione economica</strong><br>
+        <span class="muted">Inserisci i valori per vedere il calcolo automatico</span>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <button type="button" class="btn btn-ghost" onclick="closeM('m-bns-upd')">Annulla</button>
+        <button type="submit" name="azione" value="salva" class="btn btn-ghost">💾 Salva</button>
+        <button type="submit" name="azione" value="completa" class="btn btn-gold">✅ Completa e Calcola</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL PAGAMENTO -->
+<div class="modal-overlay" id="m-pag">
+  <div class="modal">
+    <div class="modal-hd"><h3>💰 Registra Pagamento</h3><button class="modal-x" onclick="closeM('m-pag')">×</button></div>
+    <form onsubmit="salvaPag(event)">
+      <div class="form-grid">
+        <div><label>Tipo *</label><select name="tipo" required><option>Cliente</option><option>Operatore</option><option>Referral</option><option>Collab</option><option>Penale</option><option>Altro</option></select></div>
+        <div><label>Beneficiario *</label><input name="beneficiario" required></div>
+        <div><label>Importo * (EUR)</label><input name="importo" type="number" step="0.01" required></div>
+        <div><label>Metodo</label><select name="metodo"><option>Bonifico</option><option>Contanti</option><option>PayPal</option><option>Revolut</option><option>Altro</option></select></div>
+        <div><label>ID Cliente</label><input name="id_cli"></div>
+        <div><label>Nome Cliente</label><input name="nome_cli"></div>
+        <div class="form-full"><label>Causale</label><input name="causale"></div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn btn-ghost" onclick="closeM('m-pag')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Registra</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL INATTIVO -->
+<div class="modal-overlay" id="m-inr">
+  <div class="modal">
+    <div class="modal-hd"><h3>💤 Aggiungi Inattivo</h3><button class="modal-x" onclick="closeM('m-inr')">×</button></div>
+    <form onsubmit="salvaInr(event)">
+      <div class="form-grid">
+        <div><label>Nome *</label><input name="nome" required></div>
+        <div><label>Telefono</label><input name="tel"></div>
+        <div><label>Email</label><input name="email"></div>
+        <div><label>Operatore</label><select name="operatore"><option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option></select></div>
+        <div><label>Provenienza</label><input name="provenienza"></div>
+        <div><label>Interesse</label><select name="interesse"><option>Alto</option><option>Medio</option><option>Basso</option><option>Sconosciuto</option></select></div>
+        <div><label>Potenziale (EUR)</label><input name="potenziale_economico" type="number" step="0.01" value="0"></div>
+        <div><label>Prossimo Ricontatto</label><input name="data_prossimo_ricontatto" type="date"></div>
+        <div><label>Stato</label><select name="stato"><option>Mai Ricontattato</option><option>Da Richiamare</option><option>Ha Risposto</option></select></div>
+        <div><label>BK Disponibili</label><input name="bk_disponibili"></div>
+        <div class="form-full"><label>Note</label><textarea name="note" style="min-height:50px"></textarea></div>
+      </div>
+      <div class="modal-ft">
+        <button type="button" class="btn btn-ghost" onclick="closeM('m-inr')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script src="supabase.min.js"></script>
+<script>
+var SUPA_URL = 'https://ntwqfuvcosvzpqrfpipn.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+var db = supabase.createClient(SUPA_URL, SUPA_KEY);
+var OPS = ['Mary','Manuele','Serena','Samuele']; // fallback, override dal DB
+var currentSection = 'dash';
+var realtimeChannel = null;
+var currentUser = null;
+var currentRole = 'VIEWER';
+var currentNome = '';
+
+// ── NAV VISIBILITY PER RUOLO ───────────
+var NAV_RULES = {
+  'SOCIO_ADMIN':   ['dash','clienti','bonus','task','penali','inattivi','finanze','economia','etica','team','collab','ideas','config'],
+  'SOCIO':         ['dash','clienti','bonus','task','penali','inattivi','finanze','economia','etica','team','collab','ideas'],
+  'OPERATORE':     ['dash','clienti','bonus','task','penali','inattivi','team'],
+  'COLLAB':        ['dash','clienti','bonus','task'],
+  'REFERRAL':      ['dash'],
+  'VIEWER':        ['dash','clienti','bonus'],
+  'ADMIN_TECNICO': ['dash','clienti','bonus','task','penali','inattivi','finanze','economia','etica','team','collab','ideas','config']
+};
+
+// ── UTILS ──────────────────────────────
+function euro(v) { return 'EUR ' + parseFloat(v||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fd(d) { return d ? new Date(d).toLocaleDateString('it-IT') : '-'; }
+function fdt(d) { return d ? new Date(d).toLocaleString('it-IT') : '-'; }
+function setView(h) { document.getElementById('view').innerHTML = h; }
+function setTopbar(t, a) { document.getElementById('tb-title').textContent = t; document.getElementById('tb-act').innerHTML = a||''; }
+function openM(id) { document.getElementById(id).classList.add('open'); }
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg, type) {
+  var el = document.createElement('div');
+  el.className = 'toast ' + (type==='ok'?'t-ok':type==='err'?'t-err':'t-info');
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(function(){ el.remove(); }, 3200);
+}
+
+function badge(stato) {
+  if (!stato) return '<span class="badge b-gray">-</span>';
+  var s = stato.toUpperCase();
+  if (s==='ATTIVO'||s==='COMPLETATO'||s==='PAGATO'||s==='OK'||s.includes('ATTIV')) return '<span class="badge b-green">'+stato+'</span>';
+  if (s==='IN LAVORAZIONE'||s==='IN ATTESA'||s==='IN CALCOLO'||s==='MEDIA') return '<span class="badge b-orange">'+stato+'</span>';
+  if (s==='BLOCCATO'||s==='CHIUSO'||s==='SOSPESO'||s==='ALTA') return '<span class="badge b-red">'+stato+'</span>';
+  if (s==='LIBERO') return '<span class="badge b-blue">'+stato+'</span>';
+  if (s==='BASSA') return '<span class="badge b-gray">'+stato+'</span>';
+  return '<span class="badge b-gray">'+stato+'</span>';
+}
+function tierB(t) {
+  var m = {'S+':'b-purple','S':'b-gold','A':'b-blue','B':'b-green','C':'b-gray'};
+  return '<span class="badge '+(m[t]||'b-gray')+'">'+t+'</span>';
+}
+function inrBadge(s) {
+  if (s==='Mai Ricontattato') return '<span class="badge b-red">'+s+'</span>';
+  if (s==='Da Richiamare') return '<span class="badge b-orange">'+s+'</span>';
+  if (s==='Ha Risposto') return '<span class="badge b-blue">'+s+'</span>';
+  if (s==='Riattivato') return '<span class="badge b-green">'+s+'</span>';
+  return '<span class="badge b-gray">'+s+'</span>';
+}
+
+async function nextId(table, prefix, pad) {
+  var res = await db.from(table).select('id').order('created_at',{ascending:false}).limit(100);
+  if (!res.data || !res.data.length) return prefix+'-'+'1'.padStart(pad,'0');
+  var nums = res.data.map(function(r){ var m=String(r.id).match(/(\d+)$/); return m?parseInt(m[1]):0; });
+  return prefix+'-'+String(Math.max.apply(null,nums)+1).padStart(pad,'0');
+}
+
+// ── NOTIFICHE ──────────────────────────
+function toggleNotif() {
+  var p = document.getElementById('notif-panel');
+  if (p.classList.contains('open')) { p.classList.remove('open'); return; }
+  p.classList.add('open');
+  loadNotifPanel();
+  document.addEventListener('click', closeNotifOutside, {once:true});
+}
+function closeNotifOutside(e) {
+  var p = document.getElementById('notif-panel');
+  var b = document.getElementById('notif-btn');
+  if (!p.contains(e.target) && !b.contains(e.target)) p.classList.remove('open');
+}
+async function loadNotifCount() {
+  var r = await db.from('notifiche').select('id',{count:'exact'}).eq('letto',false);
+  var n = r.count||0;
+  var dot = document.getElementById('notif-dot');
+  dot.textContent = n>9?'9+':n;
+  dot.className = 'notif-dot'+(n>0?' visible':'');
+}
+async function loadNotifPanel() {
+  var r = await db.from('notifiche').select('*').order('created_at',{ascending:false}).limit(30);
+  var items = r.data||[];
+  var el = document.getElementById('notif-list');
+  if (!items.length) { el.innerHTML = '<div class="notif-empty">Nessuna notifica</div>'; return; }
+  var h = '';
+  var prioCls = {Alta:'unread-red',Media:'unread',Bassa:''};
+  items.forEach(function(n){
+    var cls = n.letto ? '' : (prioCls[n.priorita]||'unread');
+    var ts = new Date(n.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    h += '<div class="notif-item '+cls+'" onclick="markRead('+n.id+')">';
+    h += '<div class="notif-title">'+(n.letto?'':' ')+'['+n.tipo+'] '+n.titolo+'</div>';
+    if (n.messaggio) h += '<div class="notif-msg">'+n.messaggio+'</div>';
+    h += '<div class="notif-ts">'+ts+(n.destinatario?' → '+n.destinatario:'')+'</div>';
+    h += '</div>';
+  });
+  el.innerHTML = h;
+}
+async function markRead(id) {
+  await db.from('notifiche').update({letto:true,letto_at:new Date().toISOString()}).eq('id',id);
+  loadNotifCount(); loadNotifPanel();
+}
+async function markAllRead() {
+  await db.from('notifiche').update({letto:true,letto_at:new Date().toISOString()}).eq('letto',false);
+  loadNotifCount(); loadNotifPanel();
+}
+async function addNotif(tipo, titolo, messaggio, priorita, dest) {
+  await db.from('notifiche').insert({tipo:tipo,titolo:titolo,messaggio:messaggio||null,priorita:priorita||'Media',destinatario:dest||null});
+  loadNotifCount();
+}
+
+// ── REAL-TIME ──────────────────────────
+function initRealtime() {
+  var dot = document.getElementById('rt-dot');
+  var lbl = document.getElementById('rt-label');
+  realtimeChannel = db.channel('crm-live')
+    .on('postgres_changes',{event:'*',schema:'public',table:'clienti'}, function(){
+      updateKPI();
+      if (currentSection==='clienti') loadClienti();
+      if (currentSection==='dash') loadDash();
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'bonus'}, function(){
+      updateKPI();
+      if (currentSection==='bonus') loadBonus();
+      if (currentSection==='dash') loadDash();
+      if (currentSection==='economia') loadEconomia();
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'task'}, function(){
+      if (currentSection==='task') loadTask();
+      if (currentSection==='dash') loadDash();
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:'penali'}, function(){
+      if (currentSection==='penali') loadPenali();
+    })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifiche'}, function(){
+      loadNotifCount();
+    })
+    .subscribe(function(status){
+      if (status==='SUBSCRIBED') {
+        dot.style.background='var(--green)'; lbl.textContent='live';
+      } else if (status==='CHANNEL_ERROR' || status==='CLOSED') {
+        dot.style.background='var(--red)'; lbl.textContent='offline';
+      } else {
+        dot.style.background='var(--orange)'; lbl.textContent='...';
+      }
+    });
+}
+
+// ── OPERATORI DA DB ────────────────────
+async function loadOperatori() {
+  var r = await db.from('operatori').select('nome,perc_default,colore').eq('stato','Attivo').order('nome');
+  if (r.data && r.data.length) {
+    OPS = r.data.map(function(o){ return o.nome; });
+    // aggiorna i select operatore nei form
+    document.querySelectorAll('select[name="operatore"]').forEach(function(sel){
+      var cur = sel.value;
+      sel.innerHTML = '<option value="">Seleziona...</option>';
+      r.data.forEach(function(o){ sel.innerHTML += '<option value="'+o.nome+'"'+(o.nome===cur?' selected':'')+'>'+o.nome+'</option>'; });
+    });
+  }
+}
+
+// ── NAVIGAZIONE ────────────────────────
+function nav(s) {
+  currentSection = s;
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  var all = document.querySelectorAll('.nav-item');
+  for (var i=0;i<all.length;i++) {
+    if (all[i].getAttribute('onclick')==="nav('"+s+"')") { all[i].classList.add('active'); break; }
+  }
+  document.getElementById('notif-panel').classList.remove('open');
+  setView('<div class="loading"><div class="spinner"></div></div>');
+  var fn = {dash:loadDash,clienti:loadClienti,bonus:loadBonus,task:loadTask,penali:loadPenali,inattivi:loadInattivi,finanze:loadFinanze,economia:loadEconomia,etica:loadEtica,team:loadTeam,collab:loadCollab,ideas:loadIdeas,config:loadConfig};
+  if (fn[s]) fn[s]();
+}
+
+// ── SIDEBAR KPI ─────────────────────────
+async function updateKPI() {
+  var cliR = await db.from('clienti').select('id',{count:'exact'}).eq('stato','ATTIVO');
+  var bnsR = await db.from('bonus').select('id',{count:'exact'}).neq('stato','COMPLETATO');
+  var bnsM = await db.from('bonus').select('ric_real,pag_cli,perc_op,perc_collab,costi_extra');
+  document.getElementById('k-cli').textContent = cliR.count!=null?cliR.count:'-';
+  document.getElementById('k-bns').textContent = bnsR.count!=null?bnsR.count:'-';
+  if (bnsM.data) {
+    var mar = bnsM.data.reduce(function(s,b){ var r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100; return s+(r-p-co-cc-parseFloat(b.costi_extra||0)); }, 0);
+    document.getElementById('k-mar').textContent = euro(mar);
+  }
+}
+
+// ── DASHBOARD ──────────────────────────
+async function loadDash() {
+  setTopbar('Dashboard', '<button class="btn btn-ghost btn-sm" onclick="loadDash()">Aggiorna</button>');
+  var now = new Date();
+  var oggi = now.toISOString().slice(0,10);
+  var r1 = await db.from('task').select('*').eq('stato','Aperto');
+  var r2 = await db.from('clienti').select('*').eq('stato','ATTIVO');
+  var r3 = await db.from('bonus').select('*');
+  var r4 = await db.from('penali').select('*').eq('stato','In Calcolo');
+  var r5 = await db.from('clienti_inattivi').select('*').neq('stato','Trasferito nel CRM');
+  var task=r1.data||[], cli=r2.data||[], bns=r3.data||[], pen=r4.data||[], inr=r5.data||[];
+  var margine = bns.reduce(function(s,b){ var r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100; return s+(r-p-co-cc-parseFloat(b.costi_extra||0)); },0);
+  var ricTot = bns.reduce(function(s,b){ return s+parseFloat(b.ric_real||0); },0);
+  var penTot = pen.reduce(function(s,p){ return s+parseFloat(p.tot_penale||0); },0);
+  var taskScad = task.filter(function(t){ return t.scadenza && new Date(t.scadenza)<now; });
+  var cliUrg = cli.filter(function(c){ return c.penale_att; });
+  var daRich = inr.filter(function(i){ return i.data_prossimo_ricontatto && i.data_prossimo_ricontatto<=oggi; });
+
+  // top clienti
+  var bmap = {};
+  bns.forEach(function(b){ if(!b.id_cli)return; if(!bmap[b.id_cli])bmap[b.id_cli]={n:b.cliente||b.id_cli,t:0}; bmap[b.id_cli].t+=parseFloat(b.ric_real||0); });
+  var topCli = Object.values(bmap).sort(function(a,b){return b.t-a.t;}).slice(0,5);
+
+  // bonus liberi
+  var liberi = bns.filter(function(b){return b.stato==='LIBERO';}).sort(function(a,b){ var m={'S+':0,'S':1,'A':2,'B':3,'C':4}; return (m[a.tier]||5)-(m[b.tier]||5); }).slice(0,5);
+
+  // task per op
+  var top={};
+  task.forEach(function(t){ top[t.operatore]=(top[t.operatore]||0)+1; });
+
+  // ranking op per ricavo
+  var opR={};
+  bns.forEach(function(b){ opR[b.operatore]=(opR[b.operatore]||0)+parseFloat(b.ric_real||0); });
+  var opSort = Object.keys(opR).sort(function(a,b){return opR[b]-opR[a];});
+
+  var h = '';
+  h += '<div class="grid-4">';
+  h += '<div class="card"><div class="card-title">Margine MBBET</div><div class="card-val '+(margine>=0?'green':'red')+'">'+euro(margine)+'</div><div class="card-sub">Ricavo: '+euro(ricTot)+'</div></div>';
+  h += '<div class="card"><div class="card-title">Task Aperti</div><div class="card-val gold">'+task.length+'</div><div class="card-sub">'+taskScad.length+' scaduti</div></div>';
+  h += '<div class="card"><div class="card-title">Penali Attive</div><div class="card-val '+(penTot>0?'red':'green')+'">'+euro(penTot)+'</div><div class="card-sub">'+pen.length+' in calcolo</div></div>';
+  h += '<div class="card"><div class="card-title">Inattivi da Richiamare</div><div class="card-val" style="color:var(--orange)">'+daRich.length+'</div><div class="card-sub">di '+inr.length+' totali</div></div>';
+  h += '</div>';
+  h += '<div class="grid-2">';
+
+  // Q1
+  h += '<div class="q-card"><div class="q-label">1 - Chi lavora cosa oggi?</div><ul class="q-list">';
+  OPS.forEach(function(op){ h += '<li><span class="bold gold" style="width:50px">'+op+'</span><span>'+(top[op]||0)+' task aperti</span></li>'; });
+  h += '</ul></div>';
+
+  // Q2
+  h += '<div class="q-card"><div class="q-label">2 - Clienti urgenti</div>';
+  if (cliUrg.length) { h += '<ul class="q-list">'; cliUrg.slice(0,5).forEach(function(c){ h += '<li><span class="red">!! </span><span>'+c.nome+'</span><span class="muted" style="margin-left:auto">'+c.operatore+'</span></li>'; }); h += '</ul>'; }
+  else h += '<div class="q-empty">Nessun cliente urgente</div>';
+  h += '</div>';
+
+  // Q3
+  h += '<div class="q-card"><div class="q-label">3 - Chi genera piu soldi?</div>';
+  if (topCli.length) { h += '<ul class="q-list">'; topCli.forEach(function(c,i){ h += '<li><span class="gold">#'+(i+1)+'</span><span>'+c.n+'</span><span class="green bold" style="margin-left:auto">'+euro(c.t)+'</span></li>'; }); h += '</ul>'; }
+  else h += '<div class="q-empty">Nessun dato</div>';
+  h += '</div>';
+
+  // Q4
+  h += '<div class="q-card"><div class="q-label">4 - Task scaduti</div>';
+  if (taskScad.length) { h += '<ul class="q-list">'; taskScad.slice(0,5).forEach(function(t){ h += '<li><span class="red">!!!</span><span>'+t.descrizione+'</span><span class="muted" style="margin-left:auto">'+t.operatore+'</span></li>'; }); h += '</ul>'; }
+  else h += '<div class="q-empty">Nessun task scaduto</div>';
+  h += '</div>';
+
+  // Q5 margine
+  h += '<div class="q-card"><div class="q-label">5 - Margine reale MBBET</div>';
+  h += '<div style="font-size:28px;font-weight:900;color:'+(margine>=0?'var(--green)':'var(--red)')+'">'+euro(margine)+'</div>';
+  h += '<div class="muted" style="font-size:11px;margin-top:4px">Ricavo '+euro(ricTot)+' | Penali '+euro(penTot)+'</div></div>';
+
+  // Q6 bonus liberi
+  h += '<div class="q-card"><div class="q-label">6 - Bonus liberi per tier</div>';
+  if (liberi.length) { h += '<ul class="q-list">'; liberi.forEach(function(b){ h += '<li>'+tierB(b.tier)+'<span>'+b.bookmaker+'</span><span class="muted" style="margin-left:auto">'+(b.cliente||'-')+'</span></li>'; }); h += '</ul>'; }
+  else h += '<div class="q-empty">Nessun bonus libero</div>';
+  h += '</div>';
+
+  // Q7
+  h += '<div class="q-card"><div class="q-label">7 - Inattivi da richiamare oggi</div>';
+  if (daRich.length) { h += '<ul class="q-list">'; daRich.slice(0,5).forEach(function(i){ h += '<li><span class="bold">'+i.nome+'</span><span class="muted" style="margin-left:auto">'+i.operatore+'</span></li>'; }); h += '</ul>'; }
+  else h += '<div class="q-empty">Nessuno da richiamare oggi</div>';
+  h += '</div>';
+
+  // Q8
+  h += '<div class="q-card"><div class="q-label">8 - Penali in calcolo</div>';
+  if (pen.length) { h += '<ul class="q-list">'; pen.slice(0,5).forEach(function(p){ h += '<li><span>'+(p.nome_cli||'-')+'</span><span class="red bold" style="margin-left:auto">'+euro(p.tot_penale)+'</span></li>'; }); h += '</ul>'; }
+  else h += '<div class="q-empty">Nessuna penale attiva</div>';
+  h += '</div>';
+
+  // Q9
+  h += '<div class="q-card"><div class="q-label">9 - Ranking operatori</div><ul class="q-list">';
+  opSort.forEach(function(op,i){ h += '<li><span class="gold">#'+(i+1)+' '+op+'</span><span class="bold" style="margin-left:auto">'+euro(opR[op])+'</span></li>'; });
+  h += '</ul></div>';
+
+  // Q10
+  h += '<div class="q-card"><div class="q-label">10 - Clienti attivi per operatore</div><ul class="q-list">';
+  OPS.forEach(function(op){ var n=cli.filter(function(c){return c.operatore===op;}).length; h += '<li><span class="gold bold">'+op+'</span><span style="margin-left:auto">'+n+' clienti</span></li>'; });
+  h += '</ul></div>';
+
+  h += '</div>';
+  setView(h);
+}
+
+// ── CLIENTI ────────────────────────────
+var _cli = [];
+async function loadClienti() {
+  setTopbar('Clienti', '<input id="s-cli" placeholder="Cerca..." oninput="filterCli(this.value)" style="background:var(--navy3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px;width:200px"> <button class="btn btn-ghost btn-sm" onclick="loadClienti()">Aggiorna</button> <button class="btn btn-gold btn-sm" onclick="openM(\'m-cli\')">+ Nuovo</button>');
+  var r = await db.from('clienti').select('*').order('created_at',{ascending:false});
+  _cli = r.data||[];
+  renderCli(_cli);
+}
+function filterCli(q) { var ql=q.toLowerCase(); renderCli(_cli.filter(function(c){ return (c.nome||'').toLowerCase().includes(ql)||(c.id||'').toLowerCase().includes(ql)||(c.tel||'').includes(ql)||(c.operatore||'').toLowerCase().includes(ql); })); }
+function renderCli(data) {
+  if (!data.length) { setView('<div class="empty">Nessun cliente trovato</div>'); return; }
+  var h = '<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Nome</th><th>Operatore</th><th>Tel</th><th>Stato</th><th>Tipo</th><th>SPID</th><th>CC</th><th>Ingresso</th></tr></thead><tbody>';
+  data.forEach(function(c){
+    h += '<tr>';
+    h += '<td class="gold bold">'+c.id+'</td>';
+    h += '<td class="bold">'+c.nome+'</td>';
+    h += '<td>'+(c.operatore||'-')+'</td>';
+    h += '<td>'+(c.tel||'-')+'</td>';
+    h += '<td>'+badge(c.stato)+'</td>';
+    h += '<td><span class="badge '+(c.tipologia_cli==='VIP'?'b-gold':c.tipologia_cli==='Ripreso'?'b-blue':'b-gray')+'">'+(c.tipologia_cli||'Nuovo')+'</span></td>';
+    h += '<td>'+(c.spid?'SI':'NO')+'</td>';
+    h += '<td>'+(c.cc?'SI':'NO')+'</td>';
+    h += '<td>'+fd(c.data_ingresso)+'</td>';
+    h += '</tr>';
+  });
+  h += '</tbody></table></div><div class="muted" style="font-size:11px;margin-top:6px">'+data.length+' clienti</div>';
+  setView(h);
+}
+async function salvaCli(e) {
+  e.preventDefault();
+  var f = new FormData(e.target);
+  var id = await nextId('clienti','MBBET',3);
+  var r = await db.from('clienti').insert({
+    id:id, nome:f.get('nome'), tel:f.get('tel')||null, email:f.get('email')||null,
+    email_siti:f.get('email_siti')||null, operatore:f.get('operatore'),
+    tipologia:f.get('tipologia'), referral:f.get('referral')||null, collab:f.get('collab')||null,
+    spid:f.get('spid')==='on', cc:f.get('cc')==='on', drive_url:f.get('drive_url')||null,
+    stato_acc:f.get('stato_acc'), data_prima_op:f.get('data_prima_op')||null,
+    stato:f.get('stato'), tipologia_cli:f.get('tipologia_cli'), note:f.get('note')||null,
+    data_ingresso:new Date().toISOString().slice(0,10)
+  });
+  if (r.error) { toast('Errore: '+r.error.message,'err'); return; }
+  toast('Cliente '+id+' salvato!','ok');
+  addNotif('Info','Nuovo cliente: '+f.get('nome'),'ID: '+id+' | Operatore: '+f.get('operatore'),'Bassa',f.get('operatore'));
+  closeM('m-cli'); e.target.reset(); loadClienti(); updateKPI();
+}
+
+// ── BONUS ──────────────────────────────
+var _bns = [];
+async function loadBonus() {
+  setTopbar('Bonus', '<button class="btn btn-ghost btn-sm" onclick="loadBonus()">Aggiorna</button> <button class="btn btn-gold btn-sm" onclick="openBonus()">+ Nuovo</button>');
+  var r = await db.from('bonus').select('*').order('created_at',{ascending:false});
+  _bns = r.data||[];
+  renderBns(_bns);
+}
+async function openBonus() {
+  var sel = document.getElementById('b-bk');
+  if (sel.options.length<2) {
+    var bk = await db.from('bookmaker').select('nome,tier').eq('attivo',true).order('nome');
+    if (bk.data) bk.data.forEach(function(b){ var o=document.createElement('option'); o.value=b.nome; o.textContent=b.nome+' ['+b.tier+']'; sel.appendChild(o); });
+  }
+  openM('m-bns');
+}
+function renderBns(data) {
+  var ricTot = data.reduce(function(s,b){return s+parseFloat(b.ric_real||0);},0);
+  var marTot = data.reduce(function(s,b){ var r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100,cr=r*parseFloat(b.perc_referral||0)/100; return s+(r-p-co-cc-cr-parseFloat(b.costi_extra||0)); },0);
+  var compTot = data.reduce(function(s,b){var r=parseFloat(b.ric_real||0);return s+r*parseFloat(b.perc_op||0)/100;},0);
+  var pagTot = data.reduce(function(s,b){return s+parseFloat(b.pag_cli||0);},0);
+  var h = '<div class="grid-4">';
+  h += '<div class="card"><div class="card-title">Totale Bonus</div><div class="card-val gold">'+data.length+'</div><div class="card-sub">Liberi: '+data.filter(function(b){return b.stato==='LIBERO';}).length+'</div></div>';
+  h += '<div class="card"><div class="card-title">Ricavo Reale</div><div class="card-val green">'+euro(ricTot)+'</div><div class="card-sub">Pagato clienti: '+euro(pagTot)+'</div></div>';
+  h += '<div class="card"><div class="card-title">Margine MBBET</div><div class="card-val '+(marTot>=0?'green':'red')+'">'+euro(marTot)+'</div><div class="card-sub">Comp operatori: '+euro(compTot)+'</div></div>';
+  h += '<div class="card"><div class="card-title">Completati</div><div class="card-val blue">'+data.filter(function(b){return b.stato==='COMPLETATO';}).length+'</div><div class="card-sub">In lavorazione: '+data.filter(function(b){return b.stato==='IN LAVORAZIONE';}).length+'</div></div>';
+  h += '</div>';
+  h += '<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Cliente</th><th>Bookmaker</th><th>Tier</th><th>Op</th><th>Stato</th><th>Ric.Reale</th><th>Pag.Cli</th><th>Comp.Op</th><th>Margine</th><th></th></tr></thead><tbody>';
+  data.forEach(function(b){
+    var r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100,cr=r*parseFloat(b.perc_referral||0)/100,mar=r-p-co-cc-cr-parseFloat(b.costi_extra||0);
+    h += '<tr>';
+    h += '<td class="gold" style="white-space:nowrap">'+b.id+'</td>';
+    h += '<td>'+(b.cliente||'-')+'<br><small class="muted">'+(b.id_cli||'')+'</small></td>';
+    h += '<td class="bold">'+b.bookmaker+'</td>';
+    h += '<td>'+tierB(b.tier)+'</td>';
+    h += '<td>'+(b.operatore||'-')+'</td>';
+    h += '<td>'+badge(b.stato)+'</td>';
+    h += '<td class="green">'+euro(b.ric_real)+'</td>';
+    h += '<td>'+euro(b.pag_cli)+'</td>';
+    h += '<td class="gold">'+euro(co)+'</td>';
+    h += '<td class="'+(mar>=0?'green':'red')+' bold">'+euro(mar)+'</td>';
+    h += '<td style="white-space:nowrap">';
+    h += '<button class="btn btn-ghost btn-sm" onclick="apriAggiornaBns(\''+b.id+'\')">✏️</button> ';
+    if (b.stato!=='COMPLETATO') h += '<button class="btn btn-green btn-sm" onclick="completaBonus(\''+b.id+'\')">✅ Chiudi</button>';
+    h += '</td>';
+    h += '</tr>';
+  });
+  if (!data.length) h += '<tr><td colspan="11" class="empty">Nessun bonus</td></tr>';
+  h += '</tbody></table></div><div class="muted" style="font-size:11px;margin-top:6px">'+data.length+' bonus</div>';
+  setView(h);
+}
+
+// Apri modal aggiornamento con dati pre-compilati
+async function apriAggiornaBns(id) {
+  var b = _bns.find(function(x){return x.id===id;});
+  if (!b) { var r=await db.from('bonus').select('*').eq('id',id).single(); b=r.data; }
+  if (!b) return;
+  document.querySelector('#m-bns-upd [name=id]').value = b.id;
+  document.querySelector('#m-bns-upd [name=ric_real]').value = b.ric_real||0;
+  document.querySelector('#m-bns-upd [name=pag_cli]').value = b.pag_cli||0;
+  document.querySelector('#m-bns-upd [name=perc_op]').value = b.perc_op||20;
+  document.querySelector('#m-bns-upd [name=perc_collab]').value = b.perc_collab||0;
+  document.querySelector('#m-bns-upd [name=perc_referral]').value = b.perc_referral||0;
+  document.querySelector('#m-bns-upd [name=costi_extra]').value = b.costi_extra||0;
+  document.querySelector('#m-bns-upd [name=stato]').value = b.stato||'IN LAVORAZIONE';
+  document.querySelector('#m-bns-upd [name=pross_azione]').value = b.pross_azione||'';
+  document.querySelector('#m-bns-upd [name=note]').value = b.note||'';
+  document.getElementById('bns-upd-info').innerHTML = '<span class="gold bold">'+b.id+'</span> · '+b.bookmaker+' '+tierB(b.tier)+' · Cliente: <b>'+(b.cliente||'-')+'</b> · Op: '+b.operatore;
+  aggiornaPreview();
+  // live preview on change
+  var inputs = document.querySelectorAll('#m-bns-upd input[type=number]');
+  inputs.forEach(function(i){ i.oninput = aggiornaPreview; });
+  openM('m-bns-upd');
+}
+
+function aggiornaPreview() {
+  var f = document.querySelector('#m-bns-upd form');
+  var r = parseFloat(f.ric_real.value||0);
+  var p = parseFloat(f.pag_cli.value||0);
+  var po = parseFloat(f.perc_op.value||0);
+  var pc = parseFloat(f.perc_collab.value||0);
+  var pr = parseFloat(f.perc_referral.value||0);
+  var ce = parseFloat(f.costi_extra.value||0);
+  var co = r*po/100, cc = r*pc/100, cr = r*pr/100;
+  var mar = r - p - co - cc - cr - ce;
+  var el = document.getElementById('econ-preview');
+  el.innerHTML = '<strong class="gold">Distribuzione automatica</strong><br>'
+    + '<span class="muted">Ricavo Reale:</span> <b class="green">'+euro(r)+'</b><br>'
+    + '<span class="muted">→ Pagato Cliente:</span> <b class="red">'+euro(p)+'</b><br>'
+    + '<span class="muted">→ Comp. Operatore ('+po+'%):</span> <b class="gold">'+euro(co)+'</b><br>'
+    + (pc>0?'<span class="muted">→ Comp. Collab ('+pc+'%):</span> <b class="blue">'+euro(cc)+'</b><br>':'')
+    + (pr>0?'<span class="muted">→ Comp. Referral ('+pr+'%):</span> <b class="purple">'+euro(cr)+'</b><br>':'')
+    + (ce>0?'<span class="muted">→ Costi Extra:</span> <b class="red">'+euro(ce)+'</b><br>':'')
+    + '<hr style="border-color:var(--border);margin:6px 0">'
+    + '<span class="muted">Margine MBBET:</span> <b class="'+(mar>=0?'green':'red')+'" style="font-size:15px">'+euro(mar)+'</b>';
+}
+
+async function salvaAggiornaBns(e) {
+  e.preventDefault();
+  var f = new FormData(e.target);
+  var id = f.get('id');
+  var azione = e.submitter ? e.submitter.value : 'salva';
+  var statoFinale = azione==='completa' ? 'COMPLETATO' : f.get('stato');
+  var r = parseFloat(f.get('ric_real')||0);
+  var po = parseFloat(f.get('perc_op')||20);
+  var pc = parseFloat(f.get('perc_collab')||0);
+  var pr = parseFloat(f.get('perc_referral')||0);
+  var upd = {
+    ric_real:r, pag_cli:parseFloat(f.get('pag_cli')||0),
+    perc_op:po, perc_collab:pc, perc_referral:pr,
+    comp_referral:r*pr/100, costi_extra:parseFloat(f.get('costi_extra')||0),
+    stato:statoFinale, pross_azione:f.get('pross_azione')||null, note:f.get('note')||null,
+    ult_azione:new Date().toISOString()
+  };
+  var res = await db.from('bonus').update(upd).eq('id',id);
+  if (res.error) { toast('Errore: '+res.error.message,'err'); return; }
+  if (azione==='completa') {
+    var bFull = await db.from('bonus').select('*').eq('id',id).single();
+    if (bFull.data) await calcolaEconomia(bFull.data);
+    toast('Bonus chiuso e distribuzione calcolata!','ok');
+    addNotif('Info','Bonus completato: '+id,'Margine MBBET: '+euro(r-parseFloat(f.get('pag_cli')||0)-r*po/100-r*pc/100-r*pr/100-parseFloat(f.get('costi_extra')||0)),'Media',null);
+  } else {
+    toast('Bonus aggiornato','ok');
+  }
+  closeM('m-bns-upd'); loadBonus(); updateKPI();
+}
+
+async function completaBonus(id) {
+  var b = _bns.find(function(x){return x.id===id;});
+  if (!b) { var r=await db.from('bonus').select('*').eq('id',id).single(); b=r.data; }
+  if (!b) return;
+  apriAggiornaBns(id);
+  setTimeout(function(){ document.querySelector('#m-bns-upd [name=stato]').value='COMPLETATO'; }, 100);
+}
+
+// ══════════════════════════════════════════════════
+// MOTORE ECONOMICO — P4
+// Calcola e distribuisce tutto in cascata
+// ══════════════════════════════════════════════════
+async function calcolaEconomia(b) {
+  var r   = parseFloat(b.ric_real||0);
+  var p   = parseFloat(b.pag_cli||0);
+  var po  = parseFloat(b.perc_op||20);
+  var pc  = parseFloat(b.perc_collab||0);
+  var pr  = parseFloat(b.perc_referral||0);
+  var ce  = parseFloat(b.costi_extra||0);
+  var co  = Math.round(r*po/100*100)/100;
+  var cc  = Math.round(r*pc/100*100)/100;
+  var cr  = Math.round(r*pr/100*100)/100;
+  var mar = Math.round((r-p-co-cc-cr-ce)*100)/100;
+
+  // 1. Etica economica — upsert
+  var eticaId = 'ETC-'+b.id;
+  await db.from('etica_economica').upsert({
+    id: eticaId,
+    id_bonus: b.id, id_cli: b.id_cli||null, nome_cli: b.cliente||null,
+    operatore: b.operatore||null, bookmaker: b.bookmaker||null,
+    ricavo_reale: r, pagato_cliente: p,
+    comp_operatore: co, comp_collab: cc, comp_referral: cr,
+    comp_referral_calc: cr,
+    costi_extra: ce, penali: 0,
+    margine_netto: mar,
+    saldo_da_pagare: co+cc+cr, saldo_pagato: 0,
+    stato_pagamento: 'Da Pagare',
+    id_referral: b.id_referral||null
+  }, {onConflict:'id'});
+
+  // 2. Team MBBET — aggiorna saldo operatore
+  if (b.operatore) {
+    var tm = await db.from('team_mbbet').select('comp_maturato,saldo_da_pagare').eq('nome',b.operatore).single();
+    if (tm.data) {
+      await db.from('team_mbbet').update({
+        comp_maturato: parseFloat(tm.data.comp_maturato||0)+co,
+        saldo_da_pagare: parseFloat(tm.data.saldo_da_pagare||0)+co,
+        ricavo_generato: parseFloat(tm.data.ricavo_generato||0)+r
+      }).eq('nome',b.operatore);
+    }
+  }
+
+  // 3. Collab — aggiorna saldo se id_collab presente
+  if (b.id_collab && cc>0) {
+    var cl = await db.from('collab').select('*').eq('id',b.id_collab).single();
+    if (cl.data) {
+      await db.from('collab').update({
+        perc: pc
+      }).eq('id',b.id_collab);
+    }
+  }
+
+  // 4. Referral — aggiorna saldo se id_referral presente
+  if (b.id_referral && cr>0) {
+    var rf = await db.from('referral').select('comp_maturato,saldo_da_pagare,ricavo_generato').eq('id',b.id_referral).single();
+    if (rf.data) {
+      await db.from('referral').update({
+        comp_maturato: parseFloat(rf.data.comp_maturato||0)+cr,
+        saldo_da_pagare: parseFloat(rf.data.saldo_da_pagare||0)+cr,
+        ricavo_generato: parseFloat(rf.data.ricavo_generato||0)+r
+      }).eq('id',b.id_referral);
+    }
+  }
+
+  // 5. Pagamento operatore — registra in pagamenti come "da pagare"
+  if (co>0 && b.operatore) {
+    var pidOp = await nextId('pagamenti','PAG',4);
+    await db.from('pagamenti').insert({
+      id:pidOp, tipo:'Operatore', beneficiario:b.operatore,
+      importo:co, metodo:'Da definire',
+      id_cli:b.id_cli||null, nome_cli:b.cliente||null,
+      causale:'Comp. bonus '+b.id+' ('+b.bookmaker+')',
+      stato:'Da Pagare', data_pag:new Date().toISOString()
+    });
+  }
+
+  // 6. Notifica distribuzione completata
+  addNotif('Info',
+    'Distribuzione economica calcolata',
+    b.bookmaker+' | Margine: '+euro(mar)+' | Op: '+euro(co)+(cc>0?' | Collab: '+euro(cc):'')+(cr>0?' | Ref: '+euro(cr):''),
+    mar>=0?'Media':'Alta', null
+  );
+
+  if (currentSection==='etica') loadEtica();
+  if (currentSection==='economia') loadEconomia();
+}
+async function salvaBns(e) {
+  e.preventDefault();
+  var f = new FormData(e.target);
+  var id = await nextId('bonus','BNS',5);
+  var r = await db.from('bonus').insert({
+    id:id, id_cli:f.get('id_cli')||null, cliente:f.get('cliente')||null,
+    bookmaker:f.get('bookmaker'), tier:f.get('tier'), operatore:f.get('operatore'),
+    perc_op:parseFloat(f.get('perc_op')||20), stato:f.get('stato'), priorita:f.get('priorita'),
+    ric_prev:parseFloat(f.get('ric_prev')||0), pross_azione:f.get('pross_azione')||null, note:f.get('note')||null
+  });
+  if (r.error) { toast('Errore: '+r.error.message,'err'); return; }
+  toast('Bonus '+id+' salvato!','ok');
+  addNotif('Info','Nuovo bonus: '+f.get('bookmaker'),'ID: '+id+' | Cliente: '+(f.get('cliente')||'-'),'Bassa',f.get('operatore'));
+  closeM('m-bns'); e.target.reset(); loadBonus();
+}
+
+// ── TASK ───────────────────────────────
+var _task = [];
+async function loadTask() {
+  setTopbar('Task', '<button class="btn btn-ghost btn-sm" onclick="loadTask()">Aggiorna</button> <button class="btn btn-gold btn-sm" onclick="openM(\'m-task\')">+ Nuovo</button>');
+  var r = await db.from('task').select('*').order('scadenza',{ascending:true,nullsFirst:false});
+  _task = r.data||[];
+  renderTask(_task);
+}
+function renderTask(data) {
+  var now = new Date();
+  var h = '<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Prior.</th><th>Tipo</th><th>Cliente</th><th>Operatore</th><th>Descrizione</th><th>Scadenza</th><th>Stato</th><th></th></tr></thead><tbody>';
+  data.forEach(function(t){
+    var scad = t.scadenza?new Date(t.scadenza):null;
+    var late = scad && scad<now && t.stato!=='Chiuso';
+    h += '<tr'+(late?' style="background:rgba(239,68,68,.05)"':'')+'>';
+    h += '<td class="gold">'+t.id+'</td>';
+    h += '<td>'+badge(t.priorita)+'</td>';
+    h += '<td>'+(t.tipo||'-')+'</td>';
+    h += '<td>'+(t.nome_cli||t.id_cli||'-')+'</td>';
+    h += '<td>'+(t.operatore||'-')+'</td>';
+    h += '<td>'+(t.descrizione||'-')+'</td>';
+    h += '<td>'+(scad?'<span class="'+(late?'red':'')+'">'+fdt(scad)+'</span>':'-')+'</td>';
+    h += '<td>'+badge(t.stato)+'</td>';
+    h += '<td>'+(t.stato!=='Chiuso'?'<button class="btn btn-green btn-sm" onclick="chiudiTask(\''+t.id+'\')">Chiudi</button>':'')+'</td>';
+    h += '</tr>';
+  });
+  if (!data.length) h += '<tr><td colspan="9" class="empty">Nessun task</td></tr>';
+  h += '</tbody></table></div>';
+  setView(h);
+}
+async function chiudiTask(id) {
+  await db.from('task').update({stato:'Chiuso'}).eq('id',id);
+  toast('Task chiuso','ok'); loadTask();
+}
+async function salvaTask(e) {
+  e.preventDefault();
+  var f = new FormData(e.target);
+  var id = await nextId('task','TSK',5);
+  var r = await db.from('task').insert({
+    id:id, priorita:f.get('priorita'), tipo:f.get('tipo'),
+    id_cli:f.get('id_cli')||null, nome_cli:f.get('nome_cli')||null,
+    operatore:f.get('operatore'), descrizione:f.get('descrizione'),
+    scadenza:f.get('scadenza')||null, stato:'Aperto', note:f.get('note')||null,
+    data_creazione:new Date().toISOString()
+  });
+  if (r.error) { toast('Errore: '+r.error.message,'err'); return; }
+  toast('Task '+id+' salvato!','ok');
+  addNotif('Task','Nuovo task: '+f.get('descrizione'),'ID: '+id+' | '+f.get('priorita')+' priorità',f.get('priorita'),f.get('operatore'));
+  closeM('m-task'); e.target.reset(); loadTask();
+}
+
+// ── PENALI ─────────────────────────────
+async function loadPenali() {
+  setTopbar('Penali');
+  var r = await db.from('penali').select('*').order('created_at',{ascending:false});
+  var pen = r.data||[];
+  var tot = pen.filter(function(p){return p.stato==='In Calcolo';}).reduce(function(s,p){return s+parseFloat(p.tot_penale||0);},0);
+  var h = '<div class="grid-3"><div class="card"><div class="card-title">Penali Attive</div><div class="card-val red">'+pen.filter(function(p){return p.stato==='In Calcolo';}).length+'</div></div><div class="card"><div class="card-title">Totale Penali</div><div class="card-val red">'+euro(tot)+'</div></div><div class="card"><div class="card-title">Chiuse</div><div class="card-val green">'+pen.filter(function(p){return p.stato==='Chiusa';}).length+'</div></div></div>';
+  h += '<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Cliente</th><th>Operatore</th><th>GG Ritardo</th><th>EUR/gg</th><th>Totale</th><th>Stato</th></tr></thead><tbody>';
+  pen.forEach(function(p){
+    h += '<tr><td class="gold">'+p.id+'</td><td>'+(p.nome_cli||'-')+'</td><td>'+(p.operatore||'-')+'</td><td>'+(p.gg_ritardo||0)+'</td><td>'+euro(p.penale_gg)+'</td><td class="red bold">'+euro(p.tot_penale)+'</td><td>'+badge(p.stato)+'</td></tr>';
+  });
+  if (!pen.length) h += '<tr><td colspan="7" class="empty">Nessuna penale</td></tr>';
+  h += '</tbody></table></div>';
+  setView(h);
+}
+
+// ── CLIENTI INATTIVI ───────────────────
+var _inr = [];
+async function loadInattivi() {
+  setTopbar('Clienti Inattivi', '<button class="btn btn-ghost btn-sm" onclick="loadInattivi()">Aggiorna</button> <button class="btn btn-gold btn-sm" onclick="openM(\'m-inr\')">+ Aggiungi</button>');
+  var r = await db.from('clienti_inattivi').select('*').order('created_at',{ascending:false});
+  _inr = r.data||[];
+  var oggi = new Date().toISOString().slice(0,10);
+  var daR = _inr.filter(function(i){return i.data_prossimo_ricontatto && i.data_prossimo_ricontatto<=oggi && i.stato!=='Trasferito nel CRM';}).length;
+  var riatt = _inr.filter(function(i){return i.stato==='Trasferito nel CRM';}).length;
+  var conv = _inr.length>0?((riatt/_inr.length)*100).toFixed(1):0;
+  var potTot = _inr.filter(function(i){return i.stato!=='Trasferito nel CRM';}).reduce(function(s,i){return s+parseFloat(i.potenziale_economico||0);},0);
+  var h = '<div class="grid-4"><div class="card"><div class="card-title">Totale Inattivi</div><div class="card-val gold">'+_inr.length+'</div></div><div class="card"><div class="card-title">Da Richiamare Oggi</div><div class="card-val red">'+daR+'</div></div><div class="card"><div class="card-title">Conversione</div><div class="card-val green">'+conv+'%</div></div><div class="card"><div class="card-title">Potenziale Recuperabile</div><div class="card-val gold">'+euro(potTot)+'</div></div></div>';
+  h += '<div class="tbl-wrap"><table><thead><tr><th>Stato</th><th>Nome</th><th>Tel</th><th>Operatore</th><th>Ult. Contatto</th><th>Prossimo</th><th>Tentativi</th><th>Interesse</th><th>Potenziale</th><th>ID CRM</th><th></th></tr></thead><tbody>';
+  var clsMap={'Mai Ricontattato':'inr-mai','Da Richiamare':'inr-rich','Ha Risposto':'inr-risp','Riattivato':'inr-riatt','Trasferito nel CRM':'inr-tras'};
+  _inr.forEach(function(i){
+    var cls = clsMap[i.stato]||'';
+    h += '<tr class="'+cls+'">';
+    h += '<td>'+inrBadge(i.stato)+'</td>';
+    h += '<td class="bold">'+i.nome+'</td>';
+    h += '<td>'+(i.tel||'-')+'</td>';
+    h += '<td>'+(i.operatore||'-')+'</td>';
+    h += '<td>'+fd(i.ultimo_contatto)+'</td>';
+    h += '<td>'+fd(i.data_prossimo_ricontatto)+'</td>';
+    h += '<td>'+(i.num_tentativi||0)+'</td>';
+    h += '<td><span class="badge '+(i.interesse==='Alto'?'b-green':i.interesse==='Basso'?'b-red':'b-orange')+'">'+(i.interesse||'-')+'</span></td>';
+    h += '<td class="gold">'+euro(i.potenziale_economico)+'</td>';
+    h += '<td>'+(i.id_cliente_crm?'<span class="green bold">'+i.id_cliente_crm+'</span>':'-')+'</td>';
+    h += '<td>';
+    if (i.stato!=='Trasferito nel CRM') h += '<button class="btn btn-green btn-sm" onclick="riattiva(\''+i.id+'\',\''+i.nome.replace(/'/g,"\\'")+'\')" style="white-space:nowrap">Riattiva</button>';
+    h += '</td>';
+    h += '</tr>';
+  });
+  if (!_inr.length) h += '<tr><td colspan="11" class="empty">Nessun cliente inattivo</td></tr>';
+  h += '</tbody></table></div>';
+  h += '<div style="margin-top:12px;padding:10px;background:var(--navy2);border-radius:8px;border:1px solid var(--border);font-size:12px"><strong>Legenda: </strong>'+inrBadge('Mai Ricontattato')+' '+inrBadge('Da Richiamare')+' '+inrBadge('Ha Risposto')+' '+inrBadge('Riattivato')+' '+inrBadge('Trasferito nel CRM')+'</div>';
+  setView(h);
+}
+async function riattiva(idInr, nome) {
+  if (!confirm('Riattivare '+nome+' come nuovo cliente nel CRM?')) return;
+  var rInr = await db.from('clienti_inattivi').select('*').eq('id',idInr).single();
+  if (!rInr.data) { toast('Inattivo non trovato','err'); return; }
+  var inr = rInr.data;
+  var newId = await nextId('clienti','MBBET',3);
+  var rIns = await db.from('clienti').insert({
+    id:newId, nome:inr.nome, tel:inr.tel||null, email:inr.email||null,
+    operatore:inr.operatore||null, referral:inr.referral||null,
+    stato:'ATTIVO', tipologia_cli:'Ripreso',
+    note:'Riattivato da inattivi il '+new Date().toLocaleDateString('it-IT'),
+    data_ingresso:new Date().toISOString().slice(0,10)
+  });
+  if (rIns.error) { toast('Errore: '+rIns.error.message,'err'); return; }
+  await db.from('clienti_inattivi').update({
+    stato:'Trasferito nel CRM', trasferito:true,
+    data_trasferimento:new Date().toISOString(),
+    id_cliente_crm:newId
+  }).eq('id',idInr);
+  toast(nome+' riattivato come '+newId,'ok'); loadInattivi(); updateKPI();
+}
+async function salvaInr(e) {
+  e.preventDefault();
+  var f = new FormData(e.target);
+  var id = 'INR-'+String((_inr.length||0)+1).padStart(3,'0');
+  var r = await db.from('clienti_inattivi').insert({
+    id:id, nome:f.get('nome'), tel:f.get('tel')||null, email:f.get('email')||null,
+    operatore:f.get('operatore'), provenienza:f.get('provenienza')||null,
+    interesse:f.get('interesse'), potenziale_economico:parseFloat(f.get('potenziale_economico')||0),
+    data_prossimo_ricontatto:f.get('data_prossimo_ricontatto')||null,
+    stato:f.get('stato'), bk_disponibili:f.get('bk_disponibili')||null,
+    note:f.get('note')||null, trasferito:false, num_tentativi:0,
+    data_inserimento:new Date().toISOString().slice(0,10)
+  });
+  if (r.error) { toast('Errore: '+r.error.message,'err'); return; }
+  toast('Inattivo salvato!','ok'); closeM('m-inr'); e.target.reset(); loadInattivi();
+}
+
+// ── FINANZE ────────────────────────────
+async function loadFinanze() {
+  setTopbar('Finanze', '<button class="btn btn-gold btn-sm" onclick="openM(\'m-pag\')">+ Pagamento</button>');
+  var r = await db.from('pagamenti').select('*').order('data_pag',{ascending:false});
+  var p = r.data||[];
+  var totIn = p.filter(function(x){return x.tipo==='Cliente'||x.tipo==='Penale';}).reduce(function(s,x){return s+parseFloat(x.importo||0);},0);
+  var totOut = p.filter(function(x){return x.tipo!=='Cliente'&&x.tipo!=='Penale';}).reduce(function(s,x){return s+parseFloat(x.importo||0);},0);
+  var h = '<div class="grid-4"><div class="card"><div class="card-title">Tot. Pagamenti</div><div class="card-val gold">'+p.length+'</div></div><div class="card"><div class="card-title">Entrate</div><div class="card-val green">'+euro(totIn)+'</div></div><div class="card"><div class="card-title">Uscite</div><div class="card-val red">'+euro(totOut)+'</div></div><div class="card"><div class="card-title">Saldo</div><div class="card-val '+(totIn-totOut>=0?'green':'red')+'">'+euro(totIn-totOut)+'</div></div></div>';
+  h += '<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Tipo</th><th>Beneficiario</th><th>Importo</th><th>Metodo</th><th>Causale</th><th>Stato</th></tr></thead><tbody>';
+  p.forEach(function(x){
+    h += '<tr>';
+    h += '<td class="gold">'+x.id+'</td>';
+    h += '<td>'+fd(x.data_pag)+'</td>';
+    h += '<td><span class="badge '+(x.tipo==='Cliente'?'b-blue':x.tipo==='Operatore'?'b-gold':x.tipo==='Penale'?'b-red':'b-gray')+'">'+x.tipo+'</span></td>';
+    h += '<td>'+x.beneficiario+'</td>';
+    h += '<td class="'+(x.tipo==='Cliente'||x.tipo==='Penale'?'green':'red')+' bold">'+euro(x.importo)+'</td>';
+    h += '<td>'+(x.metodo||'-')+'</td>';
+    h += '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(x.causale||'-')+'</td>';
+    h += '<td>'+badge(x.stato)+'</td>';
+    h += '</tr>';
+  });
+  if (!p.length) h += '<tr><td colspan="8" class="empty">Nessun pagamento</td></tr>';
+  h += '</tbody></table></div>';
+  setView(h);
+}
+async function salvaPag(e) {
+  e.preventDefault();
+  var f = new FormData(e.target);
+  var id = await nextId('pagamenti','PAG',4);
+  var r = await db.from('pagamenti').insert({
+    id:id, tipo:f.get('tipo'), beneficiario:f.get('beneficiario'),
+    importo:parseFloat(f.get('importo')), metodo:f.get('metodo'),
+    id_cli:f.get('id_cli')||null, nome_cli:f.get('nome_cli')||null,
+    causale:f.get('causale')||null, stato:'Pagato', data_pag:new Date().toISOString()
+  });
+  if (r.error) { toast('Errore: '+r.error.message,'err'); return; }
+  toast('Pagamento registrato!','ok'); closeM('m-pag'); e.target.reset(); loadFinanze();
+}
+
+// ── ECONOMIA MASTER ────────────────────
+async function loadEconomia() {
+  setTopbar('Economia Master', '<button class="btn btn-ghost btn-sm" onclick="loadEconomia()">Aggiorna</button>');
+  var r1=await db.from('bonus').select('*');
+  var r2=await db.from('clienti').select('id,stato,operatore');
+  var r3=await db.from('penali').select('tot_penale,stato');
+  var r4=await db.from('clienti_inattivi').select('stato,potenziale_economico');
+  var bns=r1.data||[], cli=r2.data||[], pen=r3.data||[], inr=r4.data||[];
+  var ricTot=bns.reduce(function(s,b){return s+parseFloat(b.ric_real||0);},0);
+  var pagCli=bns.reduce(function(s,b){return s+parseFloat(b.pag_cli||0);},0);
+  var compOp=bns.reduce(function(s,b){return s+parseFloat(b.ric_real||0)*parseFloat(b.perc_op||0)/100;},0);
+  var compCol=bns.reduce(function(s,b){return s+parseFloat(b.ric_real||0)*parseFloat(b.perc_collab||0)/100;},0);
+  var costiEx=bns.reduce(function(s,b){return s+parseFloat(b.costi_extra||0);},0);
+  var penTot=pen.filter(function(p){return p.stato==='In Calcolo';}).reduce(function(s,p){return s+parseFloat(p.tot_penale||0);},0);
+  var margine=ricTot-pagCli-compOp-compCol-costiEx;
+  var bmap={};
+  bns.forEach(function(b){if(!b.id_cli)return;if(!bmap[b.id_cli])bmap[b.id_cli]=0;var r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100;bmap[b.id_cli]+=(r-p-co-cc-parseFloat(b.costi_extra||0));});
+  var profitt=Object.values(bmap).filter(function(x){return x>0;}).length;
+  var inPerd=Object.values(bmap).filter(function(x){return x<0;}).length;
+  var bkMap={};
+  bns.forEach(function(b){bkMap[b.bookmaker]=(bkMap[b.bookmaker]||0)+parseFloat(b.ric_real||0);});
+  var topBk=Object.entries(bkMap).sort(function(a,b){return b[1]-a[1];})[0];
+  var opMap={};
+  bns.forEach(function(b){opMap[b.operatore]=(opMap[b.operatore]||0)+parseFloat(b.ric_real||0);});
+  var topOp=Object.entries(opMap).sort(function(a,b){return b[1]-a[1];})[0];
+  var riattInr=inr.filter(function(i){return i.stato==='Trasferito nel CRM';}).length;
+  var convPerc=inr.length>0?((riattInr/inr.length)*100).toFixed(1):0;
+  var potInr=inr.filter(function(i){return i.stato!=='Trasferito nel CRM';}).reduce(function(s,i){return s+parseFloat(i.potenziale_economico||0);},0);
+  var h = '<div class="grid-4">';
+  h += '<div class="card"><div class="card-title">1 - Ricavo Totale</div><div class="card-val gold">'+euro(ricTot)+'</div></div>';
+  h += '<div class="card"><div class="card-title">2 - Margine Netto</div><div class="card-val '+(margine>=0?'green':'red')+'">'+euro(margine)+'</div></div>';
+  h += '<div class="card"><div class="card-title">3 - Clienti Attivi</div><div class="card-val">'+cli.filter(function(c){return c.stato==='ATTIVO';}).length+'</div></div>';
+  h += '<div class="card"><div class="card-title">4 - Bonus Totali</div><div class="card-val blue">'+bns.length+'</div></div>';
+  h += '<div class="card"><div class="card-title">5 - Pagato ai Clienti</div><div class="card-val red">'+euro(pagCli)+'</div></div>';
+  h += '<div class="card"><div class="card-title">6 - Comp. Operatori</div><div class="card-val red">'+euro(compOp)+'</div></div>';
+  h += '<div class="card"><div class="card-title">7 - Comp. Collab</div><div class="card-val red">'+euro(compCol)+'</div></div>';
+  h += '<div class="card"><div class="card-title">8 - Penali Attive</div><div class="card-val '+(penTot>0?'red':'green')+'">'+euro(penTot)+'</div></div>';
+  h += '<div class="card"><div class="card-title">9 - Clienti Profittevoli</div><div class="card-val green">'+profitt+'</div></div>';
+  h += '<div class="card"><div class="card-title">10 - Clienti in Perdita</div><div class="card-val red">'+inPerd+'</div></div>';
+  h += '<div class="card"><div class="card-title">11 - Bookmaker Top</div><div class="card-val" style="font-size:16px">'+(topBk?topBk[0]:'-')+'</div><div class="card-sub">'+(topBk?euro(topBk[1]):'')+'</div></div>';
+  h += '<div class="card"><div class="card-title">12 - Operatore Top</div><div class="card-val gold" style="font-size:16px">'+(topOp?topOp[0]:'-')+'</div><div class="card-sub">'+(topOp?euro(topOp[1]):'')+'</div></div>';
+  h += '<div class="card"><div class="card-title">13 - Conversione Inattivi</div><div class="card-val green">'+convPerc+'%</div><div class="card-sub">'+riattInr+' su '+inr.length+'</div></div>';
+  h += '<div class="card"><div class="card-title">14 - Potenziale Inattivi</div><div class="card-val gold">'+euro(potInr)+'</div></div>';
+  h += '</div><div class="divider"></div>';
+  h += '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Ranking Operatori</h3>';
+  h += '<div class="tbl-wrap"><table><thead><tr><th>#</th><th>Operatore</th><th>Ricavo</th><th>N. Bonus</th><th>Comp. Maturato</th></tr></thead><tbody>';
+  Object.entries(opMap).sort(function(a,b){return b[1]-a[1];}).forEach(function(entry,i){
+    var op=entry[0],ric=entry[1];
+    var myBns=bns.filter(function(b){return b.operatore===op;});
+    var myComp=myBns.reduce(function(s,b){return s+parseFloat(b.ric_real||0)*parseFloat(b.perc_op||0)/100;},0);
+    h += '<tr><td class="gold bold">#'+(i+1)+'</td><td class="bold">'+op+'</td><td class="green">'+euro(ric)+'</td><td>'+myBns.length+'</td><td class="gold">'+euro(myComp)+'</td></tr>';
+  });
+  h += '</tbody></table></div>';
+  setView(h);
+}
+
+// ── ETICA ECONOMICA ────────────────────
+async function loadEtica() {
+  setTopbar('Etica Economica');
+  var r = await db.from('etica_economica').select('*').order('created_at',{ascending:false});
+  var rows = r.data||[];
+  var totMar = rows.reduce(function(s,x){return s+parseFloat(x.margine_netto||0);},0);
+  var h = '<div class="card" style="margin-bottom:16px;border-color:var(--gold)"><div class="card-title">Formula MBBET</div><div style="font-size:13px;margin-top:8px;line-height:2"><span class="gold bold">Margine Netto</span> = Ricavo Reale - Pagato Cliente - Comp. Operatore - Comp. Collab - Comp. Referral - Costi Extra - Penali</div></div>';
+  if (rows.length) {
+    h += '<div class="card" style="margin-bottom:14px"><div class="card-title">Margine Netto Totale Tracciato</div><div class="card-val '+(totMar>=0?'green':'red')+'">'+euro(totMar)+'</div></div>';
+    h += '<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Cliente</th><th>Bookmaker</th><th>Ricavo</th><th>Pag.Cli</th><th>Comp.Op</th><th>Comp.Col</th><th>Extra</th><th>Penali</th><th>Margine</th><th>Stato Pag.</th></tr></thead><tbody>';
+    rows.forEach(function(x){
+      h += '<tr><td class="gold">'+x.id+'</td><td>'+(x.nome_cli||'-')+'</td><td>'+(x.bookmaker||'-')+'</td><td class="green">'+euro(x.ricavo_reale)+'</td><td>'+euro(x.pagato_cliente)+'</td><td>'+euro(x.comp_operatore)+'</td><td>'+euro(x.comp_collab)+'</td><td>'+euro(x.costi_extra)+'</td><td class="red">'+euro(x.penali)+'</td><td class="'+(parseFloat(x.margine_netto||0)>=0?'green':'red')+' bold">'+euro(x.margine_netto)+'</td><td>'+badge(x.stato_pagamento)+'</td></tr>';
+    });
+    h += '</tbody></table></div>';
+  } else {
+    h += '<div class="empty">Nessuna voce etica registrata.<br><small>Vengono create automaticamente al completamento dei bonus.</small></div>';
+  }
+  setView(h);
+}
+
+// ── TEAM MBBET ─────────────────────────
+async function loadTeam() {
+  setTopbar('Team MBBET');
+  var r1=await db.from('team_mbbet').select('*').order('perc_societaria',{ascending:false});
+  var r2=await db.from('bonus').select('operatore,ric_real,perc_op,pag_cli,perc_collab,costi_extra');
+  var r3=await db.from('clienti').select('operatore,stato');
+  var team=r1.data||[], bns=r2.data||[], cli=r3.data||[];
+  var h = '<div class="team-grid">';
+  team.forEach(function(t){
+    var myB=bns.filter(function(b){return b.operatore===t.nome;});
+    var myR=myB.reduce(function(s,b){return s+parseFloat(b.ric_real||0);},0);
+    var myC=myB.reduce(function(s,b){return s+parseFloat(b.ric_real||0)*parseFloat(b.perc_op||0)/100;},0);
+    var myCli=cli.filter(function(c){return c.operatore===t.nome&&c.stato==='ATTIVO';}).length;
+    h += '<div class="team-card">';
+    h += '<div class="team-av">'+t.nome.charAt(0)+'</div>';
+    h += '<h4 class="gold" style="font-size:16px;font-weight:800;margin-bottom:2px">'+t.nome+'</h4>';
+    h += '<div class="muted" style="font-size:12px;margin-bottom:10px">'+t.ruolo+' &middot; '+badge(t.stato)+'</div>';
+    h += '<div class="team-stat"><span class="muted">Tipo</span><span>'+t.tipo+'</span></div>';
+    h += '<div class="team-stat"><span class="muted">% Societaria</span><span class="gold bold">'+t.perc_societaria+'%</span></div>';
+    h += '<div class="team-stat"><span class="muted">% Operativa</span><span>'+t.perc_operativa+'%</span></div>';
+    h += '<div class="team-stat"><span class="muted">Clienti Attivi</span><span>'+myCli+'</span></div>';
+    h += '<div class="team-stat"><span class="muted">Bonus Gestiti</span><span>'+myB.length+'</span></div>';
+    h += '<div class="team-stat"><span class="muted">Ricavo Generato</span><span class="green">'+euro(myR)+'</span></div>';
+    h += '<div class="team-stat"><span class="muted">Comp. Maturato</span><span class="gold">'+euro(myC)+'</span></div>';
+    h += '<div class="team-stat"><span class="muted">Saldo Da Pagare</span><span class="'+(t.saldo_da_pagare>0?'red':'green')+'">'+euro(t.saldo_da_pagare)+'</span></div>';
+    if (t.email) h += '<div class="team-stat"><span class="muted">Email</span><span style="font-size:11px">'+t.email+'</span></div>';
+    h += '</div>';
+  });
+  h += '</div>';
+  setView(h);
+}
+
+// ── COLLAB ─────────────────────────────
+async function loadCollab() {
+  setTopbar('Collab');
+  var r1=await db.from('collab').select('*').order('created_at',{ascending:false});
+  var r2=await db.from('bonus').select('nome_collab,ric_real,perc_collab');
+  var col=r1.data||[], bns=r2.data||[];
+  var h = '<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Op. Rif.</th><th>%</th><th>Stato</th><th>Ricavo via Collab</th><th>Comp. Maturato</th><th>Contatto</th></tr></thead><tbody>';
+  col.forEach(function(c){
+    var myB=bns.filter(function(b){return b.nome_collab===c.nome;});
+    var ric=myB.reduce(function(s,b){return s+parseFloat(b.ric_real||0);},0);
+    var comp=myB.reduce(function(s,b){return s+parseFloat(b.ric_real||0)*parseFloat(b.perc_collab||0)/100;},0);
+    h += '<tr><td class="gold">'+c.id+'</td><td class="bold">'+c.nome+'</td><td>'+(c.tipo||'-')+'</td><td>'+(c.op_rif||'-')+'</td><td>'+c.perc+'%</td><td>'+badge(c.stato)+'</td><td class="green">'+euro(ric)+'</td><td class="gold bold">'+euro(comp)+'</td><td>'+(c.contatto||'-')+'</td></tr>';
+  });
+  if (!col.length) h += '<tr><td colspan="9" class="empty">Nessun collaboratore</td></tr>';
+  h += '</tbody></table></div>';
+  setView(h);
+}
+
+// ── IDEAS ENGINE ───────────────────────
+var _ideas = [];
+async function loadIdeas() {
+  setTopbar('Ideas Engine');
+  var r = await db.from('ideas_engine').select('*').order('created_at');
+  _ideas = r.data||[];
+  var h = '<div class="grid-4" style="margin-bottom:14px"><div class="card"><div class="card-title">Totali</div><div class="card-val gold">'+_ideas.length+'</div></div><div class="card"><div class="card-title">In Sviluppo</div><div class="card-val blue">'+_ideas.filter(function(i){return i.stato==='In Sviluppo';}).length+'</div></div><div class="card"><div class="card-title">Approvate</div><div class="card-val green">'+_ideas.filter(function(i){return i.stato==='Approvata';}).length+'</div></div><div class="card"><div class="card-title">Completate</div><div class="card-val">'+_ideas.filter(function(i){return i.stato==='Completata';}).length+'</div></div></div>';
+  h += '<div class="ideas-grid">';
+  _ideas.forEach(function(i){
+    h += '<div class="idea-card">';
+    h += '<h4>'+i.nome+'</h4>';
+    h += '<p>'+(i.descrizione||'-')+'</p>';
+    h += '<div class="idea-meta">';
+    h += badge(i.stato)+' ';
+    h += badge(i.priorita)+' ';
+    h += '<span class="badge '+(i.impatto==='Alto'?'b-green':i.impatto==='Medio'?'b-gold':'b-gray')+'">Impact: '+(i.impatto||'-')+'</span> ';
+    h += '<span class="badge '+(i.difficolta==='Alta'?'b-red':i.difficolta==='Bassa'?'b-green':'b-orange')+'">Diff: '+(i.difficolta||'-')+'</span>';
+    if (i.fase) h += ' <span class="badge b-purple">'+i.fase+'</span>';
+    h += '</div>';
+    if (i.note) h += '<div class="muted" style="font-size:11px;margin-top:6px">'+i.note+'</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+  setView(h);
+}
+
+// ── CONFIG ─────────────────────────────
+async function loadConfig() {
+  setTopbar('Config');
+  var r1=await db.from('config').select('*').order('chiave');
+  var r2=await db.from('bookmaker').select('*').order('tier').order('nome');
+  var cfg=r1.data||[], bk=r2.data||[];
+  var h = '<div class="grid-2">';
+  h += '<div><h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--gold)">Impostazioni Sistema</h3><div class="tbl-wrap"><table><thead><tr><th>Chiave</th><th>Valore</th></tr></thead><tbody>';
+  cfg.forEach(function(c){ h += '<tr><td class="gold">'+c.chiave+'</td><td>'+(c.valore||'-')+'</td></tr>'; });
+  h += '</tbody></table></div></div>';
+  h += '<div><h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--gold)">Bookmaker</h3><div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>Tier</th><th>Attivo</th></tr></thead><tbody>';
+  bk.forEach(function(b){ h += '<tr><td>'+b.nome+'</td><td>'+tierB(b.tier)+'</td><td>'+(b.attivo?'SI':'NO')+'</td></tr>'; });
+  h += '</tbody></table></div></div>';
+  h += '</div>';
+  setView(h);
+}
+
+// ── AUTH ───────────────────────────────
+async function initAuth() {
+  var sess = await db.auth.getSession();
+  if (sess.data && sess.data.session && sess.data.session.user) {
+    await loadUserProfile(sess.data.session.user);
+  } else {
+    showLoginScreen();
+  }
+  db.auth.onAuthStateChange(function(event, session) {
+    if (event === 'SIGNED_IN' && session) {
+      loadUserProfile(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null; currentRole = 'VIEWER'; currentNome = '';
+      showLoginScreen();
+    }
+  });
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  var btn = document.getElementById('l-btn');
+  var err = document.getElementById('login-err');
+  var email = document.getElementById('l-email').value.trim();
+  var pwd   = document.getElementById('l-pwd').value;
+  btn.textContent = 'Accesso...'; btn.disabled = true;
+  err.textContent = ''; err.style.display = 'none';
+  var res = await db.auth.signInWithPassword({email: email, password: pwd});
+  if (res.error) {
+    err.textContent = 'Email o password errati. Riprova.';
+    err.style.display = 'block';
+    btn.textContent = 'Accedi'; btn.disabled = false;
+    return;
+  }
+  await loadUserProfile(res.data.user);
+}
+
+async function doLogout() {
+  await db.auth.signOut();
+}
+
+async function loadUserProfile(user) {
+  currentUser = user;
+  var r = await db.from('utenti_crm').select('ruolo,nome,attivo').eq('email', user.email).single();
+  if (r.data) {
+    currentRole = r.data.ruolo || 'VIEWER';
+    currentNome = r.data.nome || user.email;
+    if (r.data.attivo === false) {
+      await db.auth.signOut();
+      var loginErr = document.getElementById('login-err');
+      loginErr.textContent = 'Account disabilitato. Contatta un admin.';
+      loginErr.style.display = 'block';
+      return;
+    }
+  } else {
+    currentRole = 'VIEWER';
+    currentNome = user.email;
+  }
+  applyRoleUI();
+  hideLoginScreen();
+  loadOperatori();
+  loadNotifCount();
+  initRealtime();
+  loadDash();
+  updateKPI();
+  setInterval(updateKPI, 30000);
+  setInterval(loadNotifCount, 15000);
+}
+
+function showLoginScreen() {
+  var ls = document.getElementById('login-screen');
+  ls.style.display = 'flex';
+  document.getElementById('user-chip').style.display = 'none';
+  document.getElementById('l-btn').textContent = 'Accedi';
+  document.getElementById('l-btn').disabled = false;
+}
+
+function hideLoginScreen() {
+  document.getElementById('login-screen').style.display = 'none';
+  var chip = document.getElementById('user-chip');
+  chip.style.display = 'flex';
+  // Iniziale avatar
+  var av = document.getElementById('user-av');
+  av.textContent = currentNome.charAt(0).toUpperCase();
+  // Colori avatar per socio
+  var avColors = {Mary:'#f59e0b', Manuele:'#3b82f6', Serena:'#8b5cf6', Samuele:'#10b981'};
+  av.style.background = avColors[currentNome] || 'var(--gold)';
+  document.getElementById('user-nome').textContent = currentNome;
+  var tag = document.getElementById('user-ruolo-tag');
+  tag.textContent = currentRole.replace('_',' ');
+  var roleClsMap = {
+    SOCIO_ADMIN:'r-socio-admin', SOCIO:'r-socio', OPERATORE:'r-operatore',
+    COLLAB:'r-collab', REFERRAL:'r-referral', VIEWER:'r-viewer', ADMIN_TECNICO:'r-admin-tecnico'
+  };
+  tag.className = 'user-ruolo-tag ' + (roleClsMap[currentRole]||'r-viewer');
+}
+
+function applyRoleUI() {
+  var allowed = NAV_RULES[currentRole] || NAV_RULES['VIEWER'];
+  document.querySelectorAll('.nav-item').forEach(function(el) {
+    var sec = el.getAttribute('data-section');
+    if (!sec) return;
+    el.style.display = allowed.indexOf(sec) >= 0 ? '' : 'none';
+  });
+}
+
+// ── INIT ───────────────────────────────
+initAuth();
+</script>
+</body>
+</html>

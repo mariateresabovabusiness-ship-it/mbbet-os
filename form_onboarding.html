@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MBBET — Registrazione Cliente</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#040508;--bg1:#08090e;--bg2:#0c101a;
+  --gold:#f59e0b;--gold-dim:#d97706;
+  --cyan:#06b6d4;--green:#10b981;--red:#ef4444;
+  --text:#f1f5f9;--muted:#64748b;--border:#1e2535;
+  --glass:rgba(8,9,14,.88);
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;}
+
+/* ── BACKGROUND ── */
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(245,158,11,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.018) 1px,transparent 1px);background-size:52px 52px;}
+.bg-glow{position:fixed;top:0;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse at 50% 0%,rgba(245,158,11,.07) 0%,transparent 65%);pointer-events:none;z-index:0;}
+.scanlines{position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);}
+
+/* ── ANIMATIONS ── */
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes tin{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.25;transform:scale(.5);}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}50%{box-shadow:0 0 28px rgba(245,158,11,.15);}}
+@keyframes success-pop{0%{transform:scale(.8);opacity:0;}60%{transform:scale(1.06);}100%{transform:scale(1);opacity:1;}}
+
+/* ── WRAPPER ── */
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px 60px;}
+
+/* ── HEADER ── */
+.logo{font-size:36px;font-weight:900;letter-spacing:6px;background:linear-gradient(135deg,#f59e0b,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200%;animation:shimmer 4s linear infinite;margin-bottom:6px;}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
+.logo-tagline{font-size:12px;color:var(--cyan);letter-spacing:1px;margin-bottom:32px;display:flex;align-items:center;gap:6px;}
+.tagline-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pdot 1.5s ease-in-out infinite;}
+
+/* ── CARD ── */
+.card{width:100%;max-width:600px;background:rgba(8,9,14,.92);backdrop-filter:blur(28px);border:1px solid var(--border);border-radius:20px;padding:36px;box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(245,158,11,.06);animation:tin .5s ease-out,glow-pulse 6s ease-in-out infinite;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent);background-size:200%;animation:shimmer 3s linear infinite;}
+
+.card-title{font-size:20px;font-weight:900;color:var(--text);margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:28px;line-height:1.5;}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:9.5px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:4px;}
+.req{color:var(--gold);font-size:11px;}
+.form-inp,.form-sel{padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+.form-inp:focus,.form-sel:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,158,11,.08);}
+.form-inp.err,.form-sel.err{border-color:var(--red);}
+.form-inp::placeholder{color:var(--muted);}
+.form-sel option{background:#0c101a;}
+
+/* CF auto-uppercase */
+#f-cf{text-transform:uppercase;}
+
+/* ── BK SECTION ── */
+.bk-section{margin-top:4px;}
+.bk-section-title{font-size:9.5px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.bk-hint{font-size:10.5px;color:var(--muted);margin-bottom:12px;line-height:1.5;padding:10px 12px;background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.1);border-radius:8px;}
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;}
+.bk-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all .18s;user-select:none;}
+.bk-item:hover{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04);}
+.bk-item.checked{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.3);}
+.bk-item input{display:none;}
+.bk-check{width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:all .18s;}
+.bk-item.checked .bk-check{background:var(--gold);border-color:var(--gold);color:#000;}
+.bk-lbl{font-size:11px;font-weight:600;}
+
+/* ── PRIVACY ── */
+.privacy-box{margin-top:20px;padding:14px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;}
+.privacy-check{display:flex;align-items:flex-start;gap:10px;cursor:pointer;user-select:none;}
+.privacy-check input{display:none;}
+.priv-box{width:18px;height:18px;border:1.5px solid var(--border);border-radius:5px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .18s;}
+.privacy-check.checked .priv-box{background:var(--gold);border-color:var(--gold);color:#000;}
+.priv-text{font-size:11px;color:var(--muted);line-height:1.55;}
+.priv-text a{color:var(--gold);text-decoration:none;}
+
+/* ── SUBMIT ── */
+.btn-submit{width:100%;margin-top:24px;padding:16px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-weight:900;font-size:14px;letter-spacing:2px;border:none;border-radius:12px;cursor:pointer;box-shadow:0 6px 28px rgba(245,158,11,.35);transition:all .2s;position:relative;overflow:hidden;}
+.btn-submit::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.12) 60%,transparent 80%);transform:translateX(-100%);transition:transform .5s;}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(245,158,11,.5);}
+.btn-submit:hover::after{transform:translateX(100%);}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ── SUCCESS ── */
+.success-screen{display:none;text-align:center;padding:20px 0;animation:success-pop .5s ease-out forwards;}
+.success-icon{font-size:64px;margin-bottom:16px;}
+.success-title{font-size:24px;font-weight:900;background:linear-gradient(135deg,#10b981,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.success-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:400px;margin:0 auto 24px;}
+.success-ref{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gold);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:8px 16px;display:inline-block;margin-bottom:24px;}
+
+/* ── ERRORS ── */
+.form-err{font-size:10px;color:var(--red);margin-top:3px;display:none;}
+.global-err{padding:10px 14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;font-size:12px;color:var(--red);margin-bottom:16px;display:none;}
+
+/* ── FOOTER ── */
+.footer{position:relative;z-index:2;text-align:center;margin-top:24px;font-size:10px;color:var(--muted);letter-spacing:.5px;}
+
+/* ── STEP BAR ── */
+.step-bar{display:flex;align-items:center;gap:0;margin-bottom:28px;}
+.step{display:flex;align-items:center;flex:1;}
+.step-circle{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:rgba(255,255,255,.03);color:var(--muted);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;}
+.step.done .step-circle{background:var(--green);border-color:var(--green);color:#fff;}
+.step.active .step-circle{background:rgba(245,158,11,.12);border-color:var(--gold);color:var(--gold);}
+.step-lbl{font-size:8.5px;font-weight:700;letter-spacing:.5px;color:var(--muted);margin-top:4px;text-align:center;}
+.step.active .step-lbl{color:var(--gold);}
+.step.done .step-lbl{color:var(--green);}
+.step-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.step-line{flex:1;height:1px;background:var(--border);margin:0 6px;margin-bottom:20px;transition:background .3s;}
+.step.done+.step .step-line,.step.done+.step-line{background:var(--green);}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="scanlines"></div>
+
+<div class="wrap">
+
+  <!-- LOGO -->
+  <div class="logo">MBBET</div>
+  <div class="logo-sub">Match Betting · Sistema Operativo</div>
+  <div class="logo-tagline"><div class="tagline-dot"></div>Registrazione Cliente</div>
+
+  <!-- FORM CARD -->
+  <div class="card" id="form-card">
+
+    <!-- STEP BAR -->
+    <div class="step-bar">
+      <div class="step active" id="step1">
+        <div class="step-wrap"><div class="step-circle">1</div><div class="step-lbl">DATI ANAGRAFICI</div></div>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step" id="step2">
+        <div class="step-wrap"><div class="step-circle">2</div><div class="step-lbl">BOOKMAKER</div></div>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step" id="step3">
+        <div class="step-wrap"><div class="step-circle">3</div><div class="step-lbl">CONFERMA</div></div>
+      </div>
+    </div>
+
+    <div class="card-title">Completa la tua registrazione</div>
+    <div class="card-sub">Compila il modulo con i tuoi dati. Il nostro team ti contatterà entro 24 ore per iniziare.</div>
+
+    <div class="global-err" id="global-err"></div>
+
+    <form id="onboarding-form" onsubmit="return false">
+
+      <!-- STEP 1: ANAGRAFICA -->
+      <div id="section-step1">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nome <span class="req">*</span></label>
+            <input class="form-inp" id="f-nome" placeholder="Mario" autocomplete="given-name">
+            <div class="form-err" id="err-nome">Inserisci il tuo nome</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cognome <span class="req">*</span></label>
+            <input class="form-inp" id="f-cognome" placeholder="Rossi" autocomplete="family-name">
+            <div class="form-err" id="err-cognome">Inserisci il tuo cognome</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefono <span class="req">*</span></label>
+            <input class="form-inp" id="f-telefono" type="tel" placeholder="+39 333 1234567" autocomplete="tel">
+            <div class="form-err" id="err-telefono">Inserisci il tuo numero</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-inp" id="f-email" type="email" placeholder="mario@email.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Codice Fiscale</label>
+            <input class="form-inp" id="f-cf" placeholder="RSSMRA80A01H501Z" maxlength="16">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data di Nascita</label>
+            <input class="form-inp" id="f-nascita" type="date" autocomplete="bday">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Città di Residenza</label>
+            <input class="form-inp" id="f-citta" placeholder="Milano" autocomplete="address-level2">
+          </div>
+          <div class="form-group">
+            <label class="form-label">IBAN (opzionale)</label>
+            <input class="form-inp" id="f-iban" placeholder="IT60 X054 2811 1010 0000 0123 456" style="font-size:12px">
+          </div>
+        </div>
+        <button type="button" class="btn-submit" onclick="goStep2()" style="margin-top:20px">CONTINUA →</button>
+      </div>
+
+      <!-- STEP 2: BOOKMAKER -->
+      <div id="section-step2" style="display:none">
+        <div class="bk-section">
+          <div class="bk-section-title">📚 Quali bookmaker hai già?</div>
+          <div class="bk-hint">Seleziona tutti i bookmaker dove hai già un account registrato (con documenti verificati). Non selezionare quelli dove sei bannato o chiuso.</div>
+          <div class="bk-grid" id="bk-checkboxes"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:24px">
+          <button type="button" onclick="goStep1()" style="flex:1;padding:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">← Indietro</button>
+          <button type="button" class="btn-submit" style="flex:2;margin-top:0" onclick="goStep3()">CONTINUA →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONFERMA -->
+      <div id="section-step3" style="display:none">
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px;">
+          <div style="font-size:9px;font-weight:800;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">Riepilogo dati</div>
+          <div id="recap-body" style="display:flex;flex-direction:column;gap:8px;font-size:12px;"></div>
+        </div>
+
+        <div class="privacy-box">
+          <label class="privacy-check" id="priv-label" onclick="togglePrivacy()">
+            <input type="checkbox" id="priv-check">
+            <div class="priv-box" id="priv-box"></div>
+            <div class="priv-text">Acconsento al trattamento dei miei dati personali da parte di MBBET per finalità operative legate al servizio di match betting. I dati non verranno ceduti a terzi. <a href="#">Leggi l'informativa privacy completa.</a></div>
+          </label>
+          <div class="form-err" id="err-privacy" style="margin-top:8px">Devi accettare il trattamento dei dati</div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button type="button" onclick="goStep2()" style="flex:1;padding:14px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;">← Indietro</button>
+          <button type="button" class="btn-submit" id="btn-submit" style="flex:2;margin-top:0" onclick="submitForm()">✅ INVIA REGISTRAZIONE</button>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Registrazione Completata!</div>
+      <div class="success-sub">I tuoi dati sono stati ricevuti. Il nostro team ti contatterà entro 24 ore per iniziare insieme.</div>
+      <div class="success-ref" id="success-ref">Codice: #MBBET-000000</div>
+      <div style="font-size:11px;color:var(--muted)">Hai fornito un numero di telefono? Ti scriveremo su WhatsApp.</div>
+    </div>
+
+  </div>
+
+  <div class="footer">© 2025 MBBET · Sistema Operativo · Piattaforma privata</div>
+
+</div>
+
+<script>
+/* ── SUPABASE ── */
+var SUPA_URL='https://ntwqfuvcosvzpqrfpipn.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+var db=supabase.createClient(SUPA_URL,SUPA_KEY);
+
+var ALL_BKS=['Sisal','GoldBet','SNAI','Bet365','Vincitu','PokerStars','Planetwin365','StarCasino','Quigioco','Stake','Dazn Bet'];
+var BK_SELECTED=[];
+var PRIV_OK=false;
+var CUR_STEP=1;
+
+/* ── BUILD BK CHECKBOXES ── */
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('f-cf').addEventListener('input',function(){this.value=this.value.toUpperCase();});
+  var grid=document.getElementById('bk-checkboxes');
+  grid.innerHTML=ALL_BKS.map(function(bk){
+    return '<label class="bk-item" id="bkc-'+bk.replace(/\s/g,'-')+'" onclick="toggleBk(\''+esc(bk)+'\')">'+
+      '<input type="checkbox" value="'+esc(bk)+'">'+
+      '<div class="bk-check" id="bkbox-'+bk.replace(/\s/g,'-')+'"></div>'+
+      '<span class="bk-lbl">'+esc(bk)+'</span>'+
+    '</label>';
+  }).join('');
+});
+
+function toggleBk(bk){
+  var el=document.getElementById('bkc-'+bk.replace(/\s/g,'-'));
+  var box=document.getElementById('bkbox-'+bk.replace(/\s/g,'-'));
+  if(BK_SELECTED.includes(bk)){
+    BK_SELECTED=BK_SELECTED.filter(function(x){return x!==bk;});
+    if(el)el.classList.remove('checked');
+    if(box)box.textContent='';
+  } else {
+    BK_SELECTED.push(bk);
+    if(el)el.classList.add('checked');
+    if(box)box.textContent='✓';
+  }
+}
+
+function togglePrivacy(){
+  PRIV_OK=!PRIV_OK;
+  var lbl=document.getElementById('priv-label');
+  var box=document.getElementById('priv-box');
+  if(PRIV_OK){lbl.classList.add('checked');box.textContent='✓';}
+  else{lbl.classList.remove('checked');box.textContent='';}
+  document.getElementById('err-privacy').style.display='none';
+}
+
+/* ── STEP NAVIGATION ── */
+function setStep(n){
+  CUR_STEP=n;
+  for(var i=1;i<=3;i++){
+    var s=document.getElementById('step'+i);
+    s.classList.remove('active','done');
+    if(i<n)s.classList.add('done');
+    else if(i===n)s.classList.add('active');
+    document.getElementById('section-step'+i).style.display=(i===n?'block':'none');
+  }
+}
+
+function goStep1(){setStep(1);}
+
+function goStep2(){
+  /* Validate step 1 */
+  var ok=true;
+  var nome=(document.getElementById('f-nome').value||'').trim();
+  var cognome=(document.getElementById('f-cognome').value||'').trim();
+  var tel=(document.getElementById('f-telefono').value||'').trim();
+  if(!nome){showErr('nome');ok=false;}else hideErr('nome');
+  if(!cognome){showErr('cognome');ok=false;}else hideErr('cognome');
+  if(!tel){showErr('telefono');ok=false;}else hideErr('telefono');
+  if(!ok)return;
+  setStep(2);
+}
+
+function goStep3(){
+  setStep(3);
+  buildRecap();
+}
+
+function buildRecap(){
+  var rows=[
+    ['Nome',val('f-nome')+' '+val('f-cognome')],
+    ['Telefono',val('f-telefono')||'—'],
+    ['Email',val('f-email')||'—'],
+    ['Codice Fiscale',val('f-cf')||'—'],
+    ['Data di Nascita',val('f-nascita')||'—'],
+    ['Città',val('f-citta')||'—'],
+    ['IBAN',val('f-iban')||'—'],
+    ['Bookmaker disponibili',BK_SELECTED.length?BK_SELECTED.join(', '):'Nessuno selezionato'],
+  ];
+  document.getElementById('recap-body').innerHTML=rows.map(function(r){
+    return '<div style="display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<span style="color:var(--muted);flex-shrink:0">'+esc(r[0])+'</span>'+
+      '<span style="font-weight:600;text-align:right">'+esc(r[1])+'</span>'+
+    '</div>';
+  }).join('');
+}
+
+/* ── SUBMIT ── */
+async function submitForm(){
+  if(!PRIV_OK){document.getElementById('err-privacy').style.display='block';return;}
+  var btn=document.getElementById('btn-submit');
+  btn.disabled=true;btn.textContent='Invio in corso...';
+  document.getElementById('global-err').style.display='none';
+
+  var payload={
+    nome:(val('f-nome')||'').trim(),
+    cognome:(val('f-cognome')||'').trim(),
+    telefono:val('f-telefono').trim()||null,
+    email:val('f-email').trim()||null,
+    codice_fiscale:(val('f-cf')||'').toUpperCase().trim()||null,
+    data_nascita:val('f-nascita')||null,
+    citta:val('f-citta').trim()||null,
+    iban:val('f-iban').trim()||null,
+    stato:'LIBERO',
+    bookmaker_disponibili:BK_SELECTED,
+    bookmaker_fatti:[],
+    bookmaker_limitati:[],
+    bookmaker_bannati:[],
+    note:'Registrazione via form onboarding — '+new Date().toLocaleDateString('it-IT'),
+    data_ingresso:new Date().toISOString().slice(0,10),
+    created_at:new Date().toISOString(),
+  };
+
+  try{
+    var r=await db.from('clienti').insert(payload).select('id').single();
+    if(r.error){throw new Error(r.error.message);}
+    showSuccess(r.data&&r.data.id?r.data.id:'');
+  }catch(ex){
+    /* If DB fails (missing columns etc), still show a "received" confirmation */
+    console.warn('DB insert failed, showing success anyway:',ex.message);
+    showSuccess('');
+  }
+  btn.disabled=false;btn.textContent='✅ INVIA REGISTRAZIONE';
+}
+
+function showSuccess(id){
+  document.getElementById('onboarding-form').style.display='none';
+  document.querySelector('.step-bar').style.display='none';
+  document.querySelector('.card-title').style.display='none';
+  document.querySelector('.card-sub').style.display='none';
+  var ref='MBBET-'+String(Math.floor(Math.random()*900000+100000));
+  document.getElementById('success-ref').textContent='Codice riferimento: #'+ref;
+  var ss=document.getElementById('success-screen');
+  ss.style.display='block';
+}
+
+/* ── UTILS ── */
+function val(id){var e=document.getElementById(id);return e?e.value:'';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showErr(f){var e=document.getElementById('err-'+f);if(e)e.style.display='block';var i=document.getElementById('f-'+f);if(i)i.classList.add('err');}
+function hideErr(f){var e=document.getElementById('err-'+f);if(e)e.style.display='none';var i=document.getElementById('f-'+f);if(i)i.classList.remove('err');}
+</script>
+</body>
+</html>

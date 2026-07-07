@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MBBET OS — Finanze</title>
+<script>try{var _h=window.location.hash,_l=localStorage.getItem('mbbet_v2_session');if((_h&&_h.indexOf('#mbbet=')===0)||_l)document.documentElement.classList.add('mb-auth');}catch(e){}</script>
+<style>html.mb-auth #ls{display:none!important}</style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050714;--card:rgba(10,13,32,.97);--gold:#f5c842;--glow-g:rgba(245,200,66,.28);
+  --green:#00e58a;--glow-gr:rgba(0,229,138,.22);--blue:#4f9dff;--purple:#b794f4;
+  --red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;
+  --tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--br:rgba(255,255,255,.07);--sb:224px}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;overflow:hidden;font-size:14px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(245,200,66,.2);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* SIDEBAR */
+.sb{width:var(--sb);height:100vh;flex-shrink:0;background:rgba(3,4,14,.99);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;position:relative;z-index:30}
+.sb::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(245,200,66,.25) 30%,rgba(245,200,66,.25) 70%,transparent)}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.sb-crown{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 28px var(--glow-g),inset 0 1px 0 rgba(255,255,255,.25)}
+.sb-nm{font-size:14px;font-weight:900;letter-spacing:1.5px;color:var(--gold)}
+.sb-sub{font-size:8px;color:var(--tx3);letter-spacing:2px;margin-top:2px}
+.sb-sec{padding:13px 16px 3px;font-size:8px;font-weight:800;color:var(--tx4);letter-spacing:2.5px}
+.sb-lnk{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--tx3);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:.14s;text-decoration:none;position:relative}
+.sb-lnk:hover{color:var(--tx2);background:rgba(255,255,255,.022);border-left-color:rgba(245,200,66,.2)}
+.sb-lnk.act{color:var(--gold);background:rgba(245,200,66,.08);border-left-color:var(--gold);font-weight:700}
+.sb-lnk.act::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--gold);box-shadow:0 0 16px var(--glow-g)}
+.sb-lnk .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.05)}
+.sb-mode{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.14);border-radius:9px;padding:9px 12px;margin-bottom:9px}
+.sb-ml{font-size:8px;color:var(--tx3);letter-spacing:1.5px;margin-bottom:4px}
+.sb-mv{font-size:13px;font-weight:800;color:var(--gold)}
+/* PAGE */
+.pg{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:62px;padding:0 20px;flex-shrink:0;display:flex;align-items:center;gap:10px;background:rgba(3,4,14,.98);border-bottom:1px solid rgba(255,255,255,.06);position:relative;z-index:20}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,200,66,.25),transparent)}
+.tb-back{display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx3);text-decoration:none;transition:.14s;flex-shrink:0}
+.tb-back:hover{border-color:rgba(245,200,66,.3);color:var(--gold)}
+.tb-title{flex:1;text-align:center}
+.tb-g{font-size:18px;font-weight:900;letter-spacing:3px;color:var(--gold);text-shadow:0 0 28px var(--glow-g)}
+.tb-sub{font-size:9px;color:var(--tx3);margin-top:3px}
+.tb-usr{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;flex-shrink:0}
+.tb-av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000}
+.tb-info{display:flex;flex-direction:column}
+.tb-nm{font-size:11px;font-weight:700;color:var(--tx2)}
+.tb-rl{font-size:9px;color:var(--tx3)}
+.tb-logout{width:26px;height:26px;border-radius:6px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.15);cursor:pointer;font-size:11px;color:var(--red);display:flex;align-items:center;justify-content:center;transition:.14s;margin-left:4px}
+.tb-logout:hover{background:rgba(255,87,87,.18)}
+/* CONTENT */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.inner{flex:1;overflow-y:auto;padding:24px}
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px 20px;animation:fadeUp .3s ease both}
+.kpi-label{font-size:8px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;margin-bottom:8px}
+.kpi-val{font-size:28px;font-weight:900}
+.kpi-sub{font-size:10px;color:var(--tx3);margin-top:5px}
+/* TABS */
+.tabs-bar{display:flex;gap:4px;padding:0 24px;background:rgba(3,4,14,.95);border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.tab-btn{padding:14px 20px;font-size:12px;font-weight:700;color:var(--tx3);cursor:pointer;border-bottom:2px solid transparent;transition:.14s;letter-spacing:.5px;white-space:nowrap}
+.tab-btn:hover{color:var(--tx2)}
+.tab-btn.act{color:var(--gold);border-bottom-color:var(--gold)}
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:9px 14px;font-size:9px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07)}
+.data-table td{padding:12px 14px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx2)}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+.badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:8px;display:inline-block}
+.badge-g{background:rgba(0,229,138,.1);color:var(--green);border:1px solid rgba(0,229,138,.22)}
+.badge-r{background:rgba(255,87,87,.1);color:var(--red);border:1px solid rgba(255,87,87,.22)}
+.badge-b{background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.22)}
+.badge-gold{background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.22)}
+/* SPESE FORM */
+.sp-form{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px;margin-bottom:20px}
+.sp-form-grid{display:grid;grid-template-columns:1fr 1fr 120px 1fr auto;gap:12px;align-items:end}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:8.5px;font-weight:700;color:var(--tx3);letter-spacing:1.5px}
+.fg input,.fg select{padding:9px 13px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:9px;color:var(--tx);font-size:13px;outline:none;transition:.18s;font-family:inherit;width:100%}
+.fg input:focus,.fg select:focus{border-color:rgba(245,200,66,.42);background:rgba(245,200,66,.04)}
+.btn-add{padding:9px 18px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:9px;color:#000;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.16s}
+.btn-add:hover{opacity:.9;transform:translateY(-1px)}
+.btn-del{background:rgba(255,87,87,.1);border:1px solid rgba(255,87,87,.2);border-radius:7px;color:var(--red);cursor:pointer;padding:4px 10px;font-size:11px;transition:.14s}
+.btn-del:hover{background:rgba(255,87,87,.22)}
+/* BILANCIO */
+.bil-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.bil-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px}
+.bil-label{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--tx3);margin-bottom:8px}
+.bil-val{font-size:32px;font-weight:900}
+.bil-sub{font-size:11px;color:var(--tx3);margin-top:6px}
+.bil-bar{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;margin-top:12px}
+.bil-fill{height:100%;border-radius:4px;transition:.8s}
+.margine-card{background:rgba(10,13,32,.95);border:2px solid rgba(245,200,66,.25);border-radius:14px;padding:24px;text-align:center;margin-bottom:20px;box-shadow:0 0 40px rgba(245,200,66,.06)}
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 20px;color:var(--tx3)}
+.empty-ic{font-size:40px;margin-bottom:12px;opacity:.4}
+/* LOGIN */
+#ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.li-box{background:rgba(10,13,32,.99);border:1px solid rgba(245,200,66,.18);border-radius:20px;padding:40px 36px;width:340px}
+.li-logo{text-align:center;margin-bottom:28px}
+.li-t{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.li-s{font-size:10px;color:var(--tx3);margin-top:4px}
+.li-f{display:flex;flex-direction:column;gap:12px}
+.li-inp{padding:11px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx);font-size:13px;outline:none;width:100%;font-family:inherit}
+.li-inp:focus{border-color:rgba(245,200,66,.4)}
+.li-btn{padding:12px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:10px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:1px}
+.li-err{font-size:11px;color:var(--red);text-align:center;min-height:16px}
+</style>
+<script src="shared/supabase.min.js"></script>
+<script src="shared/auth.js"></script>
+</head>
+<body>
+<div id="app" style="display:flex;height:100%;flex-direction:row">
+  <!-- SIDEBAR -->
+  <div class="sb">
+    <div class="sb-logo">
+      <div class="sb-crown">&#128081;</div>
+      <div><div class="sb-nm">MBBET OS</div><div class="sb-sub">SISTEMA OPERATIVO</div></div>
+    </div>
+    <div class="sb-sec">NAVIGAZIONE</div>
+    <a class="sb-lnk" href="#" onclick="navTo('index.html');return false;"><span class="ic">&#127968;</span>Hub Centrale</a>
+    <a class="sb-lnk" href="#" onclick="navTo('01_clienti.html');return false;"><span class="ic">&#128100;</span>Clienti</a>
+    <a class="sb-lnk" href="#"><span class="ic">&#127919;</span>Bonus</a>
+    <a class="sb-lnk" href="#" onclick="navTo('03_team.html');return false;"><span class="ic">&#128101;</span>Team</a>
+    <a class="sb-lnk act"><span class="ic">&#128184;</span>Finanze</a>
+    <a class="sb-lnk" href="#"><span class="ic">&#9989;</span>Task</a>
+    <a class="sb-lnk" href="#"><span class="ic">&#128202;</span>Report</a>
+    <div class="sb-sec">SISTEMA</div>
+    <a class="sb-lnk" href="#"><span class="ic">&#9881;</span>Config</a>
+    <div class="sb-bot">
+      <div class="sb-mode"><div class="sb-ml">RUOLO ATTIVO</div><div class="sb-mv" id="sb-role">—</div></div>
+    </div>
+  </div>
+  <!-- MAIN -->
+  <div class="pg">
+    <div class="topbar">
+      <a class="tb-back" href="#" onclick="navTo('index.html');return false;">&#8592; Hub</a>
+      <div class="tb-title">
+        <div class="tb-g">FINANZE</div>
+        <div class="tb-sub">ENTRATE · SPESE · BILANCIO</div>
+      </div>
+      <div class="tb-usr">
+        <div class="tb-av" id="tb-av">MB</div>
+        <div class="tb-info"><div class="tb-nm" id="tb-nm">—</div><div class="tb-rl" id="tb-rl">—</div></div>
+        <div class="tb-logout" onclick="doLogout()" title="Esci">&#10005;</div>
+      </div>
+    </div>
+    <div class="tabs-bar">
+      <div class="tab-btn act" onclick="switchTab('entrate',this)">&#128176; Entrate</div>
+      <div class="tab-btn" onclick="switchTab('spese',this)">&#128197; Spese</div>
+      <div class="tab-btn" onclick="switchTab('bilancio',this)">&#128200; Bilancio</div>
+    </div>
+    <div class="content">
+      <!-- KPI sempre visibili -->
+      <div class="inner" id="main-inner">
+        <div class="kpi-row">
+          <div class="kpi-card" style="border-color:rgba(0,229,138,.18)">
+            <div class="kpi-label">ENTRATE MESE</div>
+            <div class="kpi-val" style="color:var(--green)" id="kv-entrate">— €</div>
+            <div class="kpi-sub" id="kv-entrate-sub">Da clienti attivi</div>
+          </div>
+          <div class="kpi-card" style="border-color:rgba(255,87,87,.18)">
+            <div class="kpi-label">SPESE MESE</div>
+            <div class="kpi-val" style="color:var(--red)" id="kv-spese">— €</div>
+            <div class="kpi-sub" id="kv-spese-sub">Inserite manualmente</div>
+          </div>
+          <div class="kpi-card" style="border-color:rgba(245,200,66,.22)">
+            <div class="kpi-label">MARGINE NETTO</div>
+            <div class="kpi-val" style="color:var(--gold)" id="kv-margine">— €</div>
+            <div class="kpi-sub" id="kv-margine-sub">Entrate - Spese</div>
+          </div>
+        </div>
+
+        <!-- TAB: ENTRATE -->
+        <div id="tab-entrate">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">&#128176; ENTRATE DA CLIENTI</div>
+            <div style="font-size:10px;color:var(--tx3)">Calcolate da clienti attivi nel CRM</div>
+          </div>
+          <div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+            <table class="data-table">
+              <thead><tr>
+                <th>CLIENTE</th><th>OPERATORE</th><th>STATO</th><th>BOOKMAKER</th><th>RICAVO PREV.</th>
+              </tr></thead>
+              <tbody id="entrate-body">
+                <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--tx3)">Caricamento...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB: SPESE -->
+        <div id="tab-spese" style="display:none">
+          <div class="sp-form">
+            <div style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px;margin-bottom:16px">&#43; NUOVA SPESA</div>
+            <div class="sp-form-grid">
+              <div class="fg"><label>DESCRIZIONE</label><input type="text" id="sp-desc" placeholder="Es: Abbonamento VPN"></div>
+              <div class="fg"><label>CATEGORIA</label>
+                <select id="sp-cat">
+                  <option value="Strumenti">Strumenti</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Operatività">Operatività</option>
+                  <option value="Pagamento Operatore">Pagamento Operatore</option>
+                  <option value="Pagamento Collab">Pagamento Collab</option>
+                  <option value="Altro">Altro</option>
+                </select>
+              </div>
+              <div class="fg"><label>IMPORTO €</label><input type="number" id="sp-imp" placeholder="0.00" min="0" step="0.01"></div>
+              <div class="fg"><label>DATA</label><input type="date" id="sp-data"></div>
+              <button class="btn-add" onclick="addSpesa()">+ Aggiungi</button>
+            </div>
+          </div>
+          <div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+            <table class="data-table">
+              <thead><tr><th>DATA</th><th>DESCRIZIONE</th><th>CATEGORIA</th><th>IMPORTO</th><th></th></tr></thead>
+              <tbody id="spese-body"></tbody>
+            </table>
+            <div id="spese-empty" class="empty-state" style="display:none">
+              <div class="empty-ic">&#128197;</div>
+              <div style="font-weight:700;margin-bottom:4px">Nessuna spesa registrata</div>
+              <div style="font-size:12px">Aggiungi la prima spesa con il form sopra</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: BILANCIO -->
+        <div id="tab-bilancio" style="display:none">
+          <div class="margine-card">
+            <div style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px;margin-bottom:8px">MARGINE NETTO MESE CORRENTE</div>
+            <div style="font-size:48px;font-weight:900;color:var(--gold)" id="bil-margine-big">— €</div>
+            <div style="font-size:12px;color:var(--tx3);margin-top:8px" id="bil-margine-sub">Calcolo da entrate e spese registrate</div>
+          </div>
+          <div class="bil-grid">
+            <div class="bil-card">
+              <div class="bil-label">ENTRATE</div>
+              <div class="bil-val" style="color:var(--green)" id="bil-entrate">— €</div>
+              <div class="bil-sub">Da clienti attivi CRM</div>
+              <div class="bil-bar"><div class="bil-fill" id="bil-bar-e" style="background:var(--green);width:0%"></div></div>
+            </div>
+            <div class="bil-card">
+              <div class="bil-label">SPESE</div>
+              <div class="bil-val" style="color:var(--red)" id="bil-spese">— €</div>
+              <div class="bil-sub">Registrate manualmente</div>
+              <div class="bil-bar"><div class="bil-fill" id="bil-bar-s" style="background:var(--red);width:0%"></div></div>
+            </div>
+          </div>
+          <div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+            <div style="padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px">SPESE PER CATEGORIA</div>
+            <div id="bil-cats" style="padding:16px 18px;display:flex;flex-direction:column;gap:10px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="ls" style="display:flex">
+  <div class="li-box">
+    <div class="li-logo"><div class="li-t">&#128081; MBBET OS</div><div class="li-s">ACCESSO RISERVATO</div></div>
+    <div class="li-f">
+      <input class="li-inp" type="email" id="li-e" placeholder="Email">
+      <input class="li-inp" type="password" id="li-p" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+      <div class="li-err" id="l-err"></div>
+      <button class="li-btn" onclick="login()">ENTRA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SPESE_KEY='mbbet_spese_v1';
+var ENTRATE_TOT=0;
+var CLIENTI_DATA=[];
+
+function fmt(n){return (n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function switchTab(name,el){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('act');});
+  el.classList.add('act');
+  ['entrate','spese','bilancio'].forEach(function(t){
+    document.getElementById('tab-'+t).style.display=t===name?'block':'none';
+  });
+  if(name==='bilancio')buildBilancio();
+}
+
+// SPESE (localStorage)
+function loadSpese(){return JSON.parse(localStorage.getItem(SPESE_KEY)||'[]');}
+function saveSpese(arr){localStorage.setItem(SPESE_KEY,JSON.stringify(arr));}
+
+function renderSpese(){
+  var arr=loadSpese();
+  var body=document.getElementById('spese-body');
+  var empty=document.getElementById('spese-empty');
+  var tot=arr.reduce(function(s,x){return s+(x.imp||0);},0);
+  document.getElementById('kv-spese').textContent=fmt(tot)+' €';
+  document.getElementById('kv-spese-sub').textContent=arr.length+' voci registrate';
+  updateMargine();
+  if(!arr.length){body.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  body.innerHTML=arr.map(function(s,i){
+    var catCol=s.cat==='Pagamento Operatore'||s.cat==='Pagamento Collab'?'badge-b':
+               s.cat==='Marketing'?'badge-gold':'badge-r';
+    return '<tr>'+
+      '<td style="color:var(--tx3);font-size:11px">'+s.data+'</td>'+
+      '<td style="font-weight:600">'+s.desc+'</td>'+
+      '<td><span class="badge '+catCol+'">'+s.cat+'</span></td>'+
+      '<td style="color:var(--red);font-weight:700">- '+fmt(s.imp)+' €</td>'+
+      '<td><button class="btn-del" onclick="delSpesa('+i+')">&#128465;</button></td>'+
+      '</tr>';
+  }).join('');
+}
+
+function addSpesa(){
+  var desc=document.getElementById('sp-desc').value.trim();
+  var cat=document.getElementById('sp-cat').value;
+  var imp=parseFloat(document.getElementById('sp-imp').value)||0;
+  var data=document.getElementById('sp-data').value||new Date().toISOString().slice(0,10);
+  if(!desc||!imp){alert('Inserisci descrizione e importo');return;}
+  var arr=loadSpese();
+  arr.unshift({desc:desc,cat:cat,imp:imp,data:data});
+  saveSpese(arr);
+  document.getElementById('sp-desc').value='';
+  document.getElementById('sp-imp').value='';
+  renderSpese();
+}
+
+function delSpesa(i){
+  if(!confirm('Eliminare questa spesa?'))return;
+  var arr=loadSpese();arr.splice(i,1);saveSpese(arr);renderSpese();
+}
+
+function updateMargine(){
+  var spese=loadSpese().reduce(function(s,x){return s+(x.imp||0);},0);
+  var margine=ENTRATE_TOT-spese;
+  document.getElementById('kv-margine').textContent=fmt(margine)+' €';
+  document.getElementById('kv-margine-sub').textContent=margine>=0?'Saldo positivo ✓':'Attenzione: saldo negativo';
+  document.getElementById('kv-margine').style.color=margine>=0?'var(--gold)':'var(--red)';
+}
+
+function buildBilancio(){
+  var spese=loadSpese();
+  var totSpese=spese.reduce(function(s,x){return s+(x.imp||0);},0);
+  var margine=ENTRATE_TOT-totSpese;
+  var tot=ENTRATE_TOT+totSpese;
+  document.getElementById('bil-margine-big').textContent=fmt(margine)+' €';
+  document.getElementById('bil-margine-big').style.color=margine>=0?'var(--gold)':'var(--red)';
+  document.getElementById('bil-margine-sub').textContent=margine>=0?'Situazione positiva — ottimo!':'Spese superiori alle entrate';
+  document.getElementById('bil-entrate').textContent=fmt(ENTRATE_TOT)+' €';
+  document.getElementById('bil-spese').textContent=fmt(totSpese)+' €';
+  var maxBar=Math.max(ENTRATE_TOT,totSpese,1);
+  document.getElementById('bil-bar-e').style.width=Math.round(ENTRATE_TOT/maxBar*100)+'%';
+  document.getElementById('bil-bar-s').style.width=Math.round(totSpese/maxBar*100)+'%';
+  // categorie
+  var cats={};spese.forEach(function(s){cats[s.cat]=(cats[s.cat]||0)+(s.imp||0);});
+  var catsEl=document.getElementById('bil-cats');
+  if(!Object.keys(cats).length){catsEl.innerHTML='<div style="color:var(--tx3);font-size:12px">Nessuna spesa registrata</div>';return;}
+  catsEl.innerHTML=Object.keys(cats).map(function(k){
+    var pct=totSpese?Math.round(cats[k]/totSpese*100):0;
+    return '<div style="display:flex;align-items:center;gap:12px">'+
+      '<div style="width:120px;font-size:11px;font-weight:600;color:var(--tx2)">'+k+'</div>'+
+      '<div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden">'+
+      '<div style="height:100%;background:var(--red);border-radius:3px;width:'+pct+'%;transition:.6s"></div></div>'+
+      '<div style="font-size:11px;font-weight:700;color:var(--red);min-width:80px;text-align:right">'+fmt(cats[k])+' €</div>'+
+      '<div style="font-size:10px;color:var(--tx3);min-width:34px">'+pct+'%</div>'+
+      '</div>';
+  }).join('');
+}
+
+async function loadEntrate(){
+  try{
+    var r=await db.from('clienti').select('nome,cognome,operatore,stato,bookmaker_disponibili');
+    if(!r.data)return;
+    CLIENTI_DATA=r.data;
+    var attivi=r.data.filter(function(c){return c.stato==='ATTIVO';});
+    var inLav=r.data.filter(function(c){return c.stato==='IN_LAVORAZIONE';});
+    var totBk=0;r.data.forEach(function(c){totBk+=(c.bookmaker_disponibili||[]).length;});
+    ENTRATE_TOT=attivi.length*68+inLav.length*34;
+    document.getElementById('kv-entrate').textContent=fmt(ENTRATE_TOT)+' €';
+    document.getElementById('kv-entrate-sub').textContent=attivi.length+' attivi · '+inLav.length+' in lavorazione';
+    updateMargine();
+    // tabella
+    var body=document.getElementById('entrate-body');
+    if(!r.data.length){
+      body.innerHTML='<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--tx3)">Nessun cliente nel CRM</td></tr>';
+      return;
+    }
+    body.innerHTML=r.data.map(function(c){
+      var nome=(c.nome||'')+' '+(c.cognome||'');
+      var bks=(c.bookmaker_disponibili||[]).length;
+      var ric=c.stato==='ATTIVO'?68:c.stato==='IN_LAVORAZIONE'?34:0;
+      var stCol=c.stato==='ATTIVO'?'badge-g':c.stato==='IN_LAVORAZIONE'?'badge-b':'';
+      return '<tr>'+
+        '<td style="font-weight:600">'+nome.trim()+'</td>'+
+        '<td style="color:var(--tx3)">'+( c.operatore||'—')+'</td>'+
+        '<td><span class="badge '+stCol+'">'+c.stato+'</span></td>'+
+        '<td style="color:var(--tx3)">'+bks+' BK</td>'+
+        '<td style="color:var(--green);font-weight:700">'+(ric?'+ '+fmt(ric)+' €':'—')+'</td>'+
+        '</tr>';
+    }).join('');
+  }catch(e){console.warn(e);}
+}
+
+function login(){var em=(document.getElementById('li-e').value||'').trim();var pw=document.getElementById('li-p').value||'';var err=document.getElementById('l-err');err.textContent='';if(!em||!pw){err.textContent='Inserisci email e password';return;}var res=doLogin(em,pw);if(res.error){err.textContent=res.error;return;}boot();}
+
+function boot(){
+  var _ls=document.getElementById('ls');if(_ls)_ls.setAttribute('style','display:none');
+  var ini=(currentNome||'MB').split(' ').map(function(w){return w[0]||''}).join('').toUpperCase().slice(0,2);
+  document.getElementById('tb-av').textContent=ini;
+  document.getElementById('tb-nm').textContent=currentNome;
+  document.getElementById('tb-rl').textContent=(currentRole||'').replace(/_/g,' ');
+  document.getElementById('sb-role').textContent=(currentRole||'').replace(/_/g,' ');
+  // set today's date as default for spesa
+  document.getElementById('sp-data').value=new Date().toISOString().slice(0,10);
+  renderSpese();
+  loadEntrate();
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  try{initAuth(function(){boot();},function(){document.getElementById('ls').style.display='flex';setTimeout(function(){var e=document.getElementById('li-e');if(e)e.focus();},80);});}
+  catch(e){document.getElementById('ls').style.display='flex';}
+});
+</script>
+</body>
+</html>

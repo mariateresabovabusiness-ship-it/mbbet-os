@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM MBBET v3.0</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;
+  --gold:#f59e0b;--gold2:#fbbf24;
+  --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
+  --green:#10b981;--red:#ef4444;--orange:#f97316;
+  --blue:#3b82f6;--purple:#a78bfa;--gray:#6b7280;
+  --sw:220px;
+}
+body{background:var(--navy);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;height:100vh;overflow:hidden;font-size:14px}
+
+/* SIDEBAR */
+#sb{width:var(--sw);min-width:var(--sw);background:var(--navy2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{padding:18px 16px 14px;border-bottom:2px solid var(--gold);text-align:center}
+.sb-logo h1{font-size:18px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.sb-logo small{font-size:10px;color:var(--muted)}
+.sb-kpi{padding:10px 14px;border-bottom:1px solid var(--border)}
+.sb-kpi-row{display:flex;justify-content:space-between;padding:3px 0;font-size:11px}
+.sb-kpi-row span:first-child{color:var(--muted)}
+.sb-kpi-row span:last-child{font-weight:700;color:var(--gold)}
+.nav-group{padding:6px 0}
+.nav-label{font-size:10px;font-weight:700;color:var(--muted);padding:6px 16px 2px;text-transform:uppercase;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .12s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(245,158,11,.08);color:var(--text)}
+.nav-item.active{background:rgba(245,158,11,.12);color:var(--gold);border-left-color:var(--gold);font-weight:700}
+.nav-item .ic{font-size:15px;width:18px;text-align:center}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--navy2);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;min-height:54px}
+.topbar h2{font-size:17px;font-weight:700;flex:1}
+#view{flex:1;overflow-y:auto;padding:24px}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:all .12s;display:inline-flex;align-items:center;gap:6px}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:var(--gold2)}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#2563eb}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:#dc2626}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#059669}
+.btn-ghost{background:var(--navy3);color:var(--text)}
+.btn-ghost:hover{background:#475569}
+.btn-sm{padding:4px 10px;font-size:12px}
+
+/* CARDS */
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:18px}
+.card-title{font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.card-val{font-size:26px;font-weight:800;color:var(--text)}
+.card-val.gold{color:var(--gold)}
+.card-val.green{color:var(--green)}
+.card-val.red{color:var(--red)}
+.card-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+
+/* TABLES */
+.tbl-wrap{background:var(--navy2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:var(--navy3);padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* BADGES */
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue)}
+.badge-gold{background:rgba(245,158,11,.15);color:var(--gold)}
+.badge-gray{background:rgba(107,114,128,.15);color:var(--gray)}
+.badge-purple{background:rgba(167,139,250,.15);color:var(--purple)}
+
+/* FORMS */
+.form-section{margin-bottom:22px}
+.form-section-title{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.form-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.form-full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+input,select,textarea{width:100%;background:var(--navy3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;transition:border-color .12s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+input[type=checkbox]{width:auto;cursor:pointer;accent-color:var(--gold);width:16px;height:16px}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+.checkbox-row label{margin-bottom:0;text-transform:none;letter-spacing:0;font-size:13px;color:var(--text)}
+textarea{resize:vertical;min-height:80px}
+select option{background:var(--navy2)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:12px;width:100%;max-width:700px;padding:24px;margin:auto}
+.modal-lg{max-width:900px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h3{font-size:18px;font-weight:800;color:var(--gold)}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ACCEPTANCE BOX */
+.acceptance-box{background:rgba(239,68,68,.08);border:2px solid var(--red);border-radius:10px;padding:16px;margin-top:8px}
+.acceptance-box p{font-size:13px;color:var(--text);margin-bottom:10px;line-height:1.5}
+.acceptance-check{display:flex;align-items:flex-start;gap:10px}
+.acceptance-check input{margin-top:2px;flex-shrink:0}
+.acceptance-check label{font-size:13px;font-weight:700;color:var(--red);text-transform:none;letter-spacing:0}
+
+/* SEARCH */
+.search-bar{position:relative;flex:1}
+.search-bar input{padding-left:36px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+
+/* QUESTION CARDS */
+.q-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.q-card-label{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.q-card-content{font-size:13px;color:var(--text);line-height:1.6}
+.q-card-empty{color:var(--muted);font-style:italic}
+.q-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.q-list li{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border)}
+.q-list li:last-child{border-bottom:none}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;animation:slideIn .2s ease;box-shadow:0 4px 20px rgba(0,0,0,.4);max-width:320px}
+.toast-success{background:#065f46;border:1px solid var(--green)}
+.toast-error{background:#7f1d1d;border:1px solid var(--red)}
+.toast-info{background:var(--navy3);border:1px solid var(--border)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* INATTIVI COLORS */
+.inattivo-mai{border-left:4px solid var(--red)!important}
+.inattivo-richiamare{border-left:4px solid var(--orange)!important}
+.inattivo-risposto{border-left:4px solid var(--blue)!important}
+.inattivo-riattivato{border-left:4px solid var(--green)!important}
+.inattivo-trasferito{border-left:4px solid var(--gray)!important}
+
+/* MISC */
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.section-header h3{font-size:16px;font-weight:700;flex:1}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.text-muted{color:var(--muted)}
+.text-gold{color:var(--gold)}
+.text-green{color:var(--green)}
+.text-red{color:var(--red)}
+.fw-700{font-weight:700}
+.mt-8{margin-top:8px}
+.mt-16{margin-top:16px}
+.gap-8{display:flex;gap:8px;align-items:center}
+.empty-state{text-align:center;padding:40px;color:var(--muted)}
+.empty-state .icon{font-size:40px;margin-bottom:8px}
+.ideas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.idea-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.idea-card h4{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--text)}
+.idea-card p{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+.idea-meta{display:flex;flex-wrap:wrap;gap:4px}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.team-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:18px}
+.team-card .avatar{width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#000;margin-bottom:12px}
+.team-card h4{font-size:16px;font-weight:800;color:var(--gold)}
+.team-card .ruolo{font-size:12px;color:var(--muted);margin-bottom:12px}
+.team-stat{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.team-stat:last-child{border-bottom:none}
+.team-stat .label{color:var(--muted)}
+.team-stat .val{font-weight:700}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-center{text-align:center;padding:40px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sb">
+  <div class="sb-logo">
+    <h1>🎯 MBBET</h1>
+    <small>CRM v3.0</small>
+  </div>
+  <div class="sb-kpi" id="sb-kpi">
+    <div class="sb-kpi-row"><span>Clienti attivi</span><span id="kpi-cli">—</span></div>
+    <div class="sb-kpi-row"><span>Bonus attivi</span><span id="kpi-bns">—</span></div>
+    <div class="sb-kpi-row"><span>Margine MBBET</span><span id="kpi-mar">—</span></div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Principale</div>
+    <div class="nav-item active" onclick="nav('dashboard')"><span class="ic">🏠</span> Dashboard</div>
+    <div class="nav-item" onclick="nav('clienti')"><span class="ic">👥</span> Clienti</div>
+    <div class="nav-item" onclick="nav('nuovo-cliente')"><span class="ic">➕</span> Nuovo Cliente</div>
+    <div class="nav-item" onclick="nav('bonus')"><span class="ic">🎰</span> Bonus</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Operativo</div>
+    <div class="nav-item" onclick="nav('task')"><span class="ic">✅</span> Task</div>
+    <div class="nav-item" onclick="nav('penali')"><span class="ic">⚠️</span> Penali</div>
+    <div class="nav-item" onclick="nav('inattivi')"><span class="ic">💤</span> Clienti Inattivi</div>
+    <div class="nav-item" onclick="nav('finanze')"><span class="ic">💰</span> Finanze</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Analytics</div>
+    <div class="nav-item" onclick="nav('economia')"><span class="ic">📊</span> Economia Master</div>
+    <div class="nav-item" onclick="nav('etica')"><span class="ic">⚖️</span> Etica Economica</div>
+    <div class="nav-item" onclick="nav('team')"><span class="ic">👔</span> Team MBBET</div>
+    <div class="nav-item" onclick="nav('collab')"><span class="ic">🤝</span> Collab</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Sistema</div>
+    <div class="nav-item" onclick="nav('ideas')"><span class="ic">💡</span> Ideas Engine</div>
+    <div class="nav-item" onclick="nav('config')"><span class="ic">⚙️</span> Config</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <h2 id="topbar-title">🏠 Dashboard</h2>
+    <div id="topbar-actions"></div>
+  </div>
+  <div id="view">
+    <div class="loading-center"><div class="spinner"></div><p style="margin-top:12px">Caricamento...</p></div>
+  </div>
+</div>
+
+<!-- MODAL: NUOVO CLIENTE -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>➕ Nuovo Cliente</h3>
+      <button class="modal-close" onclick="closeModal('modal-cliente')">×</button>
+    </div>
+    <form id="form-cliente" onsubmit="salvaCliente(event)">
+      <div class="form-section">
+        <div class="form-section-title">1 — Anagrafica</div>
+        <div class="form-grid">
+          <div><label>Nome Completo *</label><input name="nome" required placeholder="Mario Rossi"></div>
+          <div><label>Telefono</label><input name="tel" placeholder="+39 333 1234567"></div>
+          <div><label>Email</label><input name="email" type="email" placeholder="mario@email.com"></div>
+          <div><label>Email Siti Scommesse</label><input name="email_siti" placeholder="mario.scommesse@email.com"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">2 — Operatore & Provenienza</div>
+        <div class="form-grid">
+          <div><label>Operatore *</label>
+            <select name="operatore" required>
+              <option value="">Seleziona...</option>
+              <option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option>
+            </select>
+          </div>
+          <div><label>Tipologia</label>
+            <select name="tipologia">
+              <option>Organico</option><option>Referral</option><option>Collab</option><option>Social</option><option>Altro</option>
+            </select>
+          </div>
+          <div><label>Referral (nome)</label><input name="referral" placeholder="Nome di chi ha referito"></div>
+          <div><label>Collab</label><input name="collab" placeholder="Nome collaboratore"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">3 — Accessi & Documenti</div>
+        <div class="form-grid">
+          <div>
+            <div class="checkbox-row"><input type="checkbox" name="spid" id="chk-spid"><label for="chk-spid">SPID disponibile</label></div>
+            <div class="checkbox-row" style="margin-top:8px"><input type="checkbox" name="cc" id="chk-cc"><label for="chk-cc">Carta di Credito disponibile</label></div>
+          </div>
+          <div><label>Link Drive</label><input name="drive_url" placeholder="https://drive.google.com/..."></div>
+          <div><label>Stato Accettazione</label>
+            <select name="stato_acc">
+              <option>In Attesa</option><option>Accettato</option><option>Rifiutato</option>
+            </select>
+          </div>
+          <div><label>Data Prima Operazione</label><input name="data_prima_op" type="date"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">4 — Classificazione</div>
+        <div class="form-grid">
+          <div><label>Stato</label>
+            <select name="stato">
+              <option>ATTIVO</option><option>SOSPESO</option><option>CHIUSO</option>
+            </select>
+          </div>
+          <div><label>Tipologia Cliente</label>
+            <select name="tipologia_cli">
+              <option>Nuovo</option><option>Ripreso</option><option>VIP</option>
+            </select>
+          </div>
+          <div class="form-full"><label>Note</label><textarea name="note" placeholder="Note aggiuntive..."></textarea></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">5 — ⚠️ Accettazione Obbligatoria</div>
+        <div class="acceptance-box">
+          <p>Prima di procedere, il cliente deve accettare esplicitamente le condizioni operative ed economiche di MBBET. Questo campo è <strong>obbligatorio</strong>.</p>
+          <div class="acceptance-check">
+            <input type="checkbox" id="chk-accept" name="accettazione" required>
+            <label for="chk-accept">IL CLIENTE HA ACCETTATO le condizioni operative ed economiche di MBBET ✓</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-cliente')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva Cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: NUOVO BONUS -->
+<div class="modal-overlay" id="modal-bonus">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🎰 Nuovo Bonus</h3>
+      <button class="modal-close" onclick="closeModal('modal-bonus')">×</button>
+    </div>
+    <form id="form-bonus" onsubmit="salvaBonus(event)">
+      <div class="form-grid">
+        <div><label>Cliente ID</label><input name="id_cli" placeholder="MBBET-001" id="bns-idcli"></div>
+        <div><label>Nome Cliente</label><input name="cliente" placeholder="Mario Rossi" id="bns-nomecli"></div>
+        <div><label>Bookmaker *</label><select name="bookmaker" required id="bns-bk"><option value="">Seleziona...</option></select></div>
+        <div><label>Tier</label><select name="tier"><option>S+</option><option>S</option><option>A</option><option>B</option><option>C</option></select></div>
+        <div><label>Operatore</label><select name="operatore"><option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option></select></div>
+        <div><label>% Operatore</label><input name="perc_op" type="number" value="20" step="0.01"></div>
+        <div><label>Ricavo Previsto (€)</label><input name="ric_prev" type="number" step="0.01" value="0"></div>
+        <div><label>Priorità</label><select name="priorita"><option>ALTA</option><option>MEDIA</option><option>BASSA</option></select></div>
+        <div><label>Stato</label><select name="stato"><option>LIBERO</option><option>IN LAVORAZIONE</option><option>IN ATTESA</option><option>COMPLETATO</option><option>BLOCCATO</option></select></div>
+        <div><label>Prossima Azione</label><input name="pross_azione" placeholder="Es: Caricare documenti"></div>
+        <div class="form-full"><label>Note</label><textarea name="note"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-bonus')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva Bonus</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: NUOVO TASK -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✅ Nuovo Task</h3>
+      <button class="modal-close" onclick="closeModal('modal-task')">×</button>
+    </div>
+    <form id="form-task" onsubmit="salvaTask(event)">
+      <div class="form-grid">
+        <div><label>Priorità</label><select name="priorita"><option>ALTA</option><option>MEDIA</option><option>BASSA</option></select></div>
+        <div><label>Tipo</label><select name="tipo"><option>Chiamata</option><option>Documento</option><option>Bonus</option><option>Pagamento</option><option>Follow-up</option><option>Altro</option></select></div>
+        <div><label>Cliente ID</label><input name="id_cli" placeholder="MBBET-001"></div>
+        <div><label>Nome Cliente</label><input name="nome_cli"></div>
+        <div><label>Operatore</label><select name="operatore"><option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option></select></div>
+        <div><label>Scadenza</label><input name="scadenza" type="datetime-local"></div>
+        <div class="form-full"><label>Descrizione *</label><input name="descrizione" required></div>
+        <div class="form-full"><label>Note</label><textarea name="note" style="min-height:60px"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-task')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: PAGAMENTO -->
+<div class="modal-overlay" id="modal-pagamento">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💰 Registra Pagamento</h3>
+      <button class="modal-close" onclick="closeModal('modal-pagamento')">×</button>
+    </div>
+    <form id="form-pagamento" onsubmit="salvaPagamento(event)">
+      <div class="form-grid">
+        <div><label>Tipo *</label>
+          <select name="tipo" required>
+            <option>Cliente</option><option>Operatore</option><option>Referral</option><option>Collab</option><option>Penale</option><option>Altro</option>
+          </select>
+        </div>
+        <div><label>Beneficiario *</label><input name="beneficiario" required></div>
+        <div><label>Importo (€) *</label><input name="importo" type="number" step="0.01" required></div>
+        <div><label>Metodo</label><select name="metodo"><option>Bonifico</option><option>Contanti</option><option>PayPal</option><option>Revolut</option><option>Altro</option></select></div>
+        <div><label>ID Cliente</label><input name="id_cli" placeholder="MBBET-001"></div>
+        <div><label>Nome Cliente</label><input name="nome_cli"></div>
+        <div class="form-full"><label>Causale</label><input name="causale" placeholder="Es: Pagamento bonus Bet365 #BNS-00001"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-pagamento')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Registra</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: NUOVO INATTIVO -->
+<div class="modal-overlay" id="modal-inattivo">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💤 Aggiungi Cliente Inattivo</h3>
+      <button class="modal-close" onclick="closeModal('modal-inattivo')">×</button>
+    </div>
+    <form id="form-inattivo" onsubmit="salvaInattivo(event)">
+      <div class="form-grid">
+        <div><label>Nome *</label><input name="nome" required></div>
+        <div><label>Telefono</label><input name="tel"></div>
+        <div><label>Email</label><input name="email"></div>
+        <div><label>Operatore</label><select name="operatore"><option>Mary</option><option>Sere</option><option>Manu</option><option>Samu</option></select></div>
+        <div><label>Provenienza</label><input name="provenienza" placeholder="Es: Referral Mario"></div>
+        <div><label>Interesse</label><select name="interesse"><option>Alto</option><option>Medio</option><option>Basso</option><option>Sconosciuto</option></select></div>
+        <div><label>Potenziale Economico (€)</label><input name="potenziale_economico" type="number" step="0.01" value="0"></div>
+        <div><label>Prossimo Ricontatto</label><input name="data_prossimo_ricontatto" type="date"></div>
+        <div><label>Stato</label>
+          <select name="stato">
+            <option>Mai Ricontattato</option><option>Da Richiamare</option><option>Ha Risposto</option>
+          </select>
+        </div>
+        <div><label>BK Disponibili</label><input name="bk_disponibili" placeholder="Es: Bet365, Snai"></div>
+        <div class="form-full"><label>Note</label><textarea name="note" style="min-height:60px"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-inattivo')">Annulla</button>
+        <button type="submit" class="btn btn-gold">💾 Salva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: DETTAGLIO CLIENTE -->
+<div class="modal-overlay" id="modal-dettaglio">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="dettaglio-title">Cliente</h3>
+      <button class="modal-close" onclick="closeModal('modal-dettaglio')">×</button>
+    </div>
+    <div id="dettaglio-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<script src="supabase.min.js"></script>
+<script>
+window.onerror = function(msg, src, line, col) {
+  document.getElementById('view').innerHTML =
+    '<div style="padding:30px;color:#ef4444;font-size:15px">' +
+    '<b>❌ ERRORE JS</b><br><br>' + msg + '<br><br>Linea: ' + line + '</div>';
+};
+// ═══════════════════════════════════════
+// COSTANTI
+// ═══════════════════════════════════════
+const SUPA_URL = 'https://ntwqfuvcosvzpqrfpipn.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+const OPS = ['Mary','Sere','Manu','Samu'];
+
+const STATO_INR = {
+  'Mai Ricontattato': {cls:'inattivo-mai',badge:'badge-red'},
+  'Da Richiamare':    {cls:'inattivo-richiamare',badge:'badge-orange'},
+  'Ha Risposto':      {cls:'inattivo-risposto',badge:'badge-blue'},
+  'Riattivato':       {cls:'inattivo-riattivato',badge:'badge-green'},
+  'Trasferito nel CRM':{cls:'inattivo-trasferito',badge:'badge-gray'},
+};
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+const € = v => '€ ' + parseFloat(v||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fd = d => d ? new Date(d).toLocaleDateString('it-IT') : '—';
+const fdt = d => d ? new Date(d).toLocaleString('it-IT') : '—';
+
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function setView(html) { document.getElementById('view').innerHTML = html; }
+function setTopbar(title, actionsHtml='') {
+  document.getElementById('topbar-title').textContent = title;
+  document.getElementById('topbar-actions').innerHTML = actionsHtml;
+}
+
+async function nextId(table, prefix, pad) {
+  const { data } = await db.from(table).select('id').order('created_at', {ascending:false}).limit(100);
+  if (!data || !data.length) return `${prefix}-${'1'.padStart(pad,'0')}`;
+  const nums = data.map(r => {
+    const m = String(r.id).match(/(\d+)$/);
+    return m ? parseInt(m[1]) : 0;
+  });
+  return `${prefix}-${String(Math.max(...nums)+1).padStart(pad,'0')}`;
+}
+
+function statoBadge(stato) {
+  if (!stato) return '<span class="badge badge-gray">—</span>';
+  const s = stato.toUpperCase();
+  if (s.includes('ATTIV') || s==='COMPLETATO' || s==='PAGATO' || s==='OK') return `<span class="badge badge-green">${stato}</span>`;
+  if (s==='IN LAVORAZIONE' || s==='IN ATTESA' || s==='IN CALCOLO') return `<span class="badge badge-orange">${stato}</span>`;
+  if (s==='BLOCCATO' || s==='CHIUSO' || s==='SOSPESO') return `<span class="badge badge-red">${stato}</span>`;
+  if (s==='LIBERO') return `<span class="badge badge-blue">${stato}</span>`;
+  if (s==='MEDIA') return `<span class="badge badge-gold">${stato}</span>`;
+  if (s==='ALTA') return `<span class="badge badge-red">${stato}</span>`;
+  if (s==='BASSA') return `<span class="badge badge-gray">${stato}</span>`;
+  return `<span class="badge badge-gray">${stato}</span>`;
+}
+
+function tierBadge(t) {
+  const map = {'S+':'badge-purple','S':'badge-gold','A':'badge-blue','B':'badge-green','C':'badge-gray'};
+  return `<span class="badge ${map[t]||'badge-gray'}">${t||'?'}</span>`;
+}
+
+// ═══════════════════════════════════════
+// NAVIGAZIONE
+// ═══════════════════════════════════════
+const sections = {
+  dashboard: { title:'🏠 Dashboard', load: loadDashboard },
+  clienti:   { title:'👥 Clienti', load: loadClienti },
+  'nuovo-cliente': { title:'➕ Nuovo Cliente', load: loadNuovoCliente },
+  bonus:     { title:'🎰 Bonus', load: loadBonus },
+  task:      { title:'✅ Task', load: loadTask },
+  penali:    { title:'⚠️ Penali', load: loadPenali },
+  inattivi:  { title:'💤 Clienti Inattivi', load: loadInattivi },
+  finanze:   { title:'💰 Finanze', load: loadFinanze },
+  economia:  { title:'📊 Economia Master', load: loadEconomia },
+  etica:     { title:'⚖️ Etica Economica', load: loadEtica },
+  team:      { title:'👔 Team MBBET', load: loadTeam },
+  collab:    { title:'🤝 Collab', load: loadCollab },
+  ideas:     { title:'💡 Ideas Engine', load: loadIdeas },
+  config:    { title:'⚙️ Config', load: loadConfig },
+};
+
+function nav(s) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const clicked = [...document.querySelectorAll('.nav-item')].find(el => el.getAttribute('onclick')===`nav('${s}')`);
+  if (clicked) clicked.classList.add('active');
+  const sec = sections[s];
+  if (sec) {
+    setTopbar(sec.title);
+    setView('<div class="loading-center"><div class="spinner"></div></div>');
+    sec.load();
+  }
+}
+
+// ═══════════════════════════════════════
+// SIDEBAR KPI
+// ═══════════════════════════════════════
+async function updateSidebarKPI() {
+  const [cli, bns, bonus] = await Promise.all([
+    db.from('clienti').select('id',{count:'exact'}).eq('stato','ATTIVO'),
+    db.from('bonus').select('id',{count:'exact'}).neq('stato','COMPLETATO'),
+    db.from('bonus').select('ric_real,pag_cli,perc_op,perc_collab,costi_extra'),
+  ]);
+  document.getElementById('kpi-cli').textContent = cli.count ?? '—';
+  document.getElementById('kpi-bns').textContent = bns.count ?? '—';
+  if (bonus.data) {
+    const mar = bonus.data.reduce((s,b) => {
+      const r=parseFloat(b.ric_real||0), p=parseFloat(b.pag_cli||0);
+      const co=r*parseFloat(b.perc_op||0)/100, cc=r*parseFloat(b.perc_collab||0)/100;
+      return s+(r-p-co-cc-parseFloat(b.costi_extra||0));
+    },0);
+    document.getElementById('kpi-mar').textContent = €(mar);
+  }
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD — 10 DOMANDE
+// ═══════════════════════════════════════
+async function loadDashboard() {
+  setTopbar('🏠 Dashboard', '<button class="btn btn-ghost btn-sm" onclick="loadDashboard()">🔄 Aggiorna</button>');
+  setView('<div class="loading-center"><div class="spinner"></div><p style="margin-top:12px">Connessione a Supabase...</p></div>');
+  const now = new Date();
+  const [taskR, cliR, bnsR, penR, inrR] = await Promise.all([
+    db.from('task').select('*').eq('stato','Aperto'),
+    db.from('clienti').select('*').eq('stato','ATTIVO'),
+    db.from('bonus').select('*'),
+    db.from('penali').select('*').eq('stato','In Calcolo'),
+    db.from('clienti_inattivi').select('*').neq('stato','Trasferito nel CRM'),
+  ]);
+
+  const task  = taskR.data || [];
+  const cli   = cliR.data  || [];
+  const bonus = bnsR.data  || [];
+  const pen   = penR.data  || [];
+  const inr   = inrR.data  || [];
+
+  // Calcoli
+  const margine = bonus.reduce((s,b)=>{const r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100;return s+(r-p-co-cc-parseFloat(b.costi_extra||0));},0);
+  const ricavoTot = bonus.reduce((s,b)=>s+parseFloat(b.ric_real||0),0);
+  const penTot    = pen.reduce((s,p)=>s+parseFloat(p.tot_penale||0),0);
+
+  // Task per operatore
+  const taskByOp = {};
+  task.forEach(t=>{ taskByOp[t.operatore]=(taskByOp[t.operatore]||0)+1; });
+  const taskScaduti = task.filter(t=>t.scadenza && new Date(t.scadenza)<now);
+
+  // Clienti urgenti (penale_att)
+  const cliUrgenti = cli.filter(c=>c.penale_att);
+
+  // Top clienti per bonus
+  const bonusPerCli = {};
+  bonus.forEach(b=>{
+    if(!b.id_cli)return;
+    bonusPerCli[b.id_cli]=(bonusPerCli[b.id_cli]||{nome:b.cliente||b.id_cli,tot:0});
+    bonusPerCli[b.id_cli].tot+=parseFloat(b.ric_real||0);
+  });
+  const topCli = Object.values(bonusPerCli).sort((a,b)=>b.tot-a.tot).slice(0,5);
+
+  // Inattivi da ricontattare oggi
+  const oggi = now.toISOString().slice(0,10);
+  const daRicontattare = inr.filter(i=>i.data_prossimo_ricontatto && i.data_prossimo_ricontatto<=oggi);
+
+  // Bonus liberi top
+  const bonusLiberi = bonus.filter(b=>b.stato==='LIBERO').sort((a,b)=>{
+    const tier = {'S+':0,'S':1,'A':2,'B':3,'C':4};
+    return (tier[a.tier]??5)-(tier[b.tier]??5);
+  }).slice(0,5);
+
+  setView(`
+    <div class="grid-4">
+      <div class="card"><div class="card-title">Margine MBBET</div><div class="card-val ${margine>=0?'green':'red'}">${€(margine)}</div><div class="card-sub">Ricavo totale: ${€(ricavoTot)}</div></div>
+      <div class="card"><div class="card-title">Task Aperti</div><div class="card-val gold">${task.length}</div><div class="card-sub">${taskScaduti.length} scaduti</div></div>
+      <div class="card"><div class="card-title">Penali Attive</div><div class="card-val ${penTot>0?'red':'green'}">${€(penTot)}</div><div class="card-sub">${pen.length} in calcolo</div></div>
+      <div class="card"><div class="card-title">Inattivi da Richiamare</div><div class="card-val orange">${daRicontattare.length}</div><div class="card-sub">di ${inr.length} totali</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px">
+      <div class="q-card">
+        <div class="q-card-label">1 · Chi lavora cosa oggi?</div>
+        <ul class="q-list">${OPS.map(op=>`<li><span style="font-weight:700;color:var(--gold);width:50px">${op}</span><span>${taskByOp[op]||0} task aperti</span></li>`).join('')}</ul>
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">2 · Clienti urgenti</div>
+        ${cliUrgenti.length ? `<ul class="q-list">${cliUrgenti.slice(0,5).map(c=>`<li><span style="color:var(--red)">⚠️</span><span>${c.nome}</span><span class="text-muted" style="margin-left:auto">${c.operatore}</span></li>`).join('')}</ul>` : '<div class="q-card-empty">Nessun cliente urgente ✓</div>'}
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">3 · Chi genera più soldi?</div>
+        ${topCli.length ? `<ul class="q-list">${topCli.map((c,i)=>`<li><span style="color:var(--gold)">#${i+1}</span><span>${c.nome}</span><span style="margin-left:auto;font-weight:700;color:var(--green)">${€(c.tot)}</span></li>`).join('')}</ul>` : '<div class="q-card-empty">Nessun dato bonus</div>'}
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">4 · Task scaduti</div>
+        ${taskScaduti.length ? `<ul class="q-list">${taskScaduti.slice(0,5).map(t=>`<li><span style="color:var(--red)">🔴</span><span>${t.descrizione||'—'}</span><span class="text-muted" style="margin-left:auto">${t.operatore}</span></li>`).join('')}</ul>` : '<div class="q-card-empty">Nessun task scaduto ✓</div>'}
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">5 · Margine reale MBBET</div>
+        <div style="font-size:32px;font-weight:900;color:${margine>=0?'var(--green)':'var(--red)'};margin-bottom:8px">${€(margine)}</div>
+        <div style="font-size:12px;color:var(--muted)">Ricavo ${€(ricavoTot)} · Penali ${€(penTot)}</div>
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">6 · Bonus liberi per tier</div>
+        ${bonusLiberi.length ? `<ul class="q-list">${bonusLiberi.map(b=>`<li>${tierBadge(b.tier)}<span>${b.bookmaker}</span><span class="text-muted" style="margin-left:auto">${b.cliente||'—'}</span></li>`).join('')}</ul>` : '<div class="q-card-empty">Nessun bonus libero</div>'}
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">7 · Inattivi da ricontattare oggi</div>
+        ${daRicontattare.length ? `<ul class="q-list">${daRicontattare.slice(0,5).map(i=>`<li><span style="font-weight:700">${i.nome}</span><span class="text-muted" style="margin-left:auto">${i.operatore}</span></li>`).join('')}</ul>` : '<div class="q-card-empty">Nessuno da richiamare oggi ✓</div>'}
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">8 · Penali in calcolo</div>
+        ${pen.length ? `<ul class="q-list">${pen.slice(0,5).map(p=>`<li><span>${p.nome_cli||'—'}</span><span style="margin-left:auto;color:var(--red);font-weight:700">${€(p.tot_penale)}</span></li>`).join('')}</ul>` : '<div class="q-card-empty">Nessuna penale attiva ✓</div>'}
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">9 · Operatori ranking</div>
+        <ul class="q-list">${OPS.map(op=>{const r=bonus.filter(b=>b.operatore===op).reduce((s,b)=>s+parseFloat(b.ric_real||0),0);return {op,r};}).sort((a,b)=>b.r-a.r).map((x,i)=>`<li><span style="color:var(--gold)">#${i+1} ${x.op}</span><span style="margin-left:auto;font-weight:700">${€(x.r)}</span></li>`).join('')}</ul>
+      </div>
+      <div class="q-card">
+        <div class="q-card-label">10 · Clienti attivi per operatore</div>
+        <ul class="q-list">${OPS.map(op=>{const n=cli.filter(c=>c.operatore===op).length;return `<li><span style="font-weight:700;color:var(--gold)">${op}</span><span style="margin-left:auto">${n} clienti</span></li>`;}).join('')}</ul>
+      </div>
+    </div>
+  `);
+}
+
+// ═══════════════════════════════════════
+// CLIENTI
+// ═══════════════════════════════════════
+let _clienti = [];
+
+async function loadClienti() {
+  setTopbar('👥 Clienti', `
+    <div class="search-bar"><span class="search-icon">🔍</span><input id="cli-search" placeholder="Cerca nome, ID, tel..." oninput="filterClienti(this.value)" style="width:220px"></div>
+    <button class="btn btn-ghost btn-sm" onclick="loadClienti()">🔄</button>
+    <button class="btn btn-gold btn-sm" onclick="openModal('modal-cliente')">➕ Nuovo</button>
+  `);
+  const { data, error } = await db.from('clienti').select('*').order('created_at',{ascending:false});
+  if (error) { toast('Errore caricamento clienti','error'); return; }
+  _clienti = data || [];
+  renderClienti(_clienti);
+}
+
+function filterClienti(q) {
+  const r = q.toLowerCase();
+  renderClienti(_clienti.filter(c =>
+    (c.nome||'').toLowerCase().includes(r) ||
+    (c.id||'').toLowerCase().includes(r) ||
+    (c.tel||'').includes(r) ||
+    (c.operatore||'').toLowerCase().includes(r)
+  ));
+}
+
+function renderClienti(data) {
+  if (!data.length) { setView('<div class="empty-state"><div class="icon">👥</div><p>Nessun cliente trovato</p></div>'); return; }
+  setView(`
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Nome</th><th>Operatore</th><th>Tel</th><th>Stato</th><th>Tipo</th><th>SPID</th><th>CC</th><th>Data Ingresso</th><th>Note</th><th></th></tr></thead>
+        <tbody>
+          ${data.map(c=>`
+            <tr>
+              <td><span class="text-gold fw-700">${c.id}</span></td>
+              <td><span class="fw-700">${c.nome}</span></td>
+              <td>${c.operatore||'—'}</td>
+              <td>${c.tel||'—'}</td>
+              <td>${statoBadge(c.stato)}</td>
+              <td><span class="badge ${c.tipologia_cli==='VIP'?'badge-gold':c.tipologia_cli==='Ripreso'?'badge-blue':'badge-gray'}">${c.tipologia_cli||'Nuovo'}</span></td>
+              <td>${c.spid?'✅':'❌'}</td>
+              <td>${c.cc?'✅':'❌'}</td>
+              <td>${fd(c.data_ingresso)}</td>
+              <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.note||'—'}</td>
+              <td><button class="btn btn-ghost btn-sm" onclick="dettaglioCliente('${c.id}')">👁</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted)">${data.length} clienti</div>
+  `);
+}
+
+async function dettaglioCliente(id) {
+  const { data:c } = await db.from('clienti').select('*').eq('id',id).single();
+  if (!c) return;
+  const [bns, task, pen] = await Promise.all([
+    db.from('bonus').select('*').eq('id_cli',id),
+    db.from('task').select('*').eq('id_cli',id),
+    db.from('penali').select('*').eq('id_cli',id),
+  ]);
+  document.getElementById('dettaglio-title').textContent = `${c.id} — ${c.nome}`;
+  document.getElementById('dettaglio-body').innerHTML = `
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Stato</div><div class="card-val" style="font-size:18px">${statoBadge(c.stato)}</div></div>
+      <div class="card"><div class="card-title">Operatore</div><div class="card-val" style="font-size:18px">${c.operatore||'—'}</div></div>
+      <div class="card"><div class="card-title">Tipo</div><div class="card-val" style="font-size:18px">${c.tipologia_cli||'Nuovo'}</div></div>
+    </div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div><span class="text-muted">Tel:</span> ${c.tel||'—'}</div>
+      <div><span class="text-muted">Email:</span> ${c.email||'—'}</div>
+      <div><span class="text-muted">Email Siti:</span> ${c.email_siti||'—'}</div>
+      <div><span class="text-muted">Referral:</span> ${c.referral||'—'}</div>
+      <div><span class="text-muted">Collab:</span> ${c.collab||'—'}</div>
+      <div><span class="text-muted">SPID:</span> ${c.spid?'✅ Sì':'❌ No'}</div>
+      <div><span class="text-muted">CC:</span> ${c.cc?'✅ Sì':'❌ No'}</div>
+      <div><span class="text-muted">Data Ingresso:</span> ${fd(c.data_ingresso)}</div>
+      <div><span class="text-muted">Prima Op:</span> ${fd(c.data_prima_op)}</div>
+      <div><span class="text-muted">Penale Att:</span> ${c.penale_att?'⚠️ Sì':'No'}</div>
+    </div>
+    ${c.drive_url?`<div style="margin-bottom:12px"><a href="${c.drive_url}" target="_blank" class="btn btn-blue btn-sm">📁 Apri Drive</a></div>`:''}
+    <div style="margin-bottom:12px"><strong>Note:</strong> ${c.note||'—'}</div>
+    <div class="divider"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">Bonus (${bns.data?.length||0})</div>
+    ${bns.data?.length ? `<div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Bookmaker</th><th>Tier</th><th>Stato</th><th>Ricavo</th></tr></thead><tbody>${bns.data.map(b=>`<tr><td>${b.id}</td><td>${b.bookmaker}</td><td>${tierBadge(b.tier)}</td><td>${statoBadge(b.stato)}</td><td class="text-green">${€(b.ric_real)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="text-muted">Nessun bonus</div>'}
+    <div class="divider"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">Task (${task.data?.length||0})</div>
+    ${task.data?.length ? `<ul class="q-list">${task.data.map(t=>`<li>${statoBadge(t.priorita)}<span>${t.descrizione}</span><span class="text-muted" style="margin-left:auto">${fd(t.scadenza)}</span></li>`).join('')}</ul>` : '<div class="text-muted">Nessun task</div>'}
+    <div class="modal-footer" style="margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-dettaglio')">Chiudi</button>
+      <button class="btn btn-gold" onclick="closeModal('modal-dettaglio');openModal('modal-bonus');document.getElementById('bns-idcli').value='${c.id}';document.getElementById('bns-nomecli').value='${c.nome}'">➕ Bonus</button>
+    </div>
+  `;
+  openModal('modal-dettaglio');
+}
+
+// ═══════════════════════════════════════
+// SALVA CLIENTE
+// ═══════════════════════════════════════
+async function salvaCliente(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const accettazione = document.getElementById('chk-accept').checked;
+  if (!accettazione) { toast('⚠️ Il cliente deve accettare le condizioni!','error'); return; }
+
+  const id = await nextId('clienti','MBBET',3);
+  const { error } = await db.from('clienti').insert({
+    id, nome:f.get('nome'), tel:f.get('tel')||null, email:f.get('email')||null,
+    email_siti:f.get('email_siti')||null, operatore:f.get('operatore'),
+    tipologia:f.get('tipologia'), referral:f.get('referral')||null,
+    collab:f.get('collab')||null, spid:f.get('spid')==='on',
+    cc:f.get('cc')==='on', drive_url:f.get('drive_url')||null,
+    stato_acc:f.get('stato_acc'), data_prima_op:f.get('data_prima_op')||null,
+    stato:f.get('stato'), tipologia_cli:f.get('tipologia_cli'), note:f.get('note')||null,
+    data_ingresso: new Date().toISOString().slice(0,10),
+  });
+  if (error) { toast('Errore: '+error.message,'error'); return; }
+  toast(`✅ Cliente ${id} salvato!`,'success');
+  closeModal('modal-cliente');
+  e.target.reset();
+  loadClienti();
+  updateSidebarKPI();
+}
+
+// ═══════════════════════════════════════
+// NUOVO CLIENTE (sezione dedicata)
+// ═══════════════════════════════════════
+function loadNuovoCliente() {
+  setTopbar('➕ Nuovo Cliente');
+  setView('<div class="card" style="max-width:700px"><p>Usa il pulsante <strong>➕ Nuovo</strong> nella sezione Clienti, oppure clicca qui:</p><br><button class="btn btn-gold" onclick="nav(\'clienti\');setTimeout(()=>openModal(\'modal-cliente\'),500)">➕ Apri Form Nuovo Cliente</button></div>');
+}
+
+// ═══════════════════════════════════════
+// BONUS
+// ═══════════════════════════════════════
+let _bonus = [];
+
+async function loadBonus() {
+  setTopbar('🎰 Bonus', `
+    <select id="bns-filter-op" onchange="filterBonus()" style="background:var(--navy3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px">
+      <option value="">Tutti gli operatori</option>
+      ${OPS.map(o=>`<option>${o}</option>`).join('')}
+    </select>
+    <select id="bns-filter-stato" onchange="filterBonus()" style="background:var(--navy3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px">
+      <option value="">Tutti gli stati</option>
+      <option>LIBERO</option><option>IN LAVORAZIONE</option><option>IN ATTESA</option><option>COMPLETATO</option><option>BLOCCATO</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="loadBonus()">🔄</button>
+    <button class="btn btn-gold btn-sm" onclick="openModal('modal-bonus');loadBookmakerOptions()">➕ Nuovo</button>
+  `);
+  const { data } = await db.from('bonus').select('*').order('created_at',{ascending:false});
+  _bonus = data || [];
+  renderBonus(_bonus);
+}
+
+function filterBonus() {
+  const op    = document.getElementById('bns-filter-op')?.value;
+  const stato = document.getElementById('bns-filter-stato')?.value;
+  renderBonus(_bonus.filter(b =>
+    (!op    || b.operatore===op) &&
+    (!stato || b.stato===stato)
+  ));
+}
+
+function renderBonus(data) {
+  if (!data.length) { setView('<div class="empty-state"><div class="icon">🎰</div><p>Nessun bonus</p></div>'); return; }
+  const totRic = data.reduce((s,b)=>s+parseFloat(b.ric_real||0),0);
+  const totMar = data.reduce((s,b)=>{const r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100;return s+(r-p-co-cc-parseFloat(b.costi_extra||0));},0);
+  setView(`
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Totale</div><div class="card-val gold">${data.length}</div></div>
+      <div class="card"><div class="card-title">Ricavo Reale</div><div class="card-val green">${€(totRic)}</div></div>
+      <div class="card"><div class="card-title">Margine</div><div class="card-val ${totMar>=0?'green':'red'}">${€(totMar)}</div></div>
+      <div class="card"><div class="card-title">Liberi</div><div class="card-val blue">${data.filter(b=>b.stato==='LIBERO').length}</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Cliente</th><th>Bookmaker</th><th>Tier</th><th>Operatore</th><th>Stato</th><th>Prior.</th><th>Ric.Prev</th><th>Ric.Reale</th><th>Pag.Cli</th><th>Margine</th><th>Pross. Azione</th></tr></thead>
+        <tbody>
+          ${data.map(b=>{
+            const r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100,mar=r-p-co-cc-parseFloat(b.costi_extra||0);
+            return `<tr>
+              <td><span class="text-gold fw-700">${b.id}</span></td>
+              <td>${b.cliente||'—'}<br><small class="text-muted">${b.id_cli||''}</small></td>
+              <td><strong>${b.bookmaker}</strong></td>
+              <td>${tierBadge(b.tier)}</td>
+              <td>${b.operatore||'—'}</td>
+              <td>${statoBadge(b.stato)}</td>
+              <td>${statoBadge(b.priorita)}</td>
+              <td>${€(b.ric_prev)}</td>
+              <td class="text-green">${€(b.ric_real)}</td>
+              <td>${€(b.pag_cli)}</td>
+              <td class="${mar>=0?'text-green':'text-red'} fw-700">${€(mar)}</td>
+              <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.pross_azione||'—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted)">${data.length} bonus</div>
+  `);
+}
+
+async function loadBookmakerOptions() {
+  const sel = document.getElementById('bns-bk');
+  if (!sel || sel.options.length > 1) return;
+  const { data } = await db.from('bookmaker').select('nome,tier').eq('attivo',true).order('nome');
+  if (data) data.forEach(b=>{ const o=document.createElement('option'); o.value=b.nome; o.textContent=`${b.nome} [${b.tier}]`; sel.appendChild(o); });
+}
+
+async function salvaBonus(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const id = await nextId('bonus','BNS',5);
+  const { error } = await db.from('bonus').insert({
+    id, id_cli:f.get('id_cli')||null, cliente:f.get('cliente')||null,
+    bookmaker:f.get('bookmaker'), tier:f.get('tier'), operatore:f.get('operatore'),
+    perc_op:parseFloat(f.get('perc_op')||20), stato:f.get('stato'),
+    priorita:f.get('priorita'), ric_prev:parseFloat(f.get('ric_prev')||0),
+    pross_azione:f.get('pross_azione')||null, note:f.get('note')||null,
+  });
+  if (error) { toast('Errore: '+error.message,'error'); return; }
+  toast(`✅ Bonus ${id} salvato!`,'success');
+  closeModal('modal-bonus');
+  e.target.reset();
+  loadBonus();
+}
+
+// ═══════════════════════════════════════
+// TASK
+// ═══════════════════════════════════════
+async function loadTask() {
+  setTopbar('✅ Task', `
+    <select id="task-filter-op" onchange="filterTask()" style="background:var(--navy3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px">
+      <option value="">Tutti</option>${OPS.map(o=>`<option>${o}</option>`).join('')}
+    </select>
+    <select id="task-filter-stato" onchange="filterTask()" style="background:var(--navy3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px">
+      <option value="">Tutti stati</option><option>Aperto</option><option>In Corso</option><option>Chiuso</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="loadTask()">🔄</button>
+    <button class="btn btn-gold btn-sm" onclick="openModal('modal-task')">➕ Nuovo</button>
+  `);
+  const { data } = await db.from('task').select('*').order('scadenza',{ascending:true,nullsFirst:false});
+  window._task = data || [];
+  renderTask(window._task);
+}
+
+function filterTask() {
+  const op    = document.getElementById('task-filter-op')?.value;
+  const stato = document.getElementById('task-filter-stato')?.value;
+  renderTask((window._task||[]).filter(t=>(!op||t.operatore===op)&&(!stato||t.stato===stato)));
+}
+
+function renderTask(data) {
+  const now = new Date();
+  if (!data.length) { setView('<div class="empty-state"><div class="icon">✅</div><p>Nessun task</p></div>'); return; }
+  setView(`
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Priorità</th><th>Tipo</th><th>Cliente</th><th>Operatore</th><th>Descrizione</th><th>Scadenza</th><th>Stato</th><th></th></tr></thead>
+        <tbody>
+          ${data.map(t=>{
+            const scad = t.scadenza ? new Date(t.scadenza) : null;
+            const late = scad && scad < now && t.stato !== 'Chiuso';
+            return `<tr style="${late?'background:rgba(239,68,68,.05)':''}">
+              <td><span class="text-gold">${t.id}</span></td>
+              <td>${statoBadge(t.priorita)}</td>
+              <td>${t.tipo||'—'}</td>
+              <td>${t.nome_cli||t.id_cli||'—'}</td>
+              <td>${t.operatore||'—'}</td>
+              <td>${t.descrizione||'—'}</td>
+              <td>${scad?`<span class="${late?'text-red':''}">${fdt(scad)}</span>`:'—'}</td>
+              <td>${statoBadge(t.stato)}</td>
+              <td>
+                ${t.stato!=='Chiuso'?`<button class="btn btn-green btn-sm" onclick="chiudiTask('${t.id}')">✓</button>`:''}
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted)">${data.length} task</div>
+  `);
+}
+
+async function chiudiTask(id) {
+  await db.from('task').update({stato:'Chiuso'}).eq('id',id);
+  toast('Task chiuso','success');
+  loadTask();
+}
+
+async function salvaTask(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const id = await nextId('task','TSK',5);
+  const { error } = await db.from('task').insert({
+    id, priorita:f.get('priorita'), tipo:f.get('tipo'),
+    id_cli:f.get('id_cli')||null, nome_cli:f.get('nome_cli')||null,
+    operatore:f.get('operatore'), descrizione:f.get('descrizione'),
+    scadenza:f.get('scadenza')||null, stato:'Aperto', note:f.get('note')||null,
+    data_creazione: new Date().toISOString(),
+  });
+  if (error) { toast('Errore: '+error.message,'error'); return; }
+  toast(`✅ Task ${id} salvato!`,'success');
+  closeModal('modal-task');
+  e.target.reset();
+  loadTask();
+}
+
+// ═══════════════════════════════════════
+// PENALI
+// ═══════════════════════════════════════
+async function loadPenali() {
+  setTopbar('⚠️ Penali');
+  const { data } = await db.from('penali').select('*').order('created_at',{ascending:false});
+  const pen = data || [];
+  const totAttive = pen.filter(p=>p.stato==='In Calcolo').reduce((s,p)=>s+parseFloat(p.tot_penale||0),0);
+  setView(`
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Penali Attive</div><div class="card-val red">${pen.filter(p=>p.stato==='In Calcolo').length}</div></div>
+      <div class="card"><div class="card-title">Totale Penali</div><div class="card-val red">${€(totAttive)}</div></div>
+      <div class="card"><div class="card-title">Chiuse</div><div class="card-val green">${pen.filter(p=>p.stato==='Chiusa').length}</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Cliente</th><th>Operatore</th><th>Data Acc.</th><th>Data Inizio</th><th>GG Ritardo</th><th>€/giorno</th><th>Totale</th><th>Stato</th></tr></thead>
+        <tbody>
+          ${pen.map(p=>`<tr>
+            <td><span class="text-gold">${p.id}</span></td>
+            <td>${p.nome_cli||'—'}</td>
+            <td>${p.operatore||'—'}</td>
+            <td>${fd(p.data_acc)}</td>
+            <td>${fd(p.data_inizio)}</td>
+            <td>${p.gg_ritardo||0}</td>
+            <td>${€(p.penale_gg)}</td>
+            <td class="text-red fw-700">${€(p.tot_penale)}</td>
+            <td>${statoBadge(p.stato)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${!pen.length?'<div class="empty-state"><div class="icon">⚠️</div><p>Nessuna penale</p></div>':''}
+  `);
+}
+
+// ═══════════════════════════════════════
+// CLIENTI INATTIVI
+// ═══════════════════════════════════════
+let _inattivi = [];
+
+async function loadInattivi() {
+  setTopbar('💤 Clienti Inattivi', `
+    <select id="inr-filter" onchange="filterInattivi()" style="background:var(--navy3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px">
+      <option value="">Tutti</option>
+      <option>Mai Ricontattato</option><option>Da Richiamare</option><option>Ha Risposto</option><option>Riattivato</option><option>Trasferito nel CRM</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="loadInattivi()">🔄</button>
+    <button class="btn btn-gold btn-sm" onclick="openModal('modal-inattivo')">➕ Aggiungi</button>
+  `);
+  const { data } = await db.from('clienti_inattivi').select('*').order('created_at',{ascending:false});
+  _inattivi = data || [];
+
+  const tot     = _inattivi.length;
+  const oggi    = new Date().toISOString().slice(0,10);
+  const daRich  = _inattivi.filter(i=>i.data_prossimo_ricontatto<=oggi && i.stato!=='Trasferito nel CRM').length;
+  const riatt   = _inattivi.filter(i=>i.stato==='Trasferito nel CRM').length;
+  const conv    = tot>0 ? ((riatt/tot)*100).toFixed(1) : 0;
+  const potTot  = _inattivi.filter(i=>i.stato!=='Trasferito nel CRM').reduce((s,i)=>s+parseFloat(i.potenziale_economico||0),0);
+  const topOp   = (() => {
+    const m={}; _inattivi.filter(i=>i.stato==='Trasferito nel CRM').forEach(i=>m[i.operatore_trasferimento||'?']=(m[i.operatore_trasferimento||'?']||0)+1);
+    return Object.entries(m).sort((a,b)=>b[1]-a[1])[0];
+  })();
+
+  renderInattivi(_inattivi, {tot, daRich, conv, potTot, topOp});
+}
+
+function filterInattivi() {
+  const f = document.getElementById('inr-filter')?.value;
+  const filtered = f ? _inattivi.filter(i=>i.stato===f) : _inattivi;
+  renderInattivi(filtered, null);
+}
+
+function renderInattivi(data, stats) {
+  const oggi = new Date().toISOString().slice(0,10);
+  setView(`
+    ${stats ? `
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Totale Inattivi</div><div class="card-val gold">${stats.tot}</div></div>
+      <div class="card"><div class="card-title">Da Richiamare Oggi</div><div class="card-val red">${stats.daRich}</div></div>
+      <div class="card"><div class="card-title">Conversione %</div><div class="card-val green">${stats.conv}%</div></div>
+      <div class="card"><div class="card-title">Potenziale Recuperabile</div><div class="card-val gold">${€(stats.potTot)}</div><div class="card-sub">${stats.topOp?`Top: ${stats.topOp[0]} (${stats.topOp[1]})`:'—'}</div></div>
+    </div>` : ''}
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Stato</th><th>Nome</th><th>Tel</th><th>Operatore</th><th>Ultimo Contatto</th><th>Prossimo</th><th>Tentativi</th><th>Interesse</th><th>Potenziale</th><th>BK</th><th>ID CRM</th><th></th></tr></thead>
+        <tbody>
+          ${data.map(i=>{
+            const s = STATO_INR[i.stato]||STATO_INR['Mai Ricontattato'];
+            const inRitardo = i.data_prossimo_ricontatto && i.data_prossimo_ricontatto<=oggi && i.stato!=='Trasferito nel CRM';
+            return `<tr class="${s.cls}">
+              <td><span class="badge ${s.badge}">${i.stato}</span></td>
+              <td><span class="fw-700">${i.nome}</span></td>
+              <td>${i.tel||'—'}</td>
+              <td>${i.operatore||'—'}</td>
+              <td>${fd(i.ultimo_contatto)}</td>
+              <td><span class="${inRitardo?'text-red fw-700':''}">${fd(i.data_prossimo_ricontatto)}</span></td>
+              <td>${i.num_tentativi||0}</td>
+              <td><span class="badge ${i.interesse==='Alto'?'badge-green':i.interesse==='Basso'?'badge-red':'badge-orange'}">${i.interesse||'—'}</span></td>
+              <td class="text-gold">${€(i.potenziale_economico)}</td>
+              <td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.bk_disponibili||'—'}</td>
+              <td>${i.id_cliente_crm?`<span class="text-green fw-700">${i.id_cliente_crm}</span>`:'—'}</td>
+              <td style="display:flex;gap:4px;flex-wrap:nowrap">
+                ${i.stato!=='Trasferito nel CRM'?`
+                  <button class="btn btn-ghost btn-sm" onclick="aggiornaStatoInattivo('${i.id}')">✏️</button>
+                  ${i.stato!=='Riattivato'?`<button class="btn btn-green btn-sm" onclick="riattiva('${i.id}','${i.nome.replace(/'/g,'\\'')}','${i.operatore||''}')">🔄 Riattiva</button>`:''}
+                `:'' }
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${!data.length?'<div class="empty-state"><div class="icon">💤</div><p>Nessun cliente inattivo</p></div>':''}
+    <div style="margin-top:16px;padding:12px;background:var(--navy2);border-radius:8px;border:1px solid var(--border);font-size:12px">
+      <strong>Legenda colori:</strong>
+      <span class="badge badge-red" style="margin-left:8px">Mai Ricontattato</span>
+      <span class="badge badge-orange" style="margin-left:4px">Da Richiamare</span>
+      <span class="badge badge-blue" style="margin-left:4px">Ha Risposto</span>
+      <span class="badge badge-green" style="margin-left:4px">Riattivato</span>
+      <span class="badge badge-gray" style="margin-left:4px">Trasferito nel CRM</span>
+    </div>
+  `);
+}
+
+async function riattiva(idInr, nome, operatore) {
+  if (!confirm(`Riattivare ${nome} nel CRM come nuovo cliente?`)) return;
+  const { data:inr } = await db.from('clienti_inattivi').select('*').eq('id',idInr).single();
+  if (!inr) return;
+  const newId = await nextId('clienti','MBBET',3);
+  const { error } = await db.from('clienti').insert({
+    id: newId, nome:inr.nome, tel:inr.tel||null, email:inr.email||null,
+    operatore:inr.operatore||null, referral:inr.referral||null,
+    stato:'ATTIVO', tipologia_cli:'Ripreso',
+    note:`Riattivato da inattivi il ${new Date().toLocaleDateString('it-IT')}. ${inr.note||''}`.trim(),
+    data_ingresso: new Date().toISOString().slice(0,10),
+  });
+  if (error) { toast('Errore creazione cliente: '+error.message,'error'); return; }
+  await db.from('clienti_inattivi').update({
+    stato:'Trasferito nel CRM', trasferito:true,
+    data_trasferimento:new Date().toISOString(),
+    operatore_trasferimento:operatore||'—',
+    id_cliente_crm:newId,
+  }).eq('id',idInr);
+  toast(`✅ ${nome} riattivato come ${newId}!`,'success');
+  loadInattivi();
+  updateSidebarKPI();
+}
+
+async function aggiornaStatoInattivo(id) {
+  const nuovoStato = prompt('Nuovo stato:\n1=Mai Ricontattato\n2=Da Richiamare\n3=Ha Risposto\n4=Riattivato');
+  const map={'1':'Mai Ricontattato','2':'Da Richiamare','3':'Ha Risposto','4':'Riattivato'};
+  if (!map[nuovoStato]) return;
+  await db.from('clienti_inattivi').update({
+    stato:map[nuovoStato],
+    ultimo_contatto:new Date().toISOString().slice(0,10),
+    num_tentativi: (await db.from('clienti_inattivi').select('num_tentativi').eq('id',id).single()).data?.num_tentativi+1||1,
+    updated_at:new Date().toISOString(),
+  }).eq('id',id);
+  toast('Stato aggiornato','success');
+  loadInattivi();
+}
+
+async function salvaInattivo(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const id = 'INR-'+String((_inattivi.length||0)+1).padStart(3,'0');
+  const { error } = await db.from('clienti_inattivi').insert({
+    id, nome:f.get('nome'), tel:f.get('tel')||null, email:f.get('email')||null,
+    operatore:f.get('operatore'), provenienza:f.get('provenienza')||null,
+    interesse:f.get('interesse'), potenziale_economico:parseFloat(f.get('potenziale_economico')||0),
+    data_prossimo_ricontatto:f.get('data_prossimo_ricontatto')||null,
+    stato:f.get('stato'), bk_disponibili:f.get('bk_disponibili')||null,
+    note:f.get('note')||null, trasferito:false, num_tentativi:0,
+    data_inserimento:new Date().toISOString().slice(0,10),
+  });
+  if (error) { toast('Errore: '+error.message,'error'); return; }
+  toast('✅ Cliente inattivo salvato!','success');
+  closeModal('modal-inattivo');
+  e.target.reset();
+  loadInattivi();
+}
+
+// ═══════════════════════════════════════
+// FINANZE
+// ═══════════════════════════════════════
+async function loadFinanze() {
+  setTopbar('💰 Finanze', `<button class="btn btn-gold btn-sm" onclick="openModal('modal-pagamento')">➕ Pagamento</button>`);
+  const { data:pag } = await db.from('pagamenti').select('*').order('data_pag',{ascending:false});
+  const p = pag || [];
+  const totIn  = p.filter(x=>x.tipo==='Cliente'||x.tipo==='Penale').reduce((s,x)=>s+parseFloat(x.importo||0),0);
+  const totOut = p.filter(x=>x.tipo!=='Cliente'&&x.tipo!=='Penale').reduce((s,x)=>s+parseFloat(x.importo||0),0);
+  setView(`
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Tot. Pagamenti</div><div class="card-val gold">${p.length}</div></div>
+      <div class="card"><div class="card-title">Entrate (Cli+Pen)</div><div class="card-val green">${€(totIn)}</div></div>
+      <div class="card"><div class="card-title">Uscite</div><div class="card-val red">${€(totOut)}</div></div>
+      <div class="card"><div class="card-title">Saldo</div><div class="card-val ${totIn-totOut>=0?'green':'red'}">${€(totIn-totOut)}</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Data</th><th>Tipo</th><th>Beneficiario</th><th>Importo</th><th>Metodo</th><th>Causale</th><th>Stato</th></tr></thead>
+        <tbody>
+          ${p.map(x=>`<tr>
+            <td><span class="text-gold">${x.id}</span></td>
+            <td>${fd(x.data_pag)}</td>
+            <td><span class="badge ${x.tipo==='Cliente'?'badge-blue':x.tipo==='Operatore'?'badge-gold':x.tipo==='Penale'?'badge-red':'badge-gray'}">${x.tipo}</span></td>
+            <td>${x.beneficiario}</td>
+            <td class="${x.tipo==='Cliente'||x.tipo==='Penale'?'text-green':'text-red'} fw-700">${€(x.importo)}</td>
+            <td>${x.metodo||'—'}</td>
+            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.causale||'—'}</td>
+            <td>${statoBadge(x.stato)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${!p.length?'<div class="empty-state"><div class="icon">💰</div><p>Nessun pagamento</p></div>':''}
+  `);
+}
+
+async function salvaPagamento(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const id = await nextId('pagamenti','PAG',4);
+  const { error } = await db.from('pagamenti').insert({
+    id, tipo:f.get('tipo'), beneficiario:f.get('beneficiario'),
+    importo:parseFloat(f.get('importo')), metodo:f.get('metodo'),
+    id_cli:f.get('id_cli')||null, nome_cli:f.get('nome_cli')||null,
+    causale:f.get('causale')||null, stato:'Pagato',
+    data_pag:new Date().toISOString(),
+  });
+  if (error) { toast('Errore: '+error.message,'error'); return; }
+  toast('✅ Pagamento registrato!','success');
+  closeModal('modal-pagamento');
+  e.target.reset();
+  loadFinanze();
+}
+
+// ═══════════════════════════════════════
+// ECONOMIA MASTER — 14 KPI
+// ═══════════════════════════════════════
+async function loadEconomia() {
+  setTopbar('📊 Economia Master', '<button class="btn btn-ghost btn-sm" onclick="loadEconomia()">🔄</button>');
+  setView('<div class="loading-center"><div class="spinner"></div></div>');
+
+  const [bnsR, cliR, penR, pagR, inrR] = await Promise.all([
+    db.from('bonus').select('*'),
+    db.from('clienti').select('id,nome,stato,operatore'),
+    db.from('penali').select('tot_penale,stato'),
+    db.from('pagamenti').select('*'),
+    db.from('clienti_inattivi').select('stato,potenziale_economico'),
+  ]);
+  const bns=bnsR.data||[], cli=cliR.data||[], pen=penR.data||[], pag=pagR.data||[], inr=inrR.data||[];
+
+  const ricTot    = bns.reduce((s,b)=>s+parseFloat(b.ric_real||0),0);
+  const pagCli    = bns.reduce((s,b)=>s+parseFloat(b.pag_cli||0),0);
+  const compOp    = bns.reduce((s,b)=>s+parseFloat(b.ric_real||0)*parseFloat(b.perc_op||0)/100,0);
+  const compCollab= bns.reduce((s,b)=>s+parseFloat(b.ric_real||0)*parseFloat(b.perc_collab||0)/100,0);
+  const costiEx   = bns.reduce((s,b)=>s+parseFloat(b.costi_extra||0),0);
+  const penTot    = pen.filter(p=>p.stato==='In Calcolo').reduce((s,p)=>s+parseFloat(p.tot_penale||0),0);
+  const margine   = ricTot-pagCli-compOp-compCollab-costiEx;
+
+  // Clienti profittevoli / in perdita
+  const bnsPerCli = {};
+  bns.forEach(b=>{
+    if(!b.id_cli)return;
+    if(!bnsPerCli[b.id_cli]) bnsPerCli[b.id_cli]={mar:0};
+    const r=parseFloat(b.ric_real||0),p2=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100;
+    bnsPerCli[b.id_cli].mar+=r-p2-co-cc-parseFloat(b.costi_extra||0);
+  });
+  const profitt = Object.values(bnsPerCli).filter(x=>x.mar>0).length;
+  const inPerd  = Object.values(bnsPerCli).filter(x=>x.mar<0).length;
+
+  // Top bookmaker
+  const bkMap={};
+  bns.forEach(b=>{ bkMap[b.bookmaker]=(bkMap[b.bookmaker]||0)+parseFloat(b.ric_real||0); });
+  const topBk=Object.entries(bkMap).sort((a,b)=>b[1]-a[1])[0];
+
+  // Top operatore
+  const opMap={};
+  bns.forEach(b=>{ opMap[b.operatore]=(opMap[b.operatore]||0)+parseFloat(b.ric_real||0); });
+  const topOp=Object.entries(opMap).sort((a,b)=>b[1]-a[1])[0];
+
+  // Conversione inattivi
+  const totInr=inr.length, riattInr=inr.filter(i=>i.stato==='Trasferito nel CRM').length;
+  const convPerc=totInr>0?((riattInr/totInr)*100).toFixed(1):0;
+  const potInr=inr.filter(i=>i.stato!=='Trasferito nel CRM').reduce((s,i)=>s+parseFloat(i.potenziale_economico||0),0);
+
+  setView(`
+    <div class="grid-4">
+      <div class="card"><div class="card-title">1 · Ricavo Totale</div><div class="card-val gold">${€(ricTot)}</div></div>
+      <div class="card"><div class="card-title">2 · Margine Netto</div><div class="card-val ${margine>=0?'green':'red'}">${€(margine)}</div></div>
+      <div class="card"><div class="card-title">3 · Clienti Attivi</div><div class="card-val">${cli.filter(c=>c.stato==='ATTIVO').length}</div></div>
+      <div class="card"><div class="card-title">4 · Bonus Totali</div><div class="card-val blue">${bns.length}</div></div>
+      <div class="card"><div class="card-title">5 · Pagato ai Clienti</div><div class="card-val red">${€(pagCli)}</div><div class="card-sub">${(ricTot>0?(pagCli/ricTot*100).toFixed(1):0)}% del ricavo</div></div>
+      <div class="card"><div class="card-title">6 · Comp. Operatori</div><div class="card-val red">${€(compOp)}</div></div>
+      <div class="card"><div class="card-title">7 · Comp. Collab</div><div class="card-val red">${€(compCollab)}</div></div>
+      <div class="card"><div class="card-title">8 · Penali Attive</div><div class="card-val ${penTot>0?'red':'green'}">${€(penTot)}</div></div>
+      <div class="card"><div class="card-title">9 · Clienti Profittevoli</div><div class="card-val green">${profitt}</div></div>
+      <div class="card"><div class="card-title">10 · Clienti in Perdita</div><div class="card-val red">${inPerd}</div></div>
+      <div class="card"><div class="card-title">11 · Bookmaker Top</div><div class="card-val" style="font-size:18px">${topBk?topBk[0]:'—'}</div><div class="card-sub">${topBk?€(topBk[1]):''}</div></div>
+      <div class="card"><div class="card-title">12 · Operatore Top</div><div class="card-val gold" style="font-size:18px">${topOp?topOp[0]:'—'}</div><div class="card-sub">${topOp?€(topOp[1]):''}</div></div>
+      <div class="card"><div class="card-title">13 · Conversione Inattivi</div><div class="card-val green">${convPerc}%</div><div class="card-sub">${riattInr} su ${totInr}</div></div>
+      <div class="card"><div class="card-title">14 · Potenziale Inattivi</div><div class="card-val gold">${€(potInr)}</div></div>
+    </div>
+
+    <div class="divider"></div>
+    <h3 style="margin-bottom:14px;font-size:15px;font-weight:700">📈 Ranking Operatori</h3>
+    <div class="tbl-wrap" style="margin-bottom:20px">
+      <table>
+        <thead><tr><th>#</th><th>Operatore</th><th>Ricavo</th><th>N.Bonus</th><th>Comp. Maturato</th><th>Margine Generato</th></tr></thead>
+        <tbody>
+          ${Object.entries(opMap).sort((a,b)=>b[1]-a[1]).map(([op,ric],i)=>{
+            const myBns=bns.filter(b=>b.operatore===op);
+            const myComp=myBns.reduce((s,b)=>s+parseFloat(b.ric_real||0)*parseFloat(b.perc_op||0)/100,0);
+            const myMar=myBns.reduce((s,b)=>{const r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100;return s+(r-p-co-cc-parseFloat(b.costi_extra||0));},0);
+            return `<tr><td><span class="text-gold fw-700">#${i+1}</span></td><td><strong>${op}</strong></td><td class="text-green">${€(ric)}</td><td>${myBns.length}</td><td>${€(myComp)}</td><td class="${myMar>=0?'text-green':'text-red'} fw-700">${€(myMar)}</td></tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-bottom:14px;font-size:15px;font-weight:700">🎰 Top Bookmaker</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Bookmaker</th><th>N.Bonus</th><th>Ricavo Totale</th></tr></thead>
+        <tbody>
+          ${Object.entries(bkMap).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([bk,ric],i)=>`
+            <tr><td><span class="text-gold fw-700">#${i+1}</span></td><td><strong>${bk}</strong></td><td>${bns.filter(b=>b.bookmaker===bk).length}</td><td class="text-green fw-700">${€(ric)}</td></tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `);
+}
+
+// ═══════════════════════════════════════
+// ETICA ECONOMICA
+// ═══════════════════════════════════════
+async function loadEtica() {
+  setTopbar('⚖️ Etica Economica');
+  const { data } = await db.from('etica_economica').select('*').order('created_at',{ascending:false});
+  const rows = data || [];
+  const totMar = rows.reduce((s,r)=>s+parseFloat(r.margine_netto||0),0);
+  setView(`
+    <div class="card" style="margin-bottom:16px;border-color:var(--gold)">
+      <div class="card-title">Formula MBBET</div>
+      <div style="font-size:13px;line-height:1.8;margin-top:8px">
+        <strong style="color:var(--gold)">Margine Netto</strong> = Ricavo Reale − Pagato Cliente − Comp. Operatore − Comp. Collab − Comp. Referral − Costi Extra − Penali
+      </div>
+    </div>
+    ${rows.length ? `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Margine Netto Totale Tracciato</div>
+      <div class="card-val ${totMar>=0?'green':'red'}">${€(totMar)}</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Cliente</th><th>Bookmaker</th><th>Operatore</th><th>Ricavo</th><th>Pag.Cli</th><th>Comp.Op</th><th>Comp.Col</th><th>Comp.Ref</th><th>Extra</th><th>Penali</th><th>Margine</th><th>Stato Pag.</th></tr></thead>
+        <tbody>
+          ${rows.map(r=>`<tr>
+            <td><span class="text-gold">${r.id}</span></td>
+            <td>${r.nome_cli||'—'}</td>
+            <td>${r.bookmaker||'—'}</td>
+            <td>${r.operatore||'—'}</td>
+            <td class="text-green">${€(r.ricavo_reale)}</td>
+            <td>${€(r.pagato_cliente)}</td>
+            <td>${€(r.comp_operatore)}</td>
+            <td>${€(r.comp_collab)}</td>
+            <td>${€(r.comp_referral)}</td>
+            <td>${€(r.costi_extra)}</td>
+            <td class="text-red">${€(r.penali)}</td>
+            <td class="${parseFloat(r.margine_netto||0)>=0?'text-green':'text-red'} fw-700">${€(r.margine_netto)}</td>
+            <td>${statoBadge(r.stato_pagamento)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : '<div class="empty-state"><div class="icon">⚖️</div><p>Nessuna voce etica registrata.<br><small>Le voci vengono create automaticamente quando si completano i bonus.</small></p></div>'}
+  `);
+}
+
+// ═══════════════════════════════════════
+// TEAM MBBET
+// ═══════════════════════════════════════
+async function loadTeam() {
+  setTopbar('👔 Team MBBET');
+  const { data } = await db.from('team_mbbet').select('*').order('perc_societaria',{ascending:false});
+  const team = data || [];
+  const [bns, cli] = await Promise.all([
+    db.from('bonus').select('operatore,ric_real,perc_op,pag_cli,perc_collab,costi_extra'),
+    db.from('clienti').select('operatore,stato'),
+  ]);
+  const bonusData = bns.data||[], cliData=cli.data||[];
+
+  setView(`
+    <div class="team-grid">
+      ${team.map(t=>{
+        const myBns=bonusData.filter(b=>b.operatore===t.nome);
+        const myRic=myBns.reduce((s,b)=>s+parseFloat(b.ric_real||0),0);
+        const myComp=myBns.reduce((s,b)=>s+parseFloat(b.ric_real||0)*parseFloat(b.perc_op||0)/100,0);
+        const myMar=myBns.reduce((s,b)=>{const r=parseFloat(b.ric_real||0),p=parseFloat(b.pag_cli||0),co=r*parseFloat(b.perc_op||0)/100,cc=r*parseFloat(b.perc_collab||0)/100;return r-p-co-cc-parseFloat(b.costi_extra||0);},0);
+        const myCli=cliData.filter(c=>c.operatore===t.nome&&c.stato==='ATTIVO').length;
+        const ini=t.nome.charAt(0).toUpperCase();
+        return `
+          <div class="team-card">
+            <div class="avatar">${ini}</div>
+            <h4>${t.nome}</h4>
+            <div class="ruolo">${t.ruolo} · ${statoBadge(t.stato)}</div>
+            <div class="team-stat"><span class="label">Tipo</span><span class="val">${t.tipo}</span></div>
+            <div class="team-stat"><span class="label">% Societaria</span><span class="val text-gold">${t.perc_societaria}%</span></div>
+            <div class="team-stat"><span class="label">% Operativa</span><span class="val">${t.perc_operativa}%</span></div>
+            <div class="team-stat"><span class="label">Clienti Attivi</span><span class="val">${myCli}</span></div>
+            <div class="team-stat"><span class="label">Bonus Gestiti</span><span class="val">${myBns.length}</span></div>
+            <div class="team-stat"><span class="label">Ricavo Generato</span><span class="val text-green">${€(myRic)}</span></div>
+            <div class="team-stat"><span class="label">Comp. Maturato</span><span class="val text-gold">${€(myComp)}</span></div>
+            <div class="team-stat"><span class="label">Saldo Da Pagare</span><span class="val text-${t.saldo_da_pagare>0?'red':'green'}">${€(t.saldo_da_pagare)}</span></div>
+            ${t.email?`<div class="team-stat"><span class="label">Email</span><span class="val" style="font-size:11px">${t.email}</span></div>`:''}
+          </div>`;
+      }).join('')}
+    </div>
+  `);
+}
+
+// ═══════════════════════════════════════
+// COLLAB
+// ═══════════════════════════════════════
+async function loadCollab() {
+  setTopbar('🤝 Collab');
+  const [collR, bnsR] = await Promise.all([
+    db.from('collab').select('*').order('created_at',{ascending:false}),
+    db.from('bonus').select('nome_collab,ric_real,perc_collab'),
+  ]);
+  const coll=collR.data||[], bns=bnsR.data||[];
+  setView(`
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Op. Rif.</th><th>%</th><th>Stato</th><th>Ricavo via Collab</th><th>Comp. Maturato</th><th>Contatto</th></tr></thead>
+        <tbody>
+          ${coll.map(c=>{
+            const myBns=bns.filter(b=>b.nome_collab===c.nome);
+            const ric=myBns.reduce((s,b)=>s+parseFloat(b.ric_real||0),0);
+            const comp=myBns.reduce((s,b)=>s+parseFloat(b.ric_real||0)*parseFloat(b.perc_collab||0)/100,0);
+            return `<tr>
+              <td><span class="text-gold">${c.id}</span></td>
+              <td><strong>${c.nome}</strong></td>
+              <td>${c.tipo||'—'}</td>
+              <td>${c.op_rif||'—'}</td>
+              <td>${c.perc}%</td>
+              <td>${statoBadge(c.stato)}</td>
+              <td class="text-green">${€(ric)}</td>
+              <td class="text-gold fw-700">${€(comp)}</td>
+              <td>${c.contatto||'—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${!coll.length?'<div class="empty-state"><div class="icon">🤝</div><p>Nessun collaboratore</p></div>':''}
+  `);
+}
+
+// ═══════════════════════════════════════
+// IDEAS ENGINE
+// ═══════════════════════════════════════
+async function loadIdeas() {
+  setTopbar('💡 Ideas Engine', `
+    <select id="idea-filter" onchange="filterIdeas()" style="background:var(--navy3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:13px">
+      <option value="">Tutte</option><option>In Valutazione</option><option>Approvata</option><option>In Sviluppo</option><option>Completata</option><option>Scartata</option>
+    </select>
+  `);
+  const { data } = await db.from('ideas_engine').select('*').order('priorita').order('created_at');
+  window._ideas = data || [];
+  renderIdeas(window._ideas);
+}
+
+function filterIdeas() {
+  const f = document.getElementById('idea-filter')?.value;
+  renderIdeas(f ? (window._ideas||[]).filter(i=>i.stato===f) : (window._ideas||[]));
+}
+
+function renderIdeas(data) {
+  const impCol = {Alto:'text-green',Medio:'text-gold',Basso:'text-muted'};
+  const difCol = {Alta:'text-red',Media:'text-orange',Bassa:'text-green'};
+  setView(`
+    <div class="grid-4" style="margin-bottom:16px">
+      <div class="card"><div class="card-title">Totali</div><div class="card-val gold">${data.length}</div></div>
+      <div class="card"><div class="card-title">In Sviluppo</div><div class="card-val blue">${data.filter(i=>i.stato==='In Sviluppo').length}</div></div>
+      <div class="card"><div class="card-title">Approvate</div><div class="card-val green">${data.filter(i=>i.stato==='Approvata').length}</div></div>
+      <div class="card"><div class="card-title">Completate</div><div class="card-val">${data.filter(i=>i.stato==='Completata').length}</div></div>
+    </div>
+    <div class="ideas-grid">
+      ${data.map(i=>`
+        <div class="idea-card">
+          <h4>${i.nome}</h4>
+          <p>${i.descrizione||'—'}</p>
+          <div class="idea-meta">
+            ${statoBadge(i.stato)}
+            ${statoBadge(i.priorita)}
+            <span class="badge ${i.impatto==='Alto'?'badge-green':i.impatto==='Medio'?'badge-gold':'badge-gray'}">Impact: ${i.impatto||'—'}</span>
+            <span class="badge ${i.difficolta==='Alta'?'badge-red':i.difficolta==='Bassa'?'badge-green':'badge-orange'}">Diff: ${i.difficolta||'—'}</span>
+            ${i.fase?`<span class="badge badge-purple">${i.fase}</span>`:''}
+          </div>
+          ${i.note?`<div style="margin-top:8px;font-size:11px;color:var(--muted)">${i.note}</div>`:''}
+        </div>
+      `).join('')}
+    </div>
+    ${!data.length?'<div class="empty-state"><div class="icon">💡</div><p>Nessuna idea</p></div>':''}
+  `);
+}
+
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+async function loadConfig() {
+  setTopbar('⚙️ Config');
+  const [cfgR, bkR] = await Promise.all([
+    db.from('config').select('*').order('chiave'),
+    db.from('bookmaker').select('*').order('tier').order('nome'),
+  ]);
+  const cfg=cfgR.data||[], bk=bkR.data||[];
+  setView(`
+    <div class="grid-2">
+      <div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--gold)">⚙️ Impostazioni Sistema</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Chiave</th><th>Valore</th></tr></thead>
+            <tbody>
+              ${cfg.map(c=>`<tr><td><span class="text-gold">${c.chiave}</span></td><td>${c.valore||'—'}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--gold)">🎰 Bookmaker</h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Nome</th><th>Tier</th><th>Attivo</th></tr></thead>
+            <tbody>
+              ${bk.map(b=>`<tr><td>${b.nome}</td><td>${tierBadge(b.tier)}</td><td>${b.attivo?'✅':'❌'}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+(async () => {
+  await loadDashboard();
+  updateSidebarKPI();
+  setInterval(updateSidebarKPI, 60000);
+})();
+</script>
+</body>
+</html>

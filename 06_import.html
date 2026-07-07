@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Import Clienti — MBBET OS</title>
+<script>try{var _l=localStorage.getItem('mbbet_v2_session');if(_l)document.documentElement.classList.add('mb-auth');}catch(e){}</script>
+<style>html.mb-auth #ls{display:none!important}</style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#05070d;--card:rgba(13,17,36,.97);--gold:#f7cc46;--green:#00f093;--blue:#5aaaff;--cyan:#22eeff;--purple:#c4a4f8;--red:#ff4f4f;--orange:#ff9040;--teal:#00d4b0;--tx:#edf2ff;--tx2:#b8cee8;--tx3:#48627a;--br:rgba(255,255,255,.06)}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif}
+body{min-height:100vh;padding:0}
+*::-webkit-scrollbar{width:4px}*::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* HEADER */
+.hdr{height:64px;display:flex;align-items:center;padding:0 28px;background:linear-gradient(180deg,rgba(9,12,26,.99),rgba(7,9,20,.99));border-bottom:1px solid rgba(255,255,255,.07);gap:14px;position:sticky;top:0;z-index:50}
+.hdr-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#2d1800,#b8890a,var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px}
+.hdr-title{font-size:15px;font-weight:900;color:var(--gold);letter-spacing:1.5px}
+.hdr-sub{font-size:10px;color:var(--tx3);margin-top:1px}
+.hdr-sp{flex:1}
+.back-btn{padding:7px 16px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--br);color:var(--tx3);background:transparent;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:.14s}
+.back-btn:hover{color:var(--tx2);border-color:rgba(255,255,255,.14)}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:32px 28px}
+
+/* SECTION TITLES */
+.sec-title{font-size:11px;font-weight:900;letter-spacing:2.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
+
+/* CARDS */
+.card{background:linear-gradient(145deg,rgba(13,18,40,.97),rgba(9,12,26,.99));border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px 22px;margin-bottom:20px}
+.card-hi{border-color:rgba(0,212,176,.2);border-left:3px solid var(--teal)}
+
+/* STATUS STRIP */
+.status-strip{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:20px}
+.ss-idle{background:rgba(255,255,255,.03);border:1px solid var(--br);color:var(--tx3)}
+.ss-loading{background:rgba(247,204,70,.06);border:1px solid rgba(247,204,70,.2);color:var(--gold)}
+.ss-ready{background:rgba(0,240,147,.06);border:1px solid rgba(0,240,147,.2);color:var(--green)}
+.ss-error{background:rgba(255,79,79,.06);border:1px solid rgba(255,79,79,.2);color:var(--red)}
+.ss-running{background:rgba(0,212,176,.06);border:1px solid rgba(0,212,176,.2);color:var(--teal)}
+.spin-ic{display:inline-block;width:14px;height:14px;border:2px solid rgba(247,204,70,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+
+/* BUTTONS */
+.btn{padding:10px 22px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;border:none;letter-spacing:.5px}
+.btn-primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#000}
+.btn-primary:hover{opacity:.88}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed}
+.btn-secondary{background:rgba(255,255,255,.04);border:1px solid var(--br);color:var(--tx3)}
+.btn-secondary:hover{color:var(--tx2);border-color:rgba(255,255,255,.14)}
+.btn-danger{background:rgba(255,79,79,.08);border:1px solid rgba(255,79,79,.2);color:var(--red)}
+.btn-danger:hover{background:rgba(255,79,79,.16)}
+
+/* PREVIEW TABLE */
+.tbl-wrap{overflow-x:auto;border:1px solid rgba(255,255,255,.07);border-radius:11px;margin-top:14px}
+.prev-tbl{width:100%;border-collapse:collapse;min-width:900px;font-size:11px}
+.prev-tbl th{padding:9px 12px;font-size:9px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.2);white-space:nowrap;text-align:left}
+.prev-tbl td{padding:9px 12px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.025);vertical-align:middle;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.prev-tbl tr:hover td{background:rgba(255,255,255,.018)}
+.prev-tbl tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;padding:2px 8px;border-radius:12px;font-size:8.5px;font-weight:800;white-space:nowrap}
+.badge-new{background:rgba(0,240,147,.1);border:1px solid rgba(0,240,147,.25);color:var(--green)}
+.badge-dup{background:rgba(247,204,70,.1);border:1px solid rgba(247,204,70,.25);color:var(--gold)}
+.badge-upd{background:rgba(90,170,255,.1);border:1px solid rgba(90,170,255,.25);color:var(--blue)}
+.badge-err{background:rgba(255,79,79,.1);border:1px solid rgba(255,79,79,.25);color:var(--red)}
+.badge-skip{background:rgba(72,98,122,.08);border:1px solid rgba(72,98,122,.2);color:var(--tx3)}
+
+/* PROGRESS */
+.prog-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.05);overflow:hidden;margin:8px 0}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--teal),var(--green));transition:width .3s}
+
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.report-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;text-align:center}
+.report-n{font-size:32px;font-weight:900;line-height:1;margin-bottom:4px}
+.report-l{font-size:9px;font-weight:700;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase}
+.report-log{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:14px;max-height:300px;overflow-y:auto;font-size:10.5px;font-family:monospace;color:var(--tx3);line-height:1.7}
+.log-ok{color:var(--green)}.log-upd{color:var(--blue)}.log-dup{color:var(--gold)}.log-err{color:var(--red)}.log-inf{color:var(--tx3)}
+
+/* TEXTAREA per paste CSV */
+.csv-paste{width:100%;height:120px;background:rgba(255,255,255,.03);border:1px solid var(--br);border-radius:9px;color:var(--tx2);font-size:10px;font-family:monospace;padding:10px;outline:none;resize:vertical}
+.csv-paste:focus{border-color:rgba(0,212,176,.3)}
+
+/* SETTINGS */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.s-field label{display:block;font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.s-inp{width:100%;padding:9px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;color:var(--tx);font-size:12px;outline:none;font-family:inherit}
+.s-inp:focus{border-color:rgba(0,212,176,.3)}
+.s-check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;color:var(--tx2)}
+.s-check input{width:15px;height:15px;accent-color:var(--teal);cursor:pointer}
+
+/* LOGIN */
+#ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.li{background:linear-gradient(155deg,rgba(14,19,42,.99),rgba(8,11,24,.99));border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:42px 38px;width:360px}
+.li-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(145deg,#2d1800,#b8890a,var(--gold));display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 18px}
+.li-t{font-size:21px;font-weight:900;color:var(--gold);text-align:center;margin-bottom:22px;letter-spacing:1.5px}
+.li-inp{width:100%;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;color:var(--tx);font-size:13px;outline:none;font-family:inherit;margin-bottom:9px;display:block}
+.li-inp:focus{border-color:rgba(247,204,70,.3)}
+.li-btn{width:100%;padding:13px;background:linear-gradient(135deg,#5c3800,#b8890a,var(--gold));border:none;border-radius:10px;color:#000;font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:2px;margin-top:4px}
+.li-err{font-size:10px;color:var(--red);text-align:center;min-height:16px;margin-top:4px}
+</style>
+<script src="shared/supabase.min.js"></script>
+<script src="shared/auth.js"></script>
+</head>
+<body>
+
+<div id="ls">
+  <div class="li">
+    <div class="li-logo">&#128081;</div>
+    <div class="li-t">MBBET OS</div>
+    <input class="li-inp" type="email" id="li-e" placeholder="Email aziendale">
+    <input class="li-inp" type="password" id="li-p" placeholder="Password" onkeydown="if(event.key==='Enter')login2()">
+    <div class="li-err" id="l-err"></div>
+    <button class="li-btn" onclick="login2()">ACCEDI</button>
+  </div>
+</div>
+
+<header class="hdr">
+  <div class="hdr-logo">&#128081;</div>
+  <div><div class="hdr-title">IMPORT CLIENTI</div><div class="hdr-sub">Vecchio Modulo Google Form → MBBET OS</div></div>
+  <div class="hdr-sp"></div>
+  <a href="01_clienti.html" class="back-btn">← CRM Clienti</a>
+  <a href="index.html" class="back-btn">🏠 Dashboard</a>
+</header>
+
+<div class="main">
+
+  <!-- STATUS -->
+  <div id="status-strip" class="status-strip ss-idle">
+    <span id="status-ic">⊙</span>
+    <span id="status-msg">Pronto. Carica il CSV o incolla i dati per iniziare.</span>
+  </div>
+
+  <!-- SORGENTE DATI -->
+  <div class="sec-title">Sorgente Dati</div>
+  <div class="card card-hi">
+    <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:280px">
+        <div style="font-size:13px;font-weight:800;color:var(--teal);margin-bottom:6px">📊 Vecchio Google Form</div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:14px">Sheet ID: <code style="color:var(--cyan);font-size:10px">17Uu7h6Yns7sV2ac4CoMqxisquhln2QJFpl05Du7U-hA</code></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="loadFromSheet()">⬇ Carica da Google Sheet</button>
+          <button class="btn btn-secondary" onclick="togglePaste()">📋 Incolla CSV</button>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">Oppure, esporta da Google Sheet: <b style="color:var(--gold)">File → Scarica → CSV</b> e incolla qui sotto:</div>
+        <div id="paste-area" style="display:none;margin-top:8px">
+          <textarea class="csv-paste" id="csv-paste-input" placeholder="Incolla il contenuto CSV qui (inclusa la prima riga con i nomi delle colonne)..."></textarea>
+          <button class="btn btn-secondary" style="margin-top:6px;font-size:10px" onclick="loadFromPaste()">✓ Usa questo CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPOSTAZIONI IMPORT -->
+  <div class="sec-title" style="display:none" id="settings-sec">Impostazioni Import</div>
+  <div class="card" id="settings-card" style="display:none">
+    <div class="settings-grid">
+      <div class="s-field">
+        <label>Operatore default (se mancante nel CSV)</label>
+        <select id="s-op-default" class="s-inp">
+          <option value="">-- nessuno --</option>
+          <option>Riccardo Tavagnacco</option>
+          <option>Alessia Ciman</option>
+          <option>Ciro Bisogno</option>
+          <option>Antonio La Barbera</option>
+          <option>Francesco Bova</option>
+          <option>Mary + Samuele</option>
+          <option>Elisa Qualantonio</option>
+          <option>Emilian Cozmiuc</option>
+        </select>
+      </div>
+      <div class="s-field">
+        <label>% Operatore default</label>
+        <input type="number" id="s-perc" class="s-inp" value="20" min="1" max="100">
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+      <label class="s-check"><input type="checkbox" id="s-bonus" checked> Genera bonus per ogni BK</label>
+      <label class="s-check"><input type="checkbox" id="s-update" checked> Aggiorna clienti esistenti (senza sovrascrivere dati validi)</label>
+      <label class="s-check"><input type="checkbox" id="s-dry"> Dry run (simula senza salvare)</label>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="sec-title" style="display:none" id="preview-sec">Anteprima Dati — <span id="preview-count" style="color:var(--teal)">0 righe</span></div>
+  <div class="card" id="preview-card" style="display:none">
+    <div id="preview-warn" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(255,144,64,.06);border:1px solid rgba(255,144,64,.2);border-radius:8px;font-size:11px;color:var(--orange)"></div>
+    <div class="tbl-wrap" id="preview-table-wrap"></div>
+    <div style="margin-top:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" id="run-btn" onclick="runImport()">▶ Avvia Import</button>
+      <button class="btn btn-secondary" onclick="resetImport()">✕ Annulla</button>
+      <span id="run-info" style="font-size:11px;color:var(--tx3)"></span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="card" id="progress-card" style="display:none">
+    <div style="font-size:13px;font-weight:800;color:var(--teal);margin-bottom:10px">⟳ Import in corso...</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:5px">
+      <span id="prog-label">Inizializzazione...</span>
+      <span id="prog-pct">0%</span>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="card" id="report-card" style="display:none">
+    <div style="font-size:14px;font-weight:900;color:var(--green);margin-bottom:16px">✅ Import completato</div>
+    <div class="report-grid" id="report-grid"></div>
+    <div class="sec-title" style="margin-top:16px">Log Dettagliato</div>
+    <div class="report-log" id="report-log"></div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="downloadLog()">⬇ Scarica log JSON</button>
+      <button class="btn btn-secondary" onclick="resetImport()">↺ Nuovo import</button>
+      <a href="01_clienti.html" class="btn btn-primary" style="text-decoration:none">→ Vai al CRM</a>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div id="toast" style="position:fixed;bottom:24px;right:24px;z-index:500;padding:11px 18px;border-radius:10px;font-size:11px;font-weight:700;transition:all .3s;opacity:0;transform:translateY(6px)"></div>
+
+<script>
+/* ── COSTANTI ── */
+var SHEET_ID='17Uu7h6Yns7sV2ac4CoMqxisquhln2QJFpl05Du7U-hA';
+var SHEET_CSV_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv';
+
+var BKS_ALL=['Bet365','Snai','Lottomatica','Goldbet','Planetwin','William Hill',
+             'Betfair','Paddy Power','Unibet','Bwin','Eurobet','Sisal',
+             'Netbet','Betway','888sport','Betsson','Sportaza','Admiralbet'];
+
+var _csvRows=[];    // righe parsed [{nome,email,...}]
+var _report=null;   // risultato ultimo import
+var _importRunning=false;
+
+/* ── UI HELPERS ── */
+function g(id){return document.getElementById(id);}
+function setStatus(msg,cls){
+  var s=g('status-strip');
+  s.className='status-strip '+cls;
+  g('status-msg').textContent=msg;
+  g('status-ic').textContent={ss_idle:'⊙',ss_loading:'',ss_ready:'✓',ss_error:'✕',ss_running:'⟳'}[cls]||'⊙';
+  if(cls==='ss_loading'){
+    var ic=g('status-ic');
+    ic.className='spin-ic';
+  } else {
+    g('status-ic').className='';
+  }
+}
+function showToast(msg,type){
+  var t=g('toast');t.textContent=msg;
+  t.style.background=type==='err'?'rgba(255,79,79,.9)':'rgba(0,240,147,.1)';
+  t.style.border='1px solid '+(type==='err'?'rgba(255,79,79,.4)':'rgba(0,240,147,.25)');
+  t.style.color=type==='err'?'#fff':'var(--green)';
+  t.style.opacity='1';t.style.transform='translateY(0)';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';},3500);
+}
+function show(id){var el=g(id);if(el)el.style.display='block';}
+function hide(id){var el=g(id);if(el)el.style.display='none';}
+function showFlex(id){var el=g(id);if(el)el.style.display='flex';}
+
+/* ── CSV PARSER ── */
+function parseCsvText(text){
+  var rows=[];
+  var i=0;var len=text.length;
+  while(i<len){
+    var row=[];
+    var eol=false;
+    while(i<len&&!eol){
+      var field='';
+      if(text[i]==='"'){
+        i++;
+        while(i<len){
+          if(text[i]==='"'&&i+1<len&&text[i+1]==='"'){field+='"';i+=2;}
+          else if(text[i]==='"'){i++;break;}
+          else{field+=text[i++];}
+        }
+      } else {
+        while(i<len&&text[i]!==','&&text[i]!=='\n'&&text[i]!=='\r'){
+          field+=text[i++];
+        }
+      }
+      row.push(field);
+      if(i<len&&text[i]===','){i++;}
+      else{eol=true;}
+    }
+    if(i<len&&text[i]==='\r')i++;
+    if(i<len&&text[i]==='\n')i++;
+    if(row.length>1||(row.length===1&&row[0]!==''))rows.push(row);
+  }
+  return rows;
+}
+
+/* ── LOAD FROM GOOGLE SHEET ── */
+async function loadFromSheet(){
+  setStatus('Connessione a Google Sheet...','ss_loading');
+  try{
+    // Prova fetch diretto con redirect follow
+    var resp=await fetch(SHEET_CSV_URL,{redirect:'follow',mode:'cors'});
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    var text=await resp.text();
+    processRawCsv(text);
+  }catch(e){
+    // CORS può bloccare il fetch diretto — mostra paste fallback
+    setStatus('Fetch automatico bloccato (CORS). Usa il metodo manuale.','ss_error');
+    show('paste-area');g('paste-area').style.display='block';
+    g('csv-paste-input').placeholder='Vai su Google Sheet → File → Scarica → CSV e incolla il contenuto qui';
+    showToast('Usa Incolla CSV: apri il sheet, File → Scarica → Valori separati da virgola (.csv)','err');
+  }
+}
+
+function togglePaste(){
+  var pa=g('paste-area');
+  pa.style.display=pa.style.display==='none'?'block':'none';
+}
+
+function loadFromPaste(){
+  var text=g('csv-paste-input').value.trim();
+  if(!text){showToast('Incolla prima il contenuto CSV','err');return;}
+  processRawCsv(text);
+}
+
+/* ── PROCESSA CSV GREZZO ── */
+function processRawCsv(text){
+  setStatus('Analisi CSV in corso...','ss_loading');
+  try{
+    var raw=parseCsvText(text);
+    if(raw.length<2){setStatus('File CSV vuoto o non valido.','ss_error');return;}
+    var headers=raw[0].map(function(h){return (h||'').trim();});
+    var dataRows=raw.slice(1).filter(function(r){return r.some(function(c){return c.trim();});});
+    _csvRows=dataRows.map(function(row){return mapRow(headers,row);}).filter(function(r){return r.nome;});
+    showPreview(_csvRows,headers);
+    setStatus('Pronti: '+_csvRows.length+' clienti trovati nel CSV. Controlla l\'anteprima e avvia l\'import.','ss_ready');
+    show('settings-sec');show('settings-card');
+    show('preview-sec');show('preview-card');
+    g('preview-count').textContent=_csvRows.length+' righe';
+    hide('paste-area');
+  }catch(e){
+    setStatus('Errore nel parsing CSV: '+e.message,'ss_error');
+    console.error(e);
+  }
+}
+
+/* ── MAPPA RIGA CSV → OGGETTO ── */
+function mapRow(headers,cols){
+  function get(kws){
+    for(var i=0;i<kws.length;i++){
+      var idx=headers.findIndex(function(h){return h.toUpperCase().indexOf(kws[i].toUpperCase())>=0;});
+      if(idx>=0&&cols[idx]!==undefined)return (cols[idx]||'').trim();
+    }
+    return '';
+  }
+  var nome=get(['NOME E COGNOME','NOME COGNOME','NOME']);
+  if(!nome)return null;
+
+  var tsRaw=get(['Timestamp','DATA','TIMESTAMP']);
+  var ts=parseTs(tsRaw);
+
+  var sitiRaw=get(['SITI SU CUI','SITI GIA','SITI GIÀ','SITI']);
+  var siti=normalizeSiti(sitiRaw);
+
+  var spidRaw=get(['SPID']);
+  var ccRaw=get(['CONTO CORRENTE','CONTO']);
+  var nuovoRaw=get(['SEI NUOVO','NUOVO']);
+
+  var op=get(['OPERATORE']);
+  // normalizza maiuscolo/minuscolo operatore
+  if(op)op=op.replace(/\s+/g,' ').trim();
+  // capitalizza correttamente
+  var OP_MAP={'RICCARDO TAVAGNACCO':'Riccardo Tavagnacco','ALESSIA CIMAN':'Alessia Ciman',
+              'CIRO BISOGNO':'Ciro Bisogno','ANTONIO LA BARBERA':'Antonio La Barbera',
+              'FRANCESCO BOVA':'Francesco Bova','MARY + SAMUELE':'Mary + Samuele',
+              'ELISA QUALANTONIO':'Elisa Qualantonio','EMILIAN COZMIUC':'Emilian Cozmiuc',
+              'ALESSIA MAFFIOLI':'Alessia Maffioli','LUCA ALBERTI':'Luca Alberti'};
+  op=OP_MAP[op.toUpperCase()]||op;
+
+  var tel=get(['NUMERO DI TELEFONO','TELEFONO','TEL']);
+  tel=normalizePhone(tel);
+
+  var emailPers=get(['EMAIL']);
+  // ignora la colonna email siti se è placeholder
+  var emailSitiRaw=get(['EMAIL NOSTRA NEI SITI','EMAIL SITI']);
+  var emailSiti=(emailSitiRaw&&emailSitiRaw!=='nomeecognome@mbbet09.net')?emailSitiRaw:'';
+
+  return {
+    nome: nome,
+    email: emailPers,
+    email_siti: emailSiti||null,
+    telefono: tel,
+    referral: get(['REFERRAL']),
+    has_spid: spidRaw.indexOf('Sì')>=0||spidRaw.toLowerCase().indexOf('attivo')>=0,
+    has_cc: ccRaw.indexOf('Sì')>=0||ccRaw.toLowerCase().indexOf('conto')>=0,
+    siti_registrati: siti,
+    is_nuovo: nuovoRaw.toLowerCase().indexOf('nuovo')>=0,
+    operatore: op||null,
+    tipologia: (function(){var t=get(['TIPOLOGIA']);return t==='✔'?'Standard':(t||'Standard');}()),
+    mese_onboarding: get(['MESE DI RIFERIMENTO','MESE']),
+    consenso_data: ts?ts.toISOString():new Date().toISOString(),
+    source: 'vecchio_modulo',
+    // documenti
+    doc_ci_fronte: get(["CARTA D'IDENTITA' - FRONTE","CARTA D'IDENTITA' FRONTE","CI FRONTE"]),
+    doc_ci_retro:  get(["CARTA D'IDENTITA' - RETRO","CARTA D'IDENTITA' RETRO","CI RETRO"]),
+    doc_ts_fronte: get(['TESSERA SANITARIA - FRONTE','TESSERA SANITARIA FRONTE','TS FRONTE']),
+    doc_ts_retro:  get(['TESSERA SANITARIA - RETRO','TESSERA SANITARIA RETRO','TS RETRO']),
+    doc_foto_fronte: get(['FOTO CON DOCUMENTO','FOTO FRONTE','FOTO']),
+    doc_foto_retro:  get(['FOTO CON DOCUMENTO D\'IDENTITA\' VICINO AL VOLTO (RETRO)','FOTO RETRO']),
+    created_at: ts?ts.toISOString():new Date().toISOString(),
+    _raw_timestamp: tsRaw
+  };
+}
+
+function parseTs(str){
+  if(!str)return null;
+  try{
+    // formato M/D/YYYY H:MM:SS
+    var parts=str.split(' ');
+    var dateParts=parts[0].split('/');
+    if(dateParts.length===3){
+      var m=parseInt(dateParts[0]);var d=parseInt(dateParts[1]);var y=parseInt(dateParts[2]);
+      var timeStr=parts[1]||'00:00:00';
+      return new Date(y,m-1,d,...timeStr.split(':').map(Number));
+    }
+    return new Date(str);
+  }catch(e){return null;}
+}
+
+function normalizePhone(tel){
+  if(!tel)return null;
+  tel=tel.replace(/\s/g,'').replace(/^0039/,'+39').replace(/^39/,'+39');
+  if(tel.length===10&&!tel.startsWith('+'))tel='+39'+tel;
+  return tel||null;
+}
+
+function normalizeSiti(sitiRaw){
+  if(!sitiRaw||sitiRaw==='Nessuno di questi'||sitiRaw.toLowerCase().indexOf('nessuno')>=0||
+     sitiRaw.toLowerCase().indexOf('non ricordo')>=0||sitiRaw.toLowerCase().indexOf('non lo so')>=0){
+    return [];
+  }
+  var found=[];
+  BKS_ALL.forEach(function(bk){
+    if(sitiRaw.toLowerCase().indexOf(bk.toLowerCase())>=0)found.push(bk);
+  });
+  if(!found.length&&sitiRaw.trim()&&sitiRaw!=='Nessuno di questi'){
+    // tenta split per virgola
+    sitiRaw.split(',').forEach(function(s){
+      var t=s.trim();
+      if(t)found.push(t);
+    });
+  }
+  return found;
+}
+
+/* ── ANTEPRIMA ── */
+function showPreview(rows,_headers){
+  var warn=[];
+  var noEmail=rows.filter(function(r){return !r.email;}).length;
+  var noTel=rows.filter(function(r){return !r.telefono;}).length;
+  var noOp=rows.filter(function(r){return !r.operatore;}).length;
+  if(noEmail>0)warn.push(noEmail+' clienti senza email');
+  if(noTel>0)warn.push(noTel+' clienti senza telefono');
+  if(noOp>0)warn.push(noOp+' clienti senza operatore');
+  if(warn.length){
+    g('preview-warn').style.display='block';
+    g('preview-warn').innerHTML='⚠ Attenzione: '+warn.join(' · ')+'. Questi verranno importati comunque (flag in report).';
+  }
+  g('run-info').textContent='Verranno generati ~'+(rows.length*BKS_ALL.length)+' record bonus ('+rows.length+' clienti × '+BKS_ALL.length+' bookmaker)';
+  var h='<table class="prev-tbl"><thead><tr>'
+    +'<th>#</th><th>Nome</th><th>Email</th><th>Telefono</th><th>Operatore</th><th>Referral</th><th>SPID</th><th>CC</th><th>Siti Reg.</th><th>Nuovo</th><th>Docs</th></tr></thead><tbody>';
+  rows.slice(0,100).forEach(function(r,i){
+    var docsN=[r.doc_ci_fronte,r.doc_ci_retro,r.doc_ts_fronte,r.doc_ts_retro,r.doc_foto_fronte,r.doc_foto_retro].filter(Boolean).length;
+    h+='<tr>'
+      +'<td style="color:var(--tx3);font-size:9px">'+(i+1)+'</td>'
+      +'<td style="font-weight:700;color:var(--tx)">'+esc(r.nome)+'</td>'
+      +'<td>'+(r.email?esc(r.email):'<span style="color:var(--tx4)">—</span>')+'</td>'
+      +'<td>'+(r.telefono?esc(r.telefono):'<span style="color:var(--tx4)">—</span>')+'</td>'
+      +'<td>'+(r.operatore?'<span style="color:var(--teal);font-weight:700">'+esc(r.operatore)+'</span>':'<span style="color:var(--orange);font-size:9px">⚠ mancante</span>')+'</td>'
+      +'<td style="color:var(--tx3)">'+(r.referral?esc(r.referral):'—')+'</td>'
+      +'<td>'+(r.has_spid?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--tx4)">✗</span>')+'</td>'
+      +'<td>'+(r.has_cc?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--tx4)">✗</span>')+'</td>'
+      +'<td>'+(r.siti_registrati.length?'<span style="color:var(--orange)">'+r.siti_registrati.join(', ')+'</span>':'<span style="color:var(--tx3)">nessuno</span>')+'</td>'
+      +'<td>'+(r.is_nuovo?'<span class="badge badge-new">NUOVO</span>':'<span class="badge badge-dup">GIÀ PART.</span>')+'</td>'
+      +'<td>'+(docsN?'<span style="color:var(--blue);font-size:10px">'+docsN+' docs</span>':'<span style="color:var(--tx4)">—</span>')+'</td>'
+      +'</tr>';
+  });
+  if(rows.length>100)h+='<tr><td colspan="11" style="color:var(--tx3);text-align:center;padding:10px">...e altri '+(rows.length-100)+' clienti</td></tr>';
+  h+='</tbody></table>';
+  g('preview-table-wrap').innerHTML=h;
+}
+
+/* ── MAIN IMPORT ── */
+async function runImport(){
+  if(_importRunning)return;
+  _importRunning=true;
+  g('run-btn').disabled=true;
+  var isDry=g('s-dry').checked;
+  var doBonus=g('s-bonus').checked;
+  var doUpdate=g('s-update').checked;
+  var opDefault=g('s-op-default').value;
+  var percDefault=parseFloat(g('s-perc').value)||20;
+
+  hide('preview-card');hide('settings-card');hide('settings-sec');hide('preview-sec');
+  show('progress-card');
+  setStatus('Import in corso'+(isDry?' (DRY RUN)':'')+'...','ss_running');
+
+  var results={
+    letti:_csvRows.length,
+    creati:0,aggiornati:0,duplicati:0,
+    mancanti:0,errori:0,bonusCreati:0,
+    log:[],
+    batchId:'IMP-'+Date.now().toString().slice(-8)
+  };
+
+  var batchId=results.batchId;
+  var nextNum=0;
+
+  if(!isDry){
+    try{
+      var rmax=await db.from('clienti').select('id').like('id','MBBET-%').order('id',{ascending:false}).limit(1);
+      if(rmax.data&&rmax.data.length){
+        var mm=(rmax.data[0].id||'').match(/MBBET-0*(\d+)/i);
+        if(mm)nextNum=parseInt(mm[1],10);
+      }
+    }catch(e){}
+  }
+
+  for(var i=0;i<_csvRows.length;i++){
+    var row=_csvRows[i];
+    updateProgress(i,_csvRows.length,'Processo: '+row.nome);
+    var result=await importOneClient(row,{isDry,doBonus,doUpdate,opDefault,percDefault,batchId,nextNumRef:{v:nextNum}});
+    nextNum=result.nextNum;
+    if(result.status==='created'){results.creati++;if(result.bonusN)results.bonusCreati+=result.bonusN;}
+    else if(result.status==='updated'){results.aggiornati++;if(result.bonusN)results.bonusCreati+=result.bonusN;}
+    else if(result.status==='duplicate'){results.duplicati++;}
+    else if(result.status==='missing'){results.mancanti++;}
+    else if(result.status==='error'){results.errori++;}
+    results.log.push({nome:row.nome,status:result.status,msg:result.msg,id:result.id});
+  }
+
+  updateProgress(_csvRows.length,_csvRows.length,'Completato');
+  if(!isDry&&results.creati>0){
+    // salva log import su Supabase
+    try{
+      await db.from('import_log').insert({
+        batch_id:batchId,fonte:'vecchio_modulo_google_form',
+        eseguito_da:localStorage.getItem('mbbet_v2_session')?JSON.parse(localStorage.getItem('mbbet_v2_session')).user:'—',
+        clienti_letti:results.letti,clienti_creati:results.creati,
+        clienti_aggiornati:results.aggiornati,duplicati:results.duplicati,
+        dati_mancanti:results.mancanti,errori:results.errori,bonus_creati:results.bonusCreati,
+        dettaglio:results.log
+      });
+    }catch(e){}
+  }
+  _report=results;
+  _importRunning=false;
+  hide('progress-card');
+  showReport(results,isDry);
+  setStatus('Import '+(isDry?'simulato':'completato')+': '+results.creati+' creati, '+results.aggiornati+' aggiornati, '+results.duplicati+' duplicati.','ss_ready');
+}
+
+async function importOneClient(row,opts){
+  var isDry=opts.isDry,doBonus=opts.doBonus,doUpdate=opts.doUpdate;
+  var opDefault=opts.opDefault,percDefault=opts.percDefault,batchId=opts.batchId;
+  var numRef=opts.nextNumRef;
+
+  if(!row.nome){return{status:'missing',msg:'Nome mancante',id:null,nextNum:numRef.v,bonusN:0};}
+
+  var op=row.operatore||opDefault||null;
+  var perc=percDefault;
+
+  // ── CONTROLLA DUPLICATI ──
+  var existing=null;
+  try{
+    if(row.telefono){
+      var r1=await db.from('clienti').select('id,nome,email,tel').eq('tel',row.telefono).limit(1);
+      if(r1.data&&r1.data.length)existing=r1.data[0];
+    }
+    if(!existing&&row.email){
+      var r2=await db.from('clienti').select('id,nome,email,tel').eq('email',row.email).limit(1);
+      if(r2.data&&r2.data.length)existing=r2.data[0];
+    }
+    if(!existing){
+      var r3=await db.from('clienti').select('id,nome,email,tel').ilike('nome',row.nome.trim()).limit(1);
+      if(r3.data&&r3.data.length)existing=r3.data[0];
+    }
+  }catch(e){}
+
+  if(existing&&!doUpdate){
+    return{status:'duplicate',msg:'Duplicato: trovato '+existing.id,id:existing.id,nextNum:numRef.v,bonusN:0};
+  }
+
+  var clientId;
+  var bonusN=0;
+
+  if(existing&&doUpdate){
+    // AGGIORNA campi mancanti (non sovrascrivere dati validi)
+    clientId=existing.id;
+    var upd={};
+    if(!existing.tel&&row.telefono)upd.tel=row.telefono;
+    if(!existing.email&&row.email)upd.email=row.email;
+    if(row.siti_registrati&&row.siti_registrati.length)upd.siti_registrati=row.siti_registrati;
+    if(row.doc_ci_fronte)upd.doc_ci_fronte=row.doc_ci_fronte;
+    if(row.doc_ci_retro)upd.doc_ci_retro=row.doc_ci_retro;
+    if(row.doc_ts_fronte)upd.doc_ts_fronte=row.doc_ts_fronte;
+    if(row.doc_ts_retro)upd.doc_ts_retro=row.doc_ts_retro;
+    if(row.doc_foto_fronte)upd.doc_foto_fronte=row.doc_foto_fronte;
+    if(row.doc_foto_retro)upd.doc_foto_retro=row.doc_foto_retro;
+    if(op&&!existing.operatore)upd.operatore=op;
+    upd.updated_at=new Date().toISOString();
+    if(!isDry&&Object.keys(upd).length>1){
+      try{await db.from('clienti').update(upd).eq('id',clientId);}catch(e){
+        return{status:'error',msg:'Errore aggiornamento: '+e.message,id:clientId,nextNum:numRef.v,bonusN:0};
+      }
+    }
+    if(doBonus){bonusN=await createBonusRows(clientId,row.nome,op,row.siti_registrati||[],perc,isDry);}
+    return{status:'updated',msg:'Aggiornato '+clientId,id:clientId,nextNum:numRef.v,bonusN};
+  }
+
+  // CREA NUOVO CLIENTE
+  numRef.v++;
+  // genId: leggi max MBBET da DB
+  var rmx=await db.from('clienti').select('id').like('id','MBBET-%').order('id',{ascending:false}).limit(1);
+  var mxN=0;if(rmx.data&&rmx.data.length){var mm=(rmx.data[0].id||'').match(/MBBET-0*(\d+)/i);if(mm)mxN=parseInt(mm[1],10);}
+  mxN=Math.max(mxN,numRef.v);numRef.v=mxN;
+  numRef.v++;
+  clientId='MBBET-'+String(numRef.v).padStart(3,'0');
+  var payload={
+    id:clientId,
+    nome:row.nome,
+    email:row.email||null,
+    email_siti:row.email_siti||null,
+    tel:row.telefono||null,
+    referral:row.referral||null,
+    operatore:op||null,
+    tipologia:row.tipologia||'Standard',
+    stato:'IN_LAVORAZIONE',
+    spid:row.has_spid||false,
+    cc:row.has_cc||false,
+    siti_registrati:row.siti_registrati||[],
+    is_nuovo:row.is_nuovo||false,
+    mese_onboarding:row.mese_onboarding||null,
+    consenso_data:row.consenso_data||null,
+    source:'vecchio_modulo',
+    import_batch_id:batchId,
+    doc_ci_fronte:row.doc_ci_fronte||null,
+    doc_ci_retro:row.doc_ci_retro||null,
+    doc_ts_fronte:row.doc_ts_fronte||null,
+    doc_ts_retro:row.doc_ts_retro||null,
+    doc_foto_fronte:row.doc_foto_fronte||null,
+    doc_foto_retro:row.doc_foto_retro||null,
+    created_at:row.created_at||new Date().toISOString(),
+    updated_at:new Date().toISOString()
+  };
+  if(!isDry){
+    try{
+      var ins=await db.from('clienti').insert(payload);
+      if(ins.error)throw ins.error;
+    }catch(e){
+      numRef.v--;
+      return{status:'error',msg:'Errore insert: '+e.message,id:null,nextNum:numRef.v,bonusN:0};
+    }
+  }
+  if(doBonus){bonusN=await createBonusRows(clientId,row.nome,op,row.siti_registrati||[],perc,isDry);}
+  return{status:'created',msg:'Creato '+clientId,id:clientId,nextNum:numRef.v,bonusN};
+}
+
+/* ── CREA RIGHE BONUS PER CLIENTE ── */
+async function createBonusRows(cliId,cliNm,operatore,sitiReg,percOp,isDry){
+  if(!operatore)return 0;
+  var created=0;
+  // check esistenti per non duplicare
+  var existingBks=[];
+  try{
+    var ex=await db.from('bonus').select('bookmaker').eq('id_cli',cliId);
+    if(ex.data)existingBks=ex.data.map(function(r){return r.bookmaker;});
+  }catch(e){}
+
+  // ottieni max ID bonus
+  var maxN=0;
+  try{
+    var rm=await db.from('bonus').select('id').like('id','BNS-%').order('created_at',{ascending:false}).limit(1);
+    if(rm.data&&rm.data.length){var mm=(rm.data[0].id||'').match(/BNS-0*(\d+)/i);if(mm)maxN=parseInt(mm[1],10);}
+  }catch(e){}
+
+  var toInsert=[];
+  var oggi=new Date();
+  var dataInizio=oggi.toISOString().slice(0,10);
+  var meseOp=oggi.getMonth()+1;
+  var annoOp=oggi.getFullYear();
+  BKS_ALL.forEach(function(bk){
+    if(existingBks.indexOf(bk)>=0)return; // già esiste
+    maxN++;
+    var stato=sitiReg.indexOf(bk)>=0?'GIA_REGISTRATO':'LIBERO';
+    toInsert.push({
+      id:'BNS-'+String(maxN).padStart(5,'0'),
+      id_cli:cliId,cliente:cliNm,
+      operatore:operatore,bookmaker:bk,
+      stato:stato,stato_op:stato==='GIA_REGISTRATO'?'In corso':'In corso',
+      perc_op:percOp,
+      priorita:['Bet365','Sisal','Goldbet','William Hill','Betfair'].indexOf(bk)>=0?'ALTA':'MEDIA',
+      fase_attuale:stato==='GIA_REGISTRATO'?'Già registrato':'Da iniziare',
+      data_inizio:dataInizio,mese_operativo:meseOp,anno_operativo:annoOp,
+      deposito:0,bonus_ricevuto:0,prelievo:0,cronologia:[],
+      created_at:new Date().toISOString(),updated_at:new Date().toISOString()
+    });
+  });
+
+  if(!isDry&&toInsert.length){
+    // inserisci in batch da 50
+    for(var i=0;i<toInsert.length;i+=50){
+      try{
+        var batch=toInsert.slice(i,i+50);
+        var ins=await db.from('bonus').insert(batch);
+        if(!ins.error)created+=batch.length;
+      }catch(e){}
+    }
+  } else {
+    created=toInsert.length;
+  }
+  return created;
+}
+
+/* ── PROGRESS ── */
+function updateProgress(done,total,label){
+  var pct=total>0?Math.round(done/total*100):0;
+  g('prog-fill').style.width=pct+'%';
+  g('prog-pct').textContent=pct+'%';
+  g('prog-label').textContent=label||(''+done+'/'+total);
+}
+
+/* ── REPORT FINALE ── */
+function showReport(r,isDry){
+  show('report-card');
+  if(isDry)g('report-card').querySelector('div').textContent='🧪 Simulazione completata (nessun dato salvato)';
+  var cards=[
+    {n:r.letti,l:'Righe Lette',c:'var(--tx2)'},
+    {n:r.creati,l:'Creati',c:'var(--green)'},
+    {n:r.aggiornati,l:'Aggiornati',c:'var(--blue)'},
+    {n:r.duplicati,l:'Duplicati',c:'var(--gold)'},
+    {n:r.mancanti,l:'Dati Mancanti',c:'var(--orange)'},
+    {n:r.errori,l:'Errori',c:'var(--red)'},
+    {n:r.bonusCreati,l:'Bonus Creati',c:'var(--teal)'}
+  ];
+  g('report-grid').innerHTML=cards.map(function(c){
+    return '<div class="report-card"><div class="report-n" style="color:'+c.c+'">'+c.n+'</div><div class="report-l">'+c.l+'</div></div>';
+  }).join('');
+  var logLines=r.log.map(function(l){
+    var cls={created:'log-ok',updated:'log-upd',duplicate:'log-dup',error:'log-err',missing:'log-err'}[l.status]||'log-inf';
+    var icon={created:'✓',updated:'↑',duplicate:'~',error:'✕',missing:'?'}[l.status]||'·';
+    return '<div class="'+cls+'">'+icon+' '+esc(l.nome)+'  <span style="color:var(--tx3)">'+esc(l.msg||l.status)+(l.id?' ['+l.id+']':'')+'</span></div>';
+  }).join('');
+  g('report-log').innerHTML=logLines||'<div class="log-inf">Nessun log disponibile.</div>';
+}
+
+function downloadLog(){
+  if(!_report)return;
+  var json=JSON.stringify(_report,null,2);
+  var a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+  a.download='mbbet_import_'+(_report.batchId||'log')+'_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  showToast('Log scaricato','ok');
+}
+
+function resetImport(){
+  _csvRows=[];_report=null;_importRunning=false;
+  hide('settings-sec');hide('settings-card');hide('preview-sec');hide('preview-card');
+  hide('progress-card');hide('report-card');
+  g('csv-paste-input').value='';
+  g('run-btn').disabled=false;
+  setStatus('Pronto. Carica il CSV o incolla i dati per iniziare.','ss_idle');
+}
+
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ── LOGIN ── */
+function login2(){
+  var e=g('li-e').value.trim();
+  var p=g('li-p').value;
+  if(!e||!p){g('l-err').textContent='Inserisci email e password';return;}
+  var r=doLogin(e,p);
+  if(r.error){g('l-err').textContent=r.error;return;}
+  g('ls').style.display='none';
+  document.documentElement.classList.add('mb-auth');
+}
+
+/* ── INIT ── */
+(function(){
+  var s=null;
+  try{var raw=localStorage.getItem('mbbet_v2_session');if(raw)s=JSON.parse(raw);}catch(e){}
+  if(!s){
+    try{
+      var h=window.location.hash||'';
+      if(h.indexOf('#mbbet=')===0){
+        s=JSON.parse(decodeURIComponent(atob(h.slice(7))));
+        if(s){localStorage.setItem('mbbet_v2_session',JSON.stringify(s));history.replaceState(null,'',window.location.pathname);}
+      }
+    }catch(e){}
+  }
+  if(s&&s.email){
+    document.documentElement.classList.add('mb-auth');
+    currentUser={email:s.email};currentNome=s.nome||s.email;currentRole=s.ruolo||'VIEWER';
+  }
+})();
+</script>
+</body>
+</html>

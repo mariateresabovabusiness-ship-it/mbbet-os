@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MBBET OS — Team</title>
+<script>try{var _h=window.location.hash,_l=localStorage.getItem('mbbet_v2_session');if((_h&&_h.indexOf('#mbbet=')===0)||_l)document.documentElement.classList.add('mb-auth');}catch(e){}</script>
+<style>html.mb-auth #ls{display:none!important}</style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050714;--gold:#f5c842;--glow-g:rgba(245,200,66,.28);
+  --green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;
+  --tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--br:rgba(255,255,255,.07);--sb:224px}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;overflow:hidden;font-size:14px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(245,200,66,.2);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+/* SIDEBAR */
+.sb{width:var(--sb);height:100vh;flex-shrink:0;background:rgba(3,4,14,.99);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;position:relative;z-index:30}
+.sb::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(245,200,66,.25) 30%,rgba(245,200,66,.25) 70%,transparent)}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.sb-crown{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 28px var(--glow-g)}
+.sb-nm{font-size:14px;font-weight:900;letter-spacing:1.5px;color:var(--gold)}
+.sb-sub{font-size:8px;color:var(--tx3);letter-spacing:2px;margin-top:2px}
+.sb-sec{padding:13px 16px 3px;font-size:8px;font-weight:800;color:var(--tx4);letter-spacing:2.5px}
+.sb-lnk{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--tx3);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:.14s;text-decoration:none;position:relative}
+.sb-lnk:hover{color:var(--tx2);background:rgba(255,255,255,.022);border-left-color:rgba(245,200,66,.2)}
+.sb-lnk.act{color:var(--gold);background:rgba(245,200,66,.08);border-left-color:var(--gold);font-weight:700}
+.sb-lnk.act::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--gold);box-shadow:0 0 16px var(--glow-g)}
+.sb-lnk .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.05)}
+.sb-mode{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.14);border-radius:9px;padding:9px 12px}
+.sb-ml{font-size:8px;color:var(--tx3);letter-spacing:1.5px;margin-bottom:4px}
+.sb-mv{font-size:13px;font-weight:800;color:var(--gold)}
+/* TOPBAR */
+.pg{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:62px;padding:0 20px;flex-shrink:0;display:flex;align-items:center;gap:10px;background:rgba(3,4,14,.98);border-bottom:1px solid rgba(255,255,255,.06);position:relative;z-index:20}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,200,66,.25),transparent)}
+.tb-back{display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx3);text-decoration:none;transition:.14s;flex-shrink:0}
+.tb-back:hover{border-color:rgba(245,200,66,.3);color:var(--gold)}
+.tb-title{flex:1;text-align:center}
+.tb-g{font-size:18px;font-weight:900;letter-spacing:3px;color:var(--gold);text-shadow:0 0 28px var(--glow-g)}
+.tb-sub{font-size:9px;color:var(--tx3);margin-top:3px}
+.tb-usr{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;flex-shrink:0}
+.tb-av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000}
+.tb-info{display:flex;flex-direction:column}
+.tb-nm{font-size:11px;font-weight:700;color:var(--tx2)}
+.tb-rl{font-size:9px;color:var(--tx3)}
+.tb-logout{width:26px;height:26px;border-radius:6px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.15);cursor:pointer;font-size:11px;color:var(--red);display:flex;align-items:center;justify-content:center;transition:.14s;margin-left:4px}
+.tb-logout:hover{background:rgba(255,87,87,.18)}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+/* SECTION */
+.sec-wrap{margin-bottom:32px}
+.sec-hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sec-title{font-size:12px;font-weight:900;color:var(--tx2);letter-spacing:2px;flex:1}
+.sec-tag{font-size:9px;font-weight:700;padding:4px 12px;border-radius:10px}
+/* SOCI CARDS */
+.soci-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.socio-card{background:linear-gradient(135deg,rgba(10,13,32,.98),rgba(14,18,42,.95));border:1px solid rgba(245,200,66,.18);border-radius:18px;padding:22px;position:relative;overflow:hidden;animation:fadeUp .3s ease both;transition:.18s}
+.socio-card:hover{border-color:rgba(245,200,66,.38);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 30px rgba(245,200,66,.06)}
+.socio-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.socio-av{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.socio-nm{font-size:15px;font-weight:800;color:var(--tx);margin-bottom:5px}
+.socio-rl{font-size:9px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-block;margin-bottom:14px}
+.quota-box{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.14);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.quota-pct{font-size:32px;font-weight:900;color:var(--gold);line-height:1}
+.quota-lbl{font-size:8.5px;color:var(--tx3);margin-top:3px;letter-spacing:1px}
+.quota-val{font-size:13px;font-weight:700;color:var(--green);margin-top:6px}
+.quota-sub{font-size:9px;color:var(--tx3)}
+.socio-dot{position:absolute;top:16px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+/* OPERATORI GRID */
+.ops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.op-card{background:rgba(8,11,28,.97);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px;animation:fadeUp .3s ease both;transition:.16s;position:relative}
+.op-card:hover{border-color:rgba(79,157,255,.25);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.op-card.joint{border-color:rgba(255,138,61,.2);background:rgba(10,8,24,.97)}
+.op-card.joint::before{content:'COPPIA';position:absolute;top:-1px;right:14px;font-size:7px;font-weight:800;padding:3px 8px;background:var(--orange);color:#000;border-radius:0 0 6px 6px;letter-spacing:1px}
+.op-av{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;margin-bottom:12px;flex-shrink:0}
+.op-nm{font-size:13px;font-weight:800;color:var(--tx);margin-bottom:3px;line-height:1.3}
+.op-role{font-size:9px;color:var(--tx3);margin-bottom:12px}
+.op-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.op-stat{background:rgba(255,255,255,.04);border-radius:8px;padding:9px 10px;border:1px solid rgba(255,255,255,.05)}
+.op-sv{font-size:18px;font-weight:900;color:var(--blue)}
+.op-sl{font-size:8px;color:var(--tx3);margin-top:2px}
+.op-status{position:absolute;top:14px;right:14px;width:7px;height:7px;border-radius:50%;background:var(--green)}
+/* EMPTY */
+.empty-op{text-align:center;color:var(--tx3);padding:32px;font-size:12px}
+/* LOGIN */
+#ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.li-box{background:rgba(10,13,32,.99);border:1px solid rgba(245,200,66,.18);border-radius:20px;padding:40px 36px;width:340px}
+.li-logo{text-align:center;margin-bottom:28px}
+.li-t{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.li-s{font-size:10px;color:var(--tx3);margin-top:4px}
+.li-f{display:flex;flex-direction:column;gap:12px}
+.li-inp{padding:11px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx);font-size:13px;outline:none;width:100%;font-family:inherit}
+.li-inp:focus{border-color:rgba(245,200,66,.4)}
+.li-btn{padding:12px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:10px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:1px}
+.li-err{font-size:11px;color:var(--red);text-align:center;min-height:16px}
+</style>
+<script src="shared/supabase.min.js"></script>
+<script src="shared/auth.js"></script>
+</head>
+<body>
+<div id="app" style="display:flex;height:100%;flex-direction:row">
+  <!-- SIDEBAR -->
+  <div class="sb">
+    <div class="sb-logo">
+      <div class="sb-crown">&#128081;</div>
+      <div><div class="sb-nm">MBBET OS</div><div class="sb-sub">SISTEMA OPERATIVO</div></div>
+    </div>
+    <div class="sb-sec">NAVIGAZIONE</div>
+    <a class="sb-lnk" href="#" onclick="navTo('index.html');return false;"><span class="ic">&#127968;</span>Hub Centrale</a>
+    <a class="sb-lnk" href="#" onclick="navTo('01_clienti.html');return false;"><span class="ic">&#128100;</span>Clienti</a>
+    <a class="sb-lnk" href="#"><span class="ic">&#127919;</span>Bonus</a>
+    <a class="sb-lnk act"><span class="ic">&#128101;</span>Team</a>
+    <a class="sb-lnk" href="#" onclick="navTo('04_finanze.html');return false;"><span class="ic">&#128184;</span>Finanze</a>
+    <a class="sb-lnk" href="#"><span class="ic">&#9989;</span>Task</a>
+    <a class="sb-lnk" href="#"><span class="ic">&#128202;</span>Report</a>
+    <div class="sb-sec">SISTEMA</div>
+    <a class="sb-lnk" href="#"><span class="ic">&#9881;</span>Config</a>
+    <div class="sb-bot">
+      <div class="sb-mode"><div class="sb-ml">RUOLO ATTIVO</div><div class="sb-mv" id="sb-role">—</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="pg">
+    <div class="topbar">
+      <a class="tb-back" href="#" onclick="navTo('index.html');return false;">&#8592; Hub</a>
+      <div class="tb-title">
+        <div class="tb-g">TEAM MBBET</div>
+        <div class="tb-sub">SOCI &middot; OPERATORI &middot; PERFORMANCE</div>
+      </div>
+      <div class="tb-usr">
+        <div class="tb-av" id="tb-av">MB</div>
+        <div class="tb-info"><div class="tb-nm" id="tb-nm">—</div><div class="tb-rl" id="tb-rl">—</div></div>
+        <div class="tb-logout" onclick="doLogout()" title="Esci">&#10005;</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══ SOCI ═══ -->
+      <div class="sec-wrap">
+        <div class="sec-hdr">
+          <div class="sec-title">&#128081; SOCI MBBET — DIVISIONE GUADAGNO</div>
+          <div class="sec-tag" style="background:rgba(245,200,66,.1);color:var(--gold);border:1px solid rgba(245,200,66,.2)">GUADAGNO NETTO ÷ 4</div>
+        </div>
+        <div class="soci-grid">
+          <!-- Mary -->
+          <div class="socio-card" style="animation-delay:.05s">
+            <div class="socio-dot"></div>
+            <div class="socio-av" style="background:linear-gradient(135deg,#6b4500,var(--gold))">MB</div>
+            <div class="socio-nm">Mary Bova</div>
+            <div class="socio-rl" style="background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.25)">SOCIO ADMIN</div>
+            <div class="quota-box">
+              <div class="quota-pct">25%</div>
+              <div class="quota-lbl">QUOTA GUADAGNO</div>
+              <div class="quota-val" id="q0">— €</div>
+              <div class="quota-sub">1/4 del margine netto mese</div>
+            </div>
+            <div style="font-size:10px;color:var(--tx3)">dm.businessita@gmail.com</div>
+          </div>
+          <!-- Manuele -->
+          <div class="socio-card" style="animation-delay:.1s">
+            <div class="socio-dot"></div>
+            <div class="socio-av" style="background:linear-gradient(135deg,#5a3200,#d97706)">MA</div>
+            <div class="socio-nm">Manuele</div>
+            <div class="socio-rl" style="background:rgba(217,119,6,.1);color:#d97706;border:1px solid rgba(217,119,6,.25)">SOCIO</div>
+            <div class="quota-box">
+              <div class="quota-pct">25%</div>
+              <div class="quota-lbl">QUOTA GUADAGNO</div>
+              <div class="quota-val" id="q1">— €</div>
+              <div class="quota-sub">1/4 del margine netto mese</div>
+            </div>
+            <div style="font-size:10px;color:var(--tx3)">manuele@mbbet.it</div>
+          </div>
+          <!-- Serena -->
+          <div class="socio-card" style="animation-delay:.15s">
+            <div class="socio-dot"></div>
+            <div class="socio-av" style="background:linear-gradient(135deg,#0a2a5a,var(--blue))">SE</div>
+            <div class="socio-nm">Serena</div>
+            <div class="socio-rl" style="background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.25)">SOCIO OPERATORE</div>
+            <div class="quota-box">
+              <div class="quota-pct">25%</div>
+              <div class="quota-lbl">QUOTA GUADAGNO</div>
+              <div class="quota-val" id="q2">— €</div>
+              <div class="quota-sub">1/4 del margine netto mese</div>
+            </div>
+            <div style="font-size:10px;color:var(--tx3)">serena@mbbet.it</div>
+          </div>
+          <!-- Samuele -->
+          <div class="socio-card" style="animation-delay:.2s">
+            <div class="socio-dot"></div>
+            <div class="socio-av" style="background:linear-gradient(135deg,#2d1b6b,var(--purple))">SA</div>
+            <div class="socio-nm">Samuele</div>
+            <div class="socio-rl" style="background:rgba(183,148,244,.1);color:var(--purple);border:1px solid rgba(183,148,244,.25)">SOCIO COLLAB</div>
+            <div class="quota-box">
+              <div class="quota-pct">25%</div>
+              <div class="quota-lbl">QUOTA GUADAGNO</div>
+              <div class="quota-val" id="q3">— €</div>
+              <div class="quota-sub">1/4 del margine netto mese</div>
+            </div>
+            <div style="font-size:10px;color:var(--tx3)">samuele@mbbet.it</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ OPERATORI ═══ -->
+      <div class="sec-wrap">
+        <div class="sec-hdr">
+          <div class="sec-title">&#9881; OPERATORI — GESTIONE CLIENTI</div>
+          <div class="sec-tag" style="background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.2)" id="badge-op">11 operatori</div>
+        </div>
+        <div class="ops-grid" id="ops-grid">
+          <div class="empty-op">Caricamento clienti...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="ls" style="display:flex">
+  <div class="li-box">
+    <div class="li-logo"><div class="li-t">&#128081; MBBET OS</div><div class="li-s">ACCESSO RISERVATO</div></div>
+    <div class="li-f">
+      <input class="li-inp" type="email" id="li-e" placeholder="Email">
+      <input class="li-inp" type="password" id="li-p" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+      <div class="li-err" id="l-err"></div>
+      <button class="li-btn" onclick="login()">ENTRA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var OPERATORI=[
+  {nome:'Riccardo Tavagnacco', ini:'RT', col:'#4f9dff', bg:'linear-gradient(135deg,#0a2a5a,#4f9dff)', joint:false},
+  {nome:'Alessia Ciman',       ini:'AC', col:'#b794f4', bg:'linear-gradient(135deg,#2d1b6b,#b794f4)', joint:false},
+  {nome:'Ciro Bisogno',        ini:'CB', col:'#22e4ff', bg:'linear-gradient(135deg,#0a2a3a,#22e4ff)', joint:false},
+  {nome:'Antonio Michele La Barbera', ini:'AM', col:'#00e58a', bg:'linear-gradient(135deg,#003d24,#00e58a)', joint:false},
+  {nome:'Francesco Domenico Bova',    ini:'FB', col:'#f5c842', bg:'linear-gradient(135deg,#6b4500,#f5c842)', joint:false},
+  {nome:'Emilian Cozmiuc',     ini:'EC', col:'#ff8a3d', bg:'linear-gradient(135deg,#3b1a00,#ff8a3d)', joint:false},
+  {nome:'Alessia Maffioli',    ini:'AM', col:'#b794f4', bg:'linear-gradient(135deg,#3b0f6b,#b794f4)', joint:false},
+  {nome:'Elisa Qualantonio',   ini:'EQ', col:'#22e4ff', bg:'linear-gradient(135deg,#0a3040,#22e4ff)', joint:false},
+  {nome:'Maria Adele Catania', ini:'MA', col:'#ff5757', bg:'linear-gradient(135deg,#3b0000,#ff5757)', joint:false},
+  {nome:'Luca Albert',         ini:'LA', col:'#00e58a', bg:'linear-gradient(135deg,#003020,#00e58a)', joint:false},
+  {nome:'Mari+Samu',           ini:'MS', col:'#ff8a3d', bg:'linear-gradient(135deg,#3b1a00,#ff8a3d)', joint:true}
+];
+
+var SPESE_KEY='mbbet_spese_v1';
+var CLIENT_COUNTS={};
+var ENTRATE_TOT=0;
+
+function fmt(n){return (n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function buildOpsGrid(){
+  var g=document.getElementById('ops-grid');
+  g.innerHTML=OPERATORI.map(function(op,i){
+    var cnt=CLIENT_COUNTS[op.nome]||0;
+    var delay=(.05*i).toFixed(2);
+    var joint=op.joint?' joint':'';
+    return '<div class="op-card'+joint+'" style="animation-delay:'+delay+'s">'+
+      '<div class="op-status"></div>'+
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">'+
+      '<div class="op-av" style="background:'+op.bg+';color:'+((op.col==='#f5c842')?'#000':'#fff')+'">'+op.ini+'</div>'+
+      '<div><div class="op-nm">'+op.nome+'</div><div class="op-role">Operatore MBBET</div></div></div>'+
+      '<div class="op-stats">'+
+      '<div class="op-stat"><div class="op-sv" style="color:'+op.col+'">'+cnt+'</div><div class="op-sl">Clienti assegnati</div></div>'+
+      '<div class="op-stat"><div class="op-sv" style="color:var(--green);font-size:13px">Attivo</div><div class="op-sl">Stato</div></div>'+
+      '</div></div>';
+  }).join('');
+}
+
+function updateQuote(){
+  var spese=JSON.parse(localStorage.getItem(SPESE_KEY)||'[]').reduce(function(s,x){return s+(x.imp||0);},0);
+  var margine=Math.max(ENTRATE_TOT-spese,0);
+  var quota=margine/4;
+  ['q0','q1','q2','q3'].forEach(function(id){
+    document.getElementById(id).textContent=fmt(quota)+' €';
+  });
+}
+
+async function loadData(){
+  try{
+    var r=await db.from('clienti').select('operatore,stato,bookmaker_disponibili');
+    if(r.data){
+      CLIENT_COUNTS={};
+      r.data.forEach(function(c){
+        if(c.operatore){CLIENT_COUNTS[c.operatore]=(CLIENT_COUNTS[c.operatore]||0)+1;}
+      });
+      var att=r.data.filter(function(c){return c.stato==='ATTIVO';}).length;
+      var lav=r.data.filter(function(c){return c.stato==='IN_LAVORAZIONE';}).length;
+      ENTRATE_TOT=att*68+lav*34;
+    }
+  }catch(e){}
+  buildOpsGrid();
+  updateQuote();
+}
+
+function login(){var em=(document.getElementById('li-e').value||'').trim();var pw=document.getElementById('li-p').value||'';var err=document.getElementById('l-err');err.textContent='';if(!em||!pw){err.textContent='Inserisci email e password';return;}var res=doLogin(em,pw);if(res.error){err.textContent=res.error;return;}boot();}
+
+function boot(){
+  var _ls=document.getElementById('ls');if(_ls)_ls.setAttribute('style','display:none');
+  var ini=(currentNome||'MB').split(' ').map(function(w){return w[0]||''}).join('').toUpperCase().slice(0,2);
+  document.getElementById('tb-av').textContent=ini;
+  document.getElementById('tb-nm').textContent=currentNome;
+  document.getElementById('tb-rl').textContent=(currentRole||'').replace(/_/g,' ');
+  document.getElementById('sb-role').textContent=(currentRole||'').replace(/_/g,' ');
+  buildOpsGrid();
+  loadData();
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  try{initAuth(function(){boot();},function(){document.getElementById('ls').style.display='flex';setTimeout(function(){var e=document.getElementById('li-e');if(e)e.focus();},80);});}
+  catch(e){document.getElementById('ls').style.display='flex';}
+});
+</script>
+</body>
+</html>

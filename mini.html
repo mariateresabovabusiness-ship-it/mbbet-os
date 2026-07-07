@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Mini CRM Test</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f172a;--navy2:#1e293b;--gold:#f59e0b;--text:#f1f5f9;--muted:#94a3b8;--border:#334155;}
+body{background:var(--navy);color:var(--text);font-family:sans-serif;display:flex;height:100vh}
+#sb{width:200px;background:var(--navy2);border-right:1px solid var(--border);padding:20px}
+#sb h1{color:var(--gold);font-size:18px;margin-bottom:20px}
+#sb a{display:block;color:var(--muted);padding:8px;cursor:pointer;border-radius:6px;margin-bottom:4px}
+#sb a:hover{background:rgba(245,158,11,.1);color:var(--text)}
+#main{flex:1;padding:30px}
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<nav id="sb">
+  <h1>🎯 MBBET</h1>
+  <a onclick="show('dashboard')">🏠 Dashboard</a>
+  <a onclick="show('clienti')">👥 Clienti</a>
+  <a onclick="show('bonus')">🎰 Bonus</a>
+</nav>
+<div id="main">
+  <div id="view"></div>
+</div>
+<script src="supabase.min.js"></script>
+<script>
+const db = supabase.createClient(
+  'https://ntwqfuvcosvzpqrfpipn.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg'
+);
+
+function show(s) {
+  document.getElementById('view').innerHTML = '<div class="card">Caricamento ' + s + '...</div>';
+  if (s === 'dashboard') loadDash();
+  if (s === 'clienti')   loadClienti();
+  if (s === 'bonus')     loadBonus();
+}
+
+async function loadDash() {
+  const { data, error } = await db.from('config').select('chiave,valore');
+  if (error) { document.getElementById('view').innerHTML = '<div class="card" style="color:red">Errore: ' + error.message + '</div>'; return; }
+  document.getElementById('view').innerHTML = '<div class="card"><b style="color:#f59e0b">Dashboard</b><br><br>' + data.map(function(r){ return r.chiave + ': ' + r.valore; }).join('<br>') + '</div>';
+}
+
+async function loadClienti() {
+  const { data, error } = await db.from('clienti').select('id,nome,stato,operatore').limit(20);
+  if (error) { document.getElementById('view').innerHTML = '<div class="card" style="color:red">Errore: ' + error.message + '</div>'; return; }
+  document.getElementById('view').innerHTML = '<div class="card"><b style="color:#f59e0b">Clienti (' + data.length + ')</b><br><br>' + (data.length ? data.map(function(r){ return r.id + ' - ' + r.nome + ' (' + r.operatore + ')'; }).join('<br>') : 'Nessun cliente') + '</div>';
+}
+
+async function loadBonus() {
+  const { data, error } = await db.from('bonus').select('id,bookmaker,stato').limit(20);
+  if (error) { document.getElementById('view').innerHTML = '<div class="card" style="color:red">Errore: ' + error.message + '</div>'; return; }
+  document.getElementById('view').innerHTML = '<div class="card"><b style="color:#f59e0b">Bonus (' + data.length + ')</b><br><br>' + (data.length ? data.map(function(r){ return r.id + ' - ' + r.bookmaker + ' [' + r.stato + ']'; }).join('<br>') : 'Nessun bonus') + '</div>';
+}
+
+show('dashboard');
+</script>
+</body>
+</html>

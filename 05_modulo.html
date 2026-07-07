@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Modulo Registrazione — MBBET</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#06080f;--gold:#f7cc46;--green:#00f093;--blue:#5aaaff;--teal:#00d4b0;--red:#ff4f4f;--orange:#ff9040;--tx:#edf2ff;--tx2:#b8cee8;--tx3:#48627a;--br:rgba(255,255,255,.07)}
+html,body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif}
+*::-webkit-scrollbar{width:4px}*::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE WRAPPER */
+.page{max-width:680px;margin:0 auto;padding:40px 20px 80px}
+
+/* LOGO AREA */
+.logo-wrap{text-align:center;margin-bottom:36px}
+.logo-ic{width:64px;height:64px;border-radius:18px;background:linear-gradient(145deg,#2d1800,#b8890a,var(--gold));display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:12px;box-shadow:0 8px 32px rgba(247,204,70,.15)}
+.logo-t{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.logo-s{font-size:11px;color:var(--tx3);margin-top:4px;letter-spacing:1px}
+
+/* STEP NAV */
+.step-nav{display:flex;align-items:center;gap:0;margin-bottom:36px}
+.step-item{flex:1;text-align:center;position:relative}
+.step-item::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--br);z-index:0}
+.step-item:last-child::after{display:none}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--br);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:var(--tx3);background:var(--bg);position:relative;z-index:1;transition:.2s}
+.step-label{font-size:9px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-top:5px;line-height:1.3}
+.step-item.active .step-dot{border-color:var(--teal);color:var(--teal);box-shadow:0 0 12px rgba(0,212,176,.3)}
+.step-item.done .step-dot{background:var(--teal);border-color:var(--teal);color:#000}
+.step-item.active .step-label,.step-item.done .step-label{color:var(--tx2)}
+
+/* CARD */
+.card{background:linear-gradient(145deg,rgba(13,18,44,.98),rgba(8,11,26,.99));border:1px solid var(--br);border-radius:18px;padding:26px 28px;margin-bottom:16px;animation:fadeUp .25s ease}
+
+/* SECTION LABEL */
+.sec-lbl{font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+
+/* FORM FIELDS */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.field label .req{color:var(--red);margin-left:2px}
+.inp{width:100%;padding:11px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:var(--tx);font-size:13px;outline:none;font-family:inherit;transition:.14s}
+.inp:focus{border-color:rgba(0,212,176,.4);background:rgba(0,212,176,.03)}
+.inp.err{border-color:rgba(255,79,79,.5)}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field .hint{font-size:10px;color:var(--tx3);margin-top:4px}
+.field .err-msg{font-size:10px;color:var(--red);margin-top:4px;display:none}
+.field.has-err .err-msg{display:block}
+.field.has-err .inp{border-color:rgba(255,79,79,.5)}
+
+/* RADIO/CHECKBOX GROUPS */
+.opt-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.opt-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border:1px solid var(--br);border-radius:9px;cursor:pointer;font-size:11px;font-weight:700;color:var(--tx3);transition:.14s;user-select:none;background:rgba(255,255,255,.02)}
+.opt-btn:hover{border-color:rgba(0,212,176,.3);color:var(--tx2)}
+.opt-btn.sel{border-color:rgba(0,212,176,.5);background:rgba(0,212,176,.07);color:var(--teal)}
+.opt-btn input{display:none}
+
+/* BK GRID */
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px}
+.bk-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--br);border-radius:9px;cursor:pointer;font-size:11px;font-weight:700;color:var(--tx3);transition:.14s;background:rgba(255,255,255,.02);user-select:none}
+.bk-item:hover{border-color:rgba(255,144,64,.3);color:var(--tx2)}
+.bk-item.sel{border-color:rgba(255,144,64,.5);background:rgba(255,144,64,.07);color:var(--orange)}
+.bk-item input{display:none}
+
+/* CONSENSO */
+.consenso-box{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px}
+.consenso-text{font-size:11px;color:var(--tx3);line-height:1.7;margin-bottom:14px;max-height:140px;overflow-y:auto}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer}
+.check-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--teal);cursor:pointer;flex-shrink:0;margin-top:1px}
+.check-row span{font-size:11px;color:var(--tx2);line-height:1.5}
+.check-row.required-check span b{color:var(--gold)}
+
+/* DOCS */
+.doc-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.doc-row:last-child{border-bottom:none}
+.doc-label{flex:1;font-size:11px;color:var(--tx2)}
+.doc-label .doc-note{font-size:9px;color:var(--tx3);display:block;margin-top:1px}
+.doc-inp{flex:2;padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid var(--br);border-radius:8px;color:var(--tx2);font-size:11px;outline:none;font-family:inherit}
+.doc-inp:focus{border-color:rgba(90,170,255,.4)}
+.doc-inp::placeholder{color:var(--tx3);font-size:10px}
+
+/* RECAP */
+.recap-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.recap-item{background:rgba(255,255,255,.025);border:1px solid var(--br);border-radius:9px;padding:10px 13px}
+.recap-l{font-size:9px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.recap-v{font-size:12px;font-weight:700;color:var(--tx)}
+
+/* BUTTONS */
+.btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px}
+.btn-next{padding:13px 32px;border:none;border-radius:11px;background:linear-gradient(135deg,var(--teal),var(--blue));color:#000;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.5px;transition:.15s}
+.btn-next:hover{opacity:.88}
+.btn-next:disabled{opacity:.35;cursor:not-allowed}
+.btn-back{padding:13px 22px;border:1px solid var(--br);border-radius:11px;background:transparent;color:var(--tx3);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.14s}
+.btn-back:hover{color:var(--tx2);border-color:rgba(255,255,255,.14)}
+
+/* SUCCESS */
+#success-screen{display:none;text-align:center;padding:60px 20px}
+.success-ic{font-size:72px;margin-bottom:20px}
+.success-t{font-size:24px;font-weight:900;color:var(--green);margin-bottom:8px}
+.success-s{font-size:13px;color:var(--tx3);max-width:340px;margin:0 auto;line-height:1.6}
+.success-id{display:inline-block;margin-top:18px;padding:10px 22px;background:rgba(0,240,147,.07);border:1px solid rgba(0,240,147,.2);border-radius:10px;font-size:14px;font-weight:900;color:var(--green);letter-spacing:1px}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:10px;font-size:11px;font-weight:700;margin-bottom:14px}
+.alert-warn{background:rgba(255,144,64,.07);border:1px solid rgba(255,144,64,.2);color:var(--orange)}
+.alert-err{background:rgba(255,79,79,.07);border:1px solid rgba(255,79,79,.2);color:var(--red)}
+.alert-ok{background:rgba(0,240,147,.07);border:1px solid rgba(0,240,147,.2);color:var(--green)}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:500;padding:11px 18px;border-radius:10px;font-size:11px;font-weight:700;transition:all .3s;opacity:0;transform:translateY(6px)}
+
+@media(max-width:520px){
+  .page{padding:24px 14px 60px}
+  .inp-row{grid-template-columns:1fr}
+  .bk-grid{grid-template-columns:repeat(2,1fr)}
+  .recap-grid{grid-template-columns:1fr}
+}
+</style>
+<script src="shared/supabase.min.js"></script>
+<script src="shared/auth.js"></script>
+</head>
+<body>
+
+<div class="page" id="form-page">
+
+  <div class="logo-wrap">
+    <div><div class="logo-ic">🏆</div></div>
+    <div class="logo-t">MBBET</div>
+    <div class="logo-s">MODULO DI REGISTRAZIONE COLLABORATORE</div>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div class="step-nav" id="step-nav">
+    <div class="step-item active" id="si-0"><div class="step-dot">1</div><div class="step-label">Condizioni<br>e Contatti</div></div>
+    <div class="step-item" id="si-1"><div class="step-dot">2</div><div class="step-label">Dati<br>Operativi</div></div>
+    <div class="step-item" id="si-2"><div class="step-dot">3</div><div class="step-label">Siti<br>Registrati</div></div>
+    <div class="step-item" id="si-3"><div class="step-dot">4</div><div class="step-label">Documenti<br>e Invio</div></div>
+  </div>
+
+  <!-- STEP 0: Consenso + Contatti -->
+  <div id="step-0">
+    <div class="card">
+      <div class="sec-lbl">Condizioni operative</div>
+      <div class="consenso-box">
+        <div class="consenso-text">
+          <b style="color:var(--tx2);display:block;margin-bottom:10px">ACCORDO DI COLLABORAZIONE MBBET</b>
+          Partecipando al programma MBBET, il collaboratore accetta le seguenti condizioni:<br><br>
+          <b>1. Oggetto</b> — La collaborazione riguarda l'esecuzione di offerte promozionali (bonus benvenuto e ricarica) presso bookmaker legalmente operanti in Italia.<br><br>
+          <b>2. Remunerazione</b> — Il collaboratore percepisce una percentuale concordata sul profitto netto generato, calcolato come prelievo meno depositi e costi operativi.<br><br>
+          <b>3. Documenti</b> — Il collaboratore è tenuto a fornire documento d'identità valido, tessera sanitaria e IBAN per i pagamenti. I dati sono trattati secondo GDPR e utilizzati esclusivamente per la gestione operativa.<br><br>
+          <b>4. Impegno</b> — Il collaboratore si impegna a seguire le indicazioni operative di MBBET, a comunicare prontamente eventuali problemi con i conti bookmaker, e a non condividere informazioni riservate sul metodo con terzi.<br><br>
+          <b>5. Responsabilità</b> — MBBET non è responsabile per limitazioni o chiusure di conti imputabili a comportamenti non conformi alle istruzioni ricevute. Il collaboratore è responsabile della corretta gestione dei propri conti.<br><br>
+          <b>6. Privacy</b> — I dati personali forniti sono trattati in conformità al Regolamento UE 2016/679 (GDPR). Non vengono ceduti a terzi né utilizzati per finalità diverse dalla gestione della collaborazione.
+        </div>
+        <div class="check-row required-check" onclick="toggleCheck('c1')">
+          <input type="checkbox" id="c1">
+          <span><b>✱ Accetto le condizioni operative ed economiche di MBBET</b> (obbligatorio per procedere)</span>
+        </div>
+        <div class="check-row" onclick="toggleCheck('c2')">
+          <input type="checkbox" id="c2">
+          <span>Autorizzo il trattamento dei miei dati personali secondo il GDPR per la gestione della collaborazione</span>
+        </div>
+        <div class="check-row" onclick="toggleCheck('c3')">
+          <input type="checkbox" id="c3">
+          <span>Confermo di aver letto e compreso le modalità operative del programma MBBET</span>
+        </div>
+      </div>
+      <div id="consenso-err" class="alert alert-warn" style="display:none;margin-top:12px">
+        ⚠ Devi accettare le condizioni operative per continuare.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-lbl">Dati personali</div>
+      <div class="inp-row">
+        <div class="field" id="f-nome">
+          <label>Nome e Cognome <span class="req">*</span></label>
+          <input class="inp" id="nome" type="text" placeholder="Mario Rossi" autocomplete="name">
+          <div class="err-msg">Campo obbligatorio</div>
+        </div>
+        <div class="field" id="f-tel">
+          <label>Numero di telefono <span class="req">*</span></label>
+          <input class="inp" id="tel" type="tel" placeholder="+39 333 1234567" autocomplete="tel">
+          <div class="err-msg">Inserisci un numero valido</div>
+        </div>
+      </div>
+      <div class="field" id="f-email">
+        <label>Email personale</label>
+        <input class="inp" id="email" type="email" placeholder="mario.rossi@gmail.com" autocomplete="email">
+        <div class="hint">Usata per comunicazioni importanti</div>
+      </div>
+      <div class="field">
+        <label>Referral (chi ti ha invitato?)</label>
+        <input class="inp" id="referral" type="text" placeholder="Nome del referente">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <div></div>
+      <button class="btn-next" onclick="goStep(1)">Continua →</button>
+    </div>
+  </div>
+
+  <!-- STEP 1: Operativo -->
+  <div id="step-1" style="display:none">
+    <div class="card">
+      <div class="sec-lbl">Profilo operativo</div>
+      <div class="field">
+        <label>Sei nuovo o hai già partecipato a programmi simili?</label>
+        <div class="opt-group">
+          <label class="opt-btn" id="ob-nuovo" onclick="selOpt('nuovo','nuovo')"><input type="radio" name="nuovo" value="nuovo"> Sono nuovo</label>
+          <label class="opt-btn" id="ob-vecchio" onclick="selOpt('nuovo','vecchio')"><input type="radio" name="nuovo" value="vecchio"> Ho già partecipato</label>
+        </div>
+      </div>
+      <div class="inp-row">
+        <div class="field">
+          <label>Hai SPID attivo?</label>
+          <div class="opt-group">
+            <label class="opt-btn" id="ob-spid-si" onclick="selOpt('spid','si')"><input type="radio" name="spid" value="si"> Sì, ce l'ho</label>
+            <label class="opt-btn" id="ob-spid-no" onclick="selOpt('spid','no')"><input type="radio" name="spid" value="no"> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Hai un conto corrente bancario?</label>
+          <div class="opt-group">
+            <label class="opt-btn" id="ob-cc-si" onclick="selOpt('cc','si')"><input type="radio" name="cc" value="si"> Sì</label>
+            <label class="opt-btn" id="ob-cc-no" onclick="selOpt('cc','no')"><input type="radio" name="cc" value="no"> No / solo prepagata</label>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Operatore MBBET di riferimento</label>
+        <select class="inp" id="operatore">
+          <option value="">-- Seleziona operatore --</option>
+          <option>Riccardo Tavagnacco</option>
+          <option>Alessia Ciman</option>
+          <option>Ciro Bisogno</option>
+          <option>Antonio La Barbera</option>
+          <option>Francesco Bova</option>
+          <option>Mary + Samuele</option>
+          <option>Elisa Qualantonio</option>
+          <option>Emilian Cozmiuc</option>
+        </select>
+        <div class="hint">Se non lo sai, lascia vuoto e verrà assegnato dal team</div>
+      </div>
+      <div class="field">
+        <label>Mese di onboarding</label>
+        <select class="inp" id="mese">
+          <option value="">-- Seleziona mese --</option>
+          <option>Gennaio 2026</option><option>Febbraio 2026</option><option>Marzo 2026</option>
+          <option>Aprile 2026</option><option>Maggio 2026</option><option>Giugno 2026</option>
+          <option>Luglio 2026</option><option>Agosto 2026</option><option>Settembre 2026</option>
+          <option>Ottobre 2026</option><option>Novembre 2026</option><option>Dicembre 2026</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(0)">← Indietro</button>
+      <button class="btn-next" onclick="goStep(2)">Continua →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Siti già registrati -->
+  <div id="step-2" style="display:none">
+    <div class="card">
+      <div class="sec-lbl">Siti su cui sei già registrato</div>
+      <p style="font-size:11px;color:var(--tx3);margin-bottom:14px;line-height:1.6">
+        Seleziona i bookmaker su cui hai <b style="color:var(--orange)">già un conto attivo</b>.
+        Questi verranno marcati come "Già registrato" nel tuo profilo MBBET.
+        Se non sei registrato da nessuna parte, lascia tutto deselezionato.
+      </p>
+      <div class="bk-grid" id="bk-grid"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05)">
+        <div class="opt-group">
+          <label class="opt-btn" id="ob-nessuno" onclick="selNessuno()"> Non sono registrato da nessuna parte</label>
+          <label class="opt-btn" id="ob-nonricordo" onclick="selNonRicordo()"> Non ricordo / non sono sicuro</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(1)">← Indietro</button>
+      <button class="btn-next" onclick="goStep(3)">Continua →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Documenti + Recap + Invio -->
+  <div id="step-3" style="display:none">
+    <div class="card">
+      <div class="sec-lbl">Documenti (link Google Drive)</div>
+      <p style="font-size:11px;color:var(--tx3);margin-bottom:14px;line-height:1.6">
+        Carica i documenti su <b style="color:var(--blue)">Google Drive</b> e incolla qui i link di condivisione.<br>
+        Vai su Drive → tasto destro sul file → Condividi → "Chiunque abbia il link"
+      </p>
+      <div class="doc-row">
+        <div class="doc-label">Carta d'identità fronte<span class="doc-note">o passaporto</span></div>
+        <input class="doc-inp" id="doc-ci-f" type="url" placeholder="https://drive.google.com/...">
+      </div>
+      <div class="doc-row">
+        <div class="doc-label">Carta d'identità retro</div>
+        <input class="doc-inp" id="doc-ci-r" type="url" placeholder="https://drive.google.com/...">
+      </div>
+      <div class="doc-row">
+        <div class="doc-label">Tessera sanitaria fronte</div>
+        <input class="doc-inp" id="doc-ts-f" type="url" placeholder="https://drive.google.com/...">
+      </div>
+      <div class="doc-row">
+        <div class="doc-label">Tessera sanitaria retro</div>
+        <input class="doc-inp" id="doc-ts-r" type="url" placeholder="https://drive.google.com/...">
+      </div>
+      <div class="doc-row">
+        <div class="doc-label">Foto con documento fronte<span class="doc-note">selfie tenendo il documento vicino al viso</span></div>
+        <input class="doc-inp" id="doc-foto-f" type="url" placeholder="https://drive.google.com/...">
+      </div>
+      <div class="doc-row">
+        <div class="doc-label">Foto con documento retro</div>
+        <input class="doc-inp" id="doc-foto-r" type="url" placeholder="https://drive.google.com/...">
+      </div>
+    </div>
+
+    <!-- RECAP -->
+    <div class="card">
+      <div class="sec-lbl">Riepilogo</div>
+      <div class="recap-grid" id="recap-grid"></div>
+      <div id="recap-siti" style="margin-top:10px;padding:10px 13px;background:rgba(255,144,64,.05);border:1px solid rgba(255,144,64,.1);border-radius:9px;font-size:11px;color:var(--tx3)"></div>
+    </div>
+
+    <div id="submit-alert" style="display:none"></div>
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(2)">← Indietro</button>
+      <button class="btn-next" id="submit-btn" onclick="submitForm()">✓ Invia Registrazione</button>
+    </div>
+  </div>
+
+</div><!-- /form-page -->
+
+<!-- SUCCESS -->
+<div id="success-screen">
+  <div class="success-ic">🎉</div>
+  <div class="success-t">Registrazione Completata!</div>
+  <div class="success-s">Il tuo profilo è stato creato con successo nel sistema MBBET.<br>Il tuo operatore ti contatterà a breve.</div>
+  <div class="success-id" id="success-id"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var BKS_ALL=['Bet365','Snai','Lottomatica','Goldbet','Planetwin','William Hill',
+             'Betfair','Paddy Power','Unibet','Bwin','Eurobet','Sisal',
+             'Netbet','Betway','888sport','Betsson','Sportaza','Admiralbet'];
+
+var _selBks=[];
+var _nessuno=false;
+var _nonRicordo=false;
+var _radioState={nuovo:null,spid:null,cc:null};
+
+var SUPA_URL='https://ntwqfuvcosvzpqrfpipn.supabase.co';
+var SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+var _db=supabase.createClient(SUPA_URL,SUPA_ANON);
+
+/* ── GLOBAL MESE ── */
+var MESE_KEY='mbbet_mese';
+var MESI_NOMI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+function getGlobalMese(){
+  try{var s=localStorage.getItem(MESE_KEY);if(s){var p=JSON.parse(s);if(p&&p.m&&p.anno)return p;}}catch(e){}
+  var n=new Date();return{m:n.getMonth()+1,anno:n.getFullYear()};
+}
+function autoSetMeseSelect(){
+  var gm=getGlobalMese();
+  var label=MESI_NOMI[gm.m-1]+' '+gm.anno;
+  var sel=document.getElementById('mese');
+  if(!sel)return;
+  for(var i=0;i<sel.options.length;i++){
+    if(sel.options[i].text===label){sel.selectedIndex=i;return;}
+  }
+  // Se non esiste come opzione, aggiungila e selezionala
+  var opt=document.createElement('option');opt.value=label;opt.text=label;
+  sel.appendChild(opt);sel.value=label;
+}
+document.addEventListener('DOMContentLoaded',function(){autoSetMeseSelect();});
+
+/* ── STEP NAV ── */
+var _step=0;
+function goStep(n){
+  if(n>_step&&!validateStep(_step))return;
+  // nascondi tutti
+  for(var i=0;i<4;i++){
+    document.getElementById('step-'+i).style.display='none';
+    var si=document.getElementById('si-'+i);
+    si.className='step-item'+(i<n?' done':(i===n?' active':''));
+  }
+  _step=n;
+  document.getElementById('step-'+n).style.display='block';
+  if(n===3)buildRecap();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── VALIDAZIONE ── */
+function validateStep(n){
+  var ok=true;
+  if(n===0){
+    // check consenso obbligatorio
+    if(!document.getElementById('c1').checked){
+      document.getElementById('consenso-err').style.display='block';
+      ok=false;
+    } else {
+      document.getElementById('consenso-err').style.display='none';
+    }
+    // nome
+    var nome=document.getElementById('nome').value.trim();
+    setFieldErr('f-nome',!nome,'Campo obbligatorio');
+    if(!nome)ok=false;
+    // telefono
+    var tel=document.getElementById('tel').value.trim();
+    var telOk=tel.length>=9;
+    setFieldErr('f-tel',!telOk,'Inserisci un numero valido');
+    if(!telOk)ok=false;
+  }
+  if(!ok)showToast('Compila i campi obbligatori','err');
+  return ok;
+}
+
+function setFieldErr(fieldId,hasErr,msg){
+  var f=document.getElementById(fieldId);
+  if(!f)return;
+  if(hasErr)f.classList.add('has-err');
+  else f.classList.remove('has-err');
+}
+
+/* ── RADIO OPT ── */
+function selOpt(group,val){
+  _radioState[group]=val;
+  ['si','no','nuovo','vecchio'].forEach(function(v){
+    var el=document.getElementById('ob-'+group+'-'+v);
+    if(el){el.classList.remove('sel');}
+  });
+  var el=document.getElementById('ob-'+group+'-'+val)||document.getElementById('ob-'+val);
+  if(el)el.classList.add('sel');
+}
+
+/* ── TOGGLE CONSENSO ── */
+function toggleCheck(id){
+  var el=document.getElementById(id);
+  el.checked=!el.checked;
+  if(id==='c1'&&el.checked)document.getElementById('consenso-err').style.display='none';
+}
+
+/* ── BUILD BK GRID ── */
+(function(){
+  var g=document.getElementById('bk-grid');
+  var h='';
+  BKS_ALL.forEach(function(bk,i){
+    h+='<label class="bk-item" id="bki-'+i+'" onclick="toggleBk('+i+')">'
+      +'<input type="checkbox"> '+bk+'</label>';
+  });
+  g.innerHTML=h;
+})();
+
+function toggleBk(i){
+  var el=document.getElementById('bki-'+i);
+  var bk=BKS_ALL[i];
+  if(_selBks.indexOf(bk)>=0){
+    _selBks=_selBks.filter(function(x){return x!==bk;});
+    el.classList.remove('sel');
+  } else {
+    _selBks.push(bk);
+    el.classList.add('sel');
+    // deseleziona nessuno/nonricordo
+    _nessuno=false;_nonRicordo=false;
+    document.getElementById('ob-nessuno').classList.remove('sel');
+    document.getElementById('ob-nonricordo').classList.remove('sel');
+  }
+}
+
+function selNessuno(){
+  _selBks=[];_nessuno=!_nessuno;_nonRicordo=false;
+  clearBkSel();
+  document.getElementById('ob-nessuno').classList.toggle('sel',_nessuno);
+  document.getElementById('ob-nonricordo').classList.remove('sel');
+}
+
+function selNonRicordo(){
+  _selBks=[];_nonRicordo=!_nonRicordo;_nessuno=false;
+  clearBkSel();
+  document.getElementById('ob-nonricordo').classList.toggle('sel',_nonRicordo);
+  document.getElementById('ob-nessuno').classList.remove('sel');
+}
+
+function clearBkSel(){
+  BKS_ALL.forEach(function(_,i){document.getElementById('bki-'+i).classList.remove('sel');});
+}
+
+/* ── RECAP ── */
+function buildRecap(){
+  var nome=document.getElementById('nome').value.trim();
+  var tel=document.getElementById('tel').value.trim();
+  var email=document.getElementById('email').value.trim();
+  var op=document.getElementById('operatore').value;
+  var mese=document.getElementById('mese').value;
+  var data=[
+    {l:'Nome',v:nome||'—'},{l:'Telefono',v:tel||'—'},
+    {l:'Email',v:email||'—'},{l:'Operatore',v:op||'Da assegnare'},
+    {l:'SPID',v:_radioState.spid==='si'?'Sì':'No'},
+    {l:'Conto corrente',v:_radioState.cc==='si'?'Sì':'No/Prepagata'},
+    {l:'Profilo',v:_radioState.nuovo==='nuovo'?'Nuovo':'Già partecipato'},
+    {l:'Mese',v:mese||'—'}
+  ];
+  document.getElementById('recap-grid').innerHTML=data.map(function(d){
+    return '<div class="recap-item"><div class="recap-l">'+esc(d.l)+'</div><div class="recap-v">'+esc(d.v)+'</div></div>';
+  }).join('');
+  var sitiStr=_selBks.length?'Già registrato: '+_selBks.join(', '):(_nessuno?'Nessun sito':(_nonRicordo?'Non ricorda':'Nessun sito selezionato'));
+  document.getElementById('recap-siti').innerHTML='<b style="color:var(--orange)">Siti:</b> '+esc(sitiStr);
+}
+
+/* ── SUBMIT ── */
+async function submitForm(){
+  var btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Invio...';
+  var alertEl=document.getElementById('submit-alert');
+  alertEl.style.display='none';
+
+  var nome=document.getElementById('nome').value.trim();
+  var tel=normalizePhone(document.getElementById('tel').value.trim());
+  var email=document.getElementById('email').value.trim()||null;
+  var referral=document.getElementById('referral').value.trim()||null;
+  var op=document.getElementById('operatore').value||null;
+  var mese=document.getElementById('mese').value||null;
+
+  // gen ID
+  var clientId=await genClientId();
+  var batchId='MOD-'+Date.now().toString().slice(-8);
+  var ts=new Date().toISOString();
+
+  var payload={
+    id:clientId,
+    nome:nome,
+    email:email,
+    tel:tel,
+    referral:referral,
+    operatore:op,
+    tipologia:'Standard',
+    spid:_radioState.spid==='si',
+    cc:_radioState.cc==='si',
+    stato:'IN_LAVORAZIONE',
+    siti_registrati:_selBks,
+    is_nuovo:_radioState.nuovo!=='vecchio',
+    mese_onboarding:mese,
+    mese:(function(){var gm=getGlobalMese();return gm.anno+'-'+String(gm.m).padStart(2,'0');})(),
+    consenso_data:ts,
+    consenso_testo:'Accetto le condizioni operative ed economiche di MBBET.',
+    doc_ci_fronte:document.getElementById('doc-ci-f').value||null,
+    doc_ci_retro:document.getElementById('doc-ci-r').value||null,
+    doc_ts_fronte:document.getElementById('doc-ts-f').value||null,
+    doc_ts_retro:document.getElementById('doc-ts-r').value||null,
+    doc_foto_fronte:document.getElementById('doc-foto-f').value||null,
+    doc_foto_retro:document.getElementById('doc-foto-r').value||null,
+    source:'nuovo_modulo',
+    import_batch_id:batchId,
+    created_at:ts,updated_at:ts
+  };
+
+  try{
+    // inserisci cliente
+    var res=await _db.from('clienti').insert(payload);
+    if(res.error)throw res.error;
+
+    // crea righe bonus
+    await createBonusRows(clientId,nome,op,_selBks,20);
+
+    // log
+    try{
+      await _db.from('import_log').insert({
+        batch_id:batchId,fonte:'nuovo_modulo',
+        clienti_letti:1,clienti_creati:1,bonus_creati:BKS_ALL.length,
+        dettaglio:[{nome:nome,status:'created',id:clientId}]
+      });
+    }catch(e){}
+
+    // successo
+    document.getElementById('form-page').style.display='none';
+    document.getElementById('success-screen').style.display='block';
+    document.getElementById('success-id').textContent='ID: '+clientId;
+    window.scrollTo({top:0,behavior:'smooth'});
+
+  }catch(e){
+    alertEl.className='alert alert-err';
+    alertEl.textContent='Errore durante l\'invio: '+(e.message||'riprova più tardi.');
+    alertEl.style.display='block';
+    btn.disabled=false;btn.textContent='✓ Invia Registrazione';
+  }
+}
+
+async function genClientId(){
+  var n=1;
+  try{
+    var r=await _db.from('clienti').select('id').like('id','MBBET-%').order('id',{ascending:false}).limit(1);
+    if(r.data&&r.data.length){var m=(r.data[0].id||'').match(/MBBET-0*(\d+)/i);if(m)n=parseInt(m[1],10)+1;}
+  }catch(e){}
+  return 'MBBET-'+String(n).padStart(3,'0');
+}
+
+async function createBonusRows(cliId,cliNm,operatore,sitiReg,percOp){
+  if(!operatore)return;
+  var maxN=0;
+  try{
+    var rm=await _db.from('bonus').select('id').like('id','BNS-%').order('created_at',{ascending:false}).limit(1);
+    if(rm.data&&rm.data.length){var mm=(rm.data[0].id||'').match(/BNS-0*(\d+)/i);if(mm)maxN=parseInt(mm[1],10);}
+  }catch(e){}
+  var rows=BKS_ALL.map(function(bk){
+    maxN++;
+    var stato=sitiReg.indexOf(bk)>=0?'GIA_REGISTRATO':'LIBERO';
+    return{id:'BNS-'+String(maxN).padStart(5,'0'),id_cli:cliId,cliente:cliNm,
+      operatore:operatore,bookmaker:bk,stato:stato,stato_op:'In corso',
+      perc_op:percOp,priorita:['Bet365','Sisal','Goldbet','William Hill','Betfair'].indexOf(bk)>=0?'ALTA':'MEDIA',
+      fase_attuale:stato==='GIA_REGISTRATO'?'Già registrato':'Da iniziare',
+      deposito:0,bonus_ricevuto:0,prelievo:0,cronologia:[],
+      created_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+  });
+  for(var i=0;i<rows.length;i+=50){
+    try{await _db.from('bonus').insert(rows.slice(i,i+50));}catch(e){}
+  }
+}
+
+function normalizePhone(t){
+  if(!t)return null;
+  t=t.replace(/\s/g,'').replace(/^0039/,'+39').replace(/^39([0-9]{9})/,'+39$1');
+  if(t.length===10&&!t.startsWith('+'))t='+39'+t;
+  return t;
+}
+
+function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function showToast(msg,type){
+  var t=document.getElementById('toast');t.textContent=msg;
+  t.style.background=type==='err'?'rgba(255,79,79,.9)':'rgba(0,240,147,.1)';
+  t.style.border='1px solid '+(type==='err'?'rgba(255,79,79,.4)':'rgba(0,240,147,.25)');
+  t.style.color=type==='err'?'#fff':'var(--green)';
+  t.style.opacity='1';t.style.transform='translateY(0)';
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0';},3500);
+}
+</script>
+</body>
+</html>

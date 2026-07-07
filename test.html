@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Test Supabase</title>
+<style>
+  body { background: #0f172a; color: #f1f5f9; font-family: sans-serif; padding: 40px; }
+  #risultato { margin-top: 20px; font-size: 18px; }
+  .ok  { color: #10b981; }
+  .err { color: #ef4444; }
+</style>
+</head>
+<body>
+<h2>🔌 Test connessione Supabase</h2>
+<div id="risultato">⏳ Connessione in corso...</div>
+
+<script src="supabase.min.js"></script>
+<script>
+  const db = supabase.createClient(
+    'https://ntwqfuvcosvzpqrfpipn.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg'
+  );
+
+  db.from('config').select('chiave, valore').then(({ data, error }) => {
+    const el = document.getElementById('risultato');
+    if (error) {
+      el.innerHTML = '<span class="err">❌ ERRORE: ' + error.message + '</span>';
+    } else {
+      el.innerHTML = '<span class="ok">✅ CONNESSO! ' + data.length + ' righe config caricate.</span><br><br>'
+        + data.map(r => `<b>${r.chiave}:</b> ${r.valore}`).join('<br>');
+    }
+  });
+</script>
+</body>
+</html>
