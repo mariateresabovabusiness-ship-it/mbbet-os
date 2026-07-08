@@ -63,9 +63,11 @@
 }
 .cal-view-btn.on { background: var(--gold-bg); border-color: var(--gold-border); color: var(--gold); }
 
+.cal-body-full { min-height: calc(100vh - 260px); }
 .cal-grid-month {
   display: grid; grid-template-columns: repeat(7,1fr);
-  gap: 2px;
+  gap: 4px; grid-auto-rows: minmax(120px, 1fr);
+  height: calc(100vh - 300px); min-height: 560px;
 }
 .cal-dow {
   padding: 6px 4px; text-align: center;
@@ -73,26 +75,73 @@
   letter-spacing: 1px; color: var(--t3); font-family: var(--mono);
 }
 .cal-day {
-  min-height: 72px; border-radius: var(--r1);
+  border-radius: var(--r2);
   background: var(--s2); border: 1px solid var(--b0);
-  padding: 5px 6px; cursor: pointer; transition: border-color .15s;
-  overflow: hidden;
+  padding: 8px 9px; cursor: pointer; transition: border-color .15s, background .15s;
+  overflow: hidden; display: flex; flex-direction: column;
 }
 .cal-day:hover { border-color: var(--b1); }
 .cal-day.today { border-color: var(--gold-border); }
 .cal-day.other-month { opacity: .35; }
+.cal-day.drag-over { border-color: var(--cyan-b); background: var(--cyan-dim); }
 .cal-day-num {
-  font-size: 10.5px; font-weight: 700; font-family: var(--mono);
-  color: var(--t2); margin-bottom: 3px;
+  font-size: 13px; font-weight: 700; font-family: var(--mono);
+  color: var(--t2); margin-bottom: 5px; flex-shrink: 0;
 }
 .cal-day.today .cal-day-num { color: var(--gold); }
 .cal-post-chip {
-  font-size: 9px; font-weight: 600; padding: 1px 4px;
-  border-radius: 2px; margin-bottom: 2px; display: block;
+  font-size: 10.5px; font-weight: 600; padding: 3px 6px;
+  border-radius: 3px; margin-bottom: 3px; display: block;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  cursor: pointer; line-height: 1.4;
+  cursor: grab; line-height: 1.5; flex-shrink: 0;
 }
 .cal-post-chip:hover { filter: brightness(1.2); }
+.cal-more {
+  font-size: 10px; font-weight: 700; color: var(--t3); cursor: pointer;
+  padding: 2px 6px; margin-top: auto;
+}
+.cal-more:hover { color: var(--gold); }
+
+/* ── DAY PANEL ── */
+.day-panel-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 998; backdrop-filter: blur(2px);
+}
+.day-panel-overlay.open { display: block; }
+.day-panel {
+  display: none; flex-direction: column; position: fixed; top: 0; right: 0;
+  height: 100vh; width: 420px; max-width: 92vw; background: var(--s1);
+  border-left: 1px solid var(--b1); z-index: 999;
+  box-shadow: -24px 0 60px rgba(0,0,0,.5); animation: slide-r .2s var(--ease);
+}
+.day-panel.open { display: flex; }
+.day-panel-head {
+  padding: 18px 20px; border-bottom: 1px solid var(--b0);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.day-panel-date { font-family: var(--grotesk); font-size: 15px; font-weight: 700; color: var(--t1); text-transform: capitalize; }
+.day-panel-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.day-panel-foot { padding: 16px 20px; border-top: 1px solid var(--b0); }
+.dp-item {
+  background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r2);
+  padding: 12px 14px; cursor: pointer; transition: border-color .15s;
+}
+.dp-item:hover { border-color: var(--b2); }
+.dp-item-title { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 7px; }
+.dp-item-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+/* ── AGENDA VIEW ── */
+.cal-agenda { display: flex; flex-direction: column; gap: 6px; }
+.cal-agenda-day { display: flex; gap: 14px; padding: 10px 4px; border-bottom: 1px solid var(--b0); }
+.cal-agenda-date { width: 90px; flex-shrink: 0; font-family: var(--mono); font-size: 11px; color: var(--t3); padding-top: 2px; }
+.cal-agenda-date.today { color: var(--gold); font-weight: 700; }
+.cal-agenda-items { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.cal-agenda-item {
+  display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+  background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r1);
+  cursor: pointer; font-size: 12px;
+}
+.cal-agenda-item:hover { border-color: var(--b2); }
 
 /* Week view */
 .cal-week { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
@@ -223,6 +272,170 @@
 .piano-titolo { color: var(--t1); font-weight: 500; flex: 1; min-width: 0; }
 .piano-ob { font-size: 9.5px; color: var(--t3); font-family: var(--mono); margin-top: 2px; }
 
+/* ── AGENTE AI ── */
+.ag-hero {
+  display: flex; align-items: center; gap: 22px;
+  padding: 28px 30px; margin-bottom: 20px;
+  background:
+    radial-gradient(circle at 85% 15%, rgba(0,212,255,.14), transparent 50%),
+    radial-gradient(circle at 10% 100%, rgba(212,168,67,.12), transparent 50%),
+    linear-gradient(135deg, rgba(212,168,67,.08), rgba(0,212,255,.04));
+  background-size: 200% 200%;
+  animation: ag-hero-drift 10s ease-in-out infinite;
+  border: 1px solid var(--gold-border); border-radius: var(--r3);
+  position: relative; overflow: hidden;
+}
+@keyframes ag-hero-drift {
+  0%,100% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+  50%     { background-position: 20% 10%, 10% 20%, 100% 100%; }
+}
+.ag-avatar-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
+.ag-avatar-ring {
+  position: absolute; inset: -4px; border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--gold), var(--cyan), var(--violet), var(--gold));
+  animation: ag-spin 4s linear infinite;
+  opacity: .8;
+}
+@keyframes ag-spin { to { transform: rotate(360deg); } }
+.ag-avatar {
+  position: absolute; inset: 3px; z-index: 1; border-radius: 50%;
+  background: var(--s1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(0,0,0,.4);
+  animation: ag-pulse 2.4s ease-in-out infinite;
+}
+@keyframes ag-pulse {
+  0%,100% { box-shadow: 0 0 24px var(--gold-glow), inset 0 0 20px rgba(0,0,0,.4); }
+  50%     { box-shadow: 0 0 40px var(--cyan-glow), inset 0 0 20px rgba(0,0,0,.4); }
+}
+.ag-identity { position: relative; z-index: 1; min-width: 0; }
+.ag-name {
+  font-family: var(--grotesk); font-size: 20px; font-weight: 700; color: var(--t1);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;
+  letter-spacing: .5px;
+}
+.ag-role-badge {
+  font-family: var(--mono); font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; padding: 3px 9px; border-radius: 20px;
+  background: var(--gold-bg); border: 1px solid var(--gold-border); color: var(--gold);
+}
+.ag-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono); font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--green); padding: 3px 9px 3px 7px; border-radius: 20px;
+  background: var(--green-bg); border: 1px solid var(--green-b);
+}
+.ag-status-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 8px var(--green); animation: ag-blink 1.6s ease-in-out infinite;
+}
+@keyframes ag-blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+.ag-tagline { font-size: 12.5px; color: var(--t2); line-height: 1.5; }
+
+.ag-stats {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px;
+}
+.ag-stat {
+  background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r2);
+  padding: 16px; position: relative; transition: all var(--fast); overflow: hidden;
+}
+.ag-stat:hover { border-color: var(--b2); transform: translateY(-1px); }
+.ag-stat-label {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--t3); margin-bottom: 8px; display: flex;
+  align-items: center; justify-content: space-between;
+}
+.ag-stat-val { font-family: var(--mono); font-size: 28px; font-weight: 800; color: var(--t1); line-height: 1; }
+.ag-edit-btn {
+  background: none; border: none; color: var(--t3); cursor: pointer; font-size: 12px;
+  padding: 2px 4px; border-radius: 4px; transition: all var(--fast);
+}
+.ag-edit-btn:hover { color: var(--gold); background: var(--gold-bg); }
+.ag-stat-bar-wrap { height: 4px; background: var(--b0); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.ag-stat-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--gold), var(--cyan)); transition: width .6s var(--ease); }
+.ag-stat-bar-note { font-size: 9.5px; color: var(--t3); margin-top: 5px; font-family: var(--mono); }
+
+.ag-section { margin-bottom: 24px; }
+.ag-section-h {
+  font-family: var(--grotesk); font-size: 13px; font-weight: 700; color: var(--t1);
+  margin-bottom: 12px;
+}
+.ag-roadmap { position: relative; display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding-top: 22px; }
+.ag-roadmap-line {
+  position: absolute; top: 8px; left: calc(12.5% - 4px); right: calc(12.5% - 4px);
+  height: 3px; background: var(--b1); border-radius: 3px; z-index: 0;
+}
+.ag-roadmap-line-fill {
+  position: absolute; top: 8px; left: calc(12.5% - 4px);
+  height: 3px; background: linear-gradient(90deg, var(--green), var(--gold)); border-radius: 3px; z-index: 1;
+  transition: width .8s var(--ease);
+}
+.ag-phase {
+  background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r2);
+  padding: 14px; opacity: .45; transition: all var(--fast); position: relative; z-index: 2;
+}
+.ag-phase::before {
+  content: ''; position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  width: 11px; height: 11px; border-radius: 50%; background: var(--s1); border: 2px solid var(--b2);
+}
+.ag-phase.active {
+  opacity: 1; border-color: var(--gold-border);
+  background: linear-gradient(180deg, var(--gold-dim), var(--s1));
+}
+.ag-phase.active::before { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 10px var(--gold-glow); }
+.ag-phase.done { opacity: .8; border-color: var(--green-b); }
+.ag-phase.done::before { background: var(--green); border-color: var(--green); }
+.ag-phase-num {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 700; color: var(--t3);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+}
+.ag-phase.active .ag-phase-num { color: var(--gold); }
+.ag-phase.done .ag-phase-num { color: var(--green); }
+.ag-phase-range { font-family: var(--mono); font-size: 15px; font-weight: 800; color: var(--t1); margin-bottom: 6px; }
+.ag-phase-tip { font-size: 11px; color: var(--t3); line-height: 1.5; }
+
+.ag-suggest {
+  background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r3);
+  padding: 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  position: relative; overflow: hidden;
+}
+.ag-suggest::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at 0% 50%, rgba(212,168,67,.08), transparent 60%);
+}
+.ag-suggest-icon {
+  font-size: 34px; flex-shrink: 0; position: relative; z-index: 1;
+  width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+  background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: 50%;
+  animation: ag-glow-pulse 2.2s ease-in-out infinite;
+}
+@keyframes ag-glow-pulse {
+  0%,100% { box-shadow: 0 0 0 rgba(212,168,67,0); }
+  50%     { box-shadow: 0 0 22px var(--gold-glow); }
+}
+.ag-suggest-body { flex: 1; min-width: 220px; position: relative; z-index: 1; }
+.ag-suggest-label {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--gold); margin-bottom: 5px;
+}
+.ag-suggest-title { font-size: 15px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
+.ag-suggest-meta { font-size: 11.5px; color: var(--t3); }
+.ag-suggest-risk { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+
+/* ── ARIA INSIGHTS / ACTION CENTER ── */
+.ag-ins-list { display: flex; flex-direction: column; gap: 10px; }
+.ag-ins {
+  background: var(--s1); border: 1px solid var(--b1); border-left: 3px solid var(--b2);
+  border-radius: var(--r2); padding: 14px 16px;
+}
+.ag-ins-alta   { border-left-color: var(--red); }
+.ag-ins-media  { border-left-color: var(--orange); }
+.ag-ins-bassa  { border-left-color: var(--cyan); }
+.ag-ins-title { font-size: 13.5px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
+.ag-ins-why { font-size: 11.5px; color: var(--t2); line-height: 1.5; margin-bottom: 10px; }
+.ag-ins-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.ag-ins-empty { text-align: center; padding: 24px; color: var(--t3); font-size: 12.5px; }
+
 /* Modal social */
 .social-modal .modal-box { max-width: 780px; }
 </style>
@@ -253,6 +466,7 @@
         <div class="tab" onclick="showTab('contenuti',this)">Contenuti</div>
         <div class="tab" onclick="showTab('guardian',this)">Guardian</div>
         <div class="tab" onclick="showTab('piano',this)">Piano 30gg</div>
+        <div class="tab" onclick="showTab('agente',this)">🤖 Agente AI</div>
       </div>
 
       <!-- CALENDARIO -->
@@ -262,16 +476,18 @@
             <button onclick="calNav(-1)">‹</button>
             <span class="cal-month" id="cal-month-label">—</span>
             <button onclick="calNav(1)">›</button>
+            <button class="btn btn-ghost btn-sm" onclick="calToday()" style="margin-left:6px">Oggi</button>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
             <div class="cal-views">
               <button class="cal-view-btn on" onclick="calView('month',this)">Mese</button>
               <button class="cal-view-btn" onclick="calView('week',this)">Settimana</button>
+              <button class="cal-view-btn" onclick="calView('agenda',this)">Agenda</button>
             </div>
             <button class="btn btn-primary btn-sm" onclick="openNewPost()">+ Contenuto</button>
           </div>
         </div>
-        <div id="cal-body">
+        <div id="cal-body" class="cal-body-full">
           <div class="state-box"><div class="spinner"></div></div>
         </div>
       </div>
@@ -372,16 +588,65 @@
 
       <!-- PIANO 30gg -->
       <div id="tab-piano" style="display:none">
-        <div style="margin-bottom:20px">
-          <h2 style="font-size:16px;font-weight:700;margin-bottom:6px">Piano Editoriale 30 Giorni</h2>
-          <p style="font-size:12px;color:var(--t3)">Strategia di ripartenza social MBBET — Zero parole sensibili — Focus su fiducia, brand e educazione.</p>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+          <div>
+            <h2 style="font-size:16px;font-weight:700;margin-bottom:6px">Piano Editoriale 30 Giorni</h2>
+            <p style="font-size:12px;color:var(--t3)">Strategia di ripartenza social MBBET — Zero parole sensibili — Focus su fiducia, brand e educazione.</p>
+          </div>
+          <button class="btn btn-primary" onclick="generaPiano30Giorni()">🚀 Genera piano 30 giorni (90 video)</button>
         </div>
         <div class="piano-grid" id="piano-grid">
           <div class="state-box"><div class="spinner"></div></div>
         </div>
       </div>
 
+      <!-- AGENTE AI -->
+      <div id="tab-agente" style="display:none">
+        <div class="ag-hero">
+          <div class="ag-avatar-wrap">
+            <div class="ag-avatar-ring"></div>
+            <div class="ag-avatar">🤖</div>
+          </div>
+          <div class="ag-identity">
+            <div class="ag-name">ARIA <span class="ag-role-badge">Social Media Manager AI</span><span class="ag-status"><span class="ag-status-dot"></span>Attiva</span></div>
+            <div class="ag-tagline">Ti guido passo passo nella crescita di MBBET sui social — parto da zero, come voi.</div>
+          </div>
+        </div>
+
+        <div class="ag-stats" id="ag-stats">
+          <div class="state-box"><div class="spinner"></div></div>
+        </div>
+
+        <div class="ag-section">
+          <div class="ag-section-h">📍 Fase di Crescita</div>
+          <div class="ag-roadmap" id="ag-roadmap"></div>
+        </div>
+
+        <div class="ag-section">
+          <div class="ag-section-h" style="display:flex;align-items:center;justify-content:space-between">
+            <span>📋 Cose da fare oggi</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadAriaInsights()">↻ Aggiorna</button>
+          </div>
+          <div class="ag-suggest" id="ag-suggest">
+            <div class="state-box"><div class="spinner"></div></div>
+          </div>
+          <div id="ag-insights" style="margin-top:10px"><div class="state-box"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
     </div><!-- /page -->
+  </div>
+
+  <div class="day-panel-overlay" id="day-panel-overlay" onclick="closeDayPanel()"></div>
+  <div class="day-panel" id="day-panel">
+    <div class="day-panel-head">
+      <div class="day-panel-date" id="day-panel-date">—</div>
+      <button class="close-btn" onclick="closeDayPanel()">×</button>
+    </div>
+    <div class="day-panel-body" id="day-panel-body"></div>
+    <div class="day-panel-foot">
+      <button class="btn btn-primary" style="width:100%" onclick="dayPanelNewContent()">+ Nuovo contenuto per questo giorno</button>
+    </div>
   </div>
 </div>
 
@@ -434,12 +699,13 @@
             <label>Obiettivo</label>
             <select id="p-ob">
               <option value="">—</option>
-              <option value="brand_awareness">Brand Awareness</option>
-              <option value="educazione">Educazione</option>
-              <option value="fiducia">Fiducia</option>
-              <option value="social_proof">Social Proof</option>
-              <option value="engagement">Engagement</option>
-              <option value="lead">Lead</option>
+              <option value="farci conoscere">Farci conoscere</option>
+              <option value="creare fiducia">Creare fiducia</option>
+              <option value="spiegare il servizio">Spiegare il servizio</option>
+              <option value="rispondere a un’obiezione">Rispondere a un'obiezione</option>
+              <option value="portare a una Zoom">Portare a una Zoom</option>
+              <option value="far iniziare il primo bonus">Far iniziare il primo bonus</option>
+              <option value="recuperare clienti fermi">Recuperare clienti fermi</option>
             </select>
           </div>
         </div>
@@ -495,6 +761,8 @@
 <script src="shared/auth.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/layout.js"></script>
+<script src="social/social-data.js"></script>
+<script src="social/social-aria.js"></script>
 <script>
 
 // ── INIT ──────────────────────────────────────────────────────────
@@ -522,13 +790,14 @@ async function handleLogin(e) {
 }
 
 // ── TABS ──────────────────────────────────────────────────────────
-var TABS = ['calendario','contenuti','guardian','piano'];
+var TABS = ['calendario','contenuti','guardian','piano','agente'];
 function showTab(id, el) {
   TABS.forEach(function(t){ document.getElementById('tab-'+t).style.display='none'; });
   document.getElementById('tab-'+id).style.display='';
   document.querySelectorAll('.tabs .tab').forEach(function(t){ t.classList.remove('active'); });
   if(el) el.classList.add('active');
   if(id==='contenuti') loadContenuti();
+  if(id==='agente') loadAgente();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -553,11 +822,11 @@ var STATO_COLORS = {
 };
 
 async function loadCalPosts(year, month) {
-  var from = new Date(year,month,1).toISOString().slice(0,10);
-  var to   = new Date(year,month+1,0).toISOString().slice(0,10);
+  var from = ymd(new Date(year,month,1));
+  var to   = ymd(new Date(year,month+1,0));
   calPosts = {};
   try {
-    var r = await db.from('social_posts').select('id,titolo,stato,tipo_contenuto,data_pubblicazione')
+    var r = await db.from('social_posts').select('id,titolo,stato,tipo_contenuto,assegnato_a,data_pubblicazione')
       .gte('data_pubblicazione',from).lte('data_pubblicazione',to).order('data_pubblicazione');
     (r.data||[]).forEach(function(p){
       var d = p.data_pubblicazione;
@@ -575,11 +844,14 @@ async function renderCalendar() {
   el.innerHTML = '<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
   await loadCalPosts(y,m);
   if(calViewMode==='month') renderMonth(y,m,el);
+  else if(calViewMode==='agenda') renderAgenda(el);
   else renderWeek(el);
 }
 
+var CAL_MAX_CHIPS = 2;
+
 function renderMonth(y,m,el) {
-  var today = new Date().toISOString().slice(0,10);
+  var today = ymd(new Date());
   var firstDay = new Date(y,m,1).getDay();
   var firstMon = (firstDay+6)%7;
   var daysInMonth = new Date(y,m+1,0).getDate();
@@ -593,29 +865,58 @@ function renderMonth(y,m,el) {
   var rest=42-cells.length;
   for(var j=1;j<=rest;j++) cells.push({day:j,month:m+1,year:y,other:true});
   cells.forEach(function(c){
-    var dateStr = new Date(c.year,c.month,c.day).toISOString().slice(0,10);
+    var dateStr = ymd(new Date(c.year,c.month,c.day));
     var isToday = dateStr===today;
-    h+='<div class="cal-day'+(c.other?' other-month':'')+(isToday?' today':'')+'" onclick="calDayClick(\''+dateStr+'\')">';
+    var posts = calPosts[dateStr]||[];
+    h+='<div class="cal-day'+(c.other?' other-month':'')+(isToday?' today':'')+'" data-date="'+dateStr+'" onclick="calDayClick(\''+dateStr+'\')" ondragover="calDragOver(event,this)" ondragleave="this.classList.remove(\'drag-over\')" ondrop="calDrop(event,\''+dateStr+'\')">';
     h+='<div class="cal-day-num">'+c.day+'</div>';
-    (calPosts[dateStr]||[]).forEach(function(p){
+    posts.slice(0,CAL_MAX_CHIPS).forEach(function(p){
       var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
-      h+='<div class="cal-post-chip" style="background:'+sc.bg+';color:'+sc.c+'" onclick="event.stopPropagation();openPost(\''+p.id+'\')">'+escHtml(p.titolo||'—')+'</div>';
+      h+='<div class="cal-post-chip" draggable="true" ondragstart="calDragStart(event,\''+p.id+'\')" style="background:'+sc.bg+';color:'+sc.c+'" onclick="event.stopPropagation();openPost(\''+p.id+'\')">'+escHtml(p.titolo||'—')+'</div>';
     });
+    if (posts.length > CAL_MAX_CHIPS) {
+      h+='<div class="cal-more">+'+(posts.length-CAL_MAX_CHIPS)+' contenuti</div>';
+    }
     h+='</div>';
   });
   h+='</div>';
   el.innerHTML=h;
 }
 
+function renderAgenda(el) {
+  var dates = Object.keys(calPosts).sort();
+  var today = ymd(new Date());
+  if (!dates.length) { el.innerHTML = '<div class="ag-ins-empty">Nessun contenuto programmato questo mese.</div>'; return; }
+  var h = '<div class="cal-agenda">';
+  dates.forEach(function(ds){
+    var d = new Date(ds+'T00:00:00');
+    var label = d.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'});
+    h += '<div class="cal-agenda-day">';
+    h += '<div class="cal-agenda-date'+(ds===today?' today':'')+'">'+label+'</div>';
+    h += '<div class="cal-agenda-items">';
+    calPosts[ds].forEach(function(p){
+      var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+      h += '<div class="cal-agenda-item" onclick="openPost(\''+p.id+'\')">';
+      h += '<span class="stato-chip" style="background:'+sc.bg+';color:'+sc.c+'">'+escHtml(p.tipo_contenuto||'—')+'</span>';
+      h += '<span style="flex:1">'+escHtml(p.titolo||'—')+'</span>';
+      h += '<span style="color:var(--t3);font-family:var(--mono);font-size:10.5px">'+escHtml(p.assegnato_a||'')+'</span>';
+      h += '</div>';
+    });
+    h += '</div></div>';
+  });
+  h += '</div>';
+  el.innerHTML = h;
+}
+
 function renderWeek(el) {
   var dow=calCurrent.getDay(), offset=(dow+6)%7;
   var monday=new Date(calCurrent); monday.setDate(monday.getDate()-offset);
-  var today=new Date().toISOString().slice(0,10);
+  var today=ymd(new Date());
   var days=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
   var h='<div class="cal-week">';
   for(var i=0;i<7;i++){
     var d=new Date(monday); d.setDate(d.getDate()+i);
-    var ds=d.toISOString().slice(0,10);
+    var ds=ymd(d);
     var isToday=ds===today;
     h+='<div class="week-col">';
     h+='<div class="week-col-head'+(isToday?' today':'')+'">'+days[i]+' '+d.getDate()+'</div>';
@@ -632,8 +933,12 @@ function renderWeek(el) {
 }
 
 function calNav(dir) {
-  if(calViewMode==='month') calCurrent.setMonth(calCurrent.getMonth()+dir);
-  else calCurrent.setDate(calCurrent.getDate()+dir*7);
+  if(calViewMode==='week') calCurrent.setDate(calCurrent.getDate()+dir*7);
+  else calCurrent.setMonth(calCurrent.getMonth()+dir);
+  renderCalendar();
+}
+function calToday() {
+  calCurrent = new Date();
   renderCalendar();
 }
 function calView(mode, btn) {
@@ -642,9 +947,62 @@ function calView(mode, btn) {
   btn.classList.add('on');
   renderCalendar();
 }
+
+// ── PANNELLO GIORNO ──────────────────────────────────────────────
+var _dpDate = null;
 function calDayClick(date) {
-  document.getElementById('p-data').value=date;
+  _dpDate = date;
+  var d = new Date(date+'T00:00:00');
+  document.getElementById('day-panel-date').textContent = d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var posts = calPosts[date]||[];
+  var body = document.getElementById('day-panel-body');
+  if (!posts.length) {
+    body.innerHTML = '<div class="ag-ins-empty">Nessun contenuto per questo giorno.</div>';
+  } else {
+    body.innerHTML = posts.map(function(p){
+      var sc = STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+      return '<div class="dp-item" onclick="closeDayPanel();openPost(\''+p.id+'\')">'+
+        '<div class="dp-item-title">'+escHtml(p.titolo||'—')+'</div>'+
+        '<div class="dp-item-meta">'+
+          '<span class="stato-chip" style="background:'+sc.bg+';color:'+sc.c+'">'+escHtml(p.stato||'—')+'</span>'+
+          '<span style="font-size:10.5px;color:var(--t3);font-family:var(--mono)">'+escHtml(p.tipo_contenuto||'')+'</span>'+
+          (p.assegnato_a?'<span style="font-size:10.5px;color:var(--t3)">· '+escHtml(p.assegnato_a)+'</span>':'')+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  document.getElementById('day-panel').classList.add('open');
+  document.getElementById('day-panel-overlay').classList.add('open');
+}
+function closeDayPanel() {
+  document.getElementById('day-panel').classList.remove('open');
+  document.getElementById('day-panel-overlay').classList.remove('open');
+}
+function dayPanelNewContent() {
+  var date = _dpDate;
+  closeDayPanel();
   openNewPost();
+  document.getElementById('p-data').value = date;
+}
+
+// ── DRAG & DROP TRA GIORNI ───────────────────────────────────────
+var _dragPostId = null;
+function calDragStart(e, id) {
+  _dragPostId = id;
+  e.dataTransfer.effectAllowed = 'move';
+}
+function calDragOver(e, cell) {
+  e.preventDefault();
+  cell.classList.add('drag-over');
+}
+async function calDrop(e, newDate) {
+  e.preventDefault();
+  var cell = e.currentTarget; if (cell) cell.classList.remove('drag-over');
+  if (!_dragPostId) return;
+  var id = _dragPostId; _dragPostId = null;
+  await db.from('social_posts').update({data_pubblicazione:newDate}).eq('id',id);
+  toast('Contenuto spostato al '+new Date(newDate+'T00:00:00').toLocaleDateString('it-IT'),'success');
+  renderCalendar();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -658,7 +1016,7 @@ async function loadContenuti() {
   var autore =document.getElementById('f-autore').value;
   var rischio=document.getElementById('f-rischio').value;
   try {
-    var q=db.from('social_posts').select('id,titolo,tipo_contenuto,assegnato_a,data_pubblicazione,stato,livello_rischio').order('created_at',{ascending:false}).limit(100);
+    var q=db.from('social_posts').select('id,titolo,tipo_contenuto,assegnato_a,data_pubblicazione,stato,livello_rischio').order('data_pubblicazione',{ascending:true}).limit(200);
     if(stato)   q=q.eq('stato',stato);
     if(tipo)    q=q.eq('tipo_contenuto',tipo);
     if(autore)  q=q.eq('assegnato_a',autore);
@@ -982,37 +1340,536 @@ var OB_LABELS = {
 
 async function loadPiano() {
   var el=document.getElementById('piano-grid');
-  var weeks={1:{},2:{},3:{},4:{}};
+  var oggiIso = ymd(new Date());
+
+  // Piano reale: gli stessi contenuti già visibili in Calendario/Contenuti,
+  // raggruppati in 4 settimane a partire dal primo giorno programmato.
+  var rPosts = await db.from('social_posts').select('id,titolo,tipo_contenuto,assegnato_a,data_pubblicazione,stato')
+    .gte('data_pubblicazione', oggiIso).order('data_pubblicazione');
+  var posts = (rPosts.data||[]).filter(function(p){ return p.data_pubblicazione; });
+
+  if (posts.length) {
+    var startDate = new Date(posts[0].data_pubblicazione+'T00:00:00');
+    var weeks = {1:[],2:[],3:[],4:[]};
+    posts.forEach(function(p){
+      var giorni = Math.floor((new Date(p.data_pubblicazione+'T00:00:00') - startDate) / 86400000);
+      var w = Math.min(4, Math.floor(giorni/7)+1);
+      weeks[w].push(p);
+    });
+    var h='<div class="piano-grid">';
+    [1,2,3,4].forEach(function(w){
+      var wkPosts = weeks[w]||[];
+      var rangeStart = new Date(startDate.getTime() + (w-1)*7*86400000);
+      var rangeLabel = rangeStart.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+      h+='<div class="piano-week">';
+      h+='<div class="piano-week-head">Settimana '+w+'<div class="piano-week-theme">dal '+rangeLabel+'</div></div>';
+      wkPosts.forEach(function(p){
+        var dLabel = new Date(p.data_pubblicazione+'T00:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
+        h+='<div class="piano-item" onclick="openPost(\''+p.id+'\')">';
+        h+='<span class="piano-tipo">'+escHtml(p.tipo_contenuto||'—')+'</span>';
+        h+='<div><div class="piano-titolo">'+escHtml(p.titolo||'—')+'</div>';
+        h+='<div class="piano-ob">'+dLabel+' · '+escHtml(p.assegnato_a||'—')+'</div></div>';
+        h+='</div>';
+      });
+      if (!wkPosts.length) h+='<div class="piano-item" style="opacity:.5">Nessun contenuto in questa settimana</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+    el.outerHTML=h;
+    return;
+  }
+
+  // Fallback: nessun piano reale generato ancora — mostra le idee del piano editoriale di base
+  var weeksIdee={1:{},2:{},3:{},4:{}};
   var usedDB=false;
   try {
     var r=await db.from('social_content_ideas').select('*').order('settimana_piano,created_at');
     if(r.data&&r.data.length){
       r.data.forEach(function(item){
         var w=item.settimana_piano||1;
-        if(!weeks[w]) weeks[w]={tema:'Settimana '+w,contenuti:[]};
-        weeks[w].contenuti=weeks[w].contenuti||[];
-        weeks[w].contenuti.push({tipo:item.tipo||'POST',titolo:item.titolo,ob:item.obiettivo});
+        if(!weeksIdee[w]) weeksIdee[w]={tema:'Settimana '+w,contenuti:[]};
+        weeksIdee[w].contenuti=weeksIdee[w].contenuti||[];
+        weeksIdee[w].contenuti.push({tipo:item.tipo||'POST',titolo:item.titolo,ob:item.obiettivo});
       });
       usedDB=true;
     }
   } catch(e) {}
-  if(!usedDB) weeks=PIANO_LOCAL;
-  var h='<div class="piano-grid">';
+  if(!usedDB) weeksIdee=PIANO_LOCAL;
+  var h2='<div class="piano-grid">';
   [1,2,3,4].forEach(function(w){
-    var wk=weeks[w]||{tema:'Settimana '+w,contenuti:[]};
-    h+='<div class="piano-week">';
-    h+='<div class="piano-week-head">Settimana '+w+'<div class="piano-week-theme">'+escHtml(wk.tema||'')+'</div></div>';
+    var wk=weeksIdee[w]||{tema:'Settimana '+w,contenuti:[]};
+    h2+='<div class="piano-week">';
+    h2+='<div class="piano-week-head">Settimana '+w+'<div class="piano-week-theme">'+escHtml(wk.tema||'')+'</div></div>';
     (wk.contenuti||[]).forEach(function(c){
-      h+='<div class="piano-item">';
-      h+='<span class="piano-tipo">'+escHtml(c.tipo||'—')+'</span>';
-      h+='<div><div class="piano-titolo">'+escHtml(c.titolo||'—')+'</div>';
-      h+='<div class="piano-ob">'+escHtml(OB_LABELS[c.ob]||c.ob||'—')+'</div></div>';
-      h+='</div>';
+      h2+='<div class="piano-item">';
+      h2+='<span class="piano-tipo">'+escHtml(c.tipo||'—')+'</span>';
+      h2+='<div><div class="piano-titolo">'+escHtml(c.titolo||'—')+'</div>';
+      h2+='<div class="piano-ob">'+escHtml(OB_LABELS[c.ob]||c.ob||'—')+'</div></div>';
+      h2+='</div>';
     });
-    h+='</div>';
+    h2+='</div>';
   });
-  h+='</div>';
-  el.outerHTML=h;
+  h2+='</div>';
+  el.outerHTML=h2;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GENERATORE PIANO 30 GIORNI — 30 temi × 3 formati/persona = 90 video
+// ═══════════════════════════════════════════════════════════════
+var PIANO30_TEMI = [
+  'Chi siamo e cosa facciamo','Il nostro metodo passo dopo passo','Perché abbiamo scelto questo lavoro',
+  'La nostra storia, da dove siamo partiti','I valori che ci guidano ogni giorno','Un giorno tipo nel nostro lavoro',
+  'Le domande che ci fate più spesso','Errori comuni da evitare nel settore','Come si inizia un percorso da zero',
+  'Il percorso completo di un cliente','Trasparenza: cosa non facciamo mai','Dietro le quinte del nostro lavoro',
+  'Consigli pratici per chi inizia','Chi fa cosa nel nostro team','Un\'esperienza cliente raccontata (anonima)',
+  'I nostri obiettivi per questo mese','Cosa ci rende diversi dagli altri','Dove vogliamo arrivare',
+  'Come gestiamo un imprevisto','Le domande da farsi prima di iniziare','I nostri strumenti di lavoro',
+  'Come nasce una giornata di lavoro','Il valore della costanza','Piccoli traguardi, grandi soddisfazioni',
+  'Cosa abbiamo imparato in questo periodo','Come scegliamo cosa fare','La parte più difficile del lavoro',
+  'La parte più bella del lavoro','Un consiglio per chi ci segue','Grazie a chi ci sta seguendo'
+];
+// Caption già pronta per ogni tema (stesso ordine di PIANO30_TEMI)
+var PIANO30_CAPTIONS = [
+  'Vi siete mai chiesti chi c\'è davvero dietro MBBET? 👋\n\nSiamo un piccolo team che ha scelto di fare questo lavoro con un obiettivo preciso: accompagnare le persone in un percorso serio, organizzato e trasparente, passo dopo passo. Non promettiamo scorciatoie, promettiamo metodo.\n\nDa oggi vi raccontiamo tutto questo, giorno dopo giorno. Scrivici nei commenti se hai curiosità 🙌',
+  'Il nostro metodo in tre parole? Ascolto, ordine, costanza.\n\nPrima capiamo davvero la tua situazione, poi costruiamo insieme un percorso su misura, un passo alla volta, senza fretta e senza cose lasciate al caso. Ogni fase ha un senso preciso.\n\nTi va di scoprire come funziona nel dettaglio? Scrivici in DM 💬',
+  'Perché fare proprio questo lavoro? Ce lo chiedono spesso.\n\nOgnuno di noi ha una storia diversa alle spalle, ma un obiettivo in comune: fare le cose per bene, con serietà, e aiutare davvero le persone che decidono di affidarsi a noi.\n\nE tu, ti sei mai chiesto perché fai il lavoro che fai? Raccontacelo nei commenti 👇',
+  'Non siamo partiti da grandi numeri.\n\nSiamo partiti da un\'idea semplice: fare questo lavoro con serietà, senza promesse esagerate e senza scorciatoie. Da quell\'idea è nato tutto il resto, un passo alla volta.\n\nVi va di seguire il resto della nostra storia? Restate con noi 🙌',
+  'Trasparenza. Correttezza. Metodo.\n\nSono le tre parole che guidano ogni nostra decisione, ogni singolo giorno di lavoro. Non sono solo parole scritte da qualche parte: sono il modo in cui lavoriamo davvero, ogni volta.\n\nQuale di questi valori conta di più per te? Dicci la tua 👇',
+  'Vi siete mai chiesti come passiamo le nostre giornate?\n\nTra organizzazione, chiamate, controlli e tanta attenzione ai dettagli, ogni giornata è diversa dall\'altra ma segue sempre lo stesso filo: fare le cose per bene.\n\nEccovi un piccolo assaggio del nostro lavoro quotidiano 🎬',
+  'Ogni settimana riceviamo tante domande, spesso le stesse.\n\nOggi abbiamo deciso di raccogliere alcune delle domande più frequenti e rispondere in modo semplice e diretto, senza giri di parole.\n\nHai anche tu una domanda? Scrivila nei commenti, ti rispondiamo noi 👇',
+  'In questo settore si vedono spesso gli stessi errori, ripetuti da tante persone diverse.\n\nOggi vogliamo raccontarvene qualcuno, non per criticare nessuno, ma per aiutarti a partire con il piede giusto ed evitare le difficoltà più comuni.\n\nSalva questo post, potrebbe tornarti utile più avanti 📌',
+  'Iniziare da zero fa sempre un po\' paura.\n\nMa con la guida giusta, un percorso da zero diventa semplice e ordinato: un passo alla volta, senza saltare nessuna fase, senza sentirsi soli lungo il percorso.\n\nSe stai pensando di iniziare, scrivici: rispondiamo a tutte le domande 💬',
+  'Dall\'inizio alla fine, come funziona davvero il percorso di chi lavora con noi?\n\nOgni fase è pensata per essere chiara: si parte con un primo confronto, si costruisce insieme un piano, e si procede passo dopo passo con il supporto costante del nostro team.\n\nTi va di scoprire tutte le fasi nel dettaglio? Restate con noi nei prossimi giorni 🙌',
+  'Ci sono cose che non facciamo mai, a prescindere da tutto.\n\nNon promettiamo risultati garantiti, non nascondiamo informazioni, non mettiamo fretta a nessuno. La trasparenza viene prima di ogni altra cosa, sempre.\n\nPer noi conta più la fiducia a lungo termine di qualsiasi scorciatoia. Cosa ne pensi? 👇',
+  'Oggi vi portiamo dietro le quinte: quello che normalmente non si vede.\n\nRiunioni, controlli, organizzazione, piccoli imprevisti da gestire ogni giorno: il nostro lavoro è fatto soprattutto di questo, più che di quello che si vede da fuori.\n\nVi piacerebbe vedere altri momenti dietro le quinte? Fatecelo sapere nei commenti 🎬',
+  'Se stai per iniziare un percorso con noi, ecco qualche consiglio pratico.\n\nPrepara con calma i documenti richiesti, fai tutte le domande che ti vengono in mente, e non avere fretta: ogni fase ha i suoi tempi giusti per essere fatta bene.\n\nSalva questo post per rileggerlo quando ti serve 📌',
+  'Siamo un piccolo team, ma ognuno ha un ruolo preciso.\n\nC\'è chi segue la parte organizzativa, chi cura la relazione con i clienti, chi si occupa della parte tecnica: ogni persona contribuisce a modo suo al risultato finale.\n\nOggi vi presentiamo chi fa cosa nel nostro team 👥',
+  'Oggi vi raccontiamo una storia vera, in forma anonima per rispetto della privacy.\n\nÈ il percorso di una persona che ha lavorato con noi: dubbi iniziali, domande, un percorso costruito passo dopo passo, fino ai risultati concreti ottenuti nel tempo.\n\nSe vuoi raccontarci la tua esperienza, scrivici in DM 💬',
+  'Ogni mese ci diamo degli obiettivi chiari, scritti nero su bianco.\n\nQuesto mese vogliamo migliorare ancora la qualità del servizio e restare vicini a chi ha bisogno di risposte rapide e concrete: sono le due cose su cui stiamo lavorando di più.\n\nQual è il tuo obiettivo di questo mese? Dicci la tua 👇',
+  'Ci viene chiesto spesso cosa ci rende diversi.\n\nLa risposta è semplice: il metodo che seguiamo e l\'attenzione reale che mettiamo verso ogni singola persona che si affida a noi. Non trattiamo nessuno come un numero.\n\nSecondo te cosa fa davvero la differenza in questo settore? 👇',
+  'Abbiamo una visione chiara di dove vogliamo arrivare.\n\nVogliamo diventare un punto di riferimento serio in questo settore, costruendo ogni giorno un po\' di fiducia in più con chi ci segue e chi lavora con noi.\n\nGrazie a chi sta iniziando questo percorso insieme a noi 🙌',
+  'Gli imprevisti capitano sempre, in ogni lavoro.\n\nQuello che conta davvero non è evitarli (è impossibile), ma il modo in cui li affrontiamo: con calma, comunicazione chiara e soluzioni rapide, senza lasciare nessuno senza risposte.\n\nHai mai avuto un imprevisto gestito bene? Raccontacelo 👇',
+  'Prima di iniziare qualsiasi percorso, ci sono alcune domande che vale la pena farsi.\n\nChe obiettivo hai? Quanto tempo puoi dedicarci? Cosa ti aspetti davvero? Rispondere con onestà a queste domande aiuta a partire nel modo giusto.\n\nTe le proponiamo noi oggi, una alla volta 📝',
+  'Ogni lavoro ha i suoi strumenti, anche il nostro.\n\nUsiamo tabelle organizzate, controlli quotidiani e processi condivisi da tutto il team per essere precisi e non lasciare nulla al caso, nemmeno i dettagli più piccoli.\n\nCurioso di sapere come li usiamo ogni giorno? Restate con noi 🔧',
+  'Vi siete mai chiesti come nasce, in pratica, una nostra giornata di lavoro?\n\nParte sempre con un controllo generale della situazione, poi si passa alle priorità del giorno, e infine al lavoro operativo vero e proprio, fatto di attenzione e costanza.\n\nVe la raccontiamo passo dopo passo in questo video 🎬',
+  'Non è la velocità che conta, è la costanza.\n\nI risultati veri arrivano da chi continua a fare le cose per bene giorno dopo giorno, non da chi cerca la scorciatoia più veloce. Per noi vale per il lavoro, e vale anche per i social.\n\nSei d\'accordo? Dicci la tua nei commenti 👇',
+  'Anche i piccoli traguardi meritano di essere celebrati.\n\nOggi vogliamo condividere con voi una piccola grande soddisfazione raggiunta questa settimana, perché ogni passo avanti, anche piccolo, conta davvero per noi.\n\nQual è stato il tuo ultimo piccolo traguardo? Raccontacelo 🎉',
+  'In questo periodo abbiamo imparato tanto, forse più del solito.\n\nAbbiamo capito ancora meglio quanto conti ascoltare le persone prima di agire, e quanto la pazienza faccia davvero la differenza nei risultati a lungo termine.\n\nE tu, cosa hai imparato di recente? Condividilo con noi 👇',
+  'Ogni giorno prendiamo tante piccole decisioni, anche quelle che non si vedono.\n\nScegliamo sempre in base a un criterio semplice: cosa è davvero utile e corretto per la persona che abbiamo davanti, non cosa è più comodo per noi nel breve periodo.\n\nÈ un criterio che proviamo ad applicare ogni giorno 🙌',
+  'Non tutto è semplice in questo lavoro, ed è giusto dirlo con onestà.\n\nLa parte più difficile è spesso gestire le aspettative e i tempi di ognuno, restando sempre chiari e trasparenti anche quando le notizie non sono quelle che si vorrebbe dare.\n\nApprezziamo chi capisce che la sincerità viene prima di tutto 🙏',
+  'E ovviamente non può mancare la parte più bella di questo lavoro.\n\nÈ il momento in cui vediamo i risultati concreti di un percorso fatto bene, insieme alla persona che lo ha vissuto: è quello che ci fa alzare ogni mattina con motivazione vera.\n\nGrazie a chi ci permette di vivere questi momenti ogni giorno 💛',
+  'Un piccolo consiglio, semplice ma vero, per chi ci segue ogni giorno.\n\nNon avere fretta di arrivare al risultato: costruisci le basi giuste, fai le domande necessarie, e i risultati arriveranno di conseguenza, un passo alla volta.\n\nSalva questo post se ti serve rileggerlo più avanti 📌',
+  'Un grazie sincero, senza troppi giri di parole.\n\nGrazie a chi ci segue ogni giorno, a chi ci scrive, a chi si fida di noi anche solo leggendo questi contenuti. Siamo solo all\'inizio di questo percorso, e vogliamo farlo insieme a voi.\n\nGrazie di cuore 🙏 Restate con noi, il meglio deve ancora venire.'
+];
+
+// Ruoli comunicativi: chi deve dire cosa, in base all'argomento (non al formato).
+// Mary = volto emotivo/fiducia/storia; Serena = percorso cliente/rassicurazione; Samuele = metodo/organizzazione.
+var PIANO30_PERSONA = ['Mary','Serena','Mary','Mary','Mary','Samuele','Serena','Samuele','Serena','Serena',
+  'Mary','Mary','Serena','Samuele','Mary','Samuele','Mary','Mary','Samuele','Serena',
+  'Samuele','Samuele','Mary','Serena','Mary','Samuele','Mary','Mary','Serena','Mary'];
+var PIANO30_OBIETTIVO = ['farci conoscere','spiegare il servizio','creare fiducia','creare fiducia','creare fiducia',
+  'farci conoscere','rispondere a un’obiezione','spiegare il servizio','portare a una Zoom','spiegare il servizio',
+  'rispondere a un’obiezione','farci conoscere','portare a una Zoom','farci conoscere','creare fiducia',
+  'farci conoscere','creare fiducia','creare fiducia','rispondere a un’obiezione','portare a una Zoom',
+  'spiegare il servizio','farci conoscere','creare fiducia','far iniziare il primo bonus','creare fiducia',
+  'spiegare il servizio','creare fiducia','creare fiducia','recuperare clienti fermi','creare fiducia'];
+var PIANO30_HOOKS = [
+  "Se non sai ancora chi siamo, oggi te lo spiego io.",
+  "Ti spiego in modo semplice come funziona il percorso, passo dopo passo.",
+  "Mi chiedono spesso perché ho scelto di fare questo lavoro. Te lo racconto.",
+  "Non siamo partiti da grandi numeri. Ti racconto da dove siamo partiti davvero.",
+  "Prima di iniziare con noi, questa cosa devi saperla.",
+  "Ti sei mai chiesto come organizziamo una nostra giornata di lavoro?",
+  "La domanda che mi fate più spesso è questa. Ti rispondo subito.",
+  "Questo è l'errore più comune che vedo fare a chi inizia in questo settore.",
+  "Se pensi che servano competenze assurde per iniziare, ti spiego perché non è così.",
+  "Ti spiego esattamente cosa succede dall'inizio alla fine del percorso.",
+  "Prima di iniziare con noi, questa cosa devi saperla: ci sono cose che non facciamo mai.",
+  "Oggi ti faccio vedere quello che di solito non si vede del nostro lavoro.",
+  "Se stai per iniziare con noi, questi consigli ti serviranno subito.",
+  "Siamo in quattro, ma ognuno ha un compito preciso. Te lo spiego io.",
+  "Ti racconto la storia vera di una persona che ha fatto questo percorso con noi.",
+  "Ogni mese ci diamo obiettivi precisi. Eccoti quelli di questo mese.",
+  "Mi chiedono spesso cosa ci rende diversi dagli altri. La risposta è più semplice di quello che pensi.",
+  "Ti racconto dove vogliamo arrivare con questo progetto.",
+  "Se pensi che tutto vada sempre liscio, ti spiego come gestiamo davvero un imprevisto.",
+  "Prima di iniziare qualsiasi percorso, fatti queste domande.",
+  "Ti faccio vedere gli strumenti che usiamo ogni giorno per essere precisi.",
+  "Ti sei mai chiesto come nasce, in pratica, una nostra giornata di lavoro?",
+  "Se cerchi la scorciatoia veloce, questo video non fa per te.",
+  "Oggi voglio raccontarti un piccolo traguardo che per noi è una grande soddisfazione.",
+  "In questo periodo abbiamo imparato una cosa che voglio condividere con te.",
+  "Ti spiego con che criterio scegliamo cosa fare ogni giorno.",
+  "Se pensi che questo lavoro sia sempre facile, ti racconto la parte più difficile.",
+  "Questa è la parte del nostro lavoro che ci fa alzare ogni mattina con motivazione.",
+  "Un consiglio semplice ma vero per chi ci segue ogni giorno.",
+  "Prima di chiudere, volevo dirti semplicemente grazie."
+];
+var PIANO30_CTA_PER_OBIETTIVO = {
+  'farci conoscere': 'Seguici per scoprire il resto 🎬',
+  'creare fiducia': 'Scrivici in DM se vuoi saperne di più 💬',
+  'spiegare il servizio': 'Guarda la presentazione per capire come funziona',
+  'rispondere a un’obiezione': 'Scrivici in DM se hai altri dubbi 💬',
+  'portare a una Zoom': 'Prenota una Zoom gratuita per scoprire se fa per te',
+  'far iniziare il primo bonus': 'Parla con Serena per il tuo primo passo',
+  'recuperare clienti fermi': 'Scrivi “INFO” e ti ricontattiamo noi'
+};
+var PIANO30_NOTE_PERSONA = {
+  Mary: 'Chi parla: Maria Teresa. Tono: emotivo, sincero, diretto — come se stessi confidando qualcosa di vero a un amico. Location: ambiente informale, luce naturale. Inquadratura: primo piano, sguardo dritto in camera. Durata stimata: 30-45 sec. Testo in sovraimpressione: la frase hook nei primi 3 secondi. B-roll: momenti di vita/lavoro quotidiano se disponibili. Cosa evitare: tono da vendita, frasi che sembrano un copione letto.',
+  Serena: 'Chi parla: Serena. Tono: chiaro, rassicurante, pratico, vicino a chi ascolta. Location: postazione di lavoro ordinata o sfondo neutro. Inquadratura: mezzo busto, gesti naturali con le mani per accompagnare la spiegazione. Durata stimata: 25-40 sec. Testo in sovraimpressione: i passaggi chiave elencati a schermo. B-roll: schermo/telefono che mostra un messaggio o una chiamata. Cosa evitare: linguaggio troppo tecnico, andare di fretta sui passaggi.',
+  Samuele: 'Chi parla: Samuele. Tono: ordinato, concreto, preciso, affidabile. Location: postazione operativa, tabelle o computer visibili sullo sfondo. Inquadratura: mezzo busto o dettaglio su schermo/tabella. Durata stimata: 25-35 sec. Testo in sovraimpressione: numeri o punti elenco chiave. B-roll: dettagli di tabelle, calendario, processo di controllo. Cosa evitare: troppi dettagli tecnici tutti insieme, tono robotico.'
+};
+var PIANO30_TONO_LABEL = {Mary:'racconto personale', Serena:'spiegazione pratica', Samuele:'spiegazione operativa'};
+
+var PIANO30_ESEMPIO = [
+  "Pensa a chi ha iniziato senza sapere nulla di questo mondo: nel giro di poche settimane ha capito tutto il percorso, passo dopo passo.",
+  "Per esempio, prima di qualsiasi altra cosa, ci sediamo insieme (anche solo con una chiamata) e capiamo davvero cosa ti serve.",
+  "Ricordo ancora la prima persona che ho aiutato: vedere il suo percorso andare bene mi ha confermato che stavamo facendo la cosa giusta.",
+  "All'inizio eravamo in due, con un'idea scritta su un foglio. Oggi siamo un team con un metodo vero.",
+  "Se una cosa non è chiara, preferiamo fermarci e spiegarla di nuovo piuttosto che andare avanti in fretta.",
+  "Ad esempio, ogni mattina controlliamo lo stato di tutte le pratiche attive prima di iniziare qualsiasi altra cosa.",
+  "Una delle domande più comuni è: “Quanto tempo ci vuole?”. La risposta onesta è: dipende, ma te lo spieghiamo chiaramente da subito.",
+  "Ad esempio, molti si affrettano a saltare un passaggio pensando di risparmiare tempo, e poi devono tornare indietro.",
+  "Molti dei nostri clienti sono partiti senza saperne nulla, e nel giro di pochi giorni avevano già le idee chiare.",
+  "Si parte con una chiamata conoscitiva, poi si passa all'organizzazione pratica, fino al primo vero passo operativo.",
+  "Non ti diremo mai un numero finto solo per convincerti a iniziare: preferiamo dirti la verità, anche se meno entusiasmante.",
+  "Ad esempio, prima di ogni chiamata con un cliente, ci confrontiamo in team per essere sicuri di dargli la risposta più corretta possibile.",
+  "Ad esempio, tieni sempre a portata di mano i tuoi documenti: velocizza tantissimo l'inizio del percorso.",
+  "Ad esempio, se scrivi per una domanda pratica, è molto probabile che ti risponda Serena; se è una questione più organizzativa, spesso me ne occupo io.",
+  "All'inizio questa persona aveva molti dubbi, esattamente come probabilmente ne hai tu adesso.",
+  "Ad esempio, questo mese vogliamo ridurre i tempi di risposta e rendere ogni passaggio ancora più chiaro.",
+  "Ad esempio, se qualcosa non è adatto a una persona, glielo diciamo chiaramente, anche se questo significa non lavorare insieme.",
+  "Vogliamo che tra un anno le persone ci conoscano per la serietà, non solo per i risultati.",
+  "Ad esempio, se un conto viene limitato, il primo passo è capire subito la causa e comunicarla con chiarezza al cliente.",
+  "Ad esempio, chiediti: ho davvero tempo da dedicare a questo, anche solo poche ore a settimana?",
+  "Ad esempio, ogni cliente ha una scheda aggiornata in tempo reale con lo stato di ogni sua pratica.",
+  "Ad esempio, se durante il controllo troviamo una pratica ferma, diventa la priorità della giornata.",
+  "Chi ottiene i risultati migliori di solito non è chi va più veloce, ma chi non si ferma.",
+  "Ad esempio questa settimana un cliente ha completato il suo primo passaggio dopo settimane di incertezza: per noi è già un grande risultato.",
+  "Ad esempio, abbiamo capito che rispondere subito a un dubbio, anche piccolo, evita tanti problemi più avanti.",
+  "Ad esempio, se una cosa è urgente per un cliente ma comoda da rimandare per noi, viene sempre prima il cliente.",
+  "A volte dobbiamo dire a una persona che i tempi saranno più lunghi del previsto, e non è mai un momento facile.",
+  "Ad esempio, ricevere un messaggio di ringraziamento da chi all'inizio era pieno di dubbi è un momento che ripaga tutto.",
+  "Ad esempio, non confrontarti con i tempi di qualcun altro: ognuno ha il suo percorso ed è normale che sia diverso.",
+  "Ogni messaggio, ogni commento, ogni domanda che riceviamo ci conferma che stiamo costruendo qualcosa di vero."
+];
+var PIANO30_RASSICURAZIONE = [
+  "Non devi avere esperienza prima di iniziare: è normale non sapere tutto all'inizio, è per questo che ci siamo noi.",
+  "Non c'è nessun passaggio che devi affrontare da solo: siamo qui ad ogni fase.",
+  "Non lo facciamo solo per lavoro, lo facciamo perché ci crediamo davvero.",
+  "Siamo cresciuti passo dopo passo, esattamente come chiediamo di fare a chi lavora con noi.",
+  "Puoi sempre chiederci di rispiegare qualcosa: non ti faremo mai sentire in difetto per una domanda.",
+  "Niente viene lasciato al caso: ogni cliente ha una sua situazione monitorata con attenzione.",
+  "Se hai un dubbio che non abbiamo coperto qui, scrivicelo pure: rispondiamo sempre.",
+  "Seguendo l'ordine giusto, questi errori si evitano quasi del tutto.",
+  "Non serve nessuna preparazione precedente: si parte da dove sei, un passo alla volta.",
+  "In ogni fase sai sempre cosa aspettarti, senza sorprese lungo il percorso.",
+  "Preferiamo perdere una persona dicendo la verità piuttosto che guadagnarla con una bugia.",
+  "Anche quando non si vede, dietro ogni cliente c'è un lavoro di squadra vero.",
+  "Se dimentichi qualcosa non è un problema: ti guidiamo noi passo dopo passo.",
+  "In ogni caso, qualcuno del team ti risponde sempre, indipendentemente da chi.",
+  "Se anche tu hai dei dubbi, è normale: fanno parte del percorso, non sono un problema.",
+  "Questi obiettivi non restano solo scritti: li controlliamo ogni settimana.",
+  "Preferiamo essere onesti oggi piuttosto che avere un problema domani.",
+  "Ogni persona che lavora con noi oggi fa parte di questo percorso di crescita.",
+  "Non lasciamo mai una persona senza risposta quando succede qualcosa di inaspettato.",
+  "Non c'è una risposta giusta o sbagliata: serve solo per capire insieme se è il momento adatto.",
+  "Questo ci permette di risponderti subito, senza doverti far aspettare per un controllo.",
+  "Niente resta fermo per troppo tempo senza che qualcuno se ne accorga.",
+  "Anche un piccolo passo ogni giorno, nel tempo, fa una grande differenza.",
+  "Ogni piccolo progresso conta, anche quando sembra poca cosa.",
+  "Continuiamo a migliorare proprio ascoltando chi lavora con noi ogni giorno.",
+  "Questo criterio non cambia mai, qualunque sia la situazione.",
+  "Ma preferiamo sempre la verità, anche quando è scomoda da dire.",
+  "Sono questi momenti che ci ricordano perché facciamo questo lavoro.",
+  "Va bene andare al tuo ritmo, l'importante è non fermarsi del tutto.",
+  "Che tu sia già con noi o stia solo osservando da fuori, sei parte di questo percorso."
+];
+
+var PIANO30_STICKER = {
+  'farci conoscere': 'Metti uno sticker domanda: “Vuoi sapere di più su di noi?” 🙋',
+  'creare fiducia': 'Metti uno sticker domanda: “Ti fidi di più ora?” 💛',
+  'spiegare il servizio': 'Metti uno sticker sondaggio: “Ti è chiaro? Sì / Un po\'” 🤔',
+  'rispondere a un’obiezione': 'Metti uno sticker domanda: “Hai anche tu questo dubbio?” 💭',
+  'portare a una Zoom': 'Metti uno sticker sondaggio: “Ti va di prenotare una Zoom?” 📅',
+  'far iniziare il primo bonus': 'Metti uno sticker: “Scrivimi se hai bisogno di una mano” ✋',
+  'recuperare clienti fermi': 'Metti uno sticker: “Scrivi INFO se vuoi ripartire” 🔁'
+};
+var PIANO30_VISUAL_PERSONA = {
+  Mary: 'primo piano personale, luce naturale, sguardo in camera',
+  Serena: 'grafica con 2-3 passaggi numerati o schema semplice',
+  Samuele: 'tabella/dashboard o dettaglio schermo con numeri'
+};
+
+function primaFrase(testo) {
+  var m = testo.match(/^(.*?[.!?])\s/);
+  return m ? m[1] : testo;
+}
+
+// Script differenziati per formato: solo il Reel ha un vero script parlato,
+// la Storia è un outline rapido a 3 slide, il Post non parla — è idea visiva.
+function piano30ScriptReel(idx, caption) {
+  var persona = PIANO30_PERSONA[idx];
+  var parts = caption.split('\n\n');
+  var corpo = parts.length > 1 ? parts[1] : parts[0];
+  var cta = PIANO30_CTA_PER_OBIETTIVO[PIANO30_OBIETTIVO[idx]];
+  return 'HOOK (0-3 sec): '+PIANO30_HOOKS[idx]+'\n\n'+
+    'SVILUPPO — '+PIANO30_TONO_LABEL[persona]+':\n'+corpo+'\n\n'+
+    'ESEMPIO:\n'+PIANO30_ESEMPIO[idx]+'\n\n'+
+    'RASSICURAZIONE:\n'+PIANO30_RASSICURAZIONE[idx]+'\n\n'+
+    'CTA: '+cta;
+}
+function piano30ScriptStoria(idx, caption) {
+  var parts = caption.split('\n\n');
+  var corpo = parts.length > 1 ? parts[1] : parts[0];
+  var sticker = PIANO30_STICKER[PIANO30_OBIETTIVO[idx]];
+  return 'STORIA (2-3 slide, tono informale — come parlare a un amico dietro le quinte):\n\n'+
+    '1️⃣ Slide 1 — apertura: '+PIANO30_HOOKS[idx]+'\n\n'+
+    '2️⃣ Slide 2 — punto centrale: '+primaFrase(corpo)+'\n\n'+
+    '3️⃣ Slide 3 — chiusura: '+sticker;
+}
+function piano30ScriptPost(idx, tema) {
+  var persona = PIANO30_PERSONA[idx];
+  return 'IDEA VISIVA (post statico o carosello — nessuno script parlato necessario):\n\n'+
+    'Immagine/slide: '+PIANO30_VISUAL_PERSONA[persona]+', coerente col tema “'+tema+'”.\n'+
+    'Testo overlay sull\'immagine: “'+PIANO30_HOOKS[idx]+'”\n\n'+
+    'Il testo completo del post è già pronto nel campo Caption qui sotto.';
+}
+
+// Un tema al giorno, espresso in Reel+Storia+Post: tutti e 3 i formati del giorno
+// vanno alla stessa persona, coerente con "chi deve dire questo messaggio".
+var PIANO30_FORMATI = [
+  {formato:'REEL',   label:'Reel',                    piattaforma:'Multi'},
+  {formato:'STORIA', label:'Storia dietro le quinte',  piattaforma:'Instagram'},
+  {formato:'POST',   label:'Post educativo',           piattaforma:'Instagram'}
+];
+
+async function generaPiano30Giorni() {
+  if (!confirm('Questo crea 90 contenuti (30 giorni × 3 video/giorno, con Reel già su Instagram+TikTok) nel calendario, assegnati a Mary/Samuele/Serena in base all\'argomento. Continuare?')) return;
+
+  var oggi = new Date();
+  var rEsistenti = await db.from('social_posts').select('id,data_pubblicazione').gte('data_pubblicazione', ymd(oggi));
+  if ((rEsistenti.data||[]).length > 0) {
+    if (!confirm('Ci sono già ' + rEsistenti.data.length + ' contenuti programmati da oggi in poi. Vuoi comunque aggiungere i 90 nuovi (potrebbero esserci doppioni)?')) return;
+  }
+
+  await loadRiskWords();
+  toast('Genero il piano, un attimo...', 'info');
+
+  var righe = [];
+  for (var giorno = 0; giorno < 30; giorno++) {
+    var idx = giorno % PIANO30_TEMI.length;
+    var tema = PIANO30_TEMI[idx];
+    var caption = PIANO30_CAPTIONS[idx];
+    var persona = PIANO30_PERSONA[idx];
+    var obiettivo = PIANO30_OBIETTIVO[idx];
+    var hook = PIANO30_HOOKS[idx];
+    var note = PIANO30_NOTE_PERSONA[persona];
+    var cta = PIANO30_CTA_PER_OBIETTIVO[obiettivo];
+    var data = new Date(oggi.getTime() + giorno*86400000);
+    var dataIso = ymd(data);
+    for (var f = 0; f < PIANO30_FORMATI.length; f++) {
+      var fmt = PIANO30_FORMATI[f];
+      var titolo = tema + ' — ' + fmt.label;
+      var script = fmt.formato==='REEL' ? piano30ScriptReel(idx, caption)
+                 : fmt.formato==='STORIA' ? piano30ScriptStoria(idx, caption)
+                 : piano30ScriptPost(idx, tema);
+      var risk = runGuardian(titolo+' '+caption+' '+script);
+      righe.push({
+        titolo: titolo,
+        tipo_contenuto: fmt.formato,
+        piattaforma: fmt.piattaforma,
+        assegnato_a: persona,
+        data_pubblicazione: dataIso,
+        stato: 'IDEA',
+        obiettivo: obiettivo,
+        hook: hook,
+        script: script,
+        caption: caption,
+        cta: cta,
+        note: note,
+        livello_rischio: risk.level,
+        parole_rischiose: risk.found.map(function(m){ return m.parola; })
+      });
+    }
+  }
+
+  var errori = 0;
+  for (var i=0; i<righe.length; i++) {
+    try {
+      var r = await db.from('social_posts').insert(righe[i]);
+      if (r.error) errori++;
+    } catch(e) { errori++; }
+  }
+
+  toast(errori === 0 ? '90 contenuti creati! Guarda il Calendario.' : (righe.length-errori) + ' creati, ' + errori + ' con errore', errori ? 'warning' : 'success');
+  showTab('calendario', document.querySelectorAll('.tabs .tab')[0]);
+  renderCalendar();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AGENTE AI — Social Media Manager virtuale
+// ═══════════════════════════════════════════════════════════════
+var AG_PHASES = [
+  {min:0,    max:100,      tip:'Fondamenta: pubblica con costanza, presentati, spiega chi siete e cosa fate.'},
+  {min:100,  max:500,      tip:'Community: rispondi ai commenti, crea engagement, mostra il dietro le quinte.'},
+  {min:500,  max:2000,     tip:'Autorità: testimonianze, casi studio, contenuti educational approfonditi.'},
+  {min:2000, max:Infinity, tip:'Scala: collaborazioni, referral, contenuti ricorrenti di valore.'}
+];
+var _agFollowerCount = 0;
+var _agIdeas = [];
+
+async function loadAgente() {
+  var statsEl=document.getElementById('ag-stats');
+  var roadmapEl=document.getElementById('ag-roadmap');
+  var suggestEl=document.getElementById('ag-suggest');
+  statsEl.innerHTML='<div class="state-box"><div class="spinner"></div></div>';
+  suggestEl.innerHTML='<div class="state-box"><div class="spinner"></div></div>';
+
+  var posts=[], pubblicatiCount=0, primaDataPub=null;
+  try {
+    var rPosts=await sdFetchAllPosts();
+    posts=rPosts.data||[];
+    posts.forEach(function(p){
+      if(p.pubblicato){ pubblicatiCount++; if(!primaDataPub) primaDataPub=p.data_pubblicazione||p.created_at; }
+    });
+  } catch(e) {}
+  _agPosts = posts;
+
+  try {
+    var rCfg=await sdGetConfig('social_follower_count');
+    _agFollowerCount = rCfg.data ? (parseInt(rCfg.data.valore)||0) : 0;
+  } catch(e) { _agFollowerCount = 0; }
+
+  var giorniAttivo = primaDataPub ? Math.max(0, Math.floor((Date.now()-new Date(primaDataPub).getTime())/86400000)) : 0;
+  var phaseIdx = AG_PHASES.findIndex(function(p){ return _agFollowerCount>=p.min && _agFollowerCount<p.max; });
+  if(phaseIdx<0) phaseIdx=0;
+  var curPhase = AG_PHASES[phaseIdx];
+  var phasePct = curPhase.max===Infinity ? 100 : Math.min(100, Math.max(0, Math.round((_agFollowerCount-curPhase.min)/(curPhase.max-curPhase.min)*100)));
+  var nextMilestone = curPhase.max===Infinity ? null : curPhase.max;
+
+  statsEl.innerHTML =
+    '<div class="ag-stat"><div class="ag-stat-label">Post Pubblicati</div><div class="ag-stat-val">'+pubblicatiCount+'</div></div>'+
+    '<div class="ag-stat"><div class="ag-stat-label"><span>Follower</span><button class="ag-edit-btn" onclick="editFollower()">✎ modifica</button></div><div class="ag-stat-val">'+_agFollowerCount+'</div>'+
+      (nextMilestone!=null ? '<div class="ag-stat-bar-wrap"><div class="ag-stat-bar" style="width:'+phasePct+'%"></div></div><div class="ag-stat-bar-note">'+phasePct+'% verso '+nextMilestone+'</div>' : '<div class="ag-stat-bar-note">Fase massima raggiunta 🎉</div>')+
+    '</div>'+
+    '<div class="ag-stat"><div class="ag-stat-label">Giorni Attivo</div><div class="ag-stat-val">'+giorniAttivo+'</div></div>'+
+    '<div class="ag-stat"><div class="ag-stat-label">Fase Attuale</div><div class="ag-stat-val">'+(phaseIdx+1)+' / 4</div></div>';
+
+  var overallFraction = (phaseIdx + phasePct/100) / AG_PHASES.length;
+  var lineFillPct = Math.min(100, Math.max(2, overallFraction*100));
+  roadmapEl.innerHTML =
+    '<div class="ag-roadmap-line"></div>'+
+    '<div class="ag-roadmap-line-fill" style="width:'+ (lineFillPct*0.75) +'%"></div>'+
+    AG_PHASES.map(function(p,i){
+      var cls = i===phaseIdx ? 'active' : (i<phaseIdx ? 'done' : '');
+      var range = p.max===Infinity ? (p.min+'+') : (p.min+' – '+p.max);
+      return '<div class="ag-phase '+cls+'"><div class="ag-phase-num">Fase '+(i+1)+(i===phaseIdx?' · ora':(i<phaseIdx?' · fatta':''))+'</div><div class="ag-phase-range">'+range+'</div><div class="ag-phase-tip">'+p.tip+'</div></div>';
+    }).join('');
+
+  try {
+    var rIdeas=await sdFetchContentIdeas();
+    _agIdeas = rIdeas.data||[];
+    var titoliUsati={};
+    posts.forEach(function(p){ if(p.titolo) titoliUsati[p.titolo]=true; });
+    var next=_agIdeas.find(function(idea){ return !titoliUsati[idea.titolo]; });
+    if(next){
+      await loadRiskWords();
+      var riskPreview=runGuardian(next.titolo+' '+(next.descrizione||''));
+      var riskColor=riskPreview.level==='alto'?'var(--red)':riskPreview.level==='medio'?'var(--orange)':'var(--green)';
+      suggestEl.innerHTML =
+        '<div class="ag-suggest-icon">💡</div>'+
+        '<div class="ag-suggest-body">'+
+          '<div class="ag-suggest-label">Settimana '+(next.settimana_piano||1)+' · '+escHtml(next.tipo||'POST')+'</div>'+
+          '<div class="ag-suggest-title">'+escHtml(next.titolo)+'</div>'+
+          '<div class="ag-suggest-meta">'+escHtml(next.descrizione||'')+'</div>'+
+          '<div class="ag-suggest-risk">🛡️ Rischio stimato: <strong style="color:'+riskColor+'">'+riskPreview.level.toUpperCase()+'</strong></div>'+
+        '</div>'+
+        '<button class="btn btn-primary" onclick="creaDaIdea(\''+next.id+'\')">Crea questo contenuto</button>';
+    } else {
+      suggestEl.innerHTML = '<div class="gh-empty" style="width:100%"><div class="gh-empty-icon">🎉</div>Hai usato tutte le idee del Piano Editoriale — passa alla sezione Piano 30gg per rivederle o crea contenuti nuovi.</div>';
+    }
+  } catch(e) {
+    suggestEl.innerHTML = '<div class="gh-empty" style="width:100%">Impossibile caricare il suggerimento al momento.</div>';
+  }
+
+  loadAriaInsights();
+}
+
+var _agPosts = [];
+var AG_CATEGORIA_ICON = {
+  OPPORTUNITY: '📅', WARNING: '🔴', ANOMALY: '⚠️', IDEA: '💡',
+  GROWTH: '📈', CONTENT: '📊', COMMUNITY: '💬', OPERATIONS: '📝'
+};
+
+async function loadAriaInsights() {
+  var el = document.getElementById('ag-insights');
+  el.innerHTML = '<div class="state-box"><div class="spinner"></div></div>';
+  try {
+    var result = await ariaComputeInsights();
+    if (!result.insights.length) {
+      el.innerHTML = '<div class="ag-ins-empty">Tutto in ordine — nessun problema da segnalare oggi.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="ag-ins-list">' + result.insights.map(function(ins){
+      var urg = ins.urgenza || 'media';
+      var icon = AG_CATEGORIA_ICON[ins.categoria] || '•';
+      return '<div class="ag-ins ag-ins-'+urg+'">'+
+        '<div class="ag-ins-title">'+icon+' '+escHtml(ins.titolo)+'</div>'+
+        '<div class="ag-ins-why">'+escHtml(ins.motivazione||'')+'</div>'+
+        '<div class="ag-ins-actions">'+
+          '<button class="btn btn-sm btn-primary" onclick="ariaAccettaTask('+ins.id+')">📌 Aggiungi promemoria</button>'+
+          '<button class="btn btn-sm btn-ghost" onclick="ariaAccettaIdea('+ins.id+')">💡 Aggiungi al Piano</button>'+
+          '<button class="btn btn-sm btn-ghost" onclick="ariaIgnora('+ins.id+')">Ignora</button>'+
+        '</div>'+
+      '</div>';
+    }).join('') + '</div>';
+  } catch(e) {
+    el.innerHTML = '<div class="ag-ins-empty">Non riesco a controllare adesso, riprova tra poco.</div>';
+  }
+}
+
+async function ariaAccettaTask(id) {
+  var r = await sdFetchInsights(); var ins = (r.data||[]).find(function(x){ return x.id===id; });
+  if (!ins) return;
+  var rt = await sdInsertTaskFromInsight(ins);
+  if (rt.error) { toast('Errore nella creazione del task','error'); return; }
+  await sdUpdateInsightStato(id, 'task_creato', {id_task_creato: rt.data.id});
+  toast('Task creato','success');
+  loadAriaInsights();
+}
+async function ariaAccettaIdea(id) {
+  var r = await sdFetchInsights(); var ins = (r.data||[]).find(function(x){ return x.id===id; });
+  if (!ins) return;
+  var ri = await sdInsertIdeaFromInsight(ins);
+  if (ri.error) { toast('Errore nella creazione dell\'idea','error'); return; }
+  await sdUpdateInsightStato(id, 'idea_creata', {id_idea_creata: ri.data[0].id});
+  toast('Idea aggiunta al Piano Editoriale','success');
+  loadAriaInsights();
+}
+async function ariaIgnora(id) {
+  await sdUpdateInsightStato(id, 'ignorato');
+  loadAriaInsights();
+}
+
+function creaDaIdea(id) {
+  var idea = _agIdeas.find(function(i){ return String(i.id)===String(id); });
+  if(!idea) return;
+  openNewPost();
+  document.getElementById('p-titolo').value = idea.titolo||'';
+  if(idea.tipo) document.getElementById('p-tipo').value = idea.tipo;
+  document.getElementById('p-caption').value = idea.descrizione||'';
+  if(idea.obiettivo) document.getElementById('p-ob').value = idea.obiettivo;
+}
+
+async function editFollower() {
+  var val = prompt('Quanti follower avete adesso (Instagram + TikTok insieme, o la piattaforma principale)?', String(_agFollowerCount||0));
+  if(val===null) return;
+  var n = parseInt(val);
+  if(isNaN(n)||n<0){ toast('Inserisci un numero valido','warning'); return; }
+  await sdSetConfig('social_follower_count', n);
+  toast('Follower aggiornati','success');
+  loadAgente();
 }
 
 // Preload risk words at startup
