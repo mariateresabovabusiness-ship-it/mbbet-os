@@ -775,11 +775,6 @@ function onLoginSuccess() {
   loadPiano();
 }
 
-initAuth(onLoginSuccess, function onFail() {
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-});
-
 async function handleLogin(e) {
   e.preventDefault();
   var btn=document.getElementById('l-btn'), err=document.getElementById('login-err');
@@ -821,19 +816,27 @@ var STATO_COLORS = {
   'SCARTATO':     {bg:'rgba(239,68,68,.2)',   c:'#ef4444'}
 };
 
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise(function(_, reject){ setTimeout(function(){ reject(new Error('timeout')); }, ms); })
+  ]);
+}
+
 async function loadCalPosts(year, month) {
   var from = ymd(new Date(year,month,1));
   var to   = ymd(new Date(year,month+1,0));
   calPosts = {};
-  try {
-    var r = await db.from('social_posts').select('id,titolo,stato,tipo_contenuto,assegnato_a,data_pubblicazione')
-      .gte('data_pubblicazione',from).lte('data_pubblicazione',to).order('data_pubblicazione');
-    (r.data||[]).forEach(function(p){
-      var d = p.data_pubblicazione;
-      if(!calPosts[d]) calPosts[d]=[];
-      calPosts[d].push(p);
-    });
-  } catch(e) {}
+  var r = await withTimeout(
+    db.from('social_posts').select('id,titolo,stato,tipo_contenuto,assegnato_a,data_pubblicazione')
+      .gte('data_pubblicazione',from).lte('data_pubblicazione',to).order('data_pubblicazione'),
+    8000
+  );
+  (r.data||[]).forEach(function(p){
+    var d = p.data_pubblicazione;
+    if(!calPosts[d]) calPosts[d]=[];
+    calPosts[d].push(p);
+  });
 }
 
 async function renderCalendar() {
@@ -842,7 +845,16 @@ async function renderCalendar() {
   var lbl = document.getElementById('cal-month-label');
   if(lbl) lbl.textContent = new Date(y,m,1).toLocaleString('it-IT',{month:'long',year:'numeric'}).toUpperCase();
   el.innerHTML = '<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
-  await loadCalPosts(y,m);
+  try {
+    await loadCalPosts(y,m);
+  } catch(e) {
+    el.innerHTML = '<div class="state-box state-err" style="padding:24px">'+
+      '<div class="state-icon">⚠️</div>'+
+      '<div class="state-msg">Il calendario non risponde. Controlla la connessione e riprova.</div>'+
+      '<button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="renderCalendar()">↻ Riprova</button>'+
+      '</div>';
+    return;
+  }
   if(calViewMode==='month') renderMonth(y,m,el);
   else if(calViewMode==='agenda') renderAgenda(el);
   else renderWeek(el);
@@ -1874,6 +1886,18 @@ async function editFollower() {
 
 // Preload risk words at startup
 loadRiskWords();
+
+// Avvio autenticazione: spostato qui in fondo di proposito. Se una sessione
+// è già salvata, initAuth chiama onLoginSuccess() in modo SINCRONO — e
+// onLoginSuccess chiama subito renderCalendar(), che usa variabili (calCurrent,
+// calViewMode, ecc.) dichiarate sopra in questo stesso script. Se questa
+// chiamata fosse più in alto (prima di quelle dichiarazioni), calCurrent
+// risulterebbe undefined al primo utilizzo e il calendario si bloccherebbe
+// per sempre sullo spinner iniziale — esattamente il bug osservato.
+initAuth(onLoginSuccess, function onFail() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+});
 </script>
 </body>
 </html>
