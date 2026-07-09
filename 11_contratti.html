@@ -44,7 +44,8 @@
 .ctr-stato { font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; padding:3px 9px; border-radius:20px; white-space:nowrap; }
 
 .ctr-scorecard { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:22px; }
-.ctr-sc-item { padding:13px 14px; border-radius:10px; background:var(--s2); border:1px solid var(--b0); border-top:2px solid var(--b2); cursor:pointer; transition:border-color .15s; }
+.ctr-sc-item { padding:13px 14px; border-radius:10px; background:var(--s2); border:1px solid var(--b0); border-top:3px solid var(--b2); cursor:pointer; transition:border-color .15s,transform .1s; }
+.ctr-sc-item:hover { transform:translateY(-1px); }
 .ctr-sc-item:hover { border-color:var(--b2); }
 .ctr-sc-item.on { background:var(--s3,var(--s2)); }
 .ctr-sc-num { font-family:var(--mono); font-size:22px; font-weight:700; line-height:1; }
@@ -227,13 +228,13 @@
 <script>
 
 var CTR_STATO_COLORS = {
-  'DA_INVIARE':      {bg:'rgba(107,114,128,.25)', c:'#9ca3af'},
-  'INVIATO':         {bg:'rgba(96,165,250,.25)',  c:'#60a5fa'},
-  'IN_ATTESA_FIRMA': {bg:'rgba(212,168,67,.25)',  c:'#d4a843'},
-  'FIRMATO':         {bg:'rgba(34,197,94,.3)',    c:'#4ade80'},
-  'RIFIUTATO':       {bg:'rgba(239,68,68,.2)',    c:'#ef4444'},
-  'SCADUTO':         {bg:'rgba(249,115,22,.25)',  c:'#f97316'},
-  'ERRORE':          {bg:'rgba(239,68,68,.3)',    c:'#ff4757'}
+  'DA_INVIARE':      {bg:'rgba(148,163,184,.3)', c:'#cbd5e1'},
+  'INVIATO':         {bg:'rgba(41,150,255,.35)', c:'#4fa9ff'},
+  'IN_ATTESA_FIRMA': {bg:'rgba(255,181,29,.35)', c:'#ffb51d'},
+  'FIRMATO':         {bg:'rgba(22,230,120,.35)', c:'#1ee878'},
+  'RIFIUTATO':       {bg:'rgba(255,45,85,.32)',  c:'#ff3358'},
+  'SCADUTO':         {bg:'rgba(255,118,26,.35)', c:'#ff7a1e'},
+  'ERRORE':          {bg:'rgba(255,20,80,.38)',  c:'#ff2050'}
 };
 
 function onLoginSuccess() {
