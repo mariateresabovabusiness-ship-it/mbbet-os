@@ -93,3 +93,37 @@ async function sdInsertIdeaFromInsight(insight) {
   };
   return db.from('social_content_ideas').insert(payload).select();
 }
+
+// ── LIBRERIA MEDIA (TikTok — video/foto grezzi per persona) ───────────
+var SD_MEDIA_BUCKET = 'social-media';
+
+async function sdFetchMediaCounts() {
+  return db.from('social_media_library').select('tipo,persona');
+}
+
+async function sdFetchMedia(tipo, persona) {
+  return db.from('social_media_library')
+    .select('*').eq('tipo', tipo).eq('persona', persona)
+    .order('created_at', {ascending:false});
+}
+
+async function sdUploadMedia(file, tipo, persona, caricatoDa) {
+  var safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  var path = tipo + '/' + persona + '/' + Date.now() + '_' + safeName;
+  var up = await db.storage.from(SD_MEDIA_BUCKET).upload(path, file);
+  if (up.error) return up;
+  return db.from('social_media_library').insert({
+    tipo: tipo, persona: persona, nome_file: file.name, storage_path: path,
+    dimensione_kb: Math.round(file.size / 1024), caricato_da: caricatoDa || null
+  }).select();
+}
+
+async function sdSignedUrlMedia(path) {
+  return db.storage.from(SD_MEDIA_BUCKET).createSignedUrl(path, 300);
+}
+
+async function sdDeleteMedia(id, path) {
+  var del = await db.storage.from(SD_MEDIA_BUCKET).remove([path]);
+  if (del.error) return del;
+  return db.from('social_media_library').delete().eq('id', id);
+}

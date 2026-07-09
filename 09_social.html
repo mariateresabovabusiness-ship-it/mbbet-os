@@ -461,6 +461,36 @@
 .ag-ins-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .ag-ins-empty { text-align: center; padding: 24px; color: var(--t3); font-size: 12.5px; }
 
+/* Media TikTok */
+.media-folder-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px;
+}
+.media-folder-card {
+  background: var(--s2); border: 1px solid var(--b0); border-left: 4px solid var(--b2);
+  border-radius: var(--r2); padding: 18px 16px; cursor: pointer; transition: border-color .15s, transform .1s;
+}
+.media-folder-card:hover { border-color: var(--b2); transform: translateY(-2px); }
+.media-folder-icon { font-size: 26px; margin-bottom: 10px; }
+.media-folder-name { font-size: 13.5px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
+.media-folder-count { font-size: 11px; color: var(--t3); font-family: var(--mono); }
+.media-file-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px;
+}
+.media-file-card {
+  background: var(--s2); border: 1px solid var(--b0); border-radius: var(--r2);
+  padding: 10px; display: flex; flex-direction: column; gap: 6px;
+}
+.media-thumb {
+  width: 100%; aspect-ratio: 1; border-radius: var(--r1); background: var(--s1);
+  display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 28px;
+}
+.media-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.media-thumb-video { background: var(--cyan-dim); }
+.media-file-name { font-size: 11px; font-weight: 600; color: var(--t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.media-file-meta { font-size: 10px; color: var(--t3); font-family: var(--mono); }
+.media-file-actions { display: flex; gap: 6px; }
+.media-file-actions .btn { flex: 1; padding: 4px 6px; font-size: 10.5px; }
+
 /* Modal social */
 .social-modal .modal-box { max-width: 780px; }
 
@@ -540,6 +570,7 @@
         <div class="tab" onclick="showTab('contenuti',this)">Contenuti</div>
         <div class="tab" onclick="showTab('guardian',this)">Guardian</div>
         <div class="tab" onclick="showTab('piano',this)">Piano 30gg</div>
+        <div class="tab" onclick="showTab('media',this)">🎬 Media TikTok</div>
         <div class="tab" onclick="showTab('agente',this)">🤖 Agente AI</div>
       </div>
 
@@ -672,6 +703,30 @@
         </div>
         <div class="piano-grid" id="piano-grid">
           <div class="state-box"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <!-- MEDIA TIKTOK -->
+      <div id="tab-media" style="display:none">
+        <div id="media-folders" style="margin-bottom:20px">
+          <h2 style="font-size:16px;font-weight:700;margin-bottom:6px">Libreria Media — Materiale grezzo per TikTok</h2>
+          <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Carica qui i video e le foto grezze, organizzati per persona. Servono per montare i contenuti TikTok fuori dal sistema.</p>
+          <div class="media-folder-grid" id="media-folder-grid">
+            <div class="state-box"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div id="media-viewer" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="btn btn-ghost btn-sm" onclick="mediaBackToFolders()">← Cartelle</button>
+              <h2 id="media-viewer-title" style="font-size:15px;font-weight:700"></h2>
+            </div>
+            <div>
+              <input type="file" id="media-upload-input" multiple style="display:none" onchange="mediaHandleUpload(this.files)">
+              <button class="btn btn-primary btn-sm" onclick="document.getElementById('media-upload-input').click()">+ Carica file</button>
+            </div>
+          </div>
+          <div class="media-file-grid" id="media-file-grid"></div>
         </div>
       </div>
 
@@ -863,7 +918,7 @@ async function handleLogin(e) {
 }
 
 // ── TABS ──────────────────────────────────────────────────────────
-var TABS = ['calendario','contenuti','guardian','piano','agente'];
+var TABS = ['calendario','contenuti','guardian','piano','media','agente'];
 function showTab(id, el) {
   TABS.forEach(function(t){ document.getElementById('tab-'+t).style.display='none'; });
   document.getElementById('tab-'+id).style.display='';
@@ -871,6 +926,7 @@ function showTab(id, el) {
   if(el) el.classList.add('active');
   if(id==='contenuti') loadContenuti();
   if(id==='agente') loadAgente();
+  if(id==='media') mediaLoadFolders();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2059,6 +2115,119 @@ async function editFollower() {
   await sdSetConfig('social_follower_count', n);
   toast('Follower aggiornati','success');
   loadAgente();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MEDIA TIKTOK — libreria video/foto grezzi per persona
+// ═══════════════════════════════════════════════════════════════
+var MEDIA_PERSONE = ['Mary','Manuele','Samuele','Serena'];
+var MEDIA_TIPI = [{k:'VIDEO', label:'Video', icon:'🎬'}, {k:'FOTO', label:'Foto', icon:'📷'}];
+var _mediaCurrent = null;
+var MEDIA_MAX_MB = 50;
+
+async function mediaLoadFolders() {
+  document.getElementById('media-folders').style.display = '';
+  document.getElementById('media-viewer').style.display = 'none';
+  var el = document.getElementById('media-folder-grid');
+  el.innerHTML = '<div class="state-box"><div class="spinner"></div></div>';
+  var r = await sdFetchMediaCounts();
+  var counts = {};
+  (r.data||[]).forEach(function(row){
+    var k = row.tipo+'|'+row.persona;
+    counts[k] = (counts[k]||0) + 1;
+  });
+  var h = '';
+  MEDIA_TIPI.forEach(function(t){
+    MEDIA_PERSONE.forEach(function(p){
+      var n = counts[t.k+'|'+p] || 0;
+      var cc = CREATOR_COLORS[p] || {c:'rgba(255,255,255,.2)', bg:'rgba(255,255,255,.05)'};
+      h += '<div class="media-folder-card" style="border-left-color:'+cc.c+';background:'+cc.bg+'" onclick="mediaOpenFolder(\''+t.k+'\',\''+p+'\')">'+
+        '<div class="media-folder-icon">'+t.icon+'</div>'+
+        '<div class="media-folder-name">'+t.label+' — '+p+'</div>'+
+        '<div class="media-folder-count">'+n+' file</div>'+
+      '</div>';
+    });
+  });
+  el.innerHTML = h;
+}
+
+function mediaBackToFolders() { mediaLoadFolders(); }
+
+async function mediaOpenFolder(tipo, persona) {
+  _mediaCurrent = {tipo:tipo, persona:persona};
+  document.getElementById('media-folders').style.display = 'none';
+  document.getElementById('media-viewer').style.display = '';
+  var t = MEDIA_TIPI.find(function(x){ return x.k===tipo; });
+  document.getElementById('media-viewer-title').textContent = (t?t.icon+' '+t.label:tipo)+' — '+persona;
+  await mediaRenderFiles();
+}
+
+async function mediaRenderFiles() {
+  var el = document.getElementById('media-file-grid');
+  el.innerHTML = '<div class="state-box"><div class="spinner"></div></div>';
+  var r = await sdFetchMedia(_mediaCurrent.tipo, _mediaCurrent.persona);
+  var files = r.data || [];
+  if (!files.length) { el.innerHTML = '<div class="ag-ins-empty">Nessun file qui ancora. Carica il primo.</div>'; return; }
+  var h = '';
+  files.forEach(function(f){
+    h += '<div class="media-file-card">';
+    if (_mediaCurrent.tipo === 'FOTO') {
+      h += '<div class="media-thumb" id="thumb-'+f.id+'"><div class="spinner" style="width:20px;height:20px"></div></div>';
+    } else {
+      h += '<div class="media-thumb media-thumb-video">🎬</div>';
+    }
+    h += '<div class="media-file-name" title="'+escHtml(f.nome_file)+'">'+escHtml(f.nome_file)+'</div>';
+    h += '<div class="media-file-meta">'+(f.dimensione_kb ? (f.dimensione_kb>1024 ? (f.dimensione_kb/1024).toFixed(1)+' MB' : f.dimensione_kb+' KB') : '')+'</div>';
+    h += '<div class="media-file-actions">';
+    h += '<button class="btn btn-ghost btn-sm" onclick="mediaDownload(\''+f.storage_path+'\')">⬇ Scarica</button>';
+    h += '<button class="btn btn-ghost btn-sm" onclick="mediaDelete(\''+f.id+'\',\''+f.storage_path+'\')">🗑</button>';
+    h += '</div></div>';
+  });
+  el.innerHTML = h;
+  if (_mediaCurrent.tipo === 'FOTO') {
+    files.forEach(async function(f){
+      var r2 = await sdSignedUrlMedia(f.storage_path);
+      var thumb = document.getElementById('thumb-'+f.id);
+      if (thumb && r2.data && r2.data.signedUrl) thumb.innerHTML = '<img src="'+r2.data.signedUrl+'" loading="lazy">';
+    });
+  }
+}
+
+async function mediaHandleUpload(fileList) {
+  if (!fileList || !fileList.length) return;
+  var files = Array.from(fileList);
+  var tooBig = files.filter(function(f){ return f.size > MEDIA_MAX_MB*1024*1024; });
+  if (tooBig.length) {
+    toast('File oltre '+MEDIA_MAX_MB+'MB non caricati: '+tooBig.map(function(f){return f.name;}).join(', '), 'warning');
+    files = files.filter(function(f){ return f.size <= MEDIA_MAX_MB*1024*1024; });
+  }
+  if (!files.length) return;
+  toast('Carico '+files.length+' file...', 'info');
+  var ok = 0, fail = 0;
+  for (var i=0;i<files.length;i++) {
+    var r = await sdUploadMedia(files[i], _mediaCurrent.tipo, _mediaCurrent.persona, currentNome);
+    if (r.error) fail++; else ok++;
+  }
+  document.getElementById('media-upload-input').value = '';
+  toast(ok+' caricati'+(fail?', '+fail+' falliti':''), fail ? 'warning' : 'success');
+  await mediaRenderFiles();
+}
+
+async function mediaDownload(path) {
+  var r = await sdSignedUrlMedia(path);
+  if (r.data && r.data.signedUrl) {
+    window.open(r.data.signedUrl, '_blank');
+  } else {
+    toast('Impossibile generare il link di download', 'error');
+  }
+}
+
+async function mediaDelete(id, path) {
+  if (!confirm('Eliminare questo file? Non si può annullare.')) return;
+  var r = await sdDeleteMedia(id, path);
+  if (r.error) { toast('Errore durante l\'eliminazione', 'error'); return; }
+  toast('File eliminato', 'success');
+  await mediaRenderFiles();
 }
 
 // Preload risk words at startup
