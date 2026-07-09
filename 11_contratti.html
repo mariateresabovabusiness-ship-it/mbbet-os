@@ -164,10 +164,19 @@
           <input type="text" id="c-link" placeholder="https://...">
         </div>
         <div class="form-group">
+          <label>PDF da firmare (bozza)</label>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <input type="file" id="c-bozza-input" accept="application/pdf" style="display:none" onchange="uploadContrattoBozza(this.files)">
+            <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('c-bozza-input').click()">+ Carica PDF da firmare</button>
+            <span id="c-bozza-status" style="font-size:11.5px;color:var(--t3)"></span>
+            <button class="btn btn-primary btn-sm" id="c-btn-yousign" type="button" style="display:none" onclick="inviaConYousign()">📨 Invia con Yousign <span style="opacity:.7;font-size:10px">SANDBOX</span></button>
+          </div>
+        </div>
+        <div class="form-group">
           <label>PDF firmato</label>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <input type="file" id="c-file-input" accept="application/pdf" style="display:none" onchange="uploadContrattoFirmato(this.files)">
-            <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('c-file-input').click()">+ Carica PDF firmato</button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('c-file-input').click()">+ Carica PDF firmato (manuale)</button>
             <span id="c-file-status" style="font-size:11.5px;color:var(--t3)"></span>
           </div>
         </div>
@@ -302,6 +311,9 @@ function openNewContratto() {
   document.getElementById('c-data-firma').value = '';
   document.getElementById('c-link').value = '';
   document.getElementById('c-file-status').textContent = '';
+  document.getElementById('c-bozza-status').textContent = '';
+  document.getElementById('c-bozza-status').dataset.path = '';
+  document.getElementById('c-btn-yousign').style.display = 'none';
   document.getElementById('c-operatore').value = '';
   document.getElementById('c-note').value = '';
   document.getElementById('c-log-wrap').style.display = 'none';
@@ -324,6 +336,9 @@ async function openContratto(id) {
   document.getElementById('c-data-firma').value = c.data_firma||'';
   document.getElementById('c-link').value = c.link_contratto||'';
   document.getElementById('c-file-status').textContent = c.storage_path_firmato ? '✓ PDF firmato caricato' : '';
+  document.getElementById('c-bozza-status').textContent = c.storage_path_bozza ? '✓ PDF da firmare caricato' : '';
+  document.getElementById('c-bozza-status').dataset.path = c.storage_path_bozza || '';
+  document.getElementById('c-btn-yousign').style.display = (c.storage_path_bozza && c.stato !== 'FIRMATO') ? '' : 'none';
   document.getElementById('c-operatore').value = c.operatore||'';
   document.getElementById('c-note').value = c.note||'';
   var log = c.log_eventi||[];
@@ -349,6 +364,45 @@ function pickClienteForContratto(id, nome, email) {
   document.getElementById('c-cliente-search').value = nome;
   if (email) document.getElementById('c-email').value = email;
   document.getElementById('c-cliente-results').innerHTML = '';
+}
+
+async function uploadContrattoBozza(files) {
+  if (!files || !files.length) return;
+  if (!_ctrEditId) { toast('Salva prima il contratto, poi carica il PDF da firmare', 'warning'); return; }
+  var file = files[0];
+  if (file.size > 20*1024*1024) { toast('PDF troppo grande (oltre 20MB)', 'warning'); return; }
+  var path = 'bozze/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  var up = await db.storage.from('contratti').upload(path, file);
+  if (up.error) { toast('Errore caricamento PDF', 'error'); return; }
+  await db.from('contratti').update({ storage_path_bozza: path }).eq('id', _ctrEditId);
+  document.getElementById('c-bozza-status').textContent = '✓ ' + file.name + ' caricato';
+  document.getElementById('c-bozza-status').dataset.path = path;
+  document.getElementById('c-btn-yousign').style.display = '';
+  toast('PDF da firmare caricato', 'success');
+}
+
+async function inviaConYousign() {
+  if (!_ctrEditId) return;
+  var btn = document.getElementById('c-btn-yousign');
+  btn.disabled = true; btn.textContent = 'Invio in corso...';
+  try {
+    var res = await fetch('/.netlify/functions/yousign-create', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ contratto_id: _ctrEditId })
+    });
+    var data = await res.json();
+    if (!res.ok || data.error) {
+      toast('Errore Yousign: ' + (data.error || 'sconosciuto'), 'error');
+      console.error('Yousign error detail:', data.detail);
+    } else {
+      toast('Inviato con Yousign (Sandbox)', 'success');
+      closeModal('modal-ctr');
+      loadContratti();
+    }
+  } catch (e) {
+    toast('Errore di rete durante l\'invio', 'error');
+  }
+  btn.disabled = false; btn.innerHTML = '📨 Invia con Yousign <span style="opacity:.7;font-size:10px">SANDBOX</span>';
 }
 
 async function uploadContrattoFirmato(files) {
