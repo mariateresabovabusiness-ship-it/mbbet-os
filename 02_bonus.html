@@ -597,6 +597,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 </style>
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>
+<script src="shared/layout.js"></script>
 </head>
 <body>
 
@@ -2994,6 +2995,7 @@ async function doSt(rid){
   var ns=g('ns').value;
   if(r._real){modLoad();var res=await db.from('bonus').update({stato:ns,ult_azione:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',rid);if(res.error){modErr(res.error.message);return;}}
   r.stato=ns;closeModal();renderView();showToast('Stato: '+ns,'ok');
+  if(ns==='FATTO')addNotif('Bonus','Bonus completato: '+r.cli_nm,r.bk_nm+' — bonus segnato come FATTO','Alta',r.cli_op);
 }
 
 /* ── AGGIORNA RICAVO ── */

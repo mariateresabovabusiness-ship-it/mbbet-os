@@ -1017,6 +1017,8 @@ async function doSubmit(){
     var r=await db.from('clienti').insert(payload);
     if(r.error)throw r.error;
 
+    try{await db.from('notifiche').insert({tipo:'Cliente',titolo:'Nuovo cliente compilato: '+nomeCpl,messaggio:'Operatore: '+(op||'da assegnare'),priorita:'Alta',destinatario:op||null,letto:false});}catch(e){}
+
     // BONUS ROWS
     var bonusCreati=await createBonus(clientId,nomeCpl,op,_sitiReg,mn,an);
 
