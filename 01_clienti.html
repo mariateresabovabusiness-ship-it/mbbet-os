@@ -503,6 +503,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
   <a class="sbl" title="Collaboratori" onclick="navTo('07_collab.html')">&#129309;</a>
   <a class="sbl" title="Documenti">&#128196;</a>
   <a class="sbl" title="Social MBBET" onclick="navTo('09_social.html')">&#128241;</a>
+  <a class="sbl" title="Contratti" onclick="navTo('11_contratti.html')">&#128220;</a>
   <a class="sbl" title="Modulo Clienti" onclick="navTo('10_onboarding_cliente.html')">&#128203;</a>
   <a class="sbl" title="Import Clienti" onclick="navTo('06_import.html')">&#128229;</a>
   <a class="sbl" title="Report">&#128202;</a>
@@ -644,6 +645,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <div class="ws-tab" onclick="wsTab('task',this)"><span class="ws-tab-ic">&#9989;</span>Task</div>
       <div class="ws-tab" onclick="wsTab('ai',this)"><span class="ws-tab-ic">&#129302;</span>AI</div>
       <div class="ws-tab" onclick="wsTab('stat',this)"><span class="ws-tab-ic">&#128202;</span>Statistiche</div>
+      <div class="ws-tab" onclick="wsTab('contr',this)"><span class="ws-tab-ic">&#128220;</span>Contratti</div>
     </div>
     <div class="ws-body">
       <div class="ws-pane on" id="wp-pan"></div>
@@ -654,6 +656,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <div class="ws-pane" id="wp-task"></div>
       <div class="ws-pane" id="wp-ai"></div>
       <div class="ws-pane" id="wp-stat"></div>
+      <div class="ws-pane" id="wp-contr"></div>
     </div>
   </div>
 </div>
@@ -973,7 +976,9 @@ function openWs(id){
     '<div class="ws-pill" style="border-color:'+sC+'22"><div class="ws-pill-v" style="color:'+sC+'">'+(c.stato||'').replace('_',' ')+'</div><div class="ws-pill-l">Stato</div></div>'
     +'<div class="ws-pill"><div class="ws-pill-v" style="color:var(--cyan)">€'+(c.potenziale||0)+'</div><div class="ws-pill-l">Potenziale</div></div>'
     +'<div class="ws-pill"><div class="ws-pill-v" style="color:'+scCol(c.score||0)+'">'+(c.score||0)+'</div><div class="ws-pill-l">Score</div></div>'
-    +'<div class="ws-pill"><div class="ws-pill-v" style="color:var(--gold)">'+(c.bk_completati||[]).length+'</div><div class="ws-pill-l">BK Fatti</div></div>';
+    +'<div class="ws-pill"><div class="ws-pill-v" style="color:var(--gold)">'+(c.bk_completati||[]).length+'</div><div class="ws-pill-l">BK Fatti</div></div>'
+    +'<div class="ws-pill" id="ws-pill-contr"><div class="ws-pill-v" style="color:var(--tx3)">&hellip;</div><div class="ws-pill-l">Contratto</div></div>';
+  refreshContrattoPill(id);
   // next BK
   var done=c.bk_completati||[],prog=c.bk_in_corso||[],lim=c.bk_limitati||[];
   var nxt=BKS.filter(function(b){return done.indexOf(b)<0&&prog.indexOf(b)<0&&lim.indexOf(b)<0;});
@@ -1004,7 +1009,7 @@ function wsTab(id,btn){
 }
 function renderWsPane(id){
   var c=_ws;if(!c)return;
-  var fn={pan:renderPan,bk:renderBk,pag:renderPag,doc:renderDoc,tl:renderTl,task:renderTask,ai:renderAi,stat:renderStat}[id];
+  var fn={pan:renderPan,bk:renderBk,pag:renderPag,doc:renderDoc,tl:renderTl,task:renderTask,ai:renderAi,stat:renderStat,contr:renderContr}[id];
   if(fn)fn(c);
 }
 
@@ -1256,6 +1261,50 @@ function renderDoc(c){
       +'</div>';
   }).join('')+'</div>';
   g('wp-doc').innerHTML=top+grid;
+}
+
+/* CONTRATTI */
+var CONTR_STATO_COLORS={
+  'DA_INVIARE':{bg:'rgba(107,114,128,.25)',c:'#9ca3af'},'INVIATO':{bg:'rgba(96,165,250,.25)',c:'#60a5fa'},
+  'IN_ATTESA_FIRMA':{bg:'rgba(212,168,67,.25)',c:'#d4a843'},'FIRMATO':{bg:'rgba(34,197,94,.3)',c:'#4ade80'},
+  'RIFIUTATO':{bg:'rgba(239,68,68,.2)',c:'#ef4444'},'SCADUTO':{bg:'rgba(249,115,22,.25)',c:'#f97316'},
+  'ERRORE':{bg:'rgba(239,68,68,.3)',c:'#ff4757'}
+};
+async function refreshContrattoPill(clienteId){
+  var r=await db.from('contratti').select('stato').eq('cliente_id',String(clienteId));
+  var rows=r.data||[];
+  var firmato=rows.some(function(x){return x.stato==='FIRMATO';});
+  var pill=g('ws-pill-contr');if(!pill)return;
+  pill.innerHTML='<div class="ws-pill-v" style="color:'+(firmato?'var(--green)':'var(--red)')+'">'+(firmato?'Sì':'No')+'</div><div class="ws-pill-l">Contratto</div>';
+}
+async function renderContr(c){
+  var cid=String(c.id);
+  var el=g('wp-contr');
+  el.innerHTML='<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
+  var r=await db.from('contratti').select('*').eq('cliente_id',cid).order('created_at',{ascending:false});
+  var rows=r.data||[];
+  var top='<div style="display:flex;justify-content:flex-end;margin-bottom:14px">'
+    +'<button class="doc-btn-add" onclick="nuovoContrattoPerCliente(\''+cid+'\',\''+fullNm(c).replace(/'/g,"&#39;")+'\',\''+(c.email||'').replace(/'/g,"&#39;")+'\')">&#43; Nuovo contratto</button>'
+    +'</div>';
+  if(!rows.length){el.innerHTML=top+'<div style="text-align:center;padding:30px;color:var(--tx3);font-size:12.5px">Nessun contratto per questo cliente.</div>';return;}
+  var list=rows.map(function(x){
+    var sc=CONTR_STATO_COLORS[x.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+    return '<div class="doc-card" style="text-align:left">'
+      +'<div class="doc-nm">'+(x.tipo_contratto||'Contratto')+'</div>'
+      +'<div style="display:inline-block;margin:6px 0;padding:2px 9px;border-radius:20px;font-size:9.5px;font-weight:700;text-transform:uppercase;background:'+sc.bg+';color:'+sc.c+'">'+x.stato.replace(/_/g,' ')+'</div>'
+      +'<div class="doc-val">Inviato: '+(x.data_invio?new Date(x.data_invio+'T00:00:00').toLocaleDateString('it-IT'):'—')+' &middot; Firmato: '+(x.data_firma?new Date(x.data_firma+'T00:00:00').toLocaleDateString('it-IT'):'—')+'</div>'
+      +'<div style="display:flex;gap:6px;margin-top:9px">'
+      +(x.link_contratto?'<a href="'+x.link_contratto.replace(/'/g,'&#39;')+'" target="_blank" class="doc-btn-apri">Apri &#8599;</a>':'')
+      +'<button class="doc-btn-edit" onclick="navTo(\'11_contratti.html\')">&#9998; Gestisci</button>'
+      +'</div></div>';
+  }).join('');
+  el.innerHTML=top+'<div class="doc-grid">'+list+'</div>';
+}
+function nuovoContrattoPerCliente(id,nome,email){
+  try{
+    localStorage.setItem('mbbet_nuovo_contratto',JSON.stringify({id:id,nome:nome,email:email}));
+  }catch(e){}
+  navTo('11_contratti.html');
 }
 
 function editDocLink(cliId,field,name){

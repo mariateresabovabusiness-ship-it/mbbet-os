@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contratti — MBBET OS</title>
+<link rel="stylesheet" href="shared/styles.css">
+<style>
+#app { display:grid; grid-template-columns:56px 1fr; height:100vh; overflow:hidden; }
+.sb {
+  background: var(--card2, #08111a); border-right: 1px solid var(--br, rgba(255,255,255,.06));
+  display:flex; flex-direction:column; align-items:center; overflow:hidden; z-index:30;
+}
+.sb-logo { width:56px; height:64px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--br2, rgba(255,255,255,.03)); flex-shrink:0; }
+.sb-crown {
+  width:36px; height:36px; border-radius:10px;
+  background: linear-gradient(145deg,#2d1800,#b8890a,var(--gold));
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  box-shadow: 0 2px 8px rgba(247,204,70,.25), 0 0 20px rgba(247,204,70,.1), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.sbl {
+  width:56px; height:52px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:var(--t3); cursor:pointer; text-decoration:none;
+  border-left:2px solid transparent; transition:.14s; position:relative;
+}
+.sbl:hover { color:var(--t1); background:rgba(255,255,255,.028); }
+.sbl.act { color:var(--gold); background:rgba(247,204,70,.04); border-left-color:var(--gold); }
+.sbl.act::before {
+  content:''; position:absolute; left:0; top:6px; bottom:6px; width:2px;
+  background:var(--gold); box-shadow:0 0 10px rgba(247,204,70,.6); border-radius:1px;
+}
+.sbl[title]:hover::after {
+  content:attr(title); position:absolute; left:60px; top:50%; transform:translateY(-50%);
+  background:rgba(10,14,32,.98); border:1px solid rgba(255,255,255,.08);
+  padding:5px 11px; border-radius:8px; font-size:11px; font-weight:600; color:var(--t2);
+  white-space:nowrap; z-index:100; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.sb-tog { margin-top:auto; width:56px; height:48px; display:flex; align-items:center; justify-content:center; color:var(--t3); cursor:pointer; font-size:14px; border-top:1px solid var(--br2, rgba(255,255,255,.03)); flex-shrink:0; }
+
+.ctr-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+.ctr-filters { display:flex; gap:8px; flex-wrap:wrap; }
+.ctr-filters select, .ctr-filters input { width:auto; min-width:130px; }
+
+.ctr-stato { font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+.ctr-row { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid var(--b0); cursor:pointer; transition:background .1s; }
+.ctr-row:hover { background:var(--b0); }
+.ctr-row:last-child { border-bottom:none; }
+.ctr-nm { font-size:13.5px; font-weight:700; color:var(--t1); }
+.ctr-sub { font-size:11px; color:var(--t3); margin-top:2px; }
+.ctr-col { flex-shrink:0; font-size:11.5px; color:var(--t2); font-family:var(--mono); min-width:90px; }
+.ctr-signed { font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:20px; }
+.ctr-signed.yes { background:var(--green-bg); color:var(--green); }
+.ctr-signed.no { background:rgba(255,255,255,.06); color:var(--t3); }
+
+.ctr-log { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+.ctr-log-item { font-size:11.5px; color:var(--t3); padding:8px 10px; background:var(--s2); border-radius:6px; border-left:2px solid var(--b2); }
+.ctr-log-item b { color:var(--t2); }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><h1>MBBET</h1><p>Operating System</p></div>
+    <form onsubmit="handleLogin(event)">
+      <input type="email" id="l-email" class="login-input" placeholder="Email" required autocomplete="email">
+      <input type="password" id="l-pwd" class="login-input" placeholder="Password" required autocomplete="current-password">
+      <button type="submit" class="login-btn" id="l-btn">Accedi</button>
+    </form>
+    <div id="login-err"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <nav class="sb">
+    <div class="sb-logo"><div class="sb-crown">&#128081;</div></div>
+    <a class="sbl" title="Mission Control" onclick="navTo('index.html')">&#127968;</a>
+    <a class="sbl" title="CRM Clienti" onclick="navTo('01_clienti.html')">&#128100;</a>
+    <a class="sbl" title="Bookmaker Intelligence" onclick="navTo('02_bonus.html')">&#127919;</a>
+    <a class="sbl" title="Promo Center" onclick="navTo('02_bonus.html')">&#127881;</a>
+    <a class="sbl" title="Task & Workflow">&#9989;</a>
+    <a class="sbl" title="Team MBBET" onclick="navTo('03_team.html')">&#128101;</a>
+    <a class="sbl" title="Revenue & Finanza" onclick="navTo('04_finanze.html')">&#128184;</a>
+    <a class="sbl" title="Collaboratori" onclick="navTo('07_collab.html')">&#129309;</a>
+    <a class="sbl" title="Documenti">&#128196;</a>
+    <a class="sbl" title="Social MBBET" onclick="navTo('09_social.html')">&#128241;</a>
+    <a class="sbl act" title="Contratti">&#128220;</a>
+    <a class="sbl" title="Import Clienti" onclick="navTo('06_import.html')">&#128229;</a>
+    <a class="sbl" title="Report">&#128202;</a>
+    <div class="sb-tog">&#8942;</div>
+  </nav>
+  <div id="main">
+    <div id="topbar"></div>
+    <div id="page" style="padding:24px;overflow-y:auto">
+
+      <div class="ctr-toolbar">
+        <div class="ctr-filters">
+          <select id="f-stato" onchange="loadContratti()">
+            <option value="">Tutti gli stati</option>
+            <option>DA_INVIARE</option><option>INVIATO</option><option>IN_ATTESA_FIRMA</option>
+            <option>FIRMATO</option><option>RIFIUTATO</option><option>SCADUTO</option><option>ERRORE</option>
+          </select>
+          <input type="text" id="f-cerca" placeholder="Cerca cliente..." oninput="loadContratti()">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openNewContratto()">+ Nuovo Contratto</button>
+      </div>
+
+      <div class="card">
+        <div id="ctr-list">
+          <div class="state-box" style="padding:24px"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUOVO/DETTAGLIO CONTRATTO -->
+<div class="modal" id="modal-ctr">
+  <div class="modal-box" style="max-width:640px">
+    <div class="modal-head">
+      <h3 id="ctr-modal-title">Nuovo Contratto</h3>
+      <button class="close-btn" onclick="closeModal('modal-ctr')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Cliente *</label>
+            <input type="text" id="c-cliente-search" placeholder="Cerca per nome..." oninput="searchClienteForContratto(this.value)" autocomplete="off">
+            <div id="c-cliente-results" style="position:relative"></div>
+            <input type="hidden" id="c-cliente-id">
+          </div>
+          <div class="form-group">
+            <label>Email cliente</label>
+            <input type="email" id="c-email" placeholder="email@cliente.it">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo contratto</label>
+            <input type="text" id="c-tipo" placeholder="Es. Contratto servizio MBBET">
+          </div>
+          <div class="form-group">
+            <label>Stato</label>
+            <select id="c-stato">
+              <option>DA_INVIARE</option><option>INVIATO</option><option>IN_ATTESA_FIRMA</option>
+              <option>FIRMATO</option><option>RIFIUTATO</option><option>SCADUTO</option><option>ERRORE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data invio</label>
+            <input type="date" id="c-data-invio">
+          </div>
+          <div class="form-group">
+            <label>Data firma</label>
+            <input type="date" id="c-data-firma">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Link contratto (Yousign o manuale)</label>
+          <input type="text" id="c-link" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>PDF firmato</label>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <input type="file" id="c-file-input" accept="application/pdf" style="display:none" onchange="uploadContrattoFirmato(this.files)">
+            <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('c-file-input').click()">+ Carica PDF firmato</button>
+            <span id="c-file-status" style="font-size:11.5px;color:var(--t3)"></span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Operatore</label>
+            <select id="c-operatore"><option value="">—</option></select>
+          </div>
+          <div class="form-group">
+            <label>Note</label>
+            <input type="text" id="c-note" placeholder="Note interne...">
+          </div>
+        </div>
+        <div class="form-group" id="c-log-wrap" style="display:none">
+          <label>Log eventi</label>
+          <div class="ctr-log" id="c-log"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-ctr')">Annulla</button>
+      <button class="btn btn-primary" onclick="saveContratto()">Salva</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script src="shared/supabase.min.js"></script>
+<script src="shared/auth.js"></script>
+<script src="shared/utils.js"></script>
+<script src="shared/layout.js"></script>
+<script>
+
+var CTR_STATO_COLORS = {
+  'DA_INVIARE':      {bg:'rgba(107,114,128,.25)', c:'#9ca3af'},
+  'INVIATO':         {bg:'rgba(96,165,250,.25)',  c:'#60a5fa'},
+  'IN_ATTESA_FIRMA': {bg:'rgba(212,168,67,.25)',  c:'#d4a843'},
+  'FIRMATO':         {bg:'rgba(34,197,94,.3)',    c:'#4ade80'},
+  'RIFIUTATO':       {bg:'rgba(239,68,68,.2)',    c:'#ef4444'},
+  'SCADUTO':         {bg:'rgba(249,115,22,.25)',  c:'#f97316'},
+  'ERRORE':          {bg:'rgba(239,68,68,.3)',    c:'#ff4757'}
+};
+
+function onLoginSuccess() {
+  if (!requireSection('clienti')) return;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'grid';
+  document.getElementById('topbar').innerHTML = buildTopbar('Contratti', '');
+  initNotifPanel();
+  loadNotifCount();
+  initRealtimeDot();
+  loadOperatoriSelect();
+  loadContratti();
+  checkPrefillNuovoContratto();
+}
+
+function checkPrefillNuovoContratto() {
+  var raw;
+  try { raw = localStorage.getItem('mbbet_nuovo_contratto'); } catch(e) { return; }
+  if (!raw) return;
+  try { localStorage.removeItem('mbbet_nuovo_contratto'); } catch(e) {}
+  var d = JSON.parse(raw);
+  openNewContratto();
+  document.getElementById('c-cliente-id').value = d.id || '';
+  document.getElementById('c-cliente-search').value = d.nome || '';
+  document.getElementById('c-cliente-search').disabled = true;
+  document.getElementById('c-email').value = d.email || '';
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  var btn=document.getElementById('l-btn'), err=document.getElementById('login-err');
+  btn.textContent='Accesso...'; btn.disabled=true; err.style.display='none';
+  var res=await doLogin(document.getElementById('l-email').value.trim(),document.getElementById('l-pwd').value);
+  if(res.error){err.textContent='Email o password non validi.';err.style.display='block';btn.textContent='Accedi';btn.disabled=false;return;}
+  onLoginSuccess();
+}
+
+async function loadOperatoriSelect() {
+  var r = await db.from('operatori').select('nome').eq('stato','Attivo').order('nome');
+  var sel = document.getElementById('c-operatore');
+  (r.data||[]).forEach(function(o){
+    var opt = document.createElement('option');
+    opt.value = o.nome; opt.textContent = o.nome;
+    sel.appendChild(opt);
+  });
+}
+
+function ctrChip(stato) {
+  var sc = CTR_STATO_COLORS[stato] || {bg:'rgba(255,255,255,.1)', c:'#fff'};
+  return '<span class="ctr-stato" style="background:'+sc.bg+';color:'+sc.c+'">'+escHtml(stato||'—')+'</span>';
+}
+
+async function loadContratti() {
+  var el = document.getElementById('ctr-list');
+  el.innerHTML = '<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
+  var q = db.from('contratti').select('*').order('created_at',{ascending:false}).limit(200);
+  var stato = document.getElementById('f-stato').value;
+  if (stato) q = q.eq('stato', stato);
+  var r = await q;
+  var rows = r.data || [];
+  var cerca = (document.getElementById('f-cerca').value||'').toLowerCase().trim();
+  if (cerca) rows = rows.filter(function(c){ return (c.nome_cliente||'').toLowerCase().indexOf(cerca)>=0; });
+  if (!rows.length) { el.innerHTML = '<div class="ag-ins-empty">Nessun contratto trovato.</div>'; return; }
+  el.innerHTML = rows.map(function(c){
+    return '<div class="ctr-row" onclick="openContratto(\''+c.id+'\')">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div class="ctr-nm">'+escHtml(c.nome_cliente||'—')+'</div>'+
+        '<div class="ctr-sub">'+escHtml(c.tipo_contratto||'Contratto')+(c.operatore?' · '+escHtml(c.operatore):'')+'</div>'+
+      '</div>'+
+      '<div class="ctr-col">'+(c.data_invio?new Date(c.data_invio+'T00:00:00').toLocaleDateString('it-IT'):'—')+'</div>'+
+      '<div class="ctr-col">'+(c.data_firma?new Date(c.data_firma+'T00:00:00').toLocaleDateString('it-IT'):'—')+'</div>'+
+      ctrChip(c.stato)+
+      '</div>';
+  }).join('');
+}
+
+var _ctrEditId = null;
+var _ctrClienteScelto = null;
+
+function openNewContratto() {
+  _ctrEditId = null;
+  _ctrClienteScelto = null;
+  document.getElementById('ctr-modal-title').textContent = 'Nuovo Contratto';
+  document.getElementById('c-cliente-search').value = '';
+  document.getElementById('c-cliente-id').value = '';
+  document.getElementById('c-email').value = '';
+  document.getElementById('c-tipo').value = '';
+  document.getElementById('c-stato').value = 'DA_INVIARE';
+  document.getElementById('c-data-invio').value = '';
+  document.getElementById('c-data-firma').value = '';
+  document.getElementById('c-link').value = '';
+  document.getElementById('c-file-status').textContent = '';
+  document.getElementById('c-operatore').value = '';
+  document.getElementById('c-note').value = '';
+  document.getElementById('c-log-wrap').style.display = 'none';
+  document.getElementById('c-cliente-search').disabled = false;
+  openModal('modal-ctr');
+}
+
+async function openContratto(id) {
+  var r = await db.from('contratti').select('*').eq('id', id).single();
+  var c = r.data; if (!c) return;
+  _ctrEditId = id;
+  document.getElementById('ctr-modal-title').textContent = 'Contratto — ' + (c.nome_cliente||'');
+  document.getElementById('c-cliente-search').value = c.nome_cliente||'';
+  document.getElementById('c-cliente-search').disabled = true;
+  document.getElementById('c-cliente-id').value = c.cliente_id||'';
+  document.getElementById('c-email').value = c.email_cliente||'';
+  document.getElementById('c-tipo').value = c.tipo_contratto||'';
+  document.getElementById('c-stato').value = c.stato||'DA_INVIARE';
+  document.getElementById('c-data-invio').value = c.data_invio||'';
+  document.getElementById('c-data-firma').value = c.data_firma||'';
+  document.getElementById('c-link').value = c.link_contratto||'';
+  document.getElementById('c-file-status').textContent = c.storage_path_firmato ? '✓ PDF firmato caricato' : '';
+  document.getElementById('c-operatore').value = c.operatore||'';
+  document.getElementById('c-note').value = c.note||'';
+  var log = c.log_eventi||[];
+  document.getElementById('c-log-wrap').style.display = log.length ? '' : 'none';
+  document.getElementById('c-log').innerHTML = log.slice().reverse().map(function(ev){
+    return '<div class="ctr-log-item"><b>'+escHtml(ev.evento||'')+'</b> — '+new Date(ev.data).toLocaleString('it-IT')+(ev.nota?' · '+escHtml(ev.nota):'')+'</div>';
+  }).join('');
+  openModal('modal-ctr');
+}
+
+async function searchClienteForContratto(q) {
+  var resEl = document.getElementById('c-cliente-results');
+  if (!q || q.length < 2) { resEl.innerHTML=''; return; }
+  var r = await db.from('clienti').select('id,nome,email').ilike('nome','%'+q+'%').limit(6);
+  var rows = r.data||[];
+  resEl.innerHTML = '<div style="position:absolute;top:2px;left:0;right:0;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);z-index:20;max-height:180px;overflow-y:auto">'+
+    rows.map(function(c){
+      return '<div style="padding:8px 12px;cursor:pointer;font-size:12.5px" onmousedown="pickClienteForContratto(\''+c.id+'\',\''+escHtml(c.nome).replace(/'/g,"\\'")+'\',\''+(c.email?escHtml(c.email).replace(/'/g,"\\'"):'')+'\')">'+escHtml(c.nome)+'</div>';
+    }).join('')+'</div>';
+}
+function pickClienteForContratto(id, nome, email) {
+  document.getElementById('c-cliente-id').value = id;
+  document.getElementById('c-cliente-search').value = nome;
+  if (email) document.getElementById('c-email').value = email;
+  document.getElementById('c-cliente-results').innerHTML = '';
+}
+
+async function uploadContrattoFirmato(files) {
+  if (!files || !files.length) return;
+  var file = files[0];
+  if (file.size > 20*1024*1024) { toast('PDF troppo grande (oltre 20MB)', 'warning'); return; }
+  var path = 'firmati/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  var up = await db.storage.from('contratti').upload(path, file);
+  if (up.error) { toast('Errore caricamento PDF', 'error'); return; }
+  document.getElementById('c-file-status').textContent = '✓ ' + file.name + ' caricato';
+  document.getElementById('c-file-status').dataset.path = path;
+  toast('PDF caricato', 'success');
+}
+
+async function saveContratto() {
+  var clienteId = document.getElementById('c-cliente-id').value;
+  var nomeCliente = document.getElementById('c-cliente-search').value.trim();
+  if (!nomeCliente) { toast('Seleziona un cliente', 'warning'); return; }
+  var payload = {
+    cliente_id: clienteId || null,
+    nome_cliente: nomeCliente,
+    email_cliente: document.getElementById('c-email').value.trim() || null,
+    tipo_contratto: document.getElementById('c-tipo').value.trim() || null,
+    stato: document.getElementById('c-stato').value,
+    data_invio: document.getElementById('c-data-invio').value || null,
+    data_firma: document.getElementById('c-data-firma').value || null,
+    link_contratto: document.getElementById('c-link').value.trim() || null,
+    operatore: document.getElementById('c-operatore').value || null,
+    note: document.getElementById('c-note').value.trim() || null,
+    updated_at: new Date().toISOString()
+  };
+  var filePath = document.getElementById('c-file-status').dataset.path;
+  if (filePath) payload.storage_path_firmato = filePath;
+
+  if (_ctrEditId) {
+    var prev = await db.from('contratti').select('stato,log_eventi').eq('id',_ctrEditId).single();
+    var log = (prev.data && prev.data.log_eventi) || [];
+    if (prev.data && prev.data.stato !== payload.stato) {
+      log.push({evento:'Stato cambiato: '+prev.data.stato+' → '+payload.stato, data:new Date().toISOString()});
+    }
+    payload.log_eventi = log;
+    await db.from('contratti').update(payload).eq('id',_ctrEditId);
+    toast('Contratto aggiornato', 'success');
+  } else {
+    payload.log_eventi = [{evento:'Contratto creato', data:new Date().toISOString()}];
+    await db.from('contratti').insert(payload);
+    toast('Contratto creato', 'success');
+  }
+  closeModal('modal-ctr');
+  loadContratti();
+}
+
+initAuth(onLoginSuccess, function onFail() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+});
+</script>
+</body>
+</html>
