@@ -42,7 +42,22 @@
 .ctr-filters select, .ctr-filters input { width:auto; min-width:130px; }
 
 .ctr-stato { font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; padding:3px 9px; border-radius:20px; white-space:nowrap; }
-.ctr-row { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid var(--b0); cursor:pointer; transition:background .1s; }
+
+.ctr-scorecard { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:22px; }
+.ctr-sc-item { padding:13px 14px; border-radius:10px; background:var(--s2); border:1px solid var(--b0); border-top:2px solid var(--b2); cursor:pointer; transition:border-color .15s; }
+.ctr-sc-item:hover { border-color:var(--b2); }
+.ctr-sc-item.on { background:var(--s3,var(--s2)); }
+.ctr-sc-num { font-family:var(--mono); font-size:22px; font-weight:700; line-height:1; }
+.ctr-sc-label { font-size:9.5px; color:var(--t3); text-transform:uppercase; letter-spacing:.5px; margin-top:5px; font-weight:700; }
+
+.ctr-group { margin-bottom:22px; }
+.ctr-group-head { display:flex; align-items:center; gap:8px; margin-bottom:8px; padding:0 2px; }
+.ctr-group-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.ctr-group-label { font-family:var(--mono); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--t2); }
+.ctr-group-count { font-size:11px; color:var(--t3); font-family:var(--mono); }
+.ctr-group-body { background:var(--s2); border:1px solid var(--b0); border-radius:var(--r2); overflow:hidden; }
+
+.ctr-row { display:flex; align-items:center; gap:14px; padding:13px 16px; border-bottom:1px solid var(--b0); border-left:3px solid transparent; cursor:pointer; transition:background .1s; }
 .ctr-row:hover { background:var(--b0); }
 .ctr-row:last-child { border-bottom:none; }
 .ctr-nm { font-size:13.5px; font-weight:700; color:var(--t1); }
@@ -105,10 +120,10 @@
         <button class="btn btn-primary btn-sm" onclick="openNewContratto()">+ Nuovo Contratto</button>
       </div>
 
-      <div class="card">
-        <div id="ctr-list">
-          <div class="state-box" style="padding:24px"><div class="spinner"></div></div>
-        </div>
+      <div class="ctr-scorecard" id="ctr-scorecard"></div>
+
+      <div id="ctr-list">
+        <div class="state-box" style="padding:24px"><div class="spinner"></div></div>
       </div>
 
     </div>
@@ -266,32 +281,75 @@ async function loadOperatoriSelect() {
   });
 }
 
+var CTR_STATO_ORDER = ['IN_ATTESA_FIRMA','DA_INVIARE','INVIATO','ERRORE','RIFIUTATO','SCADUTO','FIRMATO'];
+var CTR_STATO_LABEL = {
+  'DA_INVIARE':'Da inviare', 'INVIATO':'Inviato', 'IN_ATTESA_FIRMA':'In attesa di firma',
+  'FIRMATO':'Firmato', 'RIFIUTATO':'Rifiutato', 'SCADUTO':'Scaduto', 'ERRORE':'Errore'
+};
+var _ctrActiveFilter = '';
+
 function ctrChip(stato) {
   var sc = CTR_STATO_COLORS[stato] || {bg:'rgba(255,255,255,.1)', c:'#fff'};
-  return '<span class="ctr-stato" style="background:'+sc.bg+';color:'+sc.c+'">'+escHtml(stato||'—')+'</span>';
+  return '<span class="ctr-stato" style="background:'+sc.bg+';color:'+sc.c+'">'+escHtml(CTR_STATO_LABEL[stato]||stato||'—')+'</span>';
+}
+
+function ctrRowHtml(c) {
+  var sc = CTR_STATO_COLORS[c.stato] || {bg:'rgba(255,255,255,.1)', c:'#fff'};
+  return '<div class="ctr-row" style="border-left-color:'+sc.c+'" onclick="openContratto(\''+c.id+'\')">'+
+    '<div style="flex:1;min-width:0">'+
+      '<div class="ctr-nm">'+escHtml(c.nome_cliente||'—')+'</div>'+
+      '<div class="ctr-sub">'+escHtml(c.tipo_contratto||'Contratto')+(c.operatore?' · '+escHtml(c.operatore):'')+'</div>'+
+    '</div>'+
+    '<div class="ctr-col">Inviato '+(c.data_invio?new Date(c.data_invio+'T00:00:00').toLocaleDateString('it-IT'):'—')+'</div>'+
+    '<div class="ctr-col">Firmato '+(c.data_firma?new Date(c.data_firma+'T00:00:00').toLocaleDateString('it-IT'):'—')+'</div>'+
+    ctrChip(c.stato)+
+    '</div>';
+}
+
+function ctrFilterByStato(stato) {
+  _ctrActiveFilter = (_ctrActiveFilter === stato) ? '' : stato;
+  loadContratti();
 }
 
 async function loadContratti() {
   var el = document.getElementById('ctr-list');
+  var scEl = document.getElementById('ctr-scorecard');
   el.innerHTML = '<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
-  var q = db.from('contratti').select('*').order('created_at',{ascending:false}).limit(200);
-  var stato = document.getElementById('f-stato').value;
-  if (stato) q = q.eq('stato', stato);
-  var r = await q;
-  var rows = r.data || [];
+
+  var r = await db.from('contratti').select('*').order('created_at',{ascending:false}).limit(500);
+  var allRows = r.data || [];
+
+  // Riepilogo (sempre su tutti i contratti, non filtrato dalla ricerca)
+  var counts = {};
+  allRows.forEach(function(c){ counts[c.stato] = (counts[c.stato]||0)+1; });
+  scEl.innerHTML = CTR_STATO_ORDER.filter(function(s){ return counts[s]; }).map(function(s){
+    var sc = CTR_STATO_COLORS[s];
+    var on = _ctrActiveFilter === s;
+    return '<div class="ctr-sc-item'+(on?' on':'')+'" style="border-top-color:'+sc.c+'" onclick="ctrFilterByStato(\''+s+'\')">'+
+      '<div class="ctr-sc-num" style="color:'+sc.c+'">'+counts[s]+'</div>'+
+      '<div class="ctr-sc-label">'+CTR_STATO_LABEL[s]+'</div>'+
+    '</div>';
+  }).join('');
+
+  var stato = document.getElementById('f-stato').value || _ctrActiveFilter;
+  var rows = stato ? allRows.filter(function(c){ return c.stato === stato; }) : allRows;
   var cerca = (document.getElementById('f-cerca').value||'').toLowerCase().trim();
   if (cerca) rows = rows.filter(function(c){ return (c.nome_cliente||'').toLowerCase().indexOf(cerca)>=0; });
+
   if (!rows.length) { el.innerHTML = '<div class="ag-ins-empty">Nessun contratto trovato.</div>'; return; }
-  el.innerHTML = rows.map(function(c){
-    return '<div class="ctr-row" onclick="openContratto(\''+c.id+'\')">'+
-      '<div style="flex:1;min-width:0">'+
-        '<div class="ctr-nm">'+escHtml(c.nome_cliente||'—')+'</div>'+
-        '<div class="ctr-sub">'+escHtml(c.tipo_contratto||'Contratto')+(c.operatore?' · '+escHtml(c.operatore):'')+'</div>'+
-      '</div>'+
-      '<div class="ctr-col">'+(c.data_invio?new Date(c.data_invio+'T00:00:00').toLocaleDateString('it-IT'):'—')+'</div>'+
-      '<div class="ctr-col">'+(c.data_firma?new Date(c.data_firma+'T00:00:00').toLocaleDateString('it-IT'):'—')+'</div>'+
-      ctrChip(c.stato)+
-      '</div>';
+
+  // Raggruppa per stato, in ordine di priorità operativa
+  var byStato = {};
+  rows.forEach(function(c){ (byStato[c.stato] = byStato[c.stato] || []).push(c); });
+  el.innerHTML = CTR_STATO_ORDER.filter(function(s){ return byStato[s] && byStato[s].length; }).map(function(s){
+    var sc = CTR_STATO_COLORS[s];
+    var group = byStato[s];
+    return '<div class="ctr-group">'+
+      '<div class="ctr-group-head"><span class="ctr-group-dot" style="background:'+sc.c+'"></span>'+
+        '<span class="ctr-group-label" style="color:'+sc.c+'">'+CTR_STATO_LABEL[s]+'</span>'+
+        '<span class="ctr-group-count">'+group.length+'</span></div>'+
+      '<div class="ctr-group-body">'+group.map(ctrRowHtml).join('')+'</div>'+
+    '</div>';
   }).join('');
 }
 
