@@ -463,6 +463,40 @@
 
 /* Modal social */
 .social-modal .modal-box { max-width: 780px; }
+
+/* ── SIDEBAR (uguale al resto dell'app: index.html/01_clienti/02_bonus/ecc.) ── */
+#app { display:grid; grid-template-columns:56px 1fr; height:100vh; overflow:hidden; }
+.sb {
+  background: var(--card2, #08111a);
+  border-right: 1px solid var(--br, rgba(255,255,255,.06));
+  display:flex; flex-direction:column; align-items:center;
+  overflow:hidden; z-index:30;
+}
+.sb-logo { width:56px; height:64px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--br2, rgba(255,255,255,.03)); flex-shrink:0; }
+.sb-crown {
+  width:36px; height:36px; border-radius:10px;
+  background: linear-gradient(145deg,#2d1800,#b8890a,var(--gold));
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  box-shadow: 0 2px 8px rgba(247,204,70,.25), 0 0 20px rgba(247,204,70,.1), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.sbl {
+  width:56px; height:52px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:var(--t3); cursor:pointer; text-decoration:none;
+  border-left:2px solid transparent; transition:.14s; position:relative;
+}
+.sbl:hover { color:var(--t1); background:rgba(255,255,255,.028); }
+.sbl.act { color:var(--gold); background:rgba(247,204,70,.04); border-left-color:var(--gold); }
+.sbl.act::before {
+  content:''; position:absolute; left:0; top:6px; bottom:6px; width:2px;
+  background:var(--gold); box-shadow:0 0 10px rgba(247,204,70,.6); border-radius:1px;
+}
+.sbl[title]:hover::after {
+  content:attr(title); position:absolute; left:60px; top:50%; transform:translateY(-50%);
+  background:rgba(10,14,32,.98); border:1px solid rgba(255,255,255,.08);
+  padding:5px 11px; border-radius:8px; font-size:11px; font-weight:600; color:var(--t2);
+  white-space:nowrap; z-index:100; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.sb-tog { margin-top:auto; width:56px; height:48px; display:flex; align-items:center; justify-content:center; color:var(--t3); cursor:pointer; font-size:14px; border-top:1px solid var(--br2, rgba(255,255,255,.03)); flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -479,8 +513,23 @@
   </div>
 </div>
 
-<div class="app-layout" id="app" style="display:none">
-  <nav id="sidebar"></nav>
+<div id="app" style="display:none">
+  <nav class="sb">
+    <div class="sb-logo"><div class="sb-crown">&#128081;</div></div>
+    <a class="sbl" title="Mission Control" onclick="navTo('index.html')">&#127968;</a>
+    <a class="sbl" title="CRM Clienti" onclick="navTo('01_clienti.html')">&#128100;</a>
+    <a class="sbl" title="Bookmaker Intelligence" onclick="navTo('02_bonus.html')">&#127919;</a>
+    <a class="sbl" title="Promo Center" onclick="navTo('02_bonus.html')">&#127881;</a>
+    <a class="sbl" title="Task & Workflow">&#9989;</a>
+    <a class="sbl" title="Team MBBET" onclick="navTo('03_team.html')">&#128101;</a>
+    <a class="sbl" title="Revenue & Finanza" onclick="navTo('04_finanze.html')">&#128184;</a>
+    <a class="sbl" title="Collaboratori" onclick="navTo('07_collab.html')">&#129309;</a>
+    <a class="sbl" title="Documenti">&#128196;</a>
+    <a class="sbl act" title="Social MBBET">&#128241;</a>
+    <a class="sbl" title="Import Clienti" onclick="navTo('06_import.html')">&#128229;</a>
+    <a class="sbl" title="Report">&#128202;</a>
+    <div class="sb-tog">&#8942;</div>
+  </nav>
   <div id="main">
     <div id="topbar"></div>
     <div id="page">
@@ -795,8 +844,11 @@
 function onLoginSuccess() {
   if (!requireSection('social')) return;
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  initLayout('social', 'Social MBBET', '<button class="btn btn-primary btn-sm" onclick="openNewPost()">+ Contenuto</button>');
+  document.getElementById('app').style.display = 'grid';
+  document.getElementById('topbar').innerHTML = buildTopbar('Social MBBET', '<button class="btn btn-primary btn-sm" onclick="openNewPost()">+ Contenuto</button>');
+  initNotifPanel();
+  loadNotifCount();
+  initRealtimeDot();
   renderCalendar();
   loadPiano();
 }
