@@ -136,6 +136,49 @@ async function ariaComputeInsights() {
     });
   }
 
+  // Regola 6 — Reel e Post/Carosello dello stesso giorno troppo simili (fotocopie)
+  var ARIA_STOP = {di:1,e:1,il:1,la:1,le:1,un:1,una:1,per:1,che:1,non:1,ci:1,ti:1,tu:1,noi:1,con:1,se:1,da:1,del:1,della:1,dei:1,cosa:1,come:1,più:1,ha:1,ai:1,al:1,in:1,a:1,ma:1,sono:1,anche:1};
+  function ariaKeywords(s) {
+    return (s||'').toLowerCase().replace(/[^\wàèéìòù\s]/g,'').split(/\s+/).filter(function(w){ return w.length>3 && !ARIA_STOP[w]; });
+  }
+  function ariaOverlap(a,b) {
+    var wa=ariaKeywords(a), wb=ariaKeywords(b);
+    if(!wa.length||!wb.length) return 0;
+    var setB={}; wb.forEach(function(w){ setB[w]=1; });
+    var common=wa.filter(function(w){ return setB[w]; }).length;
+    return common/Math.min(wa.length,wb.length);
+  }
+  var postsPerGiorno = {};
+  posts.forEach(function(p){
+    if (!p.data_pubblicazione) return;
+    (postsPerGiorno[p.data_pubblicazione] = postsPerGiorno[p.data_pubblicazione] || []).push(p);
+  });
+  var fotocopie = [];
+  Object.keys(postsPerGiorno).forEach(function(giorno){
+    var delGiorno = postsPerGiorno[giorno];
+    var reel = delGiorno.filter(function(p){ return p.tipo_contenuto==='REEL'; });
+    var altri = delGiorno.filter(function(p){ return p.tipo_contenuto==='POST'||p.tipo_contenuto==='CAROSELLO'; });
+    reel.forEach(function(r){
+      altri.forEach(function(o){
+        if (ariaOverlap(r.titolo, o.titolo) >= 0.5) {
+          fotocopie.push({giorno:giorno, titoli:[r.titolo, o.titolo]});
+        }
+      });
+    });
+  });
+  if (fotocopie.length > 0) {
+    candidates.push({
+      categoria: 'CONTENT',
+      titolo: fotocopie.length + (fotocopie.length===1 ? ' contenuto sembra una fotocopia' : ' contenuti sembrano fotocopie') + ' dello stesso giorno',
+      descrizione: fotocopie.map(function(f){ return f.titoli.join(' / '); }).slice(0,5).join('; '),
+      motivazione: 'Reel e Post/Carosello dello stesso giorno hanno titoli troppo simili: rischiano di essere percepiti come lo stesso contenuto ripetuto due volte.',
+      evidenze: {fotocopie: fotocopie},
+      tipo_dato: 'DATO_REALE',
+      urgenza: 'media',
+      azione_consigliata: 'Cambia l\'angolazione di uno dei due contenuti (obiettivo, formato o dettaglio) prima di pubblicarli.'
+    });
+  }
+
   var nuoviInseriti = 0;
   for (var i=0; i<candidates.length; i++) {
     var c = candidates[i];

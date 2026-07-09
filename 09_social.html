@@ -90,12 +90,21 @@
 }
 .cal-day.today .cal-day-num { color: var(--gold); }
 .cal-post-chip {
-  font-size: 10.5px; font-weight: 600; padding: 3px 6px;
-  border-radius: 3px; margin-bottom: 3px; display: block;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 10.5px; font-weight: 600; padding: 3px 6px 3px 7px;
+  border-radius: 3px; margin-bottom: 3px;
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.04); border-left: 3px solid var(--b2);
+  white-space: nowrap; overflow: hidden;
   cursor: grab; line-height: 1.5; flex-shrink: 0;
 }
-.cal-post-chip:hover { filter: brightness(1.2); }
+.cal-post-chip:hover { filter: brightness(1.3); }
+.cal-post-chip .chip-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; color: var(--t1); }
+.fmt-badge {
+  font-family: var(--mono); font-size: 8.5px; font-weight: 700; letter-spacing: .3px;
+  padding: 1px 4px; border-radius: 2px; border: 1px solid var(--b2); color: var(--t3);
+  flex-shrink: 0; white-space: nowrap;
+}
+.stato-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .cal-more {
   font-size: 10px; font-weight: 700; color: var(--t3); cursor: pointer;
   padding: 2px 6px; margin-top: auto;
@@ -129,6 +138,21 @@
 .dp-item:hover { border-color: var(--b2); }
 .dp-item-title { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 7px; }
 .dp-item-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.dp-item { border-left: 3px solid var(--b2); }
+
+/* ── DAY COMMAND CENTER ── */
+.dcc-group-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--t3); margin: 4px 0 2px;
+}
+.dcc-stories { background: var(--s2); border: 1px solid var(--b1); border-radius: var(--r2); padding: 12px 14px; }
+.dcc-stories-slot { margin-bottom: 10px; }
+.dcc-stories-slot:last-child { margin-bottom: 0; }
+.dcc-stories-slot-label { font-size: 11px; font-weight: 700; color: var(--gold); margin-bottom: 3px; }
+.dcc-stories-slot-opts { font-size: 11.5px; color: var(--t2); line-height: 1.5; }
+.dcc-aria { background: var(--cyan-dim); border: 1px solid var(--cyan-b); border-radius: var(--r2); padding: 12px 14px; font-size: 12px; color: var(--t2); line-height: 1.5; }
+.dcc-aria-title { font-size: 11px; font-weight: 700; color: var(--cyan); margin-bottom: 5px; }
+.cal-day-view { display: flex; flex-direction: column; gap: 14px; max-width: 640px; margin: 0 auto; padding: 4px 0 24px; }
 
 /* ── AGENDA VIEW ── */
 .cal-agenda { display: flex; flex-direction: column; gap: 6px; }
@@ -155,6 +179,7 @@
 .week-post-item {
   padding: 5px 7px; border-radius: var(--r1); font-size: 10.5px; font-weight: 600;
   cursor: pointer; transition: filter .15s; border: 1px solid transparent;
+  display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,.04);
 }
 .week-post-item:hover { filter: brightness(1.15); }
 
@@ -482,6 +507,7 @@
             <div class="cal-views">
               <button class="cal-view-btn on" onclick="calView('month',this)">Mese</button>
               <button class="cal-view-btn" onclick="calView('week',this)">Settimana</button>
+              <button class="cal-view-btn" onclick="calView('day',this)">Giorno</button>
               <button class="cal-view-btn" onclick="calView('agenda',this)">Agenda</button>
             </div>
             <button class="btn btn-primary btn-sm" onclick="openNewPost()">+ Contenuto</button>
@@ -500,14 +526,14 @@
               <option value="">Tutti gli stati</option>
               <option>IDEA</option><option>DA SCRIVERE</option><option>SCRIPT PRONTO</option>
               <option>DA REGISTRARE</option><option>REGISTRATO</option><option>DA MONTARE</option>
-              <option>DA REVISIONARE</option><option>APPROVATO</option><option>PROGRAMMATO</option>
-              <option>PUBBLICATO</option><option>SCARTATO</option>
+              <option>DA REVISIONARE</option><option>DA APPROVARE</option><option>APPROVATO</option>
+              <option>PROGRAMMATO</option><option>PUBBLICATO</option><option>ANALIZZATO</option>
+              <option>SCARTATO</option>
             </select>
             <select id="f-tipo" style="width:auto;min-width:120px" onchange="loadContenuti()">
               <option value="">Tutti i tipi</option>
-              <option>REEL</option><option>STORIA</option><option>POST</option>
-              <option>CAROSELLO</option><option>EDUCATIONAL</option><option>TESTIMONIANZA</option>
-              <option>DIETRO LE QUINTE</option>
+              <option>REEL</option><option>CAROSELLO</option><option>POST</option>
+              <option>STORIA</option><option>LIVE</option>
             </select>
             <select id="f-autore" style="width:auto;min-width:110px" onchange="loadContenuti()">
               <option value="">Tutti</option>
@@ -669,9 +695,8 @@
           <div class="form-group">
             <label>Tipo</label>
             <select id="p-tipo">
-              <option>REEL</option><option>STORIA</option><option>POST</option>
-              <option>CAROSELLO</option><option>EDUCATIONAL</option><option>TESTIMONIANZA</option>
-              <option>DIETRO LE QUINTE</option><option>AVVISO</option>
+              <option>REEL</option><option>CAROSELLO</option><option>POST</option>
+              <option>STORIA</option><option>LIVE</option>
             </select>
           </div>
         </div>
@@ -731,8 +756,9 @@
             <select id="p-stato">
               <option>IDEA</option><option>DA SCRIVERE</option><option>SCRIPT PRONTO</option>
               <option>DA REGISTRARE</option><option>REGISTRATO</option><option>DA MONTARE</option>
-              <option>DA REVISIONARE</option><option>APPROVATO</option><option>PROGRAMMATO</option>
-              <option>PUBBLICATO</option>
+              <option>DA REVISIONARE</option><option>DA APPROVARE</option><option>APPROVATO</option>
+              <option>PROGRAMMATO</option><option>PUBBLICATO</option><option>ANALIZZATO</option>
+              <option>SCARTATO</option>
             </select>
           </div>
         </div>
@@ -810,11 +836,32 @@ var STATO_COLORS = {
   'REGISTRATO':   {bg:'rgba(167,139,250,.25)',c:'#a78bfa'},
   'DA MONTARE':   {bg:'rgba(167,139,250,.3)', c:'#a78bfa'},
   'DA REVISIONARE':{bg:'rgba(212,168,67,.25)',c:'#d4a843'},
+  'DA APPROVARE': {bg:'rgba(212,168,67,.3)',  c:'#e8c060'},
   'APPROVATO':    {bg:'rgba(34,197,94,.25)',  c:'#22c55e'},
   'PROGRAMMATO':  {bg:'rgba(34,197,94,.3)',   c:'#4ade80'},
   'PUBBLICATO':   {bg:'rgba(34,197,94,.4)',   c:'#4ade80'},
+  'ANALIZZATO':   {bg:'rgba(0,212,255,.25)',  c:'#00d4ff'},
   'SCARTATO':     {bg:'rgba(239,68,68,.2)',   c:'#ef4444'}
 };
+
+var CREATOR_COLORS = {
+  'Mary':    {c:'#d4a843', bg:'rgba(212,168,67,.12)'},
+  'Serena':  {c:'#c4a4f8', bg:'rgba(196,164,248,.12)'},
+  'Samuele': {c:'#00d4ff', bg:'rgba(0,212,255,.12)'},
+  'Manuele': {c:'#5aaaff', bg:'rgba(90,170,255,.12)'}
+};
+var FORMATO_ICON = { REEL:'▶', CAROSELLO:'▤', POST:'■', STORIA:'○', LIVE:'●' };
+
+function creatorColor(nome) {
+  return (CREATOR_COLORS[nome]||{c:'rgba(255,255,255,.13)'}).c;
+}
+function chipInnerHtml(p) {
+  var sc = STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+  var icon = FORMATO_ICON[p.tipo_contenuto]||'';
+  return '<span class="fmt-badge">'+icon+' '+escHtml((p.tipo_contenuto||'—').slice(0,4))+'</span>'+
+         '<span class="chip-title">'+escHtml(p.titolo||'—')+'</span>'+
+         '<span class="stato-dot" style="background:'+sc.c+'" title="'+escHtml(p.stato||'')+'"></span>';
+}
 
 function withTimeout(promise, ms) {
   return Promise.race([
@@ -857,6 +904,7 @@ async function renderCalendar() {
   }
   if(calViewMode==='month') renderMonth(y,m,el);
   else if(calViewMode==='agenda') renderAgenda(el);
+  else if(calViewMode==='day') renderDay(el);
   else renderWeek(el);
 }
 
@@ -883,8 +931,7 @@ function renderMonth(y,m,el) {
     h+='<div class="cal-day'+(c.other?' other-month':'')+(isToday?' today':'')+'" data-date="'+dateStr+'" onclick="calDayClick(\''+dateStr+'\')" ondragover="calDragOver(event,this)" ondragleave="this.classList.remove(\'drag-over\')" ondrop="calDrop(event,\''+dateStr+'\')">';
     h+='<div class="cal-day-num">'+c.day+'</div>';
     posts.slice(0,CAL_MAX_CHIPS).forEach(function(p){
-      var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
-      h+='<div class="cal-post-chip" draggable="true" ondragstart="calDragStart(event,\''+p.id+'\')" style="background:'+sc.bg+';color:'+sc.c+'" onclick="event.stopPropagation();openPost(\''+p.id+'\')">'+escHtml(p.titolo||'—')+'</div>';
+      h+='<div class="cal-post-chip" draggable="true" ondragstart="calDragStart(event,\''+p.id+'\')" style="border-left-color:'+creatorColor(p.assegnato_a)+'" onclick="event.stopPropagation();openPost(\''+p.id+'\')">'+chipInnerHtml(p)+'</div>';
     });
     if (posts.length > CAL_MAX_CHIPS) {
       h+='<div class="cal-more">+'+(posts.length-CAL_MAX_CHIPS)+' contenuti</div>';
@@ -908,9 +955,10 @@ function renderAgenda(el) {
     h += '<div class="cal-agenda-items">';
     calPosts[ds].forEach(function(p){
       var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
-      h += '<div class="cal-agenda-item" onclick="openPost(\''+p.id+'\')">';
-      h += '<span class="stato-chip" style="background:'+sc.bg+';color:'+sc.c+'">'+escHtml(p.tipo_contenuto||'—')+'</span>';
+      h += '<div class="cal-agenda-item" style="border-left:3px solid '+creatorColor(p.assegnato_a)+'" onclick="openPost(\''+p.id+'\')">';
+      h += '<span class="fmt-badge">'+(FORMATO_ICON[p.tipo_contenuto]||'')+' '+escHtml((p.tipo_contenuto||'—').slice(0,4))+'</span>';
       h += '<span style="flex:1">'+escHtml(p.titolo||'—')+'</span>';
+      h += '<span class="stato-dot" style="background:'+sc.c+'" title="'+escHtml(p.stato||'')+'"></span>';
       h += '<span style="color:var(--t3);font-family:var(--mono);font-size:10.5px">'+escHtml(p.assegnato_a||'')+'</span>';
       h += '</div>';
     });
@@ -934,9 +982,8 @@ function renderWeek(el) {
     h+='<div class="week-col-head'+(isToday?' today':'')+'">'+days[i]+' '+d.getDate()+'</div>';
     h+='<div class="week-col-body">';
     (calPosts[ds]||[]).forEach(function(p){
-      var sc=STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
-      h+='<div class="week-post-item" style="background:'+sc.bg+';color:'+sc.c+';border-color:'+sc.c+'22" onclick="openPost(\''+p.id+'\')">';
-      h+=escHtml(p.titolo||'—')+'</div>';
+      h+='<div class="week-post-item" style="border-left:3px solid '+creatorColor(p.assegnato_a)+'" onclick="openPost(\''+p.id+'\')">';
+      h+=chipInnerHtml(p)+'</div>';
     });
     h+='</div></div>';
   }
@@ -944,8 +991,20 @@ function renderWeek(el) {
   el.innerHTML=h;
 }
 
+function renderDay(el) {
+  var ds = ymd(calCurrent);
+  var posts = calPosts[ds]||[];
+  var label = calCurrent.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  var h = '<div class="cal-day-view">';
+  h += '<div class="dp-item-title" style="font-size:16px;text-transform:capitalize">'+label+'</div>';
+  h += posts.length ? dccBuildHtml(posts) : ('<div class="ag-ins-empty">Nessun contenuto per questo giorno.</div>'+dccStoriesHtml()+dccAriaHtml(posts));
+  h += '</div>';
+  el.innerHTML = h;
+}
+
 function calNav(dir) {
   if(calViewMode==='week') calCurrent.setDate(calCurrent.getDate()+dir*7);
+  else if(calViewMode==='day') calCurrent.setDate(calCurrent.getDate()+dir);
   else calCurrent.setMonth(calCurrent.getMonth()+dir);
   renderCalendar();
 }
@@ -960,29 +1019,81 @@ function calView(mode, btn) {
   renderCalendar();
 }
 
-// ── PANNELLO GIORNO ──────────────────────────────────────────────
+// ── DAY COMMAND CENTER (pannello giorno + vista Giorno) ──────────
+var DCC_STORIES_SLOTS = [
+  {label:'Mattina', opts:'Today at MBBET · obiettivo del giorno · backstage'},
+  {label:'Pomeriggio', opts:'Sondaggio · domanda · quiz · mini spiegazione · work in progress'},
+  {label:'Sera', opts:'Reel pubblicato · approfondimento · CTA · box domande · reminder Zoom'}
+];
+var DCC_FORMAT_ORDER = ['REEL','CAROSELLO','POST','STORIA','LIVE'];
+
+function dccKeywords(s) {
+  var STOP = {di:1,e:1,il:1,la:1,le:1,un:1,una:1,per:1,che:1,non:1,ci:1,ti:1,tu:1,noi:1,con:1,se:1,da:1,del:1,della:1,dei:1,cosa:1,come:1,più:1,ha:1,ai:1,al:1,in:1,a:1,ma:1,sono:1,anche:1};
+  return (s||'').toLowerCase().replace(/[^\wàèéìòù\s]/g,'').split(/\s+/).filter(function(w){ return w.length>3 && !STOP[w]; });
+}
+function dccOverlapRatio(a,b) {
+  var wa=dccKeywords(a), wb=dccKeywords(b);
+  if(!wa.length||!wb.length) return 0;
+  var setB={}; wb.forEach(function(w){ setB[w]=1; });
+  var common=wa.filter(function(w){ return setB[w]; }).length;
+  return common/Math.min(wa.length,wb.length);
+}
+function dccAriaHtml(posts) {
+  var reels = posts.filter(function(p){ return p.tipo_contenuto==='REEL'; });
+  var others = posts.filter(function(p){ return p.tipo_contenuto==='POST'||p.tipo_contenuto==='CAROSELLO'; });
+  var flags = [];
+  reels.forEach(function(r){
+    others.forEach(function(o){
+      var ratio = dccOverlapRatio(r.titolo, o.titolo);
+      if (ratio >= 0.5) flags.push('"'+r.titolo+'" e "'+o.titolo+'" sembrano troppo simili — controlla che abbiano un\'angolazione diversa.');
+    });
+  });
+  var perCreator = {};
+  posts.forEach(function(p){ if(p.assegnato_a) perCreator[p.assegnato_a]=(perCreator[p.assegnato_a]||0)+1; });
+  var creators = Object.keys(perCreator);
+  var msg = flags.length ? flags.join('<br>') : (posts.length ? 'Nessun contenuto sembra duplicato oggi.' : 'Nessun contenuto programmato: valuta se aggiungerne uno.');
+  return '<div class="dcc-aria"><div class="dcc-aria-title">💡 Suggerimenti ARIA</div>'+msg+'</div>';
+}
+function dccStoriesHtml() {
+  return '<div class="dcc-stories">'+DCC_STORIES_SLOTS.map(function(s){
+    return '<div class="dcc-stories-slot"><div class="dcc-stories-slot-label">'+s.label+'</div><div class="dcc-stories-slot-opts">'+s.opts+'</div></div>';
+  }).join('')+'</div>';
+}
+function dccItemHtml(p) {
+  var sc = STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
+  return '<div class="dp-item" style="border-left-color:'+creatorColor(p.assegnato_a)+'" onclick="openPost(\''+p.id+'\')">'+
+    '<div class="dp-item-title">'+escHtml(p.titolo||'—')+'</div>'+
+    '<div class="dp-item-meta">'+
+      '<span class="fmt-badge">'+(FORMATO_ICON[p.tipo_contenuto]||'')+' '+escHtml(p.tipo_contenuto||'—')+'</span>'+
+      '<span class="stato-dot" style="background:'+sc.c+'" title="'+escHtml(p.stato||'')+'"></span>'+
+      '<span style="font-size:10.5px;color:var(--t3)">'+escHtml(p.stato||'')+'</span>'+
+      (p.assegnato_a?'<span style="font-size:10.5px;color:var(--t3)">· '+escHtml(p.assegnato_a)+'</span>':'')+
+    '</div>'+
+  '</div>';
+}
+function dccBuildHtml(posts) {
+  var h = '';
+  DCC_FORMAT_ORDER.forEach(function(fmt){
+    var group = posts.filter(function(p){ return (p.tipo_contenuto||'').toUpperCase()===fmt; });
+    if (!group.length) return;
+    h += '<div class="dcc-group-label">'+(FORMATO_ICON[fmt]||'')+' '+fmt+'</div>';
+    h += group.map(dccItemHtml).join('');
+  });
+  var known = posts.filter(function(p){ return DCC_FORMAT_ORDER.indexOf((p.tipo_contenuto||'').toUpperCase())>=0; });
+  var extra = posts.filter(function(p){ return known.indexOf(p)<0; });
+  if (extra.length) { h += '<div class="dcc-group-label">Altro</div>' + extra.map(dccItemHtml).join(''); }
+  h += '<div class="dcc-group-label">Storie del giorno</div>' + dccStoriesHtml();
+  h += dccAriaHtml(posts);
+  return h;
+}
+
 var _dpDate = null;
 function calDayClick(date) {
   _dpDate = date;
   var d = new Date(date+'T00:00:00');
   document.getElementById('day-panel-date').textContent = d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   var posts = calPosts[date]||[];
-  var body = document.getElementById('day-panel-body');
-  if (!posts.length) {
-    body.innerHTML = '<div class="ag-ins-empty">Nessun contenuto per questo giorno.</div>';
-  } else {
-    body.innerHTML = posts.map(function(p){
-      var sc = STATO_COLORS[p.stato]||{bg:'rgba(255,255,255,.1)',c:'#fff'};
-      return '<div class="dp-item" onclick="closeDayPanel();openPost(\''+p.id+'\')">'+
-        '<div class="dp-item-title">'+escHtml(p.titolo||'—')+'</div>'+
-        '<div class="dp-item-meta">'+
-          '<span class="stato-chip" style="background:'+sc.bg+';color:'+sc.c+'">'+escHtml(p.stato||'—')+'</span>'+
-          '<span style="font-size:10.5px;color:var(--t3);font-family:var(--mono)">'+escHtml(p.tipo_contenuto||'')+'</span>'+
-          (p.assegnato_a?'<span style="font-size:10.5px;color:var(--t3)">· '+escHtml(p.assegnato_a)+'</span>':'')+
-        '</div>'+
-      '</div>';
-    }).join('');
-  }
+  document.getElementById('day-panel-body').innerHTML = dccBuildHtml(posts);
   document.getElementById('day-panel').classList.add('open');
   document.getElementById('day-panel-overlay').classList.add('open');
 }
