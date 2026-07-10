@@ -12,6 +12,23 @@ function supaHeaders() {
   return { apikey: SUPA_ANON, Authorization: 'Bearer ' + SUPA_ANON, 'Content-Type': 'application/json' };
 }
 
+// Email reale via Resend (senza dominio verificato arriva solo all'indirizzo
+// di iscrizione dell'account Resend — verificato con un invio reale).
+async function inviaEmail(titolo, messaggio) {
+  if (!process.env.RESEND_API_KEY) return;
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'MBBET OS <onboarding@resend.dev>',
+        to: ['mariateresabova.business@gmail.com'],
+        subject: titolo, html: '<p>' + messaggio + '</p>'
+      })
+    });
+  } catch (e) {}
+}
+
 exports.handler = async function (event) {
   const token = (event.queryStringParameters || {}).token;
   if (!token || token !== process.env.YOUSIGN_WEBHOOK_TOKEN) {
@@ -76,14 +93,17 @@ exports.handler = async function (event) {
     });
 
     // 5. Notifica dentro MBBET OS
+    var titoloNotif = 'Contratto firmato: ' + (contratto.nome_cliente || '');
+    var msgNotif = (contratto.tipo_contratto || 'Contratto') + ' firmato su Yousign';
     await fetch(SUPA_URL + '/rest/v1/notifiche', {
       method: 'POST', headers: supaHeaders(),
       body: JSON.stringify({
-        tipo: 'Contratto', titolo: 'Contratto firmato: ' + (contratto.nome_cliente || ''),
-        messaggio: (contratto.tipo_contratto || 'Contratto') + ' firmato su Yousign', priorita: 'Alta',
+        tipo: 'Contratto', titolo: titoloNotif,
+        messaggio: msgNotif, priorita: 'Alta',
         destinatario: contratto.operatore || null, letto: false
       })
     });
+    await inviaEmail(titoloNotif, msgNotif);
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
   } catch (err) {

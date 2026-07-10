@@ -1018,6 +1018,7 @@ async function doSubmit(){
     if(r.error)throw r.error;
 
     try{await db.from('notifiche').insert({tipo:'Cliente',titolo:'Nuovo cliente compilato: '+nomeCpl,messaggio:'Operatore: '+(op||'da assegnare'),priorita:'Alta',destinatario:op||null,letto:false});}catch(e){}
+    fetch('/.netlify/functions/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({titolo:'Nuovo cliente compilato: '+nomeCpl,messaggio:'Operatore: '+(op||'da assegnare')})}).catch(function(){});
 
     // BONUS ROWS
     var bonusCreati=await createBonus(clientId,nomeCpl,op,_sitiReg,mn,an);

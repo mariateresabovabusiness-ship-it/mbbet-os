@@ -26,6 +26,24 @@ async function creaNotifica(tipo, titolo, messaggio, destinatario) {
     method: 'POST', headers: supaHeaders(),
     body: JSON.stringify({ tipo: tipo, titolo: titolo, messaggio: messaggio || null, priorita: 'Alta', destinatario: destinatario || null, letto: false })
   });
+  await inviaEmail(titolo, messaggio || '');
+}
+
+// Email reale via Resend (senza dominio verificato arriva solo all'indirizzo
+// di iscrizione dell'account Resend — verificato con un invio reale).
+async function inviaEmail(titolo, messaggio) {
+  if (!process.env.RESEND_API_KEY) return;
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'MBBET OS <onboarding@resend.dev>',
+        to: ['mariateresabova.business@gmail.com'],
+        subject: titolo, html: '<p>' + messaggio + '</p>'
+      })
+    });
+  } catch (e) {}
 }
 
 exports.handler = async function () {
