@@ -4,99 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>CRM Clienti — MBBET OS</title>
 <script>try{var _h=window.location.hash,_l=localStorage.getItem('mbbet_v2_session');if((_h&&_h.indexOf('#mbbet=')===0)||_l)document.documentElement.classList.add('mb-auth');}catch(e){}</script>
-<style>html.mb-auth #ls{display:none!important}
-/* ══════════════════════════════════
-   MOBILE RESPONSIVE — max 768px
-══════════════════════════════════ */
-@media(max-width:768px){
-
-  /* Sidebar → bottom nav */
-  .sidebar{
-    position:fixed;bottom:0;left:0;right:0;top:auto;
-    width:100%;height:56px;
-    flex-direction:row;justify-content:space-around;align-items:center;
-    border-right:none;border-top:1px solid rgba(255,255,255,.07);
-    background:rgba(7,9,20,.98);
-    padding:0;z-index:200;overflow-x:auto;overflow-y:hidden
-  }
-  .sbl{width:48px;height:48px;border-left:none;border-bottom:2px solid transparent;font-size:20px}
-  .sbl.act{border-left:none;border-bottom-color:var(--blue);background:rgba(90,170,255,.06)}
-  .sbl.act::before{display:none}
-  .sbl[title]:hover::after{display:none}
-
-  /* Header compatto */
-  .hdr{padding:0 14px;height:52px}
-  .hdr-bsub,.hdr-bc,.hdr-div{display:none}
-  .hdr-bname{font-size:14px}
-  .hdr-unm{display:none}
-  .hdr-usr{padding:5px 8px}
-  .hdr-clk{font-size:13px}
-  .sys-live{display:none}
-
-  /* Body: lista full width */
-  .crm-body{flex-direction:column;padding-bottom:56px}
-  .crm-left{width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,.06);max-height:none;flex:1}
-
-  /* Lista clienti */
-  .list-row{padding:10px 14px;gap:10px}
-  .list-av{width:36px;height:36px;font-size:12px;border-radius:9px}
-  .cli-nm{font-size:13px}
-  .cli-sub{font-size:10px}
-  .cli-time{display:none}
-  .cli-bks{flex-wrap:wrap;gap:3px}
-  .cli-bk{font-size:8px;padding:2px 6px}
-
-  /* Ricerca e filtri */
-  .crm-search-box{padding:10px 12px}
-  .crm-si{font-size:15px;padding:10px 14px}
-
-  /* Workspace overlay → full screen su mobile */
-  #ws-panel{
-    width:100vw;max-width:100vw;
-    height:calc(100vh - 56px);
-    left:0;top:0;
-    transform:translateY(100%) scale(1);
-    border-radius:0;
-    transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .3s
-  }
-  #ws-panel.open{
-    transform:translateY(0) scale(1);
-    top:0;left:0
-  }
-
-  /* Workspace tabs scrollabili */
-  .ws-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px;gap:0}
-  .ws-tabs::-webkit-scrollbar{display:none}
-  .ws-tab{padding:11px 14px;font-size:10px;white-space:nowrap}
-
-  /* Workspace header compatto */
-  .ws-top{padding:14px 16px 12px;gap:10px;flex-wrap:wrap}
-  .ws-nm{font-size:16px}
-  .ws-pills{gap:6px}
-  .ws-pill{padding:6px 10px;min-width:60px}
-  .ws-pill-v{font-size:13px}
-  .ws-pill-l{font-size:7px}
-  .ws-bk-next{display:none}
-
-  /* BK grid */
-  .bk-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
-  .bk-card{padding:10px}
-  .bk-nm{font-size:11px}
-
-  /* Modifica panel */
-  .bke-panel{width:95vw;max-height:90vh;overflow-y:auto}
-  .bke-row.r2{grid-template-columns:1fr}
-
-  /* Recap grid */
-  .rcgrid{grid-template-columns:1fr}
-}
-
-@media(max-width:400px){
-  .bk-grid{grid-template-columns:1fr!important}
-  .hdr-av{display:none}
-}
-
-</style>
+<style>html.mb-auth #ls{display:none!important}</style>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -483,6 +391,88 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 #crm-toast.show{opacity:1}
 #crm-toast.ok{background:rgba(0,240,147,.12);border:1px solid rgba(0,240,147,.3);color:var(--green)}
 #crm-toast.err{background:rgba(255,79,79,.12);border:1px solid rgba(255,79,79,.3);color:var(--red)}
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE — max 768px
+══════════════════════════════════ */
+@media(max-width:768px){
+  #app{grid-template-columns:1fr;height:100dvh}
+  .sb{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100%;height:56px;
+    flex-direction:row;justify-content:space-around;align-items:center;
+    border-right:none;border-top:1px solid var(--br);
+    z-index:200;overflow-x:auto;overflow-y:hidden}
+  .sb-logo,.sb-tog{display:none}
+  .sbl{width:auto;flex:1;max-width:48px;height:48px;border-left:none;border-bottom:2px solid transparent;font-size:18px}
+  .sbl.act{border-left:none;border-bottom-color:var(--gold)}
+  .sbl.act::before{display:none}
+  .sbl[title]:hover::after{display:none}
+
+  .crm-pg{height:100dvh;padding-bottom:56px}
+  .hdr{padding:0 14px;height:52px}
+  .hdr-bsub,.hdr-bc,.hdr-div,.sys-live{display:none}
+  .hdr-sp+div{display:none!important}
+  .hdr-bname{font-size:14px}
+  .hdr-unm,.hdr-url{display:none}
+  .hdr-usr{padding:5px 8px}
+  .hdr-clk{display:none}
+  .hdr-right{gap:6px}
+
+  .crm-body{flex-direction:column;padding-bottom:56px;overflow-y:auto}
+  .crm-left{width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,.06);max-height:none;flex:0 0 auto}
+  .crm-list-area{flex:1 1 auto;min-height:400px}
+  .list-cols{display:none}
+
+  .cli-row{padding:10px 14px;gap:10px}
+  .cli-av{width:36px;height:36px;font-size:12px;border-radius:9px}
+  .cli-nm{font-size:13px}
+  .cli-meta{font-size:10px}
+  .cli-time{display:none}
+  .cli-bk{flex-wrap:wrap;gap:3px}
+
+  .crm-search-box{padding:10px 12px}
+  .crm-si{font-size:15px;padding:10px 14px}
+
+  /* Workspace overlay → full screen su mobile */
+  #ws-panel{
+    width:100vw;max-width:100vw;
+    height:calc(100vh - 56px);
+    left:0;top:0;
+    transform:translateY(100%) scale(1);
+    border-radius:0;
+    transition:transform .3s cubic-bezier(.22,1,.36,1), opacity .3s}
+  #ws-panel.open{transform:translateY(0) scale(1);top:0;left:0}
+
+  .ws-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 12px;gap:0}
+  .ws-tabs::-webkit-scrollbar{display:none}
+  .ws-tab{padding:11px 14px;font-size:10px;white-space:nowrap}
+
+  .ws-top{padding:14px 16px 12px;gap:10px;flex-wrap:wrap}
+  .ws-nm{font-size:16px}
+  .ws-pills{gap:6px}
+  .ws-pill{padding:6px 10px;min-width:60px}
+  .ws-pill-v{font-size:13px}
+  .ws-pill-l{font-size:7px}
+  .ws-bk-next{display:none}
+
+  .bk-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .bk-card{padding:10px}
+  .bk-nm{font-size:11px}
+
+  .bke-panel{width:95vw;max-height:90vh;overflow-y:auto}
+  .bke-row.r2{grid-template-columns:1fr}
+
+  .pano-grid,.pag-summary,.ai-rec-grid,.stat-charts{grid-template-columns:1fr!important}
+  .nc-row.r2,.nc-row.r3{grid-template-columns:1fr!important}
+
+  #crm-toast{bottom:70px;right:14px;left:14px;text-align:center}
+}
+
+@media(max-width:400px){
+  .bk-grid{grid-template-columns:1fr!important}
+  .hdr-usr{display:none}
+}
 </style>
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>

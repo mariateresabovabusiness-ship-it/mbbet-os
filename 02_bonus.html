@@ -594,6 +594,60 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .ot-leg-formula{display:flex;align-items:center;gap:6px;font-size:9px;flex-wrap:wrap}
 .ot-leg-box{padding:3px 8px;border-radius:4px;font-weight:700;font-size:9px}
 .ot-leg-arr{color:var(--tx4);font-size:10px}
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE — max 768px
+══════════════════════════════════ */
+@media(max-width:768px){
+  #app{grid-template-columns:1fr;height:100dvh}
+  .sb{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100%;height:56px;
+    flex-direction:row;justify-content:space-around;align-items:center;
+    border-right:none;border-top:1px solid var(--br);
+    z-index:200;overflow-x:auto;overflow-y:hidden}
+  .sb-logo,.sb-tog{display:none}
+  .sbl{width:auto;flex:1;max-width:52px;height:48px;border-left:none;border-bottom:2px solid transparent}
+  .sbl.act{border-left:none;border-bottom-color:var(--gold)}
+  .sbl.act::before{display:none}
+  .sbl[title]:hover::after{display:none}
+
+  .pg{height:100dvh;padding-bottom:56px}
+  .hdr{padding:0 12px}
+  .hdr-div,.hdr-bc,.sys-live{display:none}
+  .hdr-bname{font-size:12px}
+  .hdr-bsub{display:none}
+  .hdr-clk{font-size:13px}
+  .hdr-unm,.hdr-url{display:none}
+  .hdr-usr{padding:5px 8px}
+  .hdr-right{gap:8px}
+
+  .kpi-strip{grid-template-columns:repeat(4,1fr)}
+  .kpi{padding:8px 8px}
+  .kpi-l{font-size:6.5px}
+  .kpi-v{font-size:16px}
+  .kpi-s{font-size:7px}
+
+  /* Body: pannello BK sopra, contenuto sotto invece di affiancati */
+  .pg-body{flex-direction:column;overflow-y:auto}
+  .bk-panel{width:100%;border-right:none;border-bottom:1px solid var(--br2);max-height:220px}
+  .main-content{overflow:visible}
+  .main-scroll{overflow:visible;padding:14px}
+
+  .main-toolbar{flex-wrap:wrap;padding:9px 12px}
+  .tbar-search{flex:1 1 100%}
+  .vista-bar{padding:7px 12px}
+
+  .bib-nm{font-size:16px}
+  .bib-links{margin-left:0;width:100%}
+
+  .bk-ov-grid{grid-template-columns:1fr}
+  .bkc-stats{grid-template-columns:repeat(2,1fr)}
+  .promo-grid{grid-template-columns:1fr}
+  .pc-card-meta,.pc-stats-panel,.gd-stats,.mod-grid{grid-template-columns:1fr!important}
+  .op-grid{grid-template-columns:1fr}
+  .ot-leg-row{gap:14px}
+}
 </style>
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>

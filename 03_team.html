@@ -96,6 +96,23 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Inter',s
 .li-inp:focus{border-color:rgba(245,200,66,.4)}
 .li-btn{padding:12px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:10px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:1px}
 .li-err{font-size:11px;color:var(--red);text-align:center;min-height:16px}
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE — max 900px
+══════════════════════════════════ */
+@media(max-width:900px){
+  .sb{display:none}
+  .topbar{padding:0 12px;gap:6px}
+  .tb-g{font-size:14px;letter-spacing:1.5px}
+  .tb-sub{display:none}
+  .tb-info{display:none}
+  .content{padding:16px 14px}
+  .soci-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .ops-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+}
+@media(max-width:480px){
+  .soci-grid{grid-template-columns:1fr}
+}
 </style>
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>

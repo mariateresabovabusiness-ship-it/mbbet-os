@@ -527,6 +527,39 @@
   white-space:nowrap; z-index:100; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,.5);
 }
 .sb-tog { margin-top:auto; width:56px; height:48px; display:flex; align-items:center; justify-content:center; color:var(--t3); cursor:pointer; font-size:14px; border-top:1px solid var(--br2, rgba(255,255,255,.03)); flex-shrink:0; }
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE — max 768px
+══════════════════════════════════ */
+@media(max-width:768px){
+  #app{grid-template-columns:1fr;height:100dvh}
+  .sb{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100%;height:56px;
+    flex-direction:row;justify-content:space-around;align-items:center;
+    border-right:none;border-top:1px solid var(--br,rgba(255,255,255,.06));
+    z-index:200;overflow-x:auto;overflow-y:hidden}
+  .sb-logo,.sb-tog{display:none}
+  .sbl{width:auto;flex:1;max-width:48px;height:48px;border-left:none;border-bottom:2px solid transparent}
+  .sbl.act{border-left:none;border-bottom-color:var(--gold)}
+  .sbl.act::before{display:none}
+  .sbl[title]:hover::after{display:none}
+
+  #main{padding-bottom:56px;overflow-y:auto}
+  #page{padding:14px}
+  .topbar{padding:0 14px}
+  .topbar-title{font-size:12px}
+
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{white-space:nowrap;padding:9px 12px;font-size:11.5px}
+
+  .cal-body-full{min-height:auto}
+  .cal-grid-month{grid-auto-rows:minmax(70px,auto);height:auto;min-height:0;gap:3px}
+  .cal-dow{font-size:9px;padding:4px 2px}
+
+  .media-folder-grid{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>

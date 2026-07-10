@@ -71,6 +71,36 @@
 .ctr-log { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
 .ctr-log-item { font-size:11.5px; color:var(--t3); padding:8px 10px; background:var(--s2); border-radius:6px; border-left:2px solid var(--b2); }
 .ctr-log-item b { color:var(--t2); }
+
+/* ══════════════════════════════════
+   MOBILE RESPONSIVE — max 768px
+══════════════════════════════════ */
+@media(max-width:768px){
+  #app{grid-template-columns:1fr;height:100dvh}
+  .sb{
+    position:fixed;bottom:0;left:0;right:0;top:auto;
+    width:100%;height:56px;
+    flex-direction:row;justify-content:space-around;align-items:center;
+    border-right:none;border-top:1px solid var(--br,rgba(255,255,255,.06));
+    z-index:200;overflow-x:auto;overflow-y:hidden}
+  .sb-logo,.sb-tog{display:none}
+  .sbl{width:auto;flex:1;max-width:48px;height:48px;border-left:none;border-bottom:2px solid transparent}
+  .sbl.act{border-left:none;border-bottom-color:var(--gold)}
+  .sbl.act::before{display:none}
+  .sbl[title]:hover::after{display:none}
+
+  #main{padding-bottom:56px;overflow-y:auto}
+  #page{padding:14px}
+  .topbar{padding:0 14px}
+  .topbar-title{font-size:12px}
+
+  .ctr-toolbar{flex-direction:column;align-items:stretch}
+  .ctr-filters select,.ctr-filters input{min-width:0;flex:1}
+  .ctr-scorecard{grid-template-columns:repeat(auto-fit,minmax(90px,1fr))}
+
+  .ctr-row{flex-wrap:wrap;gap:8px;padding:12px}
+  .ctr-col{min-width:0;font-size:10.5px}
+}
 </style>
 </head>
 <body>
