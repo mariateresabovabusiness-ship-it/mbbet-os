@@ -72,8 +72,12 @@
 .mail-read-subj { font-size:19px; font-weight:800; color:var(--t1); margin-bottom:10px; line-height:1.3; }
 .mail-read-meta { font-size:11.5px; color:var(--t3); margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--b0); display:flex; align-items:center; gap:8px; }
 .mail-read-meta b { color:var(--t2); font-weight:700; }
-.mail-read-body { font-size:13px; color:var(--t2); line-height:1.6; white-space:pre-wrap; }
-.mail-read-iframe { width:100%; min-height:460px; border:none; background:#fff; border-radius:var(--r2); box-shadow:0 8px 32px -12px rgba(0,0,0,.5); }
+.mail-read-body { font-size:16px; color:var(--t1); line-height:1.75; white-space:pre-wrap; max-width:680px; }
+.mail-read-iframe { width:100%; min-height:600px; border:none; background:#fff; border-radius:var(--r2); box-shadow:0 8px 32px -12px rgba(0,0,0,.5); }
+.mail-read-zoom { display:flex; align-items:center; gap:6px; margin-bottom:14px; }
+.mail-read-zoom button { width:28px; height:28px; border-radius:8px; border:1px solid var(--b1); background:var(--s2); color:var(--t2); font-size:14px; font-weight:800; cursor:pointer; }
+.mail-read-zoom button:hover { background:var(--b1); color:var(--t1); }
+.mail-read-zoom span { font-size:11px; color:var(--t3); font-family:var(--mono); min-width:38px; text-align:center; }
 .mail-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; height:100%; color:var(--t3); font-size:12.5px; text-align:center; padding:24px; }
 .mail-empty-ic { font-size:30px; opacity:.4; }
 
@@ -170,6 +174,15 @@ var CARTELLE = [
 ];
 var _mailFolderAtt = null;
 var _mailCounts = {};
+var _mailZoom = 100;
+
+function regolaZoom(delta) {
+  _mailZoom = Math.max(70, Math.min(160, _mailZoom + delta * 10));
+  var frame = document.getElementById('mail-read-iframe');
+  if (frame) frame.style.zoom = (_mailZoom / 100);
+  var lbl = document.getElementById('mail-zoom-val');
+  if (lbl) lbl.textContent = _mailZoom + '%';
+}
 
 function cartellaById(id) { return CARTELLE.find(function (c) { return c.id === id; }) || CARTELLE[0]; }
 
@@ -262,9 +275,17 @@ async function leggiEmail(folder, uid, el) {
     var data = await res.json();
     if (!res.ok) { pane.innerHTML = '<div class="mail-empty">Errore: ' + escHtml(data.error || 'sconosciuto') + '</div>'; return; }
     var m = data.messaggio;
-    var corpo = m.html
-      ? '<iframe class="mail-read-iframe" sandbox="" srcdoc="' + escHtml(m.html).replace(/"/g, '&quot;') + '"></iframe>'
+    var htmlIngrandito = m.html
+      ? m.html.replace(/<head[^>]*>/i, '$&<style>body,td,p,span,div{font-size:17px!important;line-height:1.55!important}</style>')
+      : null;
+    if (htmlIngrandito && htmlIngrandito.indexOf('<style>body,td') < 0) {
+      htmlIngrandito = '<style>body,td,p,span,div{font-size:17px!important;line-height:1.55!important}</style>' + htmlIngrandito;
+    }
+    var corpo = htmlIngrandito
+      ? '<div class="mail-read-zoom"><button onclick="regolaZoom(-1)">−</button><span id="mail-zoom-val">100%</span><button onclick="regolaZoom(1)">+</button></div>'
+        + '<iframe class="mail-read-iframe" id="mail-read-iframe" sandbox="" srcdoc="' + escHtml(htmlIngrandito).replace(/"/g, '&quot;') + '"></iframe>'
       : '<div class="mail-read-body">' + escHtml(m.text || '(nessun contenuto)') + '</div>';
+    _mailZoom = 100;
     pane.innerHTML = '<div class="mail-read-accent" style="--fc:' + c.color + '"></div>'
       + '<div class="mail-read-inner">'
       + '<div class="mail-read-tag" style="--fc:' + c.color + '">' + c.icon + ' ' + c.label + '</div>'
