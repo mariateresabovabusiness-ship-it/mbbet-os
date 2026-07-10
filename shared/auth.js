@@ -16,13 +16,13 @@ var currentRole = 'VIEWER';
 var currentNome = '';
 
 var ROLE_SECTIONS = {
-  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social'],
-  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social'],
+  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social','email'],
+  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social','email'],
   'OPERATORE':     ['clienti','bonus','task','social'],
   'COLLAB':        ['clienti','bonus','social'],
   'REFERRAL':      ['report'],
   'VIEWER':        ['clienti'],
-  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social']
+  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social','email']
 };
 
 var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
