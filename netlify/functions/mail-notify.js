@@ -38,6 +38,12 @@ async function creaNotifica(titolo, messaggio) {
   await inviaEmail(titolo, messaggio || '');
 }
 
+const DEST_EMAILS = [
+  'mariateresabova.business@gmail.com',
+  'dm.businessita@gmail.com',
+  'samuelebetting7@gmail.com',
+  'ponzios71@gmail.com'
+];
 async function inviaEmail(titolo, messaggio) {
   if (!process.env.RESEND_API_KEY) return;
   try {
@@ -45,8 +51,8 @@ async function inviaEmail(titolo, messaggio) {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'MBBET OS <onboarding@resend.dev>',
-        to: ['mariateresabova.business@gmail.com'],
+        from: 'MBBET OS <notifiche@mbbet09.net>',
+        to: DEST_EMAILS,
         subject: titolo, html: '<p>' + messaggio + '</p>'
       })
     });

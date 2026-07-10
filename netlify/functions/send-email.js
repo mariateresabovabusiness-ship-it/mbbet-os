@@ -1,11 +1,14 @@
 // Netlify Function — invia una email reale via Resend per le notifiche ad
 // alta priorità. Chiamata dal browser (dove la chiave API non può stare)
 // da 02_bonus.html e 10_onboarding_cliente.html dopo aver creato una
-// notifica. Senza un dominio verificato su Resend, può mandare email solo
-// all'indirizzo di iscrizione dell'account Resend — verificato con un
-// invio reale, non è un limite inventato.
+// notifica. Dominio mbbet09.net verificato su Resend: arriva a tutto il team.
 
-const DEST_EMAIL = 'mariateresabova.business@gmail.com';
+const DEST_EMAILS = [
+  'mariateresabova.business@gmail.com',
+  'dm.businessita@gmail.com',
+  'samuelebetting7@gmail.com',
+  'ponzios71@gmail.com'
+];
 
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
@@ -29,8 +32,8 @@ exports.handler = async function (event) {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'MBBET OS <onboarding@resend.dev>',
-        to: [DEST_EMAIL],
+        from: 'MBBET OS <notifiche@mbbet09.net>',
+        to: DEST_EMAILS,
         subject: titolo,
         html: '<p>' + messaggio + '</p>'
       })
