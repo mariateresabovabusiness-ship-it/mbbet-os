@@ -39,10 +39,12 @@ exports.handler = async function (event) {
       if (totale > 0) {
         const inizio = Math.max(1, totale - MAX_MESSAGES + 1);
         for await (const msg of client.fetch(inizio + ':*', { envelope: true, uid: true, flags: true })) {
+          const toAddr = (msg.envelope && msg.envelope.to && msg.envelope.to[0] && msg.envelope.to[0].address) || '';
           messaggi.push({
             uid: msg.uid,
             subject: (msg.envelope && msg.envelope.subject) || '(senza oggetto)',
             from: (msg.envelope && msg.envelope.from && msg.envelope.from[0] && (msg.envelope.from[0].name || msg.envelope.from[0].address)) || '—',
+            cliente: toAddr.split('@')[0] || '—',
             date: (msg.envelope && msg.envelope.date) || null,
             letto: !!(msg.flags && msg.flags.has('\\Seen'))
           });

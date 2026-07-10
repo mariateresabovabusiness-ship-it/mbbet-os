@@ -39,9 +39,11 @@ exports.handler = async function (event) {
       const msg = await client.fetchOne(String(uid), { source: true }, { uid: true });
       if (msg && msg.source) {
         const parsed = await simpleParser(msg.source);
+        const toAddr = (parsed.to && parsed.to.value && parsed.to.value[0] && parsed.to.value[0].address) || '';
         risultato = {
           subject: parsed.subject || '(senza oggetto)',
           from: (parsed.from && parsed.from.text) || '—',
+          cliente: toAddr.split('@')[0] || '—',
           date: parsed.date || null,
           text: parsed.text || '',
           html: parsed.html || null
