@@ -1460,6 +1460,15 @@ async function loadData(){
     }
   }catch(e){console.warn('Mock data in uso');}
   _cli=enrichMock(data);buildSmartPanels();applyFilters();
+  checkApriClienteDaEmail();
+}
+
+function checkApriClienteDaEmail(){
+  var id;
+  try{id=localStorage.getItem('mbbet_apri_cliente');}catch(e){return;}
+  if(!id)return;
+  try{localStorage.removeItem('mbbet_apri_cliente');}catch(e){}
+  openWs(id);
 }
 
 function login2(){

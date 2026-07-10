@@ -48,6 +48,7 @@ exports.handler = async function (event) {
           text: parsed.text || '',
           html: parsed.html || null
         };
+        try { await client.messageFlagsAdd(String(uid), ['\\Seen'], { uid: true }); } catch (e) {}
       }
     } finally {
       lock.release();
