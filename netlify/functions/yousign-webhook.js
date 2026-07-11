@@ -41,8 +41,9 @@ const DEST_EMAILS = [
   'samuelebetting7@gmail.com',
   'ponzios71@gmail.com'
 ];
-async function inviaEmail(titolo, messaggio) {
+async function inviaEmail(titolo, messaggio, link) {
   if (!process.env.RESEND_API_KEY) return;
+  var html = '<p>' + messaggio + '</p>' + (link ? '<p><a href="' + link + '" style="display:inline-block;background:#f7cc46;color:#04070c;padding:8px 16px;border-radius:8px;text-decoration:none;font-weight:bold">Apri in MBBET OS →</a></p>' : '');
   try {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -50,11 +51,13 @@ async function inviaEmail(titolo, messaggio) {
       body: JSON.stringify({
         from: 'MBBET OS <notifiche@mbbet09.net>',
         to: DEST_EMAILS,
-        subject: titolo, html: '<p>' + messaggio + '</p>'
+        subject: titolo, html: html
       })
     });
   } catch (e) {}
 }
+
+const APP_BASE = 'https://effervescent-tapioca-e827c7.netlify.app';
 
 function corpoGrezzo(event) {
   return event.isBase64Encoded ? Buffer.from(event.body || '', 'base64').toString('utf8') : (event.body || '');
@@ -189,8 +192,9 @@ exports.handler = async function (event) {
     });
 
     // Notifica dentro MBBET OS + email al team
+    var linkContratto = APP_BASE + '/11_contratti.html?apri=' + contratto.id;
     var titoloNotif = EVENTO_LABEL[eventType] + ': ' + (contratto.nome_cliente || '');
-    var msgNotif = (contratto.tipo_contratto || 'Contratto') + ' — ' + EVENTO_LABEL[eventType];
+    var msgNotif = (contratto.tipo_contratto || 'Contratto') + ' — ' + EVENTO_LABEL[eventType] + '\n' + linkContratto;
     await fetch(SUPA_URL + '/rest/v1/notifiche', {
       method: 'POST', headers: supaHeaders(),
       body: JSON.stringify({
@@ -199,7 +203,7 @@ exports.handler = async function (event) {
         destinatario: contratto.operatore || null, letto: false
       })
     });
-    await inviaEmail(titoloNotif, msgNotif);
+    await inviaEmail(titoloNotif, (contratto.tipo_contratto || 'Contratto') + ' — ' + EVENTO_LABEL[eventType], linkContratto);
 
     return { statusCode: 200, body: JSON.stringify({ ok: true, stato: nuovoStato }) };
   } catch (err) {

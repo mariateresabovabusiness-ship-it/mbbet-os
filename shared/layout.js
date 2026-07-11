@@ -95,6 +95,12 @@ async function loadNotifCount() {
   dot.className = 'notif-dot' + (n > 0 ? ' visible' : '');
 }
 
+// Trasforma gli URL http(s) dentro un testo già passato per escHtml in link
+// cliccabili — sicuro perché opera solo dopo l'escaping, non prima.
+function linkifyHtml(escaped) {
+  return escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+
 async function loadNotifPanel() {
   var r = await db.from('notifiche').select('*').order('created_at',{ascending:false}).limit(25);
   var items = r.data || [];
@@ -107,7 +113,7 @@ async function loadNotifPanel() {
     var ts = fdt(n.created_at);
     h += '<div class="notif-item'+cls+'" onclick="markRead('+n.id+')">';
     h += '<div class="notif-item-title">['+escHtml(n.tipo)+'] '+escHtml(n.titolo)+'</div>';
-    if (n.messaggio) h += '<div class="notif-item-msg">'+escHtml(n.messaggio)+'</div>';
+    if (n.messaggio) h += '<div class="notif-item-msg">'+linkifyHtml(escHtml(n.messaggio))+'</div>';
     h += '<div class="notif-item-ts">'+ts+'</div></div>';
   });
   el.innerHTML = h;
