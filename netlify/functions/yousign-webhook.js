@@ -11,7 +11,11 @@ const crypto = require('crypto');
 
 const SUPA_URL = 'https://ntwqfuvcosvzpqrfpipn.supabase.co';
 const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
-const YOUSIGN_BASE = 'https://api.yousign.app/v3';
+// NOTA: l'account Yousign ha per ora solo accesso Sandbox all'API (la
+// produzione richiede un'attivazione separata da richiedere a Yousign).
+// Basta cambiare questa riga in 'https://api.yousign.app/v3' (e lo stesso
+// in yousign-create.js) quando l'ambiente di produzione sarà attivo.
+const YOUSIGN_BASE = 'https://api-sandbox.yousign.app/v3';
 
 const EVENTO_STATO = {
   'signature_request.activated': 'INVIATO',
