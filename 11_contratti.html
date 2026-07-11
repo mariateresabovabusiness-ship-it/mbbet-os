@@ -279,6 +279,12 @@ function onLoginSuccess() {
   loadOperatoriSelect();
   loadContratti();
   checkPrefillNuovoContratto();
+  checkApriContrattoDaUrl();
+}
+
+function checkApriContrattoDaUrl() {
+  var id = new URLSearchParams(location.search).get('apri');
+  if (id) openContratto(id);
 }
 
 function checkPrefillNuovoContratto() {
