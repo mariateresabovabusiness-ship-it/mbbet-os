@@ -2185,20 +2185,23 @@ function genMock(){
 
 /* ── LOAD DATA ── */
 async function loadData(){
-  try{
-    var rb=await db.from('bookmaker').select('*').eq('attivo',true).order('priorita_num',{ascending:true,nullsFirst:false});
-    if(rb.data&&rb.data.length)BKS=rb.data.map(function(b,i){return enrichBk(b,i);});
-  }catch(e){}
+  var settled=await Promise.allSettled([
+    db.from('bookmaker').select('*').eq('attivo',true).order('priorita_num',{ascending:true,nullsFirst:false}),
+    db.from('operatori').select('nome,colore,is_joint').eq('stato','Attivo'),
+    db.from('bonus').select('*').order('created_at',{ascending:false,nullsFirst:false})
+  ]);
+  var rb=settled[0].status==='fulfilled'?settled[0].value:null;
+  var ro=settled[1].status==='fulfilled'?settled[1].value:null;
+  var rbon=settled[2].status==='fulfilled'?settled[2].value:null;
+
+  if(rb&&rb.data&&rb.data.length)BKS=rb.data.map(function(b,i){return enrichBk(b,i);});
   if(!BKS.length){BKS=[{nome:'Bet365',tier:'S+',roi_medio:0},{nome:'Snai',tier:'S+',roi_medio:0},{nome:'Goldbet',tier:'S',roi_medio:0},{nome:'Sisal',tier:'A',roi_medio:0},{nome:'Betfair',tier:'A',roi_medio:0},{nome:'William Hill',tier:'S',roi_medio:0},{nome:'Lottomatica',tier:'S',roi_medio:0},{nome:'Eurobet',tier:'A',roi_medio:0},{nome:'Unibet',tier:'A',roi_medio:0},{nome:'Bwin',tier:'A',roi_medio:0},{nome:'Planetwin',tier:'S',roi_medio:0}].map(function(b,i){return enrichBk(b,i);});}
 
-  try{var ro=await db.from('operatori').select('nome,colore,is_joint').eq('stato','Attivo');if(ro.data&&ro.data.length)OPS_LIST=ro.data.map(function(o){return o.nome;});}catch(e){}
+  if(ro&&ro.data&&ro.data.length)OPS_LIST=ro.data.map(function(o){return o.nome;});
   if(!OPS_LIST.length)OPS_LIST=['Riccardo Tavagnacco','Alessia Ciman','Ciro Bisogno','Antonio La Barbera','Francesco Bova','Emilian Cozmiuc','Alessia Maffioli','Elisa Qualantonio','Maria A. Catania','Luca Alberti','Mary + Samuele'];
 
-  try{
-    var rbon=await db.from('bonus').select('*').order('created_at',{ascending:false,nullsFirst:false});
-    if(rbon.data&&rbon.data.length){BONUS_CLI=rbon.data.map(mapBonusRow);_DATA_REAL=true;}
-    else genMock();
-  }catch(e){genMock();}
+  if(rbon&&rbon.data&&rbon.data.length){BONUS_CLI=rbon.data.map(mapBonusRow);_DATA_REAL=true;}
+  else genMock();
 
   PROMO=_lsLoadPromos();_promoTableMissing=false;
   _migratePromoLinks();

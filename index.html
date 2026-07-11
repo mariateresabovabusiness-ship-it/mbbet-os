@@ -1086,13 +1086,14 @@ async function loadData(){
     var mStart=gm.anno+'-'+String(gm.m).padStart(2,'0')+'-01';
     var mEnd=na+'-'+String(nm).padStart(2,'0')+'-01';
 
-    // Carica clienti del mese
-    var r=await db.from('clienti').select('id,nome,cognome,stato,operatore,is_nuovo,bookmaker_completati,created_at').gte('created_at',mStart).lt('created_at',mEnd);
+    // Carica clienti e bonus del mese in parallelo (query indipendenti)
+    var risultati=await Promise.all([
+      db.from('clienti').select('id,nome,cognome,stato,operatore,is_nuovo,bookmaker_completati,created_at').gte('created_at',mStart).lt('created_at',mEnd),
+      db.from('bonus').select('id,cliente,bookmaker,stato,ric_real,pag_cli,costi_extra,mese_operativo,anno_operativo,updated_at,created_at').eq('mese_operativo',gm.m).eq('anno_operativo',gm.anno)
+    ]);
+    var r=risultati[0], rb=risultati[1];
     if(!r.data)throw new Error('no clienti');
     _cli=r.data;
-
-    // Carica bonus del mese
-    var rb=await db.from('bonus').select('id,cliente,bookmaker,stato,ric_real,pag_cli,costi_extra,mese_operativo,anno_operativo,updated_at,created_at').eq('mese_operativo',gm.m).eq('anno_operativo',gm.anno);
     _bns=rb.data||[];
 
     // Aggiorna tutto

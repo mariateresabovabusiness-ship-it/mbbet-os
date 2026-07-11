@@ -444,12 +444,15 @@ function cycleStatus(bonusId,cid){
 /* ══ LOAD ══ */
 async function loadAll(){
   try{
-    var rc=await db.from('collab').select('*').order('created_at',{ascending:false});
+    var risultati=await Promise.all([
+      db.from('collab').select('*').order('created_at',{ascending:false}),
+      db.from('bonus')
+        .select('id,id_cli,cliente,bookmaker,stato,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,created_at')
+        .not('nome_collab','is',null)
+        .neq('nome_collab','')
+    ]);
+    var rc=risultati[0], rb=risultati[1];
     _collabs=rc.data||[];
-    var rb=await db.from('bonus')
-      .select('id,id_cli,cliente,bookmaker,stato,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,created_at')
-      .not('nome_collab','is',null)
-      .neq('nome_collab','');
     _bns=(rb.data||[]).filter(function(b){return b.nome_collab&&b.nome_collab.trim();});
     // Merge: also create virtual collabs from bonus nome_collab if not in registry
     var regNames=_collabs.map(function(c){return (c.nome||'').toLowerCase();});

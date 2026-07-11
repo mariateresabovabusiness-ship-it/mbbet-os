@@ -142,12 +142,12 @@
 
       <div class="ctr-toolbar">
         <div class="ctr-filters">
-          <select id="f-stato" onchange="loadContratti()">
+          <select id="f-stato" onchange="renderContratti()">
             <option value="">Tutti gli stati</option>
             <option>DA_INVIARE</option><option>INVIATO</option><option>IN_ATTESA_FIRMA</option>
             <option>FIRMATO</option><option>RIFIUTATO</option><option>SCADUTO</option><option>ERRORE</option>
           </select>
-          <input type="text" id="f-cerca" placeholder="Cerca cliente..." oninput="loadContratti()">
+          <input type="text" id="f-cerca" placeholder="Cerca cliente..." oninput="renderContrattiVeloce()">
         </div>
         <button class="btn btn-primary btn-sm" onclick="openNewContratto()">+ Nuovo Contratto</button>
       </div>
@@ -174,7 +174,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>Cliente *</label>
-            <input type="text" id="c-cliente-search" placeholder="Cerca per nome..." oninput="searchClienteForContratto(this.value)" autocomplete="off">
+            <input type="text" id="c-cliente-search" placeholder="Cerca per nome..." oninput="searchClienteForContrattoVeloce(this.value)" autocomplete="off">
             <div id="c-cliente-results" style="position:relative"></div>
             <input type="hidden" id="c-cliente-id">
           </div>
@@ -319,6 +319,7 @@ var CTR_STATO_LABEL = {
   'FIRMATO':'Firmato', 'RIFIUTATO':'Rifiutato', 'SCADUTO':'Scaduto', 'ERRORE':'Errore'
 };
 var _ctrActiveFilter = '';
+var _ctrAllRows = null;
 
 function ctrChip(stato) {
   var sc = CTR_STATO_COLORS[stato] || {bg:'rgba(255,255,255,.1)', c:'#fff'};
@@ -340,16 +341,23 @@ function ctrRowHtml(c) {
 
 function ctrFilterByStato(stato) {
   _ctrActiveFilter = (_ctrActiveFilter === stato) ? '' : stato;
-  loadContratti();
+  renderContratti();
 }
 
 async function loadContratti() {
   var el = document.getElementById('ctr-list');
-  var scEl = document.getElementById('ctr-scorecard');
   el.innerHTML = '<div class="state-box" style="padding:24px"><div class="spinner"></div></div>';
-
   var r = await db.from('contratti').select('*').order('created_at',{ascending:false}).limit(500);
-  var allRows = r.data || [];
+  _ctrAllRows = r.data || [];
+  renderContratti();
+}
+
+var renderContrattiVeloce = debounce(renderContratti, 200);
+
+function renderContratti() {
+  var el = document.getElementById('ctr-list');
+  var scEl = document.getElementById('ctr-scorecard');
+  var allRows = _ctrAllRows || [];
 
   // Riepilogo (sempre su tutti i contratti, non filtrato dalla ricerca)
   var counts = {};
@@ -438,6 +446,8 @@ async function openContratto(id) {
   }).join('');
   openModal('modal-ctr');
 }
+
+var searchClienteForContrattoVeloce = debounce(searchClienteForContratto, 250);
 
 async function searchClienteForContratto(q) {
   var resEl = document.getElementById('c-cliente-results');
