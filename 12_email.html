@@ -318,15 +318,14 @@ async function leggiEmail(folder, uid, el) {
     if (eraNonLetta) { _mailCounts[folder] = Math.max(0, (_mailCounts[folder] || 0) - 1); renderScorecard(); }
     var m = data.messaggio;
     var infoCli = infoCliente(m.cliente);
-    var htmlIngrandito = m.html
-      ? m.html.replace(/<head[^>]*>/i, '$&<style>body,td,p,span,div{font-size:17px!important;line-height:1.55!important}</style>')
-      : null;
-    if (htmlIngrandito && htmlIngrandito.indexOf('<style>body,td') < 0) {
-      htmlIngrandito = '<style>body,td,p,span,div{font-size:17px!important;line-height:1.55!important}</style>' + htmlIngrandito;
+    var iniettaTag = '<base target="_blank"><style>body,td,p,span,div{font-size:17px!important;line-height:1.55!important}</style>';
+    var htmlIngrandito = m.html ? m.html.replace(/<head[^>]*>/i, '$&' + iniettaTag) : null;
+    if (htmlIngrandito && htmlIngrandito.indexOf('<base target') < 0) {
+      htmlIngrandito = iniettaTag + htmlIngrandito;
     }
     var corpo = htmlIngrandito
       ? '<div class="mail-read-zoom"><button onclick="regolaZoom(-1)">−</button><span id="mail-zoom-val">100%</span><button onclick="regolaZoom(1)">+</button></div>'
-        + '<iframe class="mail-read-iframe" id="mail-read-iframe" sandbox="" srcdoc="' + escHtml(htmlIngrandito).replace(/"/g, '&quot;') + '"></iframe>'
+        + '<iframe class="mail-read-iframe" id="mail-read-iframe" sandbox="allow-popups allow-popups-to-escape-sandbox" srcdoc="' + escHtml(htmlIngrandito).replace(/"/g, '&quot;') + '"></iframe>'
       : '<div class="mail-read-body">' + escHtml(m.text || '(nessun contenuto)') + '</div>';
     _mailZoom = 100;
     pane.innerHTML = '<div class="mail-read-accent" style="--fc:' + c.color + '"></div>'
