@@ -351,10 +351,9 @@ function ctrRowHtml(c) {
 function copiaLinkContratto(id) {
   var url = location.origin + location.pathname.replace(/[^/]*$/, '') + '11_contratti.html?apri=' + id;
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url).then(function () { toast('Link copiato negli appunti', 'success'); }, function () { toast(url, 'info'); });
-  } else {
-    toast(url, 'info');
+    navigator.clipboard.writeText(url).then(function () { toast('Link copiato negli appunti', 'success'); }, function () {});
   }
+  openContratto(id);
 }
 
 function ctrFilterByStato(stato) {
