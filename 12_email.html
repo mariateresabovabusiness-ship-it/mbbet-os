@@ -247,18 +247,17 @@ function renderScorecard() {
 }
 
 async function precaricaConteggi() {
-  for (var i = 0; i < CARTELLE.length; i++) {
-    var c = CARTELLE[i];
+  await Promise.all(CARTELLE.map(async function (c) {
     try {
       var res = await fetch('/.netlify/functions/mail-list', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ folder: c.id })
       });
       var data = await res.json();
-      _mailCounts[c.id] = (data.messaggi || []).length;
+      _mailCounts[c.id] = (data.messaggi || []).filter(function (m) { return !m.letto; }).length;
     } catch (e) { _mailCounts[c.id] = 0; }
     renderScorecard();
-  }
+  }));
 }
 
 async function apriCartella(id) {
@@ -275,7 +274,7 @@ async function apriCartella(id) {
     });
     var data = await res.json();
     if (!res.ok) { col.innerHTML = '<div class="mail-empty">Errore: ' + escHtml(data.error || 'sconosciuto') + '</div>'; return; }
-    _mailCounts[id] = data.messaggi.length;
+    _mailCounts[id] = data.messaggi.filter(function (m) { return !m.letto; }).length;
     renderScorecard();
     var listHdr = '<div class="mail-list-hdr" style="--fc:' + c.color + '"><span class="mail-list-hdr-dot"></span>' + c.icon + ' ' + c.label + ' <span style="margin-left:auto;color:var(--t3);font-weight:600">' + data.messaggi.length + '</span></div>';
     if (!data.messaggi.length) { col.innerHTML = listHdr + '<div class="mail-empty"><div class="mail-empty-ic">📭</div>Nessuna email in questa cartella</div>'; return; }
@@ -314,7 +313,9 @@ async function leggiEmail(folder, uid, el) {
     });
     var data = await res.json();
     if (!res.ok) { pane.innerHTML = '<div class="mail-empty">Errore: ' + escHtml(data.error || 'sconosciuto') + '</div>'; return; }
+    var eraNonLetta = !!(el && el.classList.contains('unread'));
     if (el) { el.classList.remove('unread'); var badge = el.querySelector('.mail-item-badge'); if (badge) badge.remove(); }
+    if (eraNonLetta) { _mailCounts[folder] = Math.max(0, (_mailCounts[folder] || 0) - 1); renderScorecard(); }
     var m = data.messaggio;
     var infoCli = infoCliente(m.cliente);
     var htmlIngrandito = m.html
