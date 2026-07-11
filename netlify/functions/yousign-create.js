@@ -1,11 +1,11 @@
-// Netlify Function — crea e invia una richiesta di firma su Yousign (Sandbox).
+// Netlify Function — crea e invia una richiesta di firma su Yousign (produzione).
 // Chiamata dal browser (11_contratti.html) passando { contratto_id }.
 // La chiave segreta YOUSIGN_API_KEY vive solo qui (variabile d'ambiente
 // Netlify), mai nel codice lato browser.
 
 const SUPA_URL = 'https://ntwqfuvcosvzpqrfpipn.supabase.co';
 const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
-const YOUSIGN_BASE = 'https://api-sandbox.yousign.app/v3';
+const YOUSIGN_BASE = 'https://api.yousign.app/v3';
 
 function supaHeaders() {
   return { apikey: SUPA_ANON, Authorization: 'Bearer ' + SUPA_ANON, 'Content-Type': 'application/json' };
@@ -94,7 +94,7 @@ exports.handler = async function (event) {
 
     // 7. Aggiorna il contratto
     const nowIso = new Date().toISOString();
-    const newLog = (contratto.log_eventi || []).concat([{ evento: 'Inviato con Yousign (Sandbox)', data: nowIso }]);
+    const newLog = (contratto.log_eventi || []).concat([{ evento: 'Inviato con Yousign', data: nowIso }]);
     await fetch(SUPA_URL + '/rest/v1/contratti?id=eq.' + contrattoId, {
       method: 'PATCH', headers: supaHeaders(),
       body: JSON.stringify({

@@ -216,7 +216,7 @@
             <input type="file" id="c-bozza-input" accept="application/pdf" style="display:none" onchange="uploadContrattoBozza(this.files)">
             <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('c-bozza-input').click()">+ Carica PDF da firmare</button>
             <span id="c-bozza-status" style="font-size:11.5px;color:var(--t3)"></span>
-            <button class="btn btn-primary btn-sm" id="c-btn-yousign" type="button" style="display:none" onclick="inviaConYousign()">📨 Invia con Yousign <span style="opacity:.7;font-size:10px">SANDBOX</span></button>
+            <button class="btn btn-primary btn-sm" id="c-btn-yousign" type="button" style="display:none" onclick="inviaConYousign()">📨 Invia con Yousign</button>
           </div>
         </div>
         <div class="form-group">
@@ -495,14 +495,14 @@ async function inviaConYousign() {
       toast('Errore Yousign: ' + (data.error || 'sconosciuto'), 'error');
       console.error('Yousign error detail:', data.detail);
     } else {
-      toast('Inviato con Yousign (Sandbox)', 'success');
+      toast('Inviato con Yousign', 'success');
       closeModal('modal-ctr');
       loadContratti();
     }
   } catch (e) {
     toast('Errore di rete durante l\'invio', 'error');
   }
-  btn.disabled = false; btn.innerHTML = '📨 Invia con Yousign <span style="opacity:.7;font-size:10px">SANDBOX</span>';
+  btn.disabled = false; btn.innerHTML = '📨 Invia con Yousign';
 }
 
 async function uploadContrattoFirmato(files) {
