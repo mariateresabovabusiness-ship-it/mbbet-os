@@ -2293,6 +2293,7 @@ function renderBkInfoBar(bk){
       +lBtn(promoHref,'&#127881; Area Promo')
       +'<button class="bib-link" onclick="modalBkGuida(\''+bk.nome+'\')">&#128196; Guida MBBET</button>'
       +'<button class="bib-link add-l" onclick="modalBkLink(\''+bk.nome+'\')">&#9998; Modifica Link</button>'
+      +'<button class="bib-link" onclick="modalBkModifica(\''+bk.nome+'\')">&#128295; Modifica</button>'
       +'<button class="bib-link" onclick="modalCreaTaskBk(\''+bk.nome+'\')">&#9989; Task</button>'
     +'</div>'
     +'<div class="bib-close" onclick="selectBk(null)">&#10005;</div>';
@@ -3221,6 +3222,38 @@ async function doLink(nome){
   var bk=BKS.find(function(b){return b.nome===nome;});
   if(bk){bk.link_sito=s;bk.link_promo=p;bk.link_guida=gd;bk.link_drive=d;bk.note_operative=n;}
   closeModal();if(_selBk&&_selBk.nome===nome)renderBkInfoBar(_selBk);showToast('Link salvati per '+nome,'ok');
+}
+
+/* ── MODIFICA BOOKMAKER (tier, ROI, colore, attivo, note) ── */
+function modalBkModifica(nome){
+  var bk=BKS.find(function(b){return b.nome===nome;});if(!bk)return;
+  var tiers=['S+','S','A','B','C','D'];
+  var tierOpts=tiers.map(function(t){return '<option'+(bk.tier===t?' selected':'')+'>'+t+'</option>';}).join('');
+  openModal('&#128295; Modifica '+nome,
+    '<div class="mod-grid">'
+    +'<div class="mod-field"><label>Tier</label><select id="e-tier" class="mod-sel">'+tierOpts+'</select></div>'
+    +'<div class="mod-field"><label>ROI Stimato (%)</label><input id="e-roi" type="number" step="0.1" class="mod-inp" value="'+(bk.roi_stimato!=null?bk.roi_stimato:(bk._roi||''))+'"></div>'
+    +'<div class="mod-field"><label>Colore</label><input id="e-col" type="color" class="mod-inp" value="'+(bk.colore||bk._col||'#5aaaff')+'" style="height:38px;padding:4px"></div>'
+    +'<div class="mod-field"><label>Attivo</label><select id="e-att" class="mod-sel"><option value="true"'+(bk.attivo!==false?' selected':'')+'>Sì</option><option value="false"'+(bk.attivo===false?' selected':'')+'>No</option></select></div>'
+    +'<div class="mod-field mod-full"><label>Note</label><textarea id="e-note" class="mod-ta" rows="3" placeholder="Note generali sul bookmaker...">'+(bk.note||'')+'</textarea></div>'
+    +'</div>',
+    '<button class="mod-btn mod-btn-cancel" onclick="closeModal()">Annulla</button><button class="mod-btn mod-btn-ok" onclick="doModificaBk(\''+nome+'\')">Salva</button>');
+}
+async function doModificaBk(nome){
+  var tier=g('e-tier').value;
+  var roi=parseFloat(g('e-roi').value)||0;
+  var col=g('e-col').value;
+  var att=g('e-att').value==='true';
+  var note=g('e-note').value||null;
+  modLoad();
+  var res=await db.from('bookmaker').update({tier:tier,roi_stimato:roi,roi_medio:roi,colore:col,attivo:att,note:note,aggiornato_il:new Date().toISOString()}).eq('nome',nome);
+  if(res.error){modErr(res.error.message);return;}
+  var bk=BKS.find(function(b){return b.nome===nome;});
+  if(bk){
+    bk.tier=tier;bk.roi_stimato=roi;bk.roi_medio=roi;bk.colore=col;bk.attivo=att;bk.note=note;bk._roi=roi;bk._col=col;
+    var hx=col.replace('#','');bk._rgb=parseInt(hx.substr(0,2),16)+','+parseInt(hx.substr(2,2),16)+','+parseInt(hx.substr(4,2),16);
+  }
+  closeModal();if(_selBk&&_selBk.nome===nome)renderBkInfoBar(_selBk);renderView();showToast('Bookmaker '+nome+' aggiornato','ok');
 }
 
 /* ── AGGIUNGI PROMO ── */
