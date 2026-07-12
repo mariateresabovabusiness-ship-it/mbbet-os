@@ -214,6 +214,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
     <div class="tab-btn" onclick="switchTab('operatori',this)">&#128101; Per Operatore</div>
     <div class="tab-btn" onclick="switchTab('divisione',this)">&#129568; Divisione Utile</div>
     <div class="tab-btn" onclick="switchTab('tasse',this)">&#128181; Tasse</div>
+    <div class="tab-btn" onclick="switchTab('capital',this)">&#127974; Capital Allocation</div>
   </div>
 
   <div class="content">
@@ -460,6 +461,35 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="tasse-persone-grid"></div>
     </div>
 
+    <!-- ═══ CAPITAL ALLOCATION ═══ -->
+    <div id="tab-capital" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div class="mese-pill" id="cap-mese-lbl">&#128197; Luglio 2026</div>
+        <div id="cap-stato-badge"></div>
+      </div>
+      <div style="font-size:10.5px;color:var(--tx3);margin-bottom:16px">&#8505; Ricavi <b style="color:var(--tx2)">maturati</b> = bonus segnati FATTO in questo mese. Ricavi <b style="color:var(--tx2)">incassati</b> = bonus con "Incassato" spuntato e data incasso in questo mese (può includere bonus maturati in mesi precedenti) — l'allocazione si calcola solo su questi ultimi, mai su soldi non ancora arrivati.</div>
+
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-hdr"><div class="panel-title">&#128202; FINANCIAL WATERFALL</div></div>
+        <div id="cap-waterfall" style="padding:16px"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:18px" id="cap-azione-panel">
+        <div style="padding:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+          <div style="font-size:10.5px;color:var(--tx3);max-width:520px">Chiudere il mese congela questi numeri: crea lo snapshot mensile e accantona Tesoreria e Fondo Investitori. Da quel momento, modificare un bonus o una spesa di questo mese richiede una rettifica esplicita, non riscrive più la storia in silenzio.</div>
+          <button class="btn-add" id="cap-alloca-btn" onclick="confermaAllocaMese()">&#127974; Alloca il Mese</button>
+        </div>
+      </div>
+
+      <div class="panel-title" style="padding:0 2px;margin-bottom:10px">&#128176; CAPITAL VAULTS</div>
+      <div class="div-socio-grid" id="cap-vaults" style="margin-bottom:18px"></div>
+
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">&#128337; STORICO MOVIMENTI VAULT</div></div>
+        <div style="overflow-x:auto"><table class="data-table" id="cap-movimenti-table"></table></div>
+      </div>
+    </div>
+
   </div>
   </div>
 </div>
@@ -616,6 +646,7 @@ function setGlobalMese(m,anno){
   if(typeof renderOperatori==='function')renderOperatori();
   if(typeof renderSpese==='function')renderSpese();
   if(typeof renderDivisione==='function')renderDivisione();
+  if(typeof renderCapital==='function')renderCapital();
 }
 function shiftMese(d){
   var gm=getGlobalMese(),m=gm.m+d,anno=gm.anno;
@@ -631,6 +662,7 @@ function syncMeseDropdowns(){
   if(g('g-mese-lbl'))g('g-mese-lbl').textContent=MESI_NOMI[gm.m-1]+' '+gm.anno;
   if(g('mese-lbl'))g('mese-lbl').innerHTML='&#128197; '+MESI_NOMI[gm.m-1]+' '+gm.anno;
   if(g('op-mese-lbl'))g('op-mese-lbl').innerHTML='&#128197; '+MESI_NOMI[gm.m-1]+' '+gm.anno;
+  if(g('cap-mese-lbl'))g('cap-mese-lbl').innerHTML='&#128197; '+MESI_NOMI[gm.m-1]+' '+gm.anno;
 }
 var MESI=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 var MESI_FULL=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
@@ -638,12 +670,16 @@ function g(id){return document.getElementById(id);}
 function fmt(n){return (parseFloat(n)||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtK(n){n=parseFloat(n)||0;return n>=1000?(n/1000).toFixed(1)+'K':fmt(n);}
 function navTo(p){window.location.href=p;}
+// Nota: showToast era chiamato da saveSplitConfig/saveTasseConfig ma non era
+// mai stato definito in questo file (nessuno script condiviso incluso qui) —
+// quindi ogni salvataggio andava a buon fine ma mostrava un falso "errore".
+function showToast(msg,type){ alert(msg); }
 
 /* ══ TABS ══ */
 function switchTab(name,el){
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('act');});
   el.classList.add('act');
-  ['overview','entrate','spese','operatori','divisione','tasse'].forEach(function(t){
+  ['overview','entrate','spese','operatori','divisione','tasse','capital'].forEach(function(t){
     g('tab-'+t).style.display=t===name?'block':'none';
   });
   if(name==='entrate'){renderEntrate();renderEntrateExtra();}
@@ -652,19 +688,21 @@ function switchTab(name,el){
   if(name==='spese')renderSpese();
   if(name==='overview')renderOverview();
   if(name==='tasse')renderTasse();
+  if(name==='capital')renderCapital();
 }
 
 /* ══ LOAD ══ */
 async function loadAll(){
   try{
     // Carica bonus completo
-    var rb=await db.from('bonus').select('id,cliente,operatore,bookmaker,ric_real,pag_cli,costi_extra,perc_op,perc_collab,nome_collab,comp_referral,stato,mese_operativo,anno_operativo,deposito,prelievo,saldo_bk,updated_at,created_at').order('created_at',{ascending:false});
+    var rb=await db.from('bonus').select('id,cliente,operatore,bookmaker,ric_real,pag_cli,costi_extra,perc_op,perc_collab,nome_collab,comp_referral,stato,mese_operativo,anno_operativo,deposito,prelievo,saldo_bk,incassato,data_incasso,updated_at,created_at').order('created_at',{ascending:false});
     _bns=rb.data||[];
     // Spese ed entrate extra condivise da Supabase
     await loadSpeseDb();
     await loadEntrateExtraDb();
     await loadTasseConfig();
     await loadSplitConfig();
+    await loadCapitalData();
     // Avvia render
     renderOverview();
     renderSpese();
@@ -1283,6 +1321,193 @@ function renderDivisione(){
       '<span style="font-size:13px;font-weight:'+(r.bold?'900':'700')+';color:'+r.c+'">'+( r.v>=0?'€ '+fmt(r.v):'- € '+fmt(-r.v))+'</span>'+
       '</div>';
   }).join('');
+}
+
+/* ══ CAPITAL ALLOCATION ══ */
+var _allocRule={tesoreria_pct:20,investitori_pct:20};
+var _capFunds=[],_capMovements=[],_capClosures=[];
+
+async function loadCapitalData(){
+  try{
+    var r=await db.from('allocation_rules').select('*').lte('valido_da',new Date().toISOString().slice(0,10)).order('valido_da',{ascending:false}).limit(1);
+    if(r.data&&r.data[0])_allocRule=r.data[0];
+  }catch(e){}
+  try{ _capFunds=(await db.from('capital_funds').select('*').order('id')).data||[]; }catch(e){_capFunds=[];}
+  try{ _capMovements=(await db.from('capital_movements').select('*').order('created_at',{ascending:false}).limit(50)).data||[]; }catch(e){_capMovements=[];}
+  try{ _capClosures=(await db.from('monthly_closures').select('*')).data||[]; }catch(e){_capClosures=[];}
+}
+
+function closureFor(mese,anno){
+  return _capClosures.find(function(c){return c.mese==mese&&c.anno==anno;})||null;
+}
+
+// Espone il controllo "mese già chiuso" alle altre pagine (02_bonus.html) via
+// una funzione globale semplice, dato che qui non c'è alcuno script condiviso.
+function meseGiaChiuso(mese,anno){ return !!closureFor(mese,anno); }
+
+function calcWaterfall(mese,anno){
+  var bnsMese=bnsOfMonth(mese,anno);
+  var maturati=0;
+  bnsMese.forEach(function(b){ if(b.stato==='FATTO') maturati+=parseFloat(b.ric_real)||0; });
+
+  // Incassati: bonus con "Incassato" spuntato e data_incasso in questo mese —
+  // può includere bonus maturati in mesi precedenti, è voluto (è la differenza
+  // tra maturato e cassa).
+  var incassati=0,pagCli=0,compOp=0,compCollab=0,compRef=0;
+  _bns.filter(function(b){
+    if(!b.incassato||!b.data_incasso)return false;
+    var d=new Date(b.data_incasso+'T00:00:00');
+    return (d.getMonth()+1)===mese && d.getFullYear()===anno;
+  }).forEach(function(b){
+    var r=parseFloat(b.ric_real)||0;
+    incassati+=r; pagCli+=parseFloat(b.pag_cli)||0;
+    compOp+=r*(parseFloat(b.perc_op)||0)/100;
+    compCollab+=r*(parseFloat(b.perc_collab)||0)/100;
+    compRef+=parseFloat(b.comp_referral)||0;
+  });
+
+  var costiOperativi=_spese.filter(function(s){
+    if(!s.data)return false;
+    var d=new Date(s.data+'T00:00:00');
+    return (d.getMonth()+1)===mese && d.getFullYear()===anno;
+  }).reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+
+  var risultatoOperativo=incassati-pagCli-compOp-compCollab-compRef-costiOperativi;
+  var chiusura=closureFor(mese,anno);
+  var rettifiche=chiusura?(parseFloat(chiusura.rettifiche)||0):0;
+  var importoDistribuibile=risultatoOperativo+rettifiche;
+  var tesPct=chiusura?parseFloat(chiusura.tesoreria_pct_usata):(parseFloat(_allocRule.tesoreria_pct)||0);
+  var invPct=chiusura?parseFloat(chiusura.investitori_pct_usata):(parseFloat(_allocRule.investitori_pct)||0);
+  var tesImp=chiusura?parseFloat(chiusura.tesoreria_importo):(importoDistribuibile>0?importoDistribuibile*tesPct/100:0);
+  var invImp=chiusura?parseFloat(chiusura.investitori_importo):(importoDistribuibile>0?importoDistribuibile*invPct/100:0);
+  var residuo=importoDistribuibile-tesImp-invImp;
+
+  return {maturati:maturati,incassati:incassati,pagCli:pagCli,compOp:compOp,compCollab:compCollab,compRef:compRef,
+    costiOperativi:costiOperativi,risultatoOperativo:risultatoOperativo,rettifiche:rettifiche,
+    importoDistribuibile:importoDistribuibile,tesPct:tesPct,invPct:invPct,tesImp:tesImp,invImp:invImp,
+    residuo:residuo,chiuso:!!chiusura};
+}
+
+function renderCapital(){
+  var gm=getGlobalMese();
+  var w=calcWaterfall(gm.m,gm.anno);
+
+  var badgeEl=g('cap-stato-badge');
+  if(badgeEl)badgeEl.innerHTML=w.chiuso
+    ? '<span style="font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(0,240,147,.12);color:var(--green);border:1px solid rgba(0,240,147,.3)">&#10003; Mese Chiuso</span>'
+    : '<span style="font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(247,204,70,.1);color:var(--gold);border:1px solid rgba(247,204,70,.3)">&#9679; Mese Aperto</span>';
+
+  var rows=[
+    {l:'Ricavi Maturati (bonus FATTO nel mese)',v:w.maturati,c:'var(--tx3)',sign:'',info:true},
+    {l:'Ricavi Incassati',v:w.incassati,c:'var(--gold)',sign:'+',bold:true},
+    {l:'Pagamenti Clienti',v:-w.pagCli,c:'var(--red)',sign:'-'},
+    {l:'Compensi Operatori',v:-w.compOp,c:'var(--blue)',sign:'-'},
+    {l:'Compensi Collab/Referral',v:-(w.compCollab+w.compRef),c:'var(--purple)',sign:'-'},
+    {l:'Costi Operativi',v:-w.costiOperativi,c:'var(--orange)',sign:'-'},
+    {l:'Risultato Operativo',v:w.risultatoOperativo,c:'var(--cyan)',sign:'=',bold:true,sep:true},
+    {l:'Rettifiche',v:w.rettifiche,c:'var(--tx3)',sign:w.rettifiche>=0?'+':'-'},
+    {l:'Importo Distribuibile',v:w.importoDistribuibile,c:'var(--green)',sign:'=',bold:true,sep:true},
+    {l:'Tesoreria ('+w.tesPct+'%)',v:-w.tesImp,c:'#5aaaff',sign:'-'},
+    {l:'Fondo Investitori ('+w.invPct+'%)',v:-w.invImp,c:'#c4a4f8',sign:'-'},
+    {l:'Residuo Post-Allocazione',v:w.residuo,c:'var(--gold)',sign:'=',bold:true,sep:true}
+  ];
+  var maxAbs=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v);}).concat([1]));
+  var wfEl=g('cap-waterfall');
+  if(wfEl)wfEl.innerHTML=rows.map(function(r){
+    var barPct=Math.min(100,Math.abs(r.v)/maxAbs*100);
+    return (r.sep?'<div style="height:1px;background:rgba(255,255,255,.08);margin:8px 0"></div>':'')
+      +'<div style="padding:'+(r.info?'4px 0':'7px 0')+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'
+      +'<span style="font-size:'+(r.info?'10px':'12px')+';font-weight:'+(r.bold?'800':'500')+';color:'+(r.info?'var(--tx4)':(r.bold?'var(--tx)':'var(--tx2)'))+'">'+(r.sign?r.sign+' ':'')+r.l+'</span>'
+      +'<span style="font-size:'+(r.info?'11px':'13px')+';font-weight:'+(r.bold?'900':'700')+';color:'+r.c+';white-space:nowrap">'+(r.v>=0?'€ '+fmt(r.v):'- € '+fmt(-r.v))+'</span>'
+      +'</div>'
+      +(r.info?'':'<div style="height:4px;background:rgba(255,255,255,.05);border-radius:3px;margin-top:5px;overflow:hidden"><div style="height:100%;width:'+barPct+'%;background:'+r.c+';border-radius:3px"></div></div>')
+      +'</div>';
+  }).join('');
+
+  var btnEl=g('cap-alloca-btn');
+  if(btnEl){
+    btnEl.disabled=w.chiuso;
+    btnEl.textContent=w.chiuso?'✓ Mese già allocato':'🏦 Alloca il Mese';
+    btnEl.style.opacity=w.chiuso?'.5':'1';
+    btnEl.style.cursor=w.chiuso?'not-allowed':'pointer';
+  }
+
+  var vEl=g('cap-vaults');
+  if(vEl)vEl.innerHTML=_capFunds.map(function(f){
+    var col=f.tipo==='TESORERIA'?'#5aaaff':(f.tipo==='INVESTITORI'?'#c4a4f8':'#00f093');
+    var obiettivoHtml='';
+    if(f.obiettivo_importo){
+      var pctObj=Math.min(100,(parseFloat(f.saldo_attuale)||0)/parseFloat(f.obiettivo_importo)*100);
+      obiettivoHtml='<div style="margin-top:10px"><div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pctObj+'%;background:'+col+'"></div></div><div style="font-size:9px;color:var(--tx3);margin-top:4px">'+pctObj.toFixed(0)+'% di obiettivo € '+fmt(f.obiettivo_importo)+'</div></div>';
+    }
+    return '<div class="div-card" style="border-top:3px solid '+col+'">'
+      +'<div class="div-nm">'+f.nome+'</div>'
+      +'<div class="div-euro" style="color:'+col+'">€ '+fmt(f.saldo_attuale)+'</div>'
+      +'<div class="div-sub">Saldo attuale</div>'
+      +obiettivoHtml
+      +'</div>';
+  }).join('');
+
+  var mEl=g('cap-movimenti-table');
+  if(mEl){
+    if(!_capMovements.length){mEl.innerHTML='<tr><td style="padding:14px;color:var(--tx3)">Nessun movimento ancora — il primo arriva con la prima allocazione mensile.</td></tr>';}
+    else{
+      mEl.innerHTML='<tr><th>Data</th><th>Vault</th><th>Tipo</th><th>Importo</th><th>Mese</th><th>Descrizione</th></tr>'
+        +_capMovements.map(function(m){
+          var fund=_capFunds.find(function(f){return f.id===m.fund_id;});
+          return '<tr><td>'+new Date(m.created_at).toLocaleDateString('it-IT')+'</td><td>'+(fund?fund.nome:'—')+'</td><td>'+m.tipo+'</td>'
+            +'<td style="color:'+(m.tipo==='PRELIEVO'?'var(--red)':'var(--green)')+'">€ '+fmt(m.importo)+'</td>'
+            +'<td>'+(m.mese?MESI_NOMI[m.mese-1]+' '+m.anno:'—')+'</td><td>'+(m.descrizione||'—')+'</td></tr>';
+        }).join('');
+    }
+  }
+}
+
+function confermaAllocaMese(){
+  var gm=getGlobalMese();
+  var w=calcWaterfall(gm.m,gm.anno);
+  if(w.chiuso){showToast('Questo mese è già stato allocato.','err');return;}
+  if(!confirm('Confermi la chiusura di '+MESI_NOMI[gm.m-1]+' '+gm.anno+'?\n\nTesoreria: € '+fmt(w.tesImp)+'\nFondo Investitori: € '+fmt(w.invImp)+'\nResiduo: € '+fmt(w.residuo)+'\n\nUna volta confermato, il mese si blocca: modificare un bonus o una spesa di questo mese richiederà una rettifica esplicita, non cambierà più questi numeri in silenzio.'))return;
+  allocaMese(gm.m,gm.anno,w);
+}
+
+async function allocaMese(mese,anno,w){
+  try{
+    var closureRes=await db.from('monthly_closures').insert({
+      mese:mese, anno:anno,
+      ricavi_maturati:w.maturati, ricavi_incassati:w.incassati,
+      pag_cli_tot:w.pagCli, comp_operatori:w.compOp, comp_collab_referral:w.compCollab+w.compRef,
+      costi_operativi:w.costiOperativi, altre_uscite:0,
+      risultato_operativo:w.risultatoOperativo, rettifiche:w.rettifiche,
+      importo_distribuibile:w.importoDistribuibile,
+      tesoreria_pct_usata:w.tesPct, investitori_pct_usata:w.invPct,
+      tesoreria_importo:w.tesImp, investitori_importo:w.invImp,
+      residuo:w.residuo, approvato_da:(currentNome||'Utente'), approvato_il:new Date().toISOString()
+    }).select();
+    if(closureRes.error){alert('Errore: '+closureRes.error.message);return;}
+    var closureId=closureRes.data[0].id;
+
+    var tesFund=_capFunds.find(function(f){return f.tipo==='TESORERIA';});
+    var invFund=_capFunds.find(function(f){return f.tipo==='INVESTITORI';});
+
+    if(tesFund&&w.tesImp>0){
+      await db.from('capital_movements').insert({fund_id:tesFund.id,tipo:'ACCANTONAMENTO',importo:w.tesImp,mese:mese,anno:anno,closure_id:closureId,descrizione:'Accantonamento chiusura '+MESI_NOMI[mese-1]+' '+anno,created_by:currentNome||null});
+      await db.from('capital_funds').update({saldo_attuale:(parseFloat(tesFund.saldo_attuale)||0)+w.tesImp}).eq('id',tesFund.id);
+    }
+    if(invFund&&w.invImp>0){
+      await db.from('capital_movements').insert({fund_id:invFund.id,tipo:'ACCANTONAMENTO',importo:w.invImp,mese:mese,anno:anno,closure_id:closureId,descrizione:'Accantonamento chiusura '+MESI_NOMI[mese-1]+' '+anno,created_by:currentNome||null});
+      await db.from('capital_funds').update({saldo_attuale:(parseFloat(invFund.saldo_attuale)||0)+w.invImp}).eq('id',invFund.id);
+    }
+
+    try{
+      await db.from('notifiche').insert({tipo:'Capitale',titolo:'Mese allocato: '+MESI_NOMI[mese-1]+' '+anno,messaggio:'Tesoreria € '+fmt(w.tesImp)+' · Investitori € '+fmt(w.invImp)+' · Residuo € '+fmt(w.residuo),priorita:'Alta',destinatario:null,letto:false});
+    }catch(e){}
+
+    alert('Mese allocato con successo.');
+    await loadCapitalData();
+    renderCapital();
+  }catch(e){alert('Errore: '+e.message);}
 }
 
 /* ══ LOGIN / BOOT ══ */
