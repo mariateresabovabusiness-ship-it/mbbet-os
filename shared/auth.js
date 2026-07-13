@@ -1,8 +1,13 @@
 // MBBET OS — Auth v4
 var SUPA_URL  = 'https://ntwqfuvcosvzpqrfpipn.supabase.co';
 var SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+try {
+  for (var _i = localStorage.length - 1; _i >= 0; _i--) {
+    var _k = localStorage.key(_i);
+    if (_k && _k.indexOf('sb-') === 0 && _k.indexOf('auth-token') !== -1) localStorage.removeItem(_k);
+  }
+} catch(e) {}
 var db = supabase.createClient(SUPA_URL, SUPA_ANON);
-try { db.auth.signOut(); } catch(e) {}
 
 var LOCAL_USERS = {
   'mariateresabova.business@gmail.com': { password: 'Luna2002@',  nome: 'Mary Bova', ruolo: 'SOCIO_ADMIN' },
