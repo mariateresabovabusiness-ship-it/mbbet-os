@@ -141,6 +141,43 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 /* MESE INDICATOR */
 .mese-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:20px;font-size:10px;font-weight:700;color:var(--gold);margin-bottom:16px}
 
+/* CAPITAL ALLOCATION */
+.cap-info{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.15);border-radius:10px;margin-bottom:18px}
+.cap-info-ic{font-size:13px;flex-shrink:0;margin-top:1px}
+.cap-info-tx{font-size:10.5px;color:var(--tx3);line-height:1.65}
+.cap-info-tx b{color:var(--tx2);font-weight:700}
+
+.wf-block-title{font-size:9px;font-weight:800;color:var(--tx4);letter-spacing:2px;margin:20px 0 10px;text-transform:uppercase}
+.wf-block-title:first-child{margin-top:2px}
+.wf-chart{position:relative}
+.wf-zeroline{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(255,255,255,.14);z-index:0}
+.wf-row{position:relative;padding:9px 0;z-index:1}
+.wf-row-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wf-row-label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:var(--tx2)}
+.wf-row-ic{width:17px;height:17px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0}
+.wf-row-val{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.wf-row.tot .wf-row-label{font-weight:800;color:var(--tx)}
+.wf-row.tot .wf-row-val{font-size:15px;font-weight:900}
+.wf-track{position:relative;height:7px;background:rgba(255,255,255,.045);border-radius:4px}
+.wf-row.tot .wf-track{height:9px}
+.wf-bar{position:absolute;top:0;height:100%;border-radius:4px;transition:width .3s,left .3s}
+
+.cap-vault-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.vault-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px;transition:.18s}
+.vault-card:hover{border-color:rgba(255,255,255,.13);transform:translateY(-1px)}
+.vault-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.vault-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.vault-nm{font-size:11.5px;font-weight:800;color:var(--tx2);letter-spacing:.3px}
+.vault-bal{font-size:25px;font-weight:900;font-variant-numeric:tabular-nums}
+.vault-sub{font-size:9.5px;color:var(--tx3);margin-top:3px;letter-spacing:.3px}
+.vault-goal{margin-top:12px}
+.vault-goal-bar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.vault-goal-fill{height:100%;border-radius:3px}
+.vault-goal-lbl{font-size:9px;color:var(--tx3);margin-top:5px}
+.vault-last{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06);font-size:9.5px;color:var(--tx3);display:flex;justify-content:space-between}
+
+.mv-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}
+
 /* LOGIN */
 #ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 .li-box{background:rgba(10,13,32,.99);border:1px solid rgba(245,200,66,.18);border-radius:20px;padding:40px 36px;width:340px}
@@ -467,22 +504,33 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
         <div class="mese-pill" id="cap-mese-lbl">&#128197; Luglio 2026</div>
         <div id="cap-stato-badge"></div>
       </div>
-      <div style="font-size:10.5px;color:var(--tx3);margin-bottom:16px">&#8505; Ricavi <b style="color:var(--tx2)">maturati</b> = bonus segnati FATTO in questo mese. Ricavi <b style="color:var(--tx2)">incassati</b> = bonus con "Incassato" spuntato e data incasso in questo mese (può includere bonus maturati in mesi precedenti) — l'allocazione si calcola solo su questi ultimi, mai su soldi non ancora arrivati.</div>
+      <div class="cap-info">
+        <div class="cap-info-ic">&#8505;&#65039;</div>
+        <div class="cap-info-tx">Ricavi <b>maturati</b> = bonus segnati FATTO in questo mese. Ricavi <b>incassati</b> = bonus con "Incassato" spuntato e data incasso in questo mese (può includere bonus maturati in mesi precedenti) — l'allocazione si calcola solo su questi ultimi, mai su soldi non ancora arrivati.</div>
+      </div>
+
+      <div class="kpi-row" id="cap-kpi" style="margin-bottom:18px"></div>
 
       <div class="panel" style="margin-bottom:18px">
         <div class="panel-hdr"><div class="panel-title">&#128202; FINANCIAL WATERFALL</div></div>
-        <div id="cap-waterfall" style="padding:16px"></div>
+        <div id="cap-waterfall" style="padding:18px 20px"></div>
       </div>
 
       <div class="panel" style="margin-bottom:18px" id="cap-azione-panel">
-        <div style="padding:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
-          <div style="font-size:10.5px;color:var(--tx3);max-width:520px">Chiudere il mese congela questi numeri: crea lo snapshot mensile e accantona Tesoreria e Fondo Investitori. Da quel momento, modificare un bonus o una spesa di questo mese richiede una rettifica esplicita, non riscrive più la storia in silenzio.</div>
-          <button class="btn-add" id="cap-alloca-btn" onclick="confermaAllocaMese()">&#127974; Alloca il Mese</button>
+        <div style="padding:20px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+          <div style="display:flex;gap:14px;align-items:flex-start;max-width:560px">
+            <div style="font-size:22px;flex-shrink:0;line-height:1">&#128274;</div>
+            <div>
+              <div style="font-size:12.5px;font-weight:800;color:var(--tx);margin-bottom:4px">Chiusura mensile</div>
+              <div style="font-size:10.5px;color:var(--tx3);line-height:1.65">Chiudere il mese congela questi numeri: crea lo snapshot mensile e accantona Tesoreria e Fondo Investitori. Da quel momento, modificare un bonus o una spesa di questo mese richiede una rettifica esplicita, non riscrive più la storia in silenzio.</div>
+            </div>
+          </div>
+          <button class="btn-add" id="cap-alloca-btn" onclick="confermaAllocaMese()" style="font-size:13px;padding:13px 26px;height:auto">&#127974; Alloca il Mese</button>
         </div>
       </div>
 
       <div class="panel-title" style="padding:0 2px;margin-bottom:10px">&#128176; CAPITAL VAULTS</div>
-      <div class="div-socio-grid" id="cap-vaults" style="margin-bottom:18px"></div>
+      <div class="cap-vault-grid" id="cap-vaults" style="margin-bottom:18px"></div>
 
       <div class="panel">
         <div class="panel-hdr"><div class="panel-title">&#128337; STORICO MOVIMENTI VAULT</div></div>
@@ -706,6 +754,7 @@ async function loadAll(){
     // Avvia render
     renderOverview();
     renderSpese();
+    renderCapital();
   }catch(e){console.warn('loadAll:',e);}
 }
 
@@ -1388,6 +1437,25 @@ function calcWaterfall(mese,anno){
     residuo:residuo,chiuso:!!chiusura};
 }
 
+var CAP_COL={gold:'#f5c842',green:'#00e58a',blue:'#4f9dff',purple:'#b794f4',red:'#ff5757',orange:'#ff8a3d',cyan:'#22e4ff',tx3:'#6b83a0',blue2:'#5aaaff',purple2:'#c4a4f8'};
+function capHexRgba(hex,a){
+  var h=hex.replace('#','');
+  var r=parseInt(h.substring(0,2),16),gg=parseInt(h.substring(2,4),16),b=parseInt(h.substring(4,6),16);
+  return 'rgba('+r+','+gg+','+b+','+a+')';
+}
+function capFmtSigned(v){ return v<0 ? '- € '+fmt(-v) : '€ '+fmt(v); }
+
+var VAULT_META={
+  TESORERIA:{icon:'&#127974;',color:CAP_COL.blue2},
+  INVESTITORI:{icon:'&#128188;',color:CAP_COL.purple2},
+  OPERATIVO:{icon:'&#9881;&#65039;',color:CAP_COL.green}
+};
+var MV_TIPO_META={
+  ACCANTONAMENTO:{c:CAP_COL.green,l:'Accantonamento'},
+  PRELIEVO:{c:CAP_COL.red,l:'Prelievo'},
+  RETTIFICA:{c:CAP_COL.orange,l:'Rettifica'}
+};
+
 function renderCapital(){
   var gm=getGlobalMese();
   var w=calcWaterfall(gm.m,gm.anno);
@@ -1397,33 +1465,76 @@ function renderCapital(){
     ? '<span style="font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(0,240,147,.12);color:var(--green);border:1px solid rgba(0,240,147,.3)">&#10003; Mese Chiuso</span>'
     : '<span style="font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(247,204,70,.1);color:var(--gold);border:1px solid rgba(247,204,70,.3)">&#9679; Mese Aperto</span>';
 
-  var rows=[
-    {l:'Ricavi Maturati (bonus FATTO nel mese)',v:w.maturati,c:'var(--tx3)',sign:'',info:true},
-    {l:'Ricavi Incassati',v:w.incassati,c:'var(--gold)',sign:'+',bold:true},
-    {l:'Pagamenti Clienti',v:-w.pagCli,c:'var(--red)',sign:'-'},
-    {l:'Compensi Operatori',v:-w.compOp,c:'var(--blue)',sign:'-'},
-    {l:'Compensi Collab/Referral',v:-(w.compCollab+w.compRef),c:'var(--purple)',sign:'-'},
-    {l:'Costi Operativi',v:-w.costiOperativi,c:'var(--orange)',sign:'-'},
-    {l:'Risultato Operativo',v:w.risultatoOperativo,c:'var(--cyan)',sign:'=',bold:true,sep:true},
-    {l:'Rettifiche',v:w.rettifiche,c:'var(--tx3)',sign:w.rettifiche>=0?'+':'-'},
-    {l:'Importo Distribuibile',v:w.importoDistribuibile,c:'var(--green)',sign:'=',bold:true,sep:true},
-    {l:'Tesoreria ('+w.tesPct+'%)',v:-w.tesImp,c:'#5aaaff',sign:'-'},
-    {l:'Fondo Investitori ('+w.invPct+'%)',v:-w.invImp,c:'#c4a4f8',sign:'-'},
-    {l:'Residuo Post-Allocazione',v:w.residuo,c:'var(--gold)',sign:'=',bold:true,sep:true}
+  // ── KPI di sintesi ─────────────────────────────────────────────
+  var kpis=[
+    {l:'RICAVI INCASSATI',v:'€ '+fmt(w.incassati),s:'Soldi arrivati davvero questo mese',c:CAP_COL.gold},
+    {l:'RISULTATO OPERATIVO',v:capFmtSigned(w.risultatoOperativo),s:'Dopo pagamenti, compensi e costi',c:CAP_COL.cyan},
+    {l:'RESIDUO POST-ALLOCAZIONE',v:capFmtSigned(w.residuo),s:'Disponibile dopo Tesoreria e Investitori',c:CAP_COL.gold}
   ];
-  var maxAbs=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v);}).concat([1]));
-  var wfEl=g('cap-waterfall');
-  if(wfEl)wfEl.innerHTML=rows.map(function(r){
-    var barPct=Math.min(100,Math.abs(r.v)/maxAbs*100);
-    return (r.sep?'<div style="height:1px;background:rgba(255,255,255,.08);margin:8px 0"></div>':'')
-      +'<div style="padding:'+(r.info?'4px 0':'7px 0')+'">'
-      +'<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'
-      +'<span style="font-size:'+(r.info?'10px':'12px')+';font-weight:'+(r.bold?'800':'500')+';color:'+(r.info?'var(--tx4)':(r.bold?'var(--tx)':'var(--tx2)'))+'">'+(r.sign?r.sign+' ':'')+r.l+'</span>'
-      +'<span style="font-size:'+(r.info?'11px':'13px')+';font-weight:'+(r.bold?'900':'700')+';color:'+r.c+';white-space:nowrap">'+(r.v>=0?'€ '+fmt(r.v):'- € '+fmt(-r.v))+'</span>'
-      +'</div>'
-      +(r.info?'':'<div style="height:4px;background:rgba(255,255,255,.05);border-radius:3px;margin-top:5px;overflow:hidden"><div style="height:100%;width:'+barPct+'%;background:'+r.c+';border-radius:3px"></div></div>')
+  var kEl=g('cap-kpi');
+  if(kEl)kEl.innerHTML=kpis.map(function(k,i){
+    return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+k.c+'">'
+      +'<div class="kpi-label">'+k.l+'</div>'
+      +'<div class="kpi-val" style="color:'+k.c+'">'+k.v+'</div>'
+      +'<div class="kpi-sub">'+k.s+'</div>'
       +'</div>';
   }).join('');
+
+  // ── Financial Waterfall (bridge chart continuo, con linea dello zero) ──
+  var running=0;
+  var steps=[];
+  function flow(label,delta,color,icon){
+    var start=running; running+=delta;
+    steps.push({type:'flow',label:label,delta:delta,start:start,end:running,color:color,icon:icon});
+  }
+  function block(title){ steps.push({type:'block',title:title}); }
+  function tot(label,color){ steps.push({type:'tot',label:label,value:running,color:color}); }
+
+  block('Ricavi');
+  flow('Ricavi Incassati', w.incassati, CAP_COL.gold, '&#8593;');
+  block('Uscite operative');
+  flow('Pagamenti Clienti', -w.pagCli, CAP_COL.red, '&#8595;');
+  flow('Compensi Operatori', -w.compOp, CAP_COL.blue, '&#8595;');
+  flow('Compensi Collab/Referral', -(w.compCollab+w.compRef), CAP_COL.purple, '&#8595;');
+  flow('Costi Operativi', -w.costiOperativi, CAP_COL.orange, '&#8595;');
+  tot('Risultato Operativo', CAP_COL.cyan);
+  block('Rettifiche & allocazione capitale');
+  flow('Rettifiche', w.rettifiche, w.rettifiche>=0?CAP_COL.green:CAP_COL.red, w.rettifiche>=0?'&#8593;':'&#8595;');
+  tot('Importo Distribuibile', CAP_COL.green);
+  flow('Tesoreria ('+w.tesPct+'%)', -w.tesImp, CAP_COL.blue2, '&#8595;');
+  flow('Fondo Investitori ('+w.invPct+'%)', -w.invImp, CAP_COL.purple2, '&#8595;');
+  tot('Residuo Post-Allocazione', CAP_COL.gold);
+
+  var allVals=[0];
+  steps.forEach(function(s){
+    if(s.type==='flow')allVals.push(s.start,s.end);
+    else if(s.type==='tot')allVals.push(s.value);
+  });
+  var minV=Math.min.apply(null,allVals), maxV=Math.max.apply(null,allVals);
+  if(minV===maxV){minV-=1;maxV+=1;}
+  var range=maxV-minV;
+  function pos(v){ return (v-minV)/range*100; }
+  var zeroPos=pos(0);
+
+  var rowsHtml=steps.map(function(s){
+    if(s.type==='block')return '<div class="wf-block-title">'+s.title+'</div>';
+    var isTot=s.type==='tot';
+    var val=isTot?s.value:s.delta;
+    var p1=isTot?zeroPos:pos(s.start);
+    var p2=isTot?pos(s.value):pos(s.end);
+    var left=Math.min(p1,p2), width=Math.abs(p2-p1);
+    if(width<1.2 && val!==0) width=1.2;
+    return '<div class="wf-row'+(isTot?' tot':'')+'">'
+      +'<div class="wf-row-top">'
+        +'<span class="wf-row-label"><span class="wf-row-ic" style="background:'+capHexRgba(s.color,.15)+';color:'+s.color+'">'+(isTot?'=':s.icon)+'</span>'+s.label+'</span>'
+        +'<span class="wf-row-val" style="color:'+s.color+'">'+capFmtSigned(val)+'</span>'
+      +'</div>'
+      +'<div class="wf-track"><div class="wf-bar" style="left:'+left.toFixed(2)+'%;width:'+width.toFixed(2)+'%;background:'+s.color+(isTot?';box-shadow:0 0 10px '+capHexRgba(s.color,.55):'')+'"></div></div>'
+      +'</div>';
+  }).join('');
+
+  var wfEl=g('cap-waterfall');
+  if(wfEl)wfEl.innerHTML='<div class="wf-chart"><div class="wf-zeroline" style="left:'+zeroPos.toFixed(2)+'%"></div>'+rowsHtml+'</div>';
 
   var btnEl=g('cap-alloca-btn');
   if(btnEl){
@@ -1433,31 +1544,42 @@ function renderCapital(){
     btnEl.style.cursor=w.chiuso?'not-allowed':'pointer';
   }
 
+  // ── Capital Vaults ─────────────────────────────────────────────
   var vEl=g('cap-vaults');
   if(vEl)vEl.innerHTML=_capFunds.map(function(f){
-    var col=f.tipo==='TESORERIA'?'#5aaaff':(f.tipo==='INVESTITORI'?'#c4a4f8':'#00f093');
-    var obiettivoHtml='';
+    var meta=VAULT_META[f.tipo]||{icon:'&#128176;',color:CAP_COL.gold};
+    var col=meta.color;
+    var lastMv=_capMovements.filter(function(m){return m.fund_id===f.id;})[0];
+    var lastHtml=lastMv
+      ? '<div class="vault-last"><span>Ultimo movimento</span><span style="color:'+(lastMv.tipo==='PRELIEVO'?CAP_COL.red:col)+';font-weight:700">'+(lastMv.tipo==='PRELIEVO'?'- ':'+ ')+'€ '+fmt(lastMv.importo)+'</span></div>'
+      : '<div class="vault-last"><span>Ultimo movimento</span><span>—</span></div>';
+    var goalHtml='';
     if(f.obiettivo_importo){
       var pctObj=Math.min(100,(parseFloat(f.saldo_attuale)||0)/parseFloat(f.obiettivo_importo)*100);
-      obiettivoHtml='<div style="margin-top:10px"><div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pctObj+'%;background:'+col+'"></div></div><div style="font-size:9px;color:var(--tx3);margin-top:4px">'+pctObj.toFixed(0)+'% di obiettivo € '+fmt(f.obiettivo_importo)+'</div></div>';
+      goalHtml='<div class="vault-goal"><div class="vault-goal-bar"><div class="vault-goal-fill" style="width:'+pctObj+'%;background:'+col+'"></div></div><div class="vault-goal-lbl">'+pctObj.toFixed(0)+'% di obiettivo € '+fmt(f.obiettivo_importo)+'</div></div>';
     }
-    return '<div class="div-card" style="border-top:3px solid '+col+'">'
-      +'<div class="div-nm">'+f.nome+'</div>'
-      +'<div class="div-euro" style="color:'+col+'">€ '+fmt(f.saldo_attuale)+'</div>'
-      +'<div class="div-sub">Saldo attuale</div>'
-      +obiettivoHtml
+    return '<div class="vault-card" style="border-top:3px solid '+col+'">'
+      +'<div class="vault-head"><div class="vault-ic" style="background:'+capHexRgba(col,.14)+';color:'+col+'">'+meta.icon+'</div><div class="vault-nm">'+f.nome+'</div></div>'
+      +'<div class="vault-bal" style="color:'+col+'">€ '+fmt(f.saldo_attuale)+'</div>'
+      +'<div class="vault-sub">Saldo attuale</div>'
+      +goalHtml
+      +lastHtml
       +'</div>';
   }).join('');
 
+  // ── Storico movimenti ──────────────────────────────────────────
   var mEl=g('cap-movimenti-table');
   if(mEl){
-    if(!_capMovements.length){mEl.innerHTML='<tr><td style="padding:14px;color:var(--tx3)">Nessun movimento ancora — il primo arriva con la prima allocazione mensile.</td></tr>';}
-    else{
+    if(!_capMovements.length){
+      mEl.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="empty-ic">&#128337;</div>Nessun movimento ancora — il primo arriva con la prima allocazione mensile.</div></td></tr>';
+    }else{
       mEl.innerHTML='<tr><th>Data</th><th>Vault</th><th>Tipo</th><th>Importo</th><th>Mese</th><th>Descrizione</th></tr>'
         +_capMovements.map(function(m){
           var fund=_capFunds.find(function(f){return f.id===m.fund_id;});
-          return '<tr><td>'+new Date(m.created_at).toLocaleDateString('it-IT')+'</td><td>'+(fund?fund.nome:'—')+'</td><td>'+m.tipo+'</td>'
-            +'<td style="color:'+(m.tipo==='PRELIEVO'?'var(--red)':'var(--green)')+'">€ '+fmt(m.importo)+'</td>'
+          var tm=MV_TIPO_META[m.tipo]||{c:CAP_COL.tx3,l:m.tipo};
+          return '<tr><td>'+new Date(m.created_at).toLocaleDateString('it-IT')+'</td><td>'+(fund?fund.nome:'—')+'</td>'
+            +'<td><span class="mv-dot" style="background:'+tm.c+'"></span>'+tm.l+'</td>'
+            +'<td style="color:'+(m.tipo==='PRELIEVO'?CAP_COL.red:CAP_COL.green)+';font-weight:700">'+(m.tipo==='PRELIEVO'?'- ':'+ ')+'€ '+fmt(m.importo)+'</td>'
             +'<td>'+(m.mese?MESI_NOMI[m.mese-1]+' '+m.anno:'—')+'</td><td>'+(m.descrizione||'—')+'</td></tr>';
         }).join('');
     }
