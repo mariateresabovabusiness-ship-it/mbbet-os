@@ -13,26 +13,29 @@ var LOCAL_USERS = {
   'mariateresabova.business@gmail.com': { password: 'Luna2002@',  nome: 'Mary Bova', ruolo: 'SOCIO_ADMIN' },
   'manuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Manuele',   ruolo: 'SOCIO' },
   'serena@mbbet.it':          { password: 'Mbbet2024!', nome: 'Serena',    ruolo: 'OPERATORE' },
-  'samuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Samuele',   ruolo: 'COLLAB' }
+  'samuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Samuele',   ruolo: 'COLLAB' },
+  'alan@mbbet.it':            { password: 'Mbbet2025!', nome: 'Alan', ruolo: 'COLLAB_SELF', collabNome: 'Alan' }
 };
 
 var SESSION_KEY = 'mbbet_v2_session';
 var currentUser = null;
 var currentRole = 'VIEWER';
 var currentNome = '';
+var currentCollabNome = '';
 
 var ROLE_SECTIONS = {
-  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social','email'],
-  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social','email'],
-  'OPERATORE':     ['clienti','bonus','task','social'],
-  'COLLAB':        ['clienti','bonus','social'],
+  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab'],
+  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab'],
+  'OPERATORE':     ['clienti','bonus','task','social','collab'],
+  'COLLAB':        ['clienti','bonus','social','collab'],
+  'COLLAB_SELF':   ['collab'],
   'REFERRAL':      ['report'],
   'VIEWER':        ['clienti'],
-  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social','email']
+  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab']
 };
 
-var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
-var ROLE_COLORS  = {'SOCIO_ADMIN':'#f59e0b','SOCIO':'#d97706','OPERATORE':'#3b82f6','COLLAB':'#a78bfa','REFERRAL':'#10b981','VIEWER':'#6b7280','ADMIN_TECNICO':'#ef4444'};
+var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','COLLAB_SELF':'Collaboratore','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
+var ROLE_COLORS  = {'SOCIO_ADMIN':'#f59e0b','SOCIO':'#d97706','OPERATORE':'#3b82f6','COLLAB':'#a78bfa','COLLAB_SELF':'#22c55e','REFERRAL':'#10b981','VIEWER':'#6b7280','ADMIN_TECNICO':'#ef4444'};
 
 // ── Leggi sessione: prima da URL hash, poi da localStorage ──────────────────
 function _readSession() {
@@ -63,6 +66,7 @@ function initAuth(onSuccess, onFail) {
     currentUser = { email: s.email };
     currentNome = s.nome || s.email;
     currentRole = s.ruolo || 'VIEWER';
+    currentCollabNome = s.collabNome || '';
     if (onSuccess) { onSuccess(); return; }
   }
   if (onFail) onFail();
@@ -77,13 +81,14 @@ function doLogin(email, password) {
   currentUser = { email: key };
   currentNome = u.nome;
   currentRole = u.ruolo;
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ email: key, nome: u.nome, ruolo: u.ruolo })); } catch(e) {}
+  currentCollabNome = u.collabNome || '';
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ email: key, nome: u.nome, ruolo: u.ruolo, collabNome: u.collabNome || '' })); } catch(e) {}
   return { data: { user: currentUser } };
 }
 
 function doLogout() {
   try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
-  currentUser = null; currentRole = 'VIEWER'; currentNome = '';
+  currentUser = null; currentRole = 'VIEWER'; currentNome = ''; currentCollabNome = '';
   window.location.href = 'index.html';
 }
 
@@ -94,7 +99,7 @@ function navTo(url) {
   try { raw = localStorage.getItem(SESSION_KEY); } catch(e) {}
   // Fallback: usa currentUser in memoria
   if (!raw && currentUser) {
-    try { raw = JSON.stringify({ email: currentUser.email, nome: currentNome, ruolo: currentRole }); } catch(e) {}
+    try { raw = JSON.stringify({ email: currentUser.email, nome: currentNome, ruolo: currentRole, collabNome: currentCollabNome }); } catch(e) {}
   }
   if (raw) {
     try {
@@ -118,3 +123,4 @@ function isSocio()      { return currentRole === 'SOCIO_ADMIN' || currentRole ==
 function canWrite()     { return ['SOCIO_ADMIN','SOCIO','OPERATORE','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
 function canDelete()    { return currentRole === 'SOCIO_ADMIN' || currentRole === 'ADMIN_TECNICO'; }
 function seeFinanze()   { return ['SOCIO_ADMIN','SOCIO','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
+function isReadOnlyCollab() { return currentRole === 'COLLAB_SELF'; }
