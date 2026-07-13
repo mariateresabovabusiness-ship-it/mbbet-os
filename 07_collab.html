@@ -100,6 +100,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .tariffa-nome{font-size:12.5px;font-weight:800;color:var(--tx2);letter-spacing:.3px}
 .tariffa-nota{font-size:8.5px;color:var(--tx3);margin-top:2px;font-style:italic}
 .tariffa-prezzo{font-size:26px;font-weight:900;color:var(--gold);margin-top:8px;text-shadow:0 0 18px rgba(245,200,66,.35)}
+.tariffa-toggle{display:flex;gap:4px;margin-top:10px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px}
+.tg-opt{flex:1;padding:6px 6px;font-size:9px;font-weight:700;border:none;border-radius:6px;background:transparent;color:var(--tx3);cursor:pointer;transition:.14s;font-family:inherit}
+.tg-opt.act{background:rgba(245,200,66,.18);color:var(--gold)}
 .st-PAGATO{background:rgba(0,229,138,.1);color:var(--green);border:1px solid rgba(0,229,138,.25)}
 .st-PAGATO:hover{background:rgba(0,229,138,.2)}
 .st-IN_CORSO{background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.25)}
@@ -511,6 +514,15 @@ function bnsForCollab(c){
     return bn===nm||bn===full||bn.includes(nm)||(nm.length>2&&nm.includes(bn));
   });
 }
+function setTariffaEsito(cardId,isPrimario,prezzoA,prezzoB){
+  var valEl=g(cardId+'-val');
+  if(valEl)valEl.textContent='€ '+fmt(isPrimario?prezzoA:prezzoB);
+  var tg=g(cardId+'-tg');
+  if(tg){
+    var btns=tg.querySelectorAll('.tg-opt');
+    for(var i=0;i<btns.length;i++)btns[i].classList.toggle('act',(i===0)===isPrimario);
+  }
+}
 function tariffeForCollab(c){
   var nm=(c.nome||'').toLowerCase().trim();
   return _collabTariffe.filter(function(t){
@@ -663,11 +675,21 @@ function renderDetail(cid){
         '<span style="font-size:9.5px;color:var(--tx3)">'+tariffe.length+' siti attivi con te</span>'+
       '</div>'+
       '<div class="tariffe-grid">'+
-      tariffe.map(function(t){
+      tariffe.map(function(t,idx){
+        var hasAlt=(t.prezzo_alt!=null&&t.prezzo_alt!=='');
+        var cid='tariffa-'+idx;
+        var toggleHtml='';
+        if(hasAlt){
+          toggleHtml='<div class="tariffa-toggle" id="'+cid+'-tg">'+
+            '<button type="button" class="tg-opt act" onclick="setTariffaEsito(\''+cid+'\',true,'+t.prezzo+','+t.prezzo_alt+')">'+(t.note||'Riuscito')+'</button>'+
+            '<button type="button" class="tg-opt" onclick="setTariffaEsito(\''+cid+'\',false,'+t.prezzo+','+t.prezzo_alt+')">'+(t.nota_alt||'Non riuscito')+'</button>'+
+            '</div>';
+        }
         return '<div class="tariffa-card">'+
           '<div class="tariffa-nome">'+t.bookmaker+'</div>'+
-          '<div class="tariffa-prezzo">€ '+fmt(t.prezzo)+'</div>'+
-          (t.note?'<div class="tariffa-nota">'+t.note+'</div>':'')+
+          '<div class="tariffa-prezzo" id="'+cid+'-val">€ '+fmt(t.prezzo)+'</div>'+
+          (!hasAlt&&t.note?'<div class="tariffa-nota">'+t.note+'</div>':'')+
+          toggleHtml+
         '</div>';
       }).join('')+
       '</div>'+
