@@ -10,6 +10,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(245,200,66,.2);border-radius:2px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,87,87,.4)}50%{box-shadow:0 0 0 6px rgba(255,87,87,0)}}
+@keyframes flicker{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.85}}
 
 /* SIDEBAR */
 .sb{width:var(--sb);height:100vh;flex-shrink:0;background:rgba(3,4,14,.99);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;position:relative;z-index:30}
@@ -103,6 +104,11 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .tariffa-toggle{display:flex;gap:4px;margin-top:10px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px}
 .tg-opt{flex:1;padding:6px 6px;font-size:9px;font-weight:700;border:none;border-radius:6px;background:transparent;color:var(--tx3);cursor:pointer;transition:.14s;font-family:inherit}
 .tg-opt.act{background:rgba(245,200,66,.18);color:var(--gold)}
+.listino-banner{margin-top:24px;padding:22px;border-radius:18px;background:linear-gradient(135deg,rgba(245,200,66,.09),rgba(10,13,32,.98) 60%);border:1px solid rgba(245,200,66,.28);box-shadow:0 0 44px rgba(245,200,66,.07)}
+.listino-hdr{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.listino-fire{font-size:30px;filter:drop-shadow(0 0 12px rgba(255,138,61,.65));animation:flicker 2.2s ease-in-out infinite;display:inline-block}
+.listino-title{font-size:17px;font-weight:900;color:var(--gold);letter-spacing:2.5px;text-shadow:0 0 22px rgba(245,200,66,.4)}
+.listino-sub{font-size:10px;color:var(--tx3);margin-top:3px}
 .st-PAGATO{background:rgba(0,229,138,.1);color:var(--green);border:1px solid rgba(0,229,138,.25)}
 .st-PAGATO:hover{background:rgba(0,229,138,.2)}
 .st-IN_CORSO{background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.25)}
@@ -606,6 +612,7 @@ function renderDetail(cid){
   var c=_collabs.find(function(x){return String(x.id)===String(cid);});
   if(!c)return;
   var allBns=bnsForCollab(c);
+  var tariffe=tariffeForCollab(c);
   var pag=getPagMap();
   var col=PALETTE[_collabs.indexOf(c)%PALETTE.length];
   var today=new Date().toISOString().slice(0,10);
@@ -629,6 +636,10 @@ function renderDetail(cid){
     var val=parseFloat(b.comp_referral)||0;
     if(!byBk[bk])byBk[bk]={bk:bk,rows:[],pagati:0,daPagare:0,scaduti:0,inScadenza:0,inc:0,daInc:0,tariff:0,totClienti:0};
     if(val>byBk[bk].tariff)byBk[bk].tariff=val;
+  });
+  // Includi anche i siti del listino senza ancora nessun cliente, così sono comunque collegati/cliccabili
+  tariffe.forEach(function(t){
+    if(!byBk[t.bookmaker])byBk[t.bookmaker]={bk:t.bookmaker,rows:[],pagati:0,daPagare:0,scaduti:0,inScadenza:0,inc:0,daInc:0,tariff:parseFloat(t.prezzo)||0,totClienti:0};
   });
   // Step 2: popola stats solo dal mese selezionato
   var totPagati=0,totDaPagare=0,totScaduti=0,totInc=0,totDaInc=0;
@@ -665,36 +676,6 @@ function renderDetail(cid){
     '<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(c.contatto||'')+(c.tipo?' · '+c.tipo:'')+'</div></div></div>'+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
-
-  // LISTINO PREZZI / SITI DISPONIBILI
-  var tariffe=tariffeForCollab(c);
-  if(tariffe.length){
-    html+='<div style="margin-bottom:18px">'+
-      '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px">'+
-        '<span style="font-size:12px;font-weight:900;color:var(--gold);letter-spacing:1.5px">&#128176; SITI DISPONIBILI &amp; COMMISSIONI</span>'+
-        '<span style="font-size:9.5px;color:var(--tx3)">'+tariffe.length+' siti attivi con te</span>'+
-      '</div>'+
-      '<div class="tariffe-grid">'+
-      tariffe.map(function(t,idx){
-        var hasAlt=(t.prezzo_alt!=null&&t.prezzo_alt!=='');
-        var cid='tariffa-'+idx;
-        var toggleHtml='';
-        if(hasAlt){
-          toggleHtml='<div class="tariffa-toggle" id="'+cid+'-tg">'+
-            '<button type="button" class="tg-opt act" onclick="setTariffaEsito(\''+cid+'\',true,'+t.prezzo+','+t.prezzo_alt+')">'+(t.note||'Riuscito')+'</button>'+
-            '<button type="button" class="tg-opt" onclick="setTariffaEsito(\''+cid+'\',false,'+t.prezzo+','+t.prezzo_alt+')">'+(t.nota_alt||'Non riuscito')+'</button>'+
-            '</div>';
-        }
-        return '<div class="tariffa-card">'+
-          '<div class="tariffa-nome">'+t.bookmaker+'</div>'+
-          '<div class="tariffa-prezzo" id="'+cid+'-val">€ '+fmt(t.prezzo)+'</div>'+
-          (!hasAlt&&t.note?'<div class="tariffa-nota">'+t.note+'</div>':'')+
-          toggleHtml+
-        '</div>';
-      }).join('')+
-      '</div>'+
-    '</div>';
-  }
 
   // SELETTORE MESE
   if(mesiList.length>0){
@@ -776,6 +757,37 @@ function renderDetail(cid){
       return '<span class="st-badge st-'+s+'" style="cursor:default">'+STATI_LABEL[s]+'</span>';
     }).join('')+
     '<span style="margin-left:auto;font-size:10.5px;color:var(--tx3);font-style:italic">clicca lo stato per cambiarlo</span></div>';
+
+  // LISTINO PREZZI / SITI DISPONIBILI — sezione in evidenza, in fondo
+  if(tariffe.length){
+    html+='<div class="listino-banner">'+
+      '<div class="listino-hdr">'+
+        '<span class="listino-fire">&#128293;</span>'+
+        '<div><div class="listino-title">LISTINO PREZZI</div>'+
+        '<div class="listino-sub">'+tariffe.length+' siti disponibili con te &middot; commissione per cliente portato</div></div>'+
+      '</div>'+
+      '<div class="tariffe-grid">'+
+      tariffe.map(function(t,idx){
+        var col2=PALETTE[idx%PALETTE.length];
+        var hasAlt=(t.prezzo_alt!=null&&t.prezzo_alt!=='');
+        var cid='tariffa-'+idx;
+        var toggleHtml='';
+        if(hasAlt){
+          toggleHtml='<div class="tariffa-toggle" id="'+cid+'-tg">'+
+            '<button type="button" class="tg-opt act" onclick="setTariffaEsito(\''+cid+'\',true,'+t.prezzo+','+t.prezzo_alt+')">'+(t.note||'Riuscito')+'</button>'+
+            '<button type="button" class="tg-opt" onclick="setTariffaEsito(\''+cid+'\',false,'+t.prezzo+','+t.prezzo_alt+')">'+(t.nota_alt||'Non riuscito')+'</button>'+
+            '</div>';
+        }
+        return '<div class="tariffa-card" style="border-color:'+col2+'44;background:linear-gradient(160deg,'+col2+'14,rgba(10,13,32,.95) 55%)">'+
+          '<div class="tariffa-nome">'+t.bookmaker+'</div>'+
+          '<div class="tariffa-prezzo" id="'+cid+'-val" style="color:'+col2+';text-shadow:0 0 18px '+col2+'55">€ '+fmt(t.prezzo)+'</div>'+
+          (!hasAlt&&t.note?'<div class="tariffa-nota">'+t.note+'</div>':'')+
+          toggleHtml+
+        '</div>';
+      }).join('')+
+      '</div>'+
+    '</div>';
+  }
 
   g('collab-detail').innerHTML=html;
 }
