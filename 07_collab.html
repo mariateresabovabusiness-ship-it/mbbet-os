@@ -109,6 +109,14 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .listino-fire{font-size:30px;filter:drop-shadow(0 0 12px rgba(255,138,61,.65));animation:flicker 2.2s ease-in-out infinite;display:inline-block}
 .listino-title{font-size:17px;font-weight:900;color:var(--gold);letter-spacing:2.5px;text-shadow:0 0 22px rgba(245,200,66,.4)}
 .listino-sub{font-size:10px;color:var(--tx3);margin-top:3px}
+.badge-nuovo{font-size:8px;font-weight:800;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--tx3);letter-spacing:.4px;text-transform:uppercase}
+.welcome-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:20px 24px;margin-bottom:20px;border-radius:16px;background:linear-gradient(120deg,rgba(245,200,66,.1),rgba(10,13,32,.98) 65%);border:1px solid rgba(245,200,66,.25)}
+.welcome-hi{font-size:20px;font-weight:900;color:var(--tx)}
+.welcome-hi span{color:var(--gold)}
+.welcome-sub{font-size:11px;color:var(--tx3);margin-top:4px}
+.welcome-tot{text-align:right}
+.welcome-tot-val{font-size:28px;font-weight:900;color:var(--green);text-shadow:0 0 20px rgba(0,229,138,.3)}
+.welcome-tot-lbl{font-size:9px;color:var(--tx3);letter-spacing:1px;margin-top:2px}
 .st-PAGATO{background:rgba(0,229,138,.1);color:var(--green);border:1px solid rgba(0,229,138,.25)}
 .st-PAGATO:hover{background:rgba(0,229,138,.2)}
 .st-IN_CORSO{background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.25)}
@@ -667,6 +675,15 @@ function renderDetail(cid){
 
   var html='';
 
+  // BENVENUTO PERSONALIZZATO (solo per il collaboratore stesso)
+  if(isReadOnlyCollab()){
+    html+='<div class="welcome-banner">'+
+      '<div><div class="welcome-hi">Ciao <span>'+(c.nome||'')+'</span> &#128075;</div>'+
+      '<div class="welcome-sub">Ecco la situazione aggiornata dei tuoi clienti e delle tue commissioni</div></div>'+
+      '<div class="welcome-tot"><div class="welcome-tot-val">€ '+fmt(totInc)+'</div><div class="welcome-tot-lbl">INCASSATO FINORA</div></div>'+
+    '</div>';
+  }
+
   // HEADER
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">'+
     '<div style="display:flex;align-items:center;gap:12px">'+
@@ -725,26 +742,27 @@ function renderDetail(cid){
   bkList.forEach(function(bkData){
     var bk=bkData.bk;
     var bkEnc=encodeURIComponent(bk);
-    var hasAlert=bkData.scaduti>0;
-    html+='<tr onclick="renderBkDetail(\''+cid+'\',\''+bkEnc+'\')" style="cursor:pointer;transition:.12s" '+
+    var haCliente=bkData.rows.length>0;
+    html+='<tr onclick="renderBkDetail(\''+cid+'\',\''+bkEnc+'\')" style="cursor:pointer;transition:.12s;'+(haCliente?'':'opacity:.5')+'" '+
       'onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" '+
       'onmouseout="this.style.background=\'transparent\'">'+
       '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<div style="display:flex;align-items:center;gap:8px">'+
-        '<span style="font-size:11px;color:var(--gold)">→</span>'+
+        '<span style="font-size:11px;color:'+(haCliente?'var(--gold)':'var(--tx3)')+'">→</span>'+
         '<span style="font-weight:800;color:var(--tx);font-size:13px">'+bk+'</span>'+
+        (!haCliente?'<span class="badge-nuovo">nessun cliente</span>':'')+
         '</div></td>'+
       '<td style="padding:11px 14px;text-align:center;color:var(--gold);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(bkData.tariff)+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+bkData.rows.length+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+bkData.pagati+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;color:var(--blue);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+bkData.daPagare+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04);color:'+(haCliente?'var(--tx)':'var(--tx3)')+'">'+bkData.rows.length+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04);color:'+(haCliente?'var(--green)':'var(--tx3)')+'">'+bkData.pagati+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04);color:'+(haCliente?'var(--blue)':'var(--tx3)')+'">'+bkData.daPagare+'</td>'+
       '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (bkData.scaduti>0?'<span style="color:var(--red);font-weight:700">'+bkData.scaduti+'</span>':'<span style="color:var(--tx3)">0</span>')+
       '</td>'+
       '<td style="padding:11px 14px;text-align:right;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (bkData.inc>0?'€ '+fmt(bkData.inc):'—')+'</td>'+
       '<td style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(bkData.daInc>0?'var(--gold)':'var(--tx3)')+'">'+
-        (bkData.daInc>0?'€ '+fmt(bkData.daInc):'✓')+'</td>'+
+        (bkData.daInc>0?'€ '+fmt(bkData.daInc):(haCliente?'✓':'—'))+'</td>'+
       '</tr>';
   });
 
