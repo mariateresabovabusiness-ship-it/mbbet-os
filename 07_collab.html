@@ -1085,6 +1085,11 @@ function renderDetail(cid){
     if(st==='PAGATO'){byClienteFlat[cl].pagati++;byClienteFlat[cl].inc+=val;}
     else{byClienteFlat[cl].daPagare++;byClienteFlat[cl].daInc+=val;if(st==='SCADUTO'||st==='URGENTE')byClienteFlat[cl].scaduti++;}
   });
+  // Includi anche i clienti gia' collegati a questo collaboratore nel CRM ma
+  // senza ancora nessun sito segnato (0 fatto finora, comunque visibili)
+  _clientiCollab.filter(function(cc){return (cc.collab||'')===c.nome;}).forEach(function(cc){
+    if(!byClienteFlat[cc.nome])byClienteFlat[cc.nome]={cliente:cc.nome,rows:[],pagati:0,daPagare:0,scaduti:0,inc:0,daInc:0};
+  });
   var clientiListFlat=Object.values(byClienteFlat).sort(function(a,b){return b.rows.length-a.rows.length;});
 
   html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;margin-bottom:6px">'+
