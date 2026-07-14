@@ -111,6 +111,14 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .listino-sub{font-size:10px;color:var(--tx3);margin-top:3px}
 .badge-nuovo{font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--tx3);letter-spacing:.4px;text-transform:uppercase}
 
+/* Wrapper per le tabelle larghe: scrollbar sempre visibile + ombra sul
+   bordo destro finche' c'e' altro da scorrere, cosi' su schermi piu'
+   stretti (laptop) si capisce subito che la tabella continua di la'. */
+.mbl-scroll-wrap{overflow-x:auto;position:relative;scrollbar-width:thin;scrollbar-color:rgba(245,200,66,.35) transparent}
+.mbl-scroll-wrap::-webkit-scrollbar{height:8px}
+.mbl-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(245,200,66,.35);border-radius:4px}
+.mbl-scroll-wrap::-webkit-scrollbar-thumb:hover{background:rgba(245,200,66,.55)}
+
 .welcome-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:20px 24px;margin-bottom:20px;border-radius:16px;background:linear-gradient(120deg,rgba(245,200,66,.1),rgba(10,13,32,.98) 65%);border:1px solid rgba(245,200,66,.25)}
 .welcome-hi{font-size:20px;font-weight:900;color:var(--tx)}
 .welcome-hi span{color:var(--gold)}
@@ -197,10 +205,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
   .kpi-strip{grid-template-columns:1fr 1fr}
 }
 /* Tabelle a schermo largo (siti, clienti) diventano schede impilate su
-   telefono E portatile: con tutte le colonne finanza aggiunte, la
-   tabella non ci sta nemmeno su un laptop da 13"/14" (1280-1440px),
-   quindi la soglia qui e' piu' alta di quella del layout sopra. */
-@media(max-width:1400px){
+   telefono/tablet. Su laptop restano tabella (vedi .mbl-table-wrap sotto
+   per lo scroll orizzontale con indizio visivo). */
+@media(max-width:900px){
   .mbl-table thead{display:none}
   .mbl-table tbody{display:flex;flex-direction:column;gap:10px}
   .mbl-table tr{display:block;border:1px solid rgba(255,255,255,.08)!important;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.012)}
@@ -981,7 +988,7 @@ function renderPocketCliente(cid,clienteEnc){
   righe.forEach(function(b){righeBySito[(b.bookmaker||'').toLowerCase()]=b;});
 
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
-    '<div style="overflow-x:auto"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
+    '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(245,200,66,.06)">'+
     '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
@@ -1175,7 +1182,7 @@ function renderDetail(cid){
     '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">'+
     '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">CLIENTI</span>'+
     '<span style="font-size:10px;color:var(--tx3)">clicca un cliente per vedere i suoi siti</span></div>'+
-    '<div style="overflow-x:auto"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
+    '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(255,255,255,.025)">'+
     '<th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
@@ -1419,7 +1426,7 @@ function renderFlatCliente(cid,clienteEnc){
   var today=new Date().toISOString().slice(0,10);
 
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
-    '<div style="overflow-x:auto"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
+    '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(245,200,66,.06)">'+
     '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+

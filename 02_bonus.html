@@ -452,6 +452,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 
 /* ── VISTA OPERATIVA (Google Sheet replica) ── */
 .ot-tbl{width:100%;border-collapse:collapse;min-width:1400px}
+/* Scrollbar sempre visibile sulle tabelle larghe, cosi' su schermi piu'
+   stretti (laptop) si capisce subito che la tabella continua di la'. */
+.mbl-scroll-wrap{overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(245,200,66,.35) transparent}
+.mbl-scroll-wrap::-webkit-scrollbar{height:8px}
+.mbl-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(245,200,66,.35);border-radius:4px}
+.mbl-scroll-wrap::-webkit-scrollbar-thumb:hover{background:rgba(245,200,66,.55)}
 .ot-th{padding:10px 11px;font-size:12px;font-weight:800;color:rgba(255,255,255,.85);letter-spacing:.3px;text-transform:none;border-bottom:2px solid rgba(255,255,255,.1);background:rgba(10,14,35,.96);white-space:nowrap;position:sticky;top:0;z-index:2;user-select:none}
 .ot-td{padding:9px 11px;font-size:13px;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.016);vertical-align:middle;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .ot-td.ot-edit{background:rgba(0,240,147,.04);border-bottom:1px solid rgba(0,240,147,.25);overflow:visible}
@@ -595,10 +601,10 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .ot-leg-box{padding:3px 8px;border-radius:4px;font-weight:700;font-size:9px}
 .ot-leg-arr{color:var(--tx4);font-size:10px}
 
-/* Tabella Vista Operativa: con tutte le colonne finanza aggiunte non ci
-   sta piu' nemmeno su un laptop 13"/14" (1280-1440px) — sotto ai 1400px
-   ogni riga diventa una scheda impilata, un campo per riga. */
-@media(max-width:1400px){
+/* Tabella Vista Operativa su telefono/tablet stretto: ogni riga diventa
+   una scheda impilata. Su laptop resta tabella con scroll orizzontale
+   (vedi .mbl-scroll-wrap per l'indizio visivo di scorrimento). */
+@media(max-width:768px){
   .ot-tbl{min-width:0}
   .ot-tbl thead{display:none}
   .ot-tbl tbody{display:flex;flex-direction:column;gap:10px}
@@ -4002,7 +4008,7 @@ function renderBkWorkspace(op, bk){
 
   /* ── TABELLA WORKSPACE — font più grande, senza Saldo BK e Ric. Previsto ── */
   var FS='13px';var FSS='11px';
-  h+='<div style="overflow-x:auto;border:1px solid '+col+'20;border-radius:14px">'
+  h+='<div class="mbl-scroll-wrap" style="border:1px solid '+col+'20;border-radius:14px">'
     +'<table class="ot-tbl" style="font-size:'+FS+'"><thead>'
     +'<tr>'
       +'<th class="ot-sg" rowspan="2" style="vertical-align:middle;font-size:'+FSS+'">Cliente</th>'
