@@ -443,7 +443,7 @@ function isReadOnlyCollab() { return currentRole === 'COLLAB_SELF'; }
 </script>
 <script>
 /* ══ GLOBALS ══ */
-var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[];
+var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[], _operatoriList=[];
 var PAG_KEY='mbbet_collab_pag_v1'; // localStorage key for payment statuses
 var STATI=['PAGATO','IN_CORSO','IN_SCADENZA','URGENTE','SCADUTO'];
 var STATI_LABEL={PAGATO:'PAGATO',IN_CORSO:'IN CORSO',IN_SCADENZA:'IN SCADENZA',URGENTE:'URGENTE',SCADUTO:'SCADUTO'};
@@ -615,11 +615,13 @@ async function loadAll(){
       db.from('collab').select('*').order('created_at',{ascending:false}),
       fetchBonusCollab(),
       db.from('collab_tariffe').select('*').order('ordine'),
-      db.from('clienti').select('id,nome,collab').not('collab','is',null)
+      db.from('clienti').select('id,nome,collab').not('collab','is',null),
+      db.from('operatori').select('nome,is_joint').eq('stato','Attivo')
     ]);
-    var rc=risultati[0], rb=risultati[1], rt=risultati[2], rcl=risultati[3];
+    var rc=risultati[0], rb=risultati[1], rt=risultati[2], rcl=risultati[3], rop=risultati[4];
     _collabTariffe=(rt&&rt.data)||[];
     _clientiCollab=(rcl&&rcl.data)||[];
+    _operatoriList=(rop&&rop.data)?rop.data.map(function(o){return o.nome;}):['Mary','Manuele','Serena','Samuele'];
     _collabs=rc.data||[];
     _bns=(rb.data||[]).filter(function(b){return b.nome_collab&&b.nome_collab.trim();});
     // Merge: also create virtual collabs from bonus nome_collab if not in registry
@@ -1471,10 +1473,7 @@ function openEditBonus(bonusId,cid,bkEnc){
       '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">OPERATORE</div>'+
         '<select id="eb-op" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
           '<option value=""'+((!b.operatore)?' selected':'')+'>— Nessuno</option>'+
-          '<option value="Mary"'+(b.operatore==='Mary'?' selected':'')+'>Mary</option>'+
-          '<option value="Manuele"'+(b.operatore==='Manuele'?' selected':'')+'>Manuele</option>'+
-          '<option value="Serena"'+(b.operatore==='Serena'?' selected':'')+'>Serena</option>'+
-          '<option value="Samuele"'+(b.operatore==='Samuele'?' selected':'')+'>Samuele</option>'+
+          _operatoriList.map(function(o){return '<option value="'+o+'"'+(b.operatore===o?' selected':'')+'>'+o+'</option>';}).join('')+
         '</select></div>'+
       '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">NOTE</div>'+
         '<input id="eb-note" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" value="'+(b.note||'')+'" placeholder="Note..."></div>'+
@@ -1497,7 +1496,7 @@ function openNewBonus(cid,bkEnc){
   var c=_collabs.find(function(x){return String(x.id)===String(cid);});
   if(!c)return;
   _newBnsCid=cid;_newBnsEnc=bkEnc;
-  var _nbOpDefault=['Mary','Manuele','Serena','Samuele'].find(function(o){return (currentNome||'').indexOf(o)===0;})||'';
+  var _nbOpDefault='';
   var _nbTariffa=tariffeForCollab(c).find(function(t){return (t.bookmaker||'').toLowerCase()===bkName.toLowerCase();});
   var _nbImpDefault=_nbTariffa?parseFloat(_nbTariffa.prezzo)||0:'';
   var mese=_collabMese?parseInt(_collabMese.split('-')[1]):new Date().getMonth()+1;
@@ -1539,8 +1538,8 @@ function openNewBonus(cid,bkEnc){
       '</div>'+
       '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">OPERATORE</div>'+
         '<select id="nb-op" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
-          '<option value=""'+(_nbOpDefault?'':' selected')+'>— Nessuno</option>'+
-          ['Mary','Manuele','Serena','Samuele'].map(function(o){return '<option value="'+o+'"'+(o===_nbOpDefault?' selected':'')+'>'+o+'</option>';}).join('')+
+          '<option value="" selected>— Nessuno</option>'+
+          _operatoriList.map(function(o){return '<option value="'+o+'">'+o+'</option>';}).join('')+
         '</select></div>'+
       '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">NOTE</div>'+
         '<input id="nb-note" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" placeholder="Note opzionali..."></div>'+
