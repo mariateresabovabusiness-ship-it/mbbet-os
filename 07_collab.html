@@ -1647,7 +1647,7 @@ async function saveNewBonus(){
     anno_operativo:anno,
     operatore:(g('nb-op').value||'').trim()||null,
     note:(g('nb-note').value||'').trim()||null,
-    stato:'IN_CORSO'
+    stato:'FATTO'
   };
   var pwd=(g('nb-pwd').value||'').trim();
   if(pwd)payload.password_bk=pwd;
