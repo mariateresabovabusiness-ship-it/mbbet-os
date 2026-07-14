@@ -3428,7 +3428,7 @@ async function loadNotifiche(){
 }
 
 /* ── TABELLE OPERATIVE ── */
-var _tw={tab:'op',selOp:'',selBk:'',selCli:'',selSt:'ALL',search:'',selMese:0,selAnno:0};
+var _tw={tab:'op',selOp:'',selBk:'',selCli:'',selSt:'ALL',search:'',selMese:0,selAnno:0,mesoSet:false};
 var _MESI_IT=['','Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 var _twTasks=[],_twPag=[],_twTaskOk=false,_twPagOk=false;
 
@@ -3490,7 +3490,7 @@ function renderTabOpCard(){
 }
 
 function openTabOp(tab){
-  _tw.tab=tab||'bk';_tw.selOp='';_tw.selBk='';_tw.selCli='';_tw.selSt='ALL';_tw.search='';_tw.selMese=0;_tw.selAnno=0;
+  _tw.tab=tab||'bk';_tw.selOp='';_tw.selBk='';_tw.selCli='';_tw.selSt='ALL';_tw.search='';_tw.selMese=0;_tw.selAnno=0;_tw.mesoSet=false;
   g('tab-ws').classList.add('open');
   if(tab==='task'&&!_twTaskOk)loadTwTasks().then(renderTw);
   if(tab==='pagamenti'&&!_twPagOk)loadTwPag().then(renderTw);
@@ -3499,7 +3499,7 @@ function openTabOp(tab){
 function closeTabOp(){g('tab-ws').classList.remove('open');}
 
 function switchTw(tab){
-  _tw.tab=tab;_tw.selOp='';_tw.selBk='';_tw.selCli='';_tw.selSt='ALL';_tw.search='';_tw.selMese=0;_tw.selAnno=0;
+  _tw.tab=tab;_tw.selOp='';_tw.selBk='';_tw.selCli='';_tw.selSt='ALL';_tw.search='';_tw.selMese=0;_tw.selAnno=0;_tw.mesoSet=false;
   if(tab==='task'&&!_twTaskOk){loadTwTasks().then(renderTw);return;}
   if(tab==='pagamenti'&&!_twPagOk){loadTwPag().then(renderTw);return;}
   renderTw();
@@ -3895,7 +3895,7 @@ function renderOpDashboard(op){
     var thisM=brows.filter(function(r){return r.mese_op===curM&&r.anno_op===curA;});
     var thisPmb=thisM.reduce(function(s,r){return s+(r.profitto_mb||0);},0);
     var cardCls='ot-bk-nav-card'+(nCP>0?' has-prob':hasAlert?' has-alert':'');
-    h+='<div class="'+cardCls+'" onclick="_tw.selBk=\''+escQ(bkNm)+'\';_tw.selMese=0;_tw.selAnno=0;_tw.selSt=\'ALL\';renderTw()">'
+    h+='<div class="'+cardCls+'" onclick="_tw.selBk=\''+escQ(bkNm)+'\';_tw.selMese=0;_tw.selAnno=0;_tw.mesoSet=false;_tw.selSt=\'ALL\';renderTw()">'
       +'<div class="ot-bk-nav-card-stripe" style="background:linear-gradient(90deg,'+col+','+col+'44)"></div>'
       +'<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px">'
         +'<div style="width:44px;height:44px;border-radius:13px;background:'+col+'1a;border:1px solid '+col+'35;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:'+col+';flex-shrink:0">'+bkNm.slice(0,2).toUpperCase()+'</div>'
@@ -3948,7 +3948,7 @@ function renderBkWorkspace(op, bk){
   var moList=Object.values(moMap).sort(function(a,b){return a.a!==b.a?a.a-b.a:a.m-b.m;});
   /* se nessun mese selezionato, default mese corrente se ha dati, altrimenti tutti */
   var selM=_tw.selMese,selA=_tw.selAnno;
-  if(!selM){var hasCur=moList.some(function(x){return x.m===curM&&x.a===curA;});if(hasCur){selM=curM;selA=curA;_tw.selMese=selM;_tw.selAnno=selA;}}
+  if(!selM&&!_tw.mesoSet){var hasCur=moList.some(function(x){return x.m===curM&&x.a===curA;});if(hasCur){selM=curM;selA=curA;_tw.selMese=selM;_tw.selAnno=selA;}_tw.mesoSet=true;}
 
   /* righe: mese + ricerca PRIMA, poi conteggi per badge, poi filtro stato */
   var monthRows=(selM>0&&selA>0)?all.filter(function(r){return r.mese_op===selM&&r.anno_op===selA;}):all;
@@ -3976,7 +3976,7 @@ function renderBkWorkspace(op, bk){
   var h='<div class="ot-bc">'
     +'<span class="ot-bc-link" onclick="_tw.selOp=\'\';_tw.selBk=\'\';_tw.search=\'\';renderTw()">Tutti gli operatori</span>'
     +'<span class="ot-bc-sep">/</span>'
-    +'<span class="ot-bc-link" onclick="_tw.selBk=\'\';_tw.selMese=0;_tw.selAnno=0;_tw.search=\'\';renderTw()">'+op+'</span>'
+    +'<span class="ot-bc-link" onclick="_tw.selBk=\'\';_tw.selMese=0;_tw.selAnno=0;_tw.mesoSet=false;_tw.search=\'\';renderTw()">'+op+'</span>'
     +'<span class="ot-bc-sep">/</span>'
     +'<span class="ot-bc-cur" style="color:'+col+'">'+bk+'</span>'
     +'<span class="ot-bc-sep">—</span>'
@@ -3996,7 +3996,7 @@ function renderBkWorkspace(op, bk){
       +'<div style="font-size:10px;color:var(--tx3);margin-top:3px">'+rows.length+' clienti &nbsp;·&nbsp; '+meseLabel+'</div>'
     +'</div>'
     +'<button onclick="otAssegna(\''+escQ(op)+'\')" style="padding:7px 16px;border-radius:9px;font-size:10px;font-weight:800;cursor:pointer;border:1px solid '+col+'40;background:'+col+'10;color:'+col+';font-family:inherit">＋ Aggiungi cliente</button>'
-    +'<button onclick="_tw.selBk=\'\';_tw.selMese=0;_tw.selAnno=0;_tw.search=\'\';renderTw()" style="padding:7px 14px;border-radius:9px;font-size:10px;cursor:pointer;border:1px solid var(--br);color:var(--tx3);background:transparent;font-family:inherit">← '+op+'</button>'
+    +'<button onclick="_tw.selBk=\'\';_tw.selMese=0;_tw.selAnno=0;_tw.mesoSet=false;_tw.search=\'\';renderTw()" style="padding:7px 14px;border-radius:9px;font-size:10px;cursor:pointer;border:1px solid var(--br);color:var(--tx3);background:transparent;font-family:inherit">← '+op+'</button>'
     +'</div>';
 
   /* ── KPI STRIP ── */
@@ -4014,11 +4014,11 @@ function renderBkWorkspace(op, bk){
 
   /* ── MESE TABS ── */
   h+='<div class="ot-mese-tabs">'
-    +'<button class="ot-mt'+((!selM)?'  on':'')+'" onclick="_tw.selMese=0;_tw.selAnno=0;renderTwContent()">Tutti</button>';
+    +'<button class="ot-mt'+((!selM)?'  on':'')+'" onclick="_tw.selMese=0;_tw.selAnno=0;_tw.mesoSet=true;renderTwContent()">Tutti</button>';
   moList.forEach(function(mo){
     var isOn=(mo.m===selM&&mo.a===selA);
     var cnt=all.filter(function(r){return r.mese_op===mo.m&&r.anno_op===mo.a;}).length;
-    h+='<button class="ot-mt'+(isOn?' on':'')+'" onclick="_tw.selMese='+mo.m+';_tw.selAnno='+mo.a+';renderTwContent()">'+_MESI_IT[mo.m]+' '+mo.a+' <span style="opacity:.6;font-weight:400">('+cnt+')</span></button>';
+    h+='<button class="ot-mt'+(isOn?' on':'')+'" onclick="_tw.selMese='+mo.m+';_tw.selAnno='+mo.a+';_tw.mesoSet=true;renderTwContent()">'+_MESI_IT[mo.m]+' '+mo.a+' <span style="opacity:.6;font-weight:400">('+cnt+')</span></button>';
   });
   h+='</div>';
 
