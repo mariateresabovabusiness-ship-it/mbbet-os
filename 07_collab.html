@@ -1135,8 +1135,8 @@ function renderDetail(cid){
       '</td>'+
       '<td style="padding:11px 14px;text-align:right;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (cd.inc>0?'€ '+fmt(cd.inc):'—')+'</td>'+
-      '<td style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':'var(--tx3)')+'">'+
-        (cd.daInc>0?'€ '+fmt(cd.daInc):'✓')+'</td>'+
+      '<td style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':cd.rows.length>0?'var(--green)':'var(--tx3)')+'">'+
+        (cd.daInc>0?'€ '+fmt(cd.daInc):cd.rows.length>0?'✓':'—')+'</td>'+
       '</tr>';
   });
 
@@ -1170,9 +1170,9 @@ function renderDetail(cid){
             '<button type="button" class="tg-opt" onclick="setTariffaEsito(\''+cid+'\',false,'+t.prezzo+','+t.prezzo_alt+')">'+(t.nota_alt||'Non riuscito')+'</button>'+
             '</div>';
         }
-        return '<div class="tariffa-card" style="border-color:'+col2+'44;background:linear-gradient(160deg,'+col2+'14,rgba(10,13,32,.95) 55%)">'+
-          '<div class="tariffa-nome">'+t.bookmaker+'</div>'+
-          '<div class="tariffa-prezzo" id="'+cid+'-val" style="color:'+col2+';text-shadow:0 0 18px '+col2+'55">€ '+fmt(t.prezzo)+'</div>'+
+        return '<div class="tariffa-card">'+
+          '<div style="display:flex;align-items:center;justify-content:center;gap:8px"><div style="width:22px;height:22px;border-radius:7px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><div class="tariffa-nome">'+t.bookmaker+'</div></div>'+
+          '<div class="tariffa-prezzo" id="'+cid+'-val">€ '+fmt(t.prezzo)+'</div>'+
           (!hasAlt&&t.note?'<div class="tariffa-nota">'+t.note+'</div>':'')+
           toggleHtml+
         '</div>';
@@ -1347,6 +1347,7 @@ function renderFlatCliente(cid,clienteEnc){
   var tariffe=tariffeForCollab(c);
   var righeBySito={};
   righe.forEach(function(b){righeBySito[(b.bookmaker||'').toLowerCase()]=b;});
+  var today=new Date().toISOString().slice(0,10);
 
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
     '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
@@ -1356,6 +1357,7 @@ function renderFlatCliente(cid,clienteEnc){
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SCADENZA</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
@@ -1370,7 +1372,7 @@ function renderFlatCliente(cid,clienteEnc){
       html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
         '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
         '<td style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-        '<td colspan="3" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td colspan="4" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
         '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
         '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
@@ -1379,6 +1381,11 @@ function renderFlatCliente(cid,clienteEnc){
       return;
     }
     var st=getPagStatus(b.id);
+    var scad=b.data_inizio?addDays(b.data_inizio,7):'';
+    var gg=scad?daysBetween(today,scad):null;
+    var isPaid=st==='PAGATO';
+    var ggCol=isPaid||gg===null?'var(--tx3)':(gg<=2?'var(--red)':'var(--green)');
+    var ggTxt=gg===null?'—':(gg<0?Math.abs(gg)+'gg fa':gg===0?'oggi':gg+'gg');
     html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(245,200,66,.04)\'" onmouseout="this.style.background=\''+bg+'\'">'+
       '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
       '<td style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
@@ -1389,6 +1396,7 @@ function renderFlatCliente(cid,clienteEnc){
         (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
       '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+      '<td style="padding:10px 14px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)"><div style="color:var(--tx2);font-size:11px">'+(scad?fmtDate(scad):'—')+'</div><div style="color:'+ggCol+';font-weight:800;font-size:10.5px;margin-top:2px">'+ggTxt+'</div></td>'+
       '<td style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
       '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<span class="st-badge st-'+st+'" '+(isReadOnlyCollab()?'style="cursor:default"':'onclick="cycleStatusCliente(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" style="cursor:pointer"')+'>'+STATI_LABEL[st]+'</span>'+
