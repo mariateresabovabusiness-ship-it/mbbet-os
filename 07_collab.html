@@ -188,6 +188,19 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 @media(max-width:540px){
   .kpi-strip{grid-template-columns:1fr 1fr}
 }
+/* Tabelle a schermo largo (siti, clienti) diventano schede impilate su
+   telefono: niente piu' scroll orizzontale, un campo per riga. */
+@media(max-width:680px){
+  .mbl-table thead{display:none}
+  .mbl-table tbody{display:flex;flex-direction:column;gap:10px}
+  .mbl-table tr{display:block;border:1px solid rgba(255,255,255,.08)!important;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.012)}
+  .mbl-table td{display:flex!important;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px!important;border-bottom:1px solid rgba(255,255,255,.05)!important;white-space:normal!important;text-align:left!important}
+  .mbl-table td:last-child{border-bottom:none!important}
+  .mbl-table td[data-lbl]:before{content:attr(data-lbl);font-size:9px;font-weight:800;letter-spacing:1px;color:var(--tx3);flex-shrink:0}
+  .mbl-table td.mbl-idx{display:none!important}
+  .mbl-table td.mbl-head{padding:12px 14px!important;background:rgba(245,200,66,.05)}
+  .mbl-table td.mbl-actions{justify-content:flex-end}
+}
 </style>
 </head>
 <body>
@@ -916,7 +929,7 @@ function renderPocketCliente(cid,clienteEnc){
   righe.forEach(function(b){righeBySito[(b.bookmaker||'').toLowerCase()]=b;});
 
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+    '<div style="overflow-x:auto"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(245,200,66,.06)">'+
     '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
@@ -935,12 +948,12 @@ function renderPocketCliente(cid,clienteEnc){
     var chip='<div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:10.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
     if(!b){
       html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
-        '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-        '<td style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-        '<td colspan="3" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
-        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
-        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
-        '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="3" data-lbl="STATO" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
+        '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
         '</td></tr>';
       return;
@@ -950,21 +963,21 @@ function renderPocketCliente(cid,clienteEnc){
     var badgeBg=st==='PAGATO'?'rgba(0,229,138,.1)':st==='ACCUMULATO'?'rgba(245,200,66,.1)':'rgba(255,255,255,.05)';
     var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
     html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(245,200,66,.04)\'" onmouseout="this.style.background=\''+bg+'\'">'+
-      '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-      '<td style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+      '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+      '<td data-lbl="USERNAME" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="PASSWORD" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
-      '<td style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
-      '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="DATA" style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+      '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      '<td data-lbl="STATO" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (st?'<span style="padding:4px 10px;border-radius:999px;background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:800;white-space:nowrap">'+badgeLabel+'</span>':
           (isReadOnlyCollab()?'<span style="font-size:10px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">Metti da parte</button>'))+
       '</td>'+
-      '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (isReadOnlyCollab()?'':'<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(245,200,66,.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>')+
       '</td></tr>';
   });
@@ -1067,7 +1080,7 @@ function renderDetail(cid){
   }
 
   // KPI
-  html+='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px">'+[
+  html+='<div class="kpi-strip" style="margin-bottom:24px">'+[
     {l:'CLIENTI TOTALI',v:bns.length,c:col,s:bkList.length+' siti',ic:'&#128101;'},
     {l:'PAGATI',v:totPagati,c:'#00e58a',s:'€ '+fmt(totInc)+' incassati',ic:'&#9989;'},
     {l:'DA PAGARE',v:totDaPagare,c:'#4f9dff',s:'in attesa',ic:'&#8987;'},
@@ -1106,7 +1119,7 @@ function renderDetail(cid){
     '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">'+
     '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">CLIENTI</span>'+
     '<span style="font-size:10px;color:var(--tx3)">clicca un cliente per vedere i suoi siti</span></div>'+
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+    '<div style="overflow-x:auto"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(255,255,255,.025)">'+
     '<th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
@@ -1122,20 +1135,20 @@ function renderDetail(cid){
     html+='<tr onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')" style="cursor:pointer;transition:.12s" '+
       'onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" '+
       'onmouseout="this.style.background=\'transparent\'">'+
-      '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-head" style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<div style="display:flex;align-items:center;gap:8px">'+
         '<span style="font-size:11px;color:var(--gold)">→</span>'+
         '<span style="font-weight:800;color:var(--tx);font-size:13px">'+cd.cliente+'</span>'+
         '</div></td>'+
-      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+cd.rows.length+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;font-weight:700;color:var(--green);border-bottom:1px solid rgba(255,255,255,.04)">'+cd.pagati+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;font-weight:700;color:var(--blue);border-bottom:1px solid rgba(255,255,255,.04)">'+cd.daPagare+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="SITI" style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+cd.rows.length+'</td>'+
+      '<td data-lbl="PAGATI" style="padding:11px 14px;text-align:center;font-weight:700;color:var(--green);border-bottom:1px solid rgba(255,255,255,.04)">'+cd.pagati+'</td>'+
+      '<td data-lbl="DA PAGARE" style="padding:11px 14px;text-align:center;font-weight:700;color:var(--blue);border-bottom:1px solid rgba(255,255,255,.04)">'+cd.daPagare+'</td>'+
+      '<td data-lbl="SCADUTI" style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (cd.scaduti>0?'<span style="color:var(--red);font-weight:700">'+cd.scaduti+'</span>':'<span style="color:var(--tx3)">0</span>')+
       '</td>'+
-      '<td style="padding:11px 14px;text-align:right;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="INCASSATO" style="padding:11px 14px;text-align:right;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (cd.inc>0?'€ '+fmt(cd.inc):'—')+'</td>'+
-      '<td style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':cd.rows.length>0?'var(--green)':'var(--tx3)')+'">'+
+      '<td data-lbl="DA INCASSARE" style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':cd.rows.length>0?'var(--green)':'var(--tx3)')+'">'+
         (cd.daInc>0?'€ '+fmt(cd.daInc):cd.rows.length>0?'✓':'—')+'</td>'+
       '</tr>';
   });
@@ -1350,7 +1363,7 @@ function renderFlatCliente(cid,clienteEnc){
   var today=new Date().toISOString().slice(0,10);
 
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+    '<div style="overflow-x:auto"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(245,200,66,.06)">'+
     '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
@@ -1370,12 +1383,12 @@ function renderFlatCliente(cid,clienteEnc){
     var chip='<div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:10.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
     if(!b){
       html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
-        '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-        '<td style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-        '<td colspan="4" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
-        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
-        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
-        '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="4" data-lbl="STATO" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
+        '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
         '</td></tr>';
       return;
@@ -1387,21 +1400,21 @@ function renderFlatCliente(cid,clienteEnc){
     var ggCol=isPaid||gg===null?'var(--tx3)':(gg<=2?'var(--red)':'var(--green)');
     var ggTxt=gg===null?'—':(gg<0?Math.abs(gg)+'gg fa':gg===0?'oggi':gg+'gg');
     html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(245,200,66,.04)\'" onmouseout="this.style.background=\''+bg+'\'">'+
-      '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-      '<td style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+      '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+      '<td data-lbl="USERNAME" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="PASSWORD" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
-      '<td style="padding:10px 14px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)"><div style="color:var(--tx2);font-size:11px">'+(scad?fmtDate(scad):'—')+'</div><div style="color:'+ggCol+';font-weight:800;font-size:10.5px;margin-top:2px">'+ggTxt+'</div></td>'+
-      '<td style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
-      '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="DATA" style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+      '<td data-lbl="SCADENZA" style="padding:10px 14px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)"><div style="color:var(--tx2);font-size:11px">'+(scad?fmtDate(scad):'—')+'</div><div style="color:'+ggCol+';font-weight:800;font-size:10.5px;margin-top:2px">'+ggTxt+'</div></td>'+
+      '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      '<td data-lbl="STATO" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<span class="st-badge st-'+st+'" '+(isReadOnlyCollab()?'style="cursor:default"':'onclick="cycleStatusCliente(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" style="cursor:pointer"')+'>'+STATI_LABEL[st]+'</span>'+
       '</td>'+
-      '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
           '<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(245,200,66,.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>'+
           '<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Elimina" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,87,87,.5)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'rgba(255,87,87,.15)\';this.style.color=\'rgba(255,87,87,.5)\'">&#128465;</button>'+
