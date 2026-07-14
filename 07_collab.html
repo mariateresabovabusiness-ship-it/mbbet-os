@@ -160,6 +160,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 /* FORM MODAL */
 #form-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:20px}
 #form-modal.open{display:flex}
+#nc-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:20px}
+#nc-modal.open{display:flex}
 .fm-box{background:rgba(8,10,28,.99);border:1px solid rgba(245,200,66,.18);border-radius:18px;padding:28px;width:420px;max-width:100%;animation:fadeUp .2s ease}
 .fm-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
 .fm-close{cursor:pointer;color:var(--tx3);font-size:18px;line-height:1;transition:.14s}
@@ -320,6 +322,25 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       </div>
       <div class="fg"><label>NOTE</label><input type="text" id="f-note" placeholder="Note..."></div>
       <button class="btn-save" onclick="saveCollab()">&#128190; SALVA</button>
+    </div>
+  </div>
+</div>
+
+<!-- NUOVO CLIENTE: manuale o via modulo -->
+<div id="nc-modal">
+  <div class="fm-box" style="width:380px">
+    <div class="fm-title">
+      <span>&#43; Nuovo Cliente <span id="nc-collab-nome" style="color:var(--tx3);font-weight:700"></span></span>
+      <span class="fm-close" onclick="closeNuovoClienteChoice()">&#10005;</span>
+    </div>
+    <div class="fm-body">
+      <div class="fg">
+        <label>AGGIUNGI MANUALMENTE</label>
+        <input type="text" id="nc-nome" placeholder="Nome cliente" onkeydown="if(event.key==='Enter')salvaNuovoClienteManuale()">
+      </div>
+      <button class="btn-save" id="nc-save-btn" onclick="salvaNuovoClienteManuale()">&#43; Aggiungi</button>
+      <div style="text-align:center;font-size:10.5px;color:var(--tx3);margin:4px 0">oppure</div>
+      <button onclick="nuovoClienteCondividiModulo()" style="cursor:pointer;padding:10px 14px;border-radius:9px;border:1px solid rgba(245,200,66,.3);background:rgba(245,200,66,.06);color:var(--gold);font-size:12px;font-weight:800;font-family:inherit">&#128279; Condividi il modulo con il cliente</button>
     </div>
   </div>
 </div>
@@ -509,6 +530,43 @@ function copyModuloLink(nomeCollab){
   }else{
     prompt('Copia questo link:',url);
   }
+}
+
+/* + Nuovo Cliente: dal bottone in testa alla pagina collaboratore, scelta tra
+   aggiunta manuale (nome, poi si sceglie il sito dopo) o condivisione del modulo. */
+var _ncCid=null;
+function openNuovoClienteChoice(cid){
+  if(isReadOnlyCollab())return;
+  var c=_collabs.find(function(x){return String(x.id)===String(cid);});
+  if(!c)return;
+  _ncCid=cid;
+  g('nc-collab-nome').textContent='— '+(c.nome||'');
+  g('nc-nome').value='';
+  g('nc-modal').classList.add('open');
+  setTimeout(function(){var e=g('nc-nome');if(e)e.focus();},100);
+}
+function closeNuovoClienteChoice(){g('nc-modal').classList.remove('open');_ncCid=null;}
+async function salvaNuovoClienteManuale(){
+  if(!_ncCid)return;
+  var c=_collabs.find(function(x){return String(x.id)===String(_ncCid);});
+  if(!c)return;
+  var nome=(g('nc-nome').value||'').trim();
+  if(!nome){showToast('Inserisci il nome del cliente','er');return;}
+  var btn=g('nc-save-btn');btn.disabled=true;btn.textContent='Salvataggio...';
+  var idCli=await collegaClienteCrm(nome,c.nome,null);
+  btn.disabled=false;btn.textContent='+ Aggiungi';
+  if(!idCli){showToast('Errore, riprova','er');return;}
+  if(!_clientiCollab.some(function(cc){return cc.id===idCli;})){
+    _clientiCollab.push({id:idCli,nome:nome,collab:c.nome,tipologia:'Referral',referral:c.nome,stato:'LIBERO'});
+  }
+  closeNuovoClienteChoice();
+  showToast('Cliente aggiunto ✓','ok');
+  selectCollab(c.id);
+}
+function nuovoClienteCondividiModulo(){
+  var c=_ncCid?_collabs.find(function(x){return String(x.id)===String(_ncCid);}):null;
+  closeNuovoClienteChoice();
+  if(c)copyModuloLink(c.nome);
 }
 
 /* ══ PAYMENT STATUS STORAGE (condiviso via database, colonna bonus.stato_collab) ══ */
@@ -881,6 +939,7 @@ function renderPocketDetail(c){
       ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+((c.nome||'?')[0]).toUpperCase()+'</div>'+
     '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
     '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">Modello a soglia: si accumula sito per sito, si paga quando un cliente arriva a € '+POCKET_SOGLIA+'</div></div></div>'+
+    (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
     (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11.5px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(245,200,66,.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
@@ -1099,6 +1158,7 @@ function renderDetail(cid){
       ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+((c.nome||'?')[0]).toUpperCase()+'</div>'+
     '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
     '<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(c.contatto||'')+(c.tipo?' · '+c.tipo:'')+'</div></div></div>'+
+    (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
     (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(245,200,66,.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
