@@ -740,11 +740,26 @@ function switchTab(name,el){
 }
 
 /* ══ LOAD ══ */
+// Supabase/PostgREST limita ogni query a 1000 righe: con oltre 7000 bonus
+// una singola select() ne perdeva la stragrande maggioranza (quelli più
+// vecchi), falsando ricavi totali, utile netto, divisione soci e allocazione
+// capitale. Qui si pagina con .range() finché non arrivano meno righe dello
+// step, cioè si è arrivati in fondo.
+async function fetchAllBonusFin(){
+  var out=[],step=1000,from=0;
+  while(true){
+    var r=await db.from('bonus').select('id,cliente,operatore,bookmaker,ric_real,pag_cli,costi_extra,perc_op,perc_collab,nome_collab,comp_referral,stato,mese_operativo,anno_operativo,deposito,prelievo,saldo_bk,incassato,data_incasso,updated_at,created_at').order('created_at',{ascending:false}).range(from,from+step-1);
+    var rows=r.data||[];
+    out=out.concat(rows);
+    if(rows.length<step)break;
+    from+=step;
+  }
+  return out;
+}
 async function loadAll(){
   try{
-    // Carica bonus completo
-    var rb=await db.from('bonus').select('id,cliente,operatore,bookmaker,ric_real,pag_cli,costi_extra,perc_op,perc_collab,nome_collab,comp_referral,stato,mese_operativo,anno_operativo,deposito,prelievo,saldo_bk,incassato,data_incasso,updated_at,created_at').order('created_at',{ascending:false});
-    _bns=rb.data||[];
+    // Carica bonus completo (paginato, vedi fetchAllBonusFin)
+    _bns=await fetchAllBonusFin();
     // Spese ed entrate extra condivise da Supabase
     await loadSpeseDb();
     await loadEntrateExtraDb();
