@@ -181,7 +181,15 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .li-err{font-size:11px;color:var(--red);text-align:center;min-height:16px}
 
 @media(max-width:900px){
-  .sb,.collab-list{display:none}
+  .sb{display:none}
+  .body-wrap{flex-direction:column}
+  .collab-list{width:100%;flex-shrink:0;border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}
+  .cl-hdr{display:none}
+  .collab-list .btn-add-cl{display:none}
+  .cl-scroll{flex:none;display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;gap:8px;padding:10px 12px;-webkit-overflow-scrolling:touch}
+  .cl-item{flex-shrink:0;flex-direction:row;white-space:nowrap;border-bottom:none;border-left:1px solid transparent;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:7px 12px}
+  .cl-item.act{border-color:var(--gold)}
+  .cl-sub{display:none}
   .kpi-strip{grid-template-columns:repeat(3,1fr)}
   .main-area{padding:14px 14px 40px}
 }
@@ -190,7 +198,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 }
 /* Tabelle a schermo largo (siti, clienti) diventano schede impilate su
    telefono: niente piu' scroll orizzontale, un campo per riga. */
-@media(max-width:680px){
+@media(max-width:900px){
   .mbl-table thead{display:none}
   .mbl-table tbody{display:flex;flex-direction:column;gap:10px}
   .mbl-table tr{display:block;border:1px solid rgba(255,255,255,.08)!important;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.012)}
@@ -612,7 +620,7 @@ function cycleStatus(bonusId,cid){
 }
 
 /* ══ LOAD ══ */
-var BONUS_COLS='id,id_cli,cliente,bookmaker,stato,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,created_at';
+var BONUS_COLS='id,id_cli,cliente,bookmaker,stato,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,bonus_ricevuto,prelievo,costi_extra,created_at';
 async function fetchBonusCollab(){
   // Prova con stato_collab+pocket_stato (colonne condivise); se la migration
   // non e' ancora stata eseguita su Supabase, ripiega su query piu' semplici
@@ -895,6 +903,33 @@ function renderPocketDetail(c){
   g('collab-detail').innerHTML=html;
 }
 
+// Colonne finanziarie interne (deposito/bonus/prelievo/ricavo/pagato
+// cliente/margine): visibili SOLO all'admin, mai al collaboratore stesso.
+var FIN_HEAD_COLS=
+  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--purple);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DEPOSITO</th>'+
+  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--blue);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">BONUS OTT.</th>'+
+  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PRELIEVO</th>'+
+  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">RICAVO TOT.</th>'+
+  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--orange);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PAGATO CLIENTE</th>'+
+  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--teal);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">MARGINE MBBET</th>';
+
+function finCellsHtml(b,cid,clienteEnc,isPocket){
+  if(isReadOnlyCollab())return'';
+  var tdS='padding:10px 14px;text-align:right;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)';
+  var dep=parseFloat(b.deposito)||0,bonRic=parseFloat(b.bonus_ricevuto)||0,prel=parseFloat(b.prelievo)||0;
+  var ricTot=parseFloat(b.ric_real)||0,pagCli=parseFloat(b.pag_cli)||0,costiEx=parseFloat(b.costi_extra)||0;
+  var compRef=parseFloat(b.comp_referral)||0;
+  var marg=ricTot-pagCli-costiEx-compRef;
+  var pk=isPocket?'1':'0';
+  var ph='<span style="color:rgba(255,255,255,.25)">✏</span>';
+  return '<td id="dep-c-'+b.id+'" data-lbl="DEPOSITO" class="editable" style="'+tdS+';color:var(--purple);font-weight:700" onclick="collabEdNum(\'dep-c-'+b.id+'\',\''+b.id+'\',\'deposito\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(dep?'€ '+fmt(dep):ph)+'</td>'+
+    '<td id="bon-c-'+b.id+'" data-lbl="BONUS OTT." class="editable" style="'+tdS+';color:var(--blue);font-weight:700" onclick="collabEdNum(\'bon-c-'+b.id+'\',\''+b.id+'\',\'bonus_ricevuto\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(bonRic?'€ '+fmt(bonRic):ph)+'</td>'+
+    '<td id="prel-c-'+b.id+'" data-lbl="PRELIEVO" class="editable" style="'+tdS+';color:var(--cyan);font-weight:700" onclick="collabEdNum(\'prel-c-'+b.id+'\',\''+b.id+'\',\'prelievo\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(prel?'€ '+fmt(prel):ph)+'</td>'+
+    '<td data-lbl="RICAVO TOT." style="'+tdS+';color:'+(ricTot>0?'var(--cyan)':ricTot<0?'var(--red)':'rgba(255,255,255,.25)')+';font-weight:800">'+(ricTot?'€ '+fmt(ricTot):'—')+'</td>'+
+    '<td id="pc-c-'+b.id+'" data-lbl="PAGATO CLIENTE" class="editable" style="'+tdS+';color:var(--orange);font-weight:700" onclick="collabEdNum(\'pc-c-'+b.id+'\',\''+b.id+'\',\'pag_cli\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(pagCli?'€ '+fmt(pagCli):ph)+'</td>'+
+    '<td data-lbl="MARGINE MBBET" style="'+tdS+';color:'+(marg>0?'var(--teal)':marg<0?'var(--red)':'rgba(255,255,255,.25)')+';font-weight:800">'+(marg?'€ '+fmt(marg):'—')+'</td>';
+}
+
 function renderPocketCliente(cid,clienteEnc){
   var c=_collabs.find(function(x){return String(x.id)===String(cid);});
   if(!c)return;
@@ -937,6 +972,7 @@ function renderPocketCliente(cid,clienteEnc){
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    (isReadOnlyCollab()?'':FIN_HEAD_COLS)+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
     '</tr></thead><tbody>';
@@ -952,6 +988,7 @@ function renderPocketCliente(cid,clienteEnc){
         '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
         '<td colspan="3" data-lbl="STATO" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
         '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        (isReadOnlyCollab()?'':'<td colspan="6" class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>')+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
@@ -973,6 +1010,7 @@ function renderPocketCliente(cid,clienteEnc){
       '</td>'+
       '<td data-lbl="DATA" style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
       '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      finCellsHtml(b,cid,clienteEnc,true)+
       '<td data-lbl="STATO" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (st?'<span style="padding:4px 10px;border-radius:999px;background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:800;white-space:nowrap">'+badgeLabel+'</span>':
           (isReadOnlyCollab()?'<span style="font-size:10px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">Metti da parte</button>'))+
@@ -1372,6 +1410,7 @@ function renderFlatCliente(cid,clienteEnc){
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SCADENZA</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    (isReadOnlyCollab()?'':FIN_HEAD_COLS)+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
     '</tr></thead><tbody>';
@@ -1387,6 +1426,7 @@ function renderFlatCliente(cid,clienteEnc){
         '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
         '<td colspan="4" data-lbl="STATO" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
         '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        (isReadOnlyCollab()?'':'<td colspan="6" class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>')+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
@@ -1411,6 +1451,7 @@ function renderFlatCliente(cid,clienteEnc){
       '<td data-lbl="DATA" style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
       '<td data-lbl="SCADENZA" style="padding:10px 14px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)"><div style="color:var(--tx2);font-size:11px">'+(scad?fmtDate(scad):'—')+'</div><div style="color:'+ggCol+';font-weight:800;font-size:10.5px;margin-top:2px">'+ggTxt+'</div></td>'+
       '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      finCellsHtml(b,cid,clienteEnc,false)+
       '<td data-lbl="STATO" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<span class="st-badge st-'+st+'" '+(isReadOnlyCollab()?'style="cursor:default"':'onclick="cycleStatusCliente(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" style="cursor:pointer"')+'>'+STATI_LABEL[st]+'</span>'+
       '</td>'+
@@ -1424,6 +1465,37 @@ function renderFlatCliente(cid,clienteEnc){
   html+='</tbody></table></div></div>';
 
   g('collab-detail').innerHTML=html;
+}
+
+// Modifica inline (solo admin) dei campi finanziari deposito/bonus/prelievo/
+// pagato-cliente/costi-extra su un bonus del collaboratore. Il Ricavo Totale
+// e il Margine MBBET si ricalcolano sempre in automatico, mai a mano.
+function collabEdNum(cellId,bonusId,field,cid,clienteEnc,isPocket){
+  if(isReadOnlyCollab())return;
+  var td=g(cellId);if(!td||td.querySelector('input'))return;
+  var b=_bns.find(function(x){return String(x.id)===String(bonusId);});if(!b)return;
+  var cur=parseFloat(b[field])||0;
+  var inp=document.createElement('input');
+  inp.type='number';inp.step='0.01';inp.min='0';inp.value=cur||'';
+  inp.style.cssText='width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1px solid rgba(245,200,66,.35);border-radius:6px;padding:5px 7px;color:var(--tx);font-size:12px;font-family:inherit;outline:none';
+  td.innerHTML='';td.appendChild(inp);inp.focus();inp.select();
+  function refresh(){
+    if(isPocket)renderPocketCliente(cid,clienteEnc);else renderFlatCliente(cid,clienteEnc);
+  }
+  async function save(){
+    var v=Math.max(0,parseFloat(inp.value)||0);
+    b[field]=v;
+    var upd={};upd[field]=v;
+    if(field==='deposito'||field==='prelievo'){
+      b.ric_real=(parseFloat(b.prelievo)||0)-(parseFloat(b.deposito)||0);
+      upd.ric_real=b.ric_real;
+    }
+    refresh();
+    try{await db.from('bonus').update(upd).eq('id',bonusId);showToast('Salvato ✓','ok');}
+    catch(e){showToast('Errore salvataggio','er');}
+  }
+  inp.onblur=save;
+  inp.onkeydown=function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape')refresh();};
 }
 
 function cycleStatusCliente(bonusId,cid,clienteEnc){
