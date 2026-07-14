@@ -595,6 +595,22 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .ot-leg-box{padding:3px 8px;border-radius:4px;font-weight:700;font-size:9px}
 .ot-leg-arr{color:var(--tx4);font-size:10px}
 
+/* Tabella Vista Operativa: con tutte le colonne finanza aggiunte non ci
+   sta piu' nemmeno su un laptop 13"/14" (1280-1440px) — sotto ai 1400px
+   ogni riga diventa una scheda impilata, un campo per riga. */
+@media(max-width:1400px){
+  .ot-tbl{min-width:0}
+  .ot-tbl thead{display:none}
+  .ot-tbl tbody{display:flex;flex-direction:column;gap:10px}
+  .ot-tbl tr{display:block!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.012)}
+  .ot-tbl td{display:flex!important;align-items:center;justify-content:space-between;gap:12px;white-space:normal!important;max-width:none!important;border-bottom:1px solid rgba(255,255,255,.05)!important}
+  .ot-tbl td:last-child{border-bottom:none!important}
+  .ot-tbl td[data-lbl]:before{content:attr(data-lbl);font-size:9px;font-weight:800;letter-spacing:1px;color:var(--tx3);flex-shrink:0}
+  .ot-tbl td.ot-head{background:rgba(245,200,66,.05)}
+  .ot-tbl td.ot-actions .tbl-acts{justify-content:flex-end;width:100%}
+  .ot-tbl select{max-width:60%}
+}
+
 /* ══════════════════════════════════
    MOBILE RESPONSIVE — max 768px
 ══════════════════════════════════ */
@@ -4028,44 +4044,44 @@ function renderBkWorkspace(op, bk){
     var ricTot=r.ricavo_reale||0;
     h+='<tr class="'+rc+'" data-rid="'+r.id+'">'
       /* cliente */
-      +'<td class="ot-td" style="'+tdS+';min-width:170px"><div style="display:flex;align-items:center;gap:10px">'
+      +'<td class="ot-td ot-head" style="'+tdS+';min-width:170px"><div style="display:flex;align-items:center;gap:10px">'
         +'<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,'+col+'30,'+col+'18);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:'+col+';flex-shrink:0">'+ini(r.cli_nm)+'</div>'
         +'<div><div style="font-size:13px;font-weight:700;color:var(--tx)">'+r.cli_nm+'</div>'
           +(r.cli_id?'<button class="pw-btn" style="font-size:9px;color:var(--blue)" onclick="event.stopPropagation();openInCrm(\''+escQ(r.cli_id)+'\',\''+escQ(r.cli_nm)+'\')">👤 CRM</button>':'')
         +'</div>'
       +'</div></td>'
       /* username */
-      +'<td class="ot-td editable" id="usr-cell-'+r.id+'" style="'+tdS+'" onclick="otEd(\'usr-cell-'+r.id+'\',\''+r.id+'\',\'username\')"><div class="pw-cell"><span id="usr-v-'+r.id+'" style="flex:1;font-size:'+FS+';color:'+(r.username?'var(--tx2)':'var(--tx4)')+'">'+(r.username||'<span style="color:var(--tx4)">✏ inserisci</span>')+'</span>'+(r.username?'<button class="pw-btn" onclick="event.stopPropagation();otCopy(\''+escQ(r.username)+'\',\'Username\')">📋</button>':'')+'</div></td>'
+      +'<td class="ot-td editable" data-lbl="USERNAME" id="usr-cell-'+r.id+'" style="'+tdS+'" onclick="otEd(\'usr-cell-'+r.id+'\',\''+r.id+'\',\'username\')"><div class="pw-cell"><span id="usr-v-'+r.id+'" style="flex:1;font-size:'+FS+';color:'+(r.username?'var(--tx2)':'var(--tx4)')+'">'+(r.username||'<span style="color:var(--tx4)">✏ inserisci</span>')+'</span>'+(r.username?'<button class="pw-btn" onclick="event.stopPropagation();otCopy(\''+escQ(r.username)+'\',\'Username\')">📋</button>':'')+'</div></td>'
       /* password */
-      +'<td class="ot-td editable" id="pwd-cell-'+r.id+'" style="'+tdS+'" onclick="otEd(\'pwd-cell-'+r.id+'\',\''+r.id+'\',\'password\')"><div class="pw-cell"><span id="pwd-v-'+r.id+'" style="flex:1;font-size:'+FS+';color:'+(r.password?'var(--tx3)':'var(--tx4)')+'">'+(r.password?'••••••••':'<span style="color:var(--tx4)">✏ inserisci</span>')+'</span><span hidden id="pwd-r-'+r.id+'">'+escQ(r.password||'')+'</span>'+(r.password?'<button class="pw-btn" id="pwd-eye-'+r.id+'" onclick="event.stopPropagation();otPwdShow(\''+r.id+'\')">👁</button>':'')+(r.password?'<button class="pw-btn" onclick="event.stopPropagation();otCopy(document.getElementById(\'pwd-r-'+r.id+'\').textContent,\'Password\')">📋</button>':'')+'</div></td>'
+      +'<td class="ot-td editable" data-lbl="PASSWORD" id="pwd-cell-'+r.id+'" style="'+tdS+'" onclick="otEd(\'pwd-cell-'+r.id+'\',\''+r.id+'\',\'password\')"><div class="pw-cell"><span id="pwd-v-'+r.id+'" style="flex:1;font-size:'+FS+';color:'+(r.password?'var(--tx3)':'var(--tx4)')+'">'+(r.password?'••••••••':'<span style="color:var(--tx4)">✏ inserisci</span>')+'</span><span hidden id="pwd-r-'+r.id+'">'+escQ(r.password||'')+'</span>'+(r.password?'<button class="pw-btn" id="pwd-eye-'+r.id+'" onclick="event.stopPropagation();otPwdShow(\''+r.id+'\')">👁</button>':'')+(r.password?'<button class="pw-btn" onclick="event.stopPropagation();otCopy(document.getElementById(\'pwd-r-'+r.id+'\').textContent,\'Password\')">📋</button>':'')+'</div></td>'
       /* stato */
-      +'<td class="ot-td" style="'+tdS+'"><select class="sto sto-'+({'In corso':'inc','Completato':'comp','Problema':'prob','Bloccato':'bloc'}[r.stato_op]||'inc')+'" style="font-size:12px" onchange="otStato(\''+r.id+'\',this)">'+stSel+'</select></td>'
+      +'<td class="ot-td" data-lbl="STATO" style="'+tdS+'"><select class="sto sto-'+({'In corso':'inc','Completato':'comp','Problema':'prob','Bloccato':'bloc'}[r.stato_op]||'inc')+'" style="font-size:12px" onchange="otStato(\''+r.id+'\',this)">'+stSel+'</select></td>'
       /* fase */
-      +'<td class="ot-td" style="'+tdS+'"><select class="ot-fase" style="font-size:11px" onchange="otFase(\''+r.id+'\',this.value)">'+faseSel+'</select></td>'
+      +'<td class="ot-td" data-lbl="FASE" style="'+tdS+'"><select class="ot-fase" style="font-size:11px" onchange="otFase(\''+r.id+'\',this.value)">'+faseSel+'</select></td>'
       /* data inizio */
-      +'<td class="ot-td editable" id="di-cell-'+r.id+'" style="'+tdS+';color:var(--teal)" onclick="otEd(\'di-cell-'+r.id+'\',\''+r.id+'\',\'data_inizio\')">'+(r.data_inizio?'<b style="font-size:13px">'+fmtDate(r.data_inizio)+'</b>':'<span style="color:var(--tx4)">✏</span>')+'</td>'
+      +'<td class="ot-td editable" data-lbl="DATA INIZIO" id="di-cell-'+r.id+'" style="'+tdS+';color:var(--teal)" onclick="otEd(\'di-cell-'+r.id+'\',\''+r.id+'\',\'data_inizio\')">'+(r.data_inizio?'<b style="font-size:13px">'+fmtDate(r.data_inizio)+'</b>':'<span style="color:var(--tx4)">✏</span>')+'</td>'
       /* scadenza — 7gg da data inizio, avviso quando restano 2gg o meno */
-      +'<td class="ot-td" id="scad-cell-'+r.id+'" style="'+tdS+'">'+(scad?'<div style="font-size:11px;color:var(--tx2)">'+fmtDateShort(scad)+'</div><div id="scad-gg-'+r.id+'" style="font-weight:800;font-size:11px;color:'+ggCol+'">'+ggTxt+'</div>':'<span style="color:var(--tx4)">—</span>')+'</td>'
+      +'<td class="ot-td" data-lbl="SCADENZA" id="scad-cell-'+r.id+'" style="'+tdS+'">'+(scad?'<div style="font-size:11px;color:var(--tx2)">'+fmtDateShort(scad)+'</div><div id="scad-gg-'+r.id+'" style="font-weight:800;font-size:11px;color:'+ggCol+'">'+ggTxt+'</div>':'<span style="color:var(--tx4)">—</span>')+'</td>'
       /* deposito */
-      +'<td class="ot-td editable" id="dep-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'dep-cell-'+r.id+'\',\''+r.id+'\',\'deposito\')"><span id="dep-v-'+r.id+'" style="color:var(--purple);font-weight:700;font-size:'+FS+'">'+(r.deposito>0?fmtE(r.deposito):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="DEPOSITO" id="dep-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'dep-cell-'+r.id+'\',\''+r.id+'\',\'deposito\')"><span id="dep-v-'+r.id+'" style="color:var(--purple);font-weight:700;font-size:'+FS+'">'+(r.deposito>0?fmtE(r.deposito):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* bonus ottenuto */
-      +'<td class="ot-td editable" id="bonRic-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'bonRic-cell-'+r.id+'\',\''+r.id+'\',\'bonus_ric\')"><span id="bonRic-v-'+r.id+'" style="color:var(--blue);font-weight:700;font-size:'+FS+'">'+(r.bonus_ric>0?fmtE(r.bonus_ric):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="BONUS OTT." id="bonRic-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'bonRic-cell-'+r.id+'\',\''+r.id+'\',\'bonus_ric\')"><span id="bonRic-v-'+r.id+'" style="color:var(--blue);font-weight:700;font-size:'+FS+'">'+(r.bonus_ric>0?fmtE(r.bonus_ric):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* prelievo */
-      +'<td class="ot-td editable" id="prel-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'prel-cell-'+r.id+'\',\''+r.id+'\',\'prelievo\')"><span id="prel-v-'+r.id+'" style="color:var(--cyan);font-weight:700;font-size:'+FS+'">'+(r.prelievo>0?fmtE(r.prelievo):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="PRELIEVO" id="prel-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'prel-cell-'+r.id+'\',\''+r.id+'\',\'prelievo\')"><span id="prel-v-'+r.id+'" style="color:var(--cyan);font-weight:700;font-size:'+FS+'">'+(r.prelievo>0?fmtE(r.prelievo):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* ricavo totale — calcolato automaticamente da prelievo - deposito */
-      +'<td class="ot-td" style="'+tdS+'"><b id="rr-v-'+r.id+'" style="font-size:14px;color:'+(ricTot>0?'var(--cyan)':ricTot<0?'var(--red)':'var(--tx4)')+'">'+(ricTot?fmtE(ricTot):'—')+'</b></td>'
+      +'<td class="ot-td" data-lbl="RICAVO TOT." style="'+tdS+'"><b id="rr-v-'+r.id+'" style="font-size:14px;color:'+(ricTot>0?'var(--cyan)':ricTot<0?'var(--red)':'var(--tx4)')+'">'+(ricTot?fmtE(ricTot):'—')+'</b></td>'
       /* pagato cliente */
-      +'<td class="ot-td editable" id="pc-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'pc-cell-'+r.id+'\',\''+r.id+'\',\'pag_cli\')"><span id="pc-v-'+r.id+'" style="color:var(--orange);font-weight:700;font-size:'+FS+'">'+(r.pag_cli>0?fmtE(r.pag_cli):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="PAGATO CLIENTE" id="pc-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'pc-cell-'+r.id+'\',\''+r.id+'\',\'pag_cli\')"><span id="pc-v-'+r.id+'" style="color:var(--orange);font-weight:700;font-size:'+FS+'">'+(r.pag_cli>0?fmtE(r.pag_cli):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* costi extra */
-      +'<td class="ot-td editable" id="ce-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'ce-cell-'+r.id+'\',\''+r.id+'\',\'costi_extra\')"><span id="ce-v-'+r.id+'" style="color:var(--red);font-size:'+FS+'">'+(r.costi_extra>0?fmtE(r.costi_extra):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="COSTI EXTRA" id="ce-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'ce-cell-'+r.id+'\',\''+r.id+'\',\'costi_extra\')"><span id="ce-v-'+r.id+'" style="color:var(--red);font-size:'+FS+'">'+(r.costi_extra>0?fmtE(r.costi_extra):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* margine MBBET — calcolato auto */
-      +'<td class="ot-td" style="'+tdS+'"><b id="marg-v-'+r.id+'" style="font-size:14px;color:'+(marg>0?'var(--teal)':marg<0?'var(--red)':'var(--tx4)')+';">'+(marg?fmtE(marg):'—')+'</b></td>'
+      +'<td class="ot-td" data-lbl="MARGINE MBBET" style="'+tdS+'"><b id="marg-v-'+r.id+'" style="font-size:14px;color:'+(marg>0?'var(--teal)':marg<0?'var(--red)':'var(--tx4)')+';">'+(marg?fmtE(marg):'—')+'</b></td>'
       /* %Op */
-      +'<td class="ot-td" style="'+tdS+';color:var(--tx3);font-size:12px">'+(r.perc_op||(_OP_PERC[r.cli_op]||20))+'%</td>'
+      +'<td class="ot-td" data-lbl="%OP" style="'+tdS+';color:var(--tx3);font-size:12px">'+(r.perc_op||(_OP_PERC[r.cli_op]||20))+'%</td>'
       /* note unica */
-      +'<td class="ot-td editable" id="note-cell-'+r.id+'" style="'+tdS+';color:var(--tx3);max-width:220px" onclick="otEd(\'note-cell-'+r.id+'\',\''+r.id+'\',\'note\')">'+(r.note?'<span style="font-size:13px">'+r.note+'</span>':'<span style="color:var(--tx4)">✏ nota</span>')+'</td>'
+      +'<td class="ot-td editable" data-lbl="NOTE" id="note-cell-'+r.id+'" style="'+tdS+';color:var(--tx3);max-width:220px" onclick="otEd(\'note-cell-'+r.id+'\',\''+r.id+'\',\'note\')">'+(r.note?'<span style="font-size:13px">'+r.note+'</span>':'<span style="color:var(--tx4)">✏ nota</span>')+'</td>'
       /* azioni */
-      +'<td class="ot-td" style="'+tdS+'"><div class="tbl-acts"><button class="ta ta-st" onclick="modalCambiaStato(\''+r.id+'\')" title="Cambia stato">&#9998;</button><button class="ta ta-tsk" onclick="modalCreaTask(\''+r.id+'\')" title="Task">&#9989;</button><button class="pw-btn" style="color:var(--teal);font-weight:700;font-size:11px" onclick="otCrnAdd(\''+r.id+'\')" title="Log">📝</button></div></td>'
+      +'<td class="ot-td ot-actions" style="'+tdS+'"><div class="tbl-acts"><button class="ta ta-st" onclick="modalCambiaStato(\''+r.id+'\')" title="Cambia stato">&#9998;</button><button class="ta ta-tsk" onclick="modalCreaTask(\''+r.id+'\')" title="Task">&#9989;</button><button class="pw-btn" style="color:var(--teal);font-weight:700;font-size:11px" onclick="otCrnAdd(\''+r.id+'\')" title="Log">📝</button></div></td>'
       +'</tr>';
   });
   h+='</tbody></table></div>';

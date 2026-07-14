@@ -197,8 +197,10 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
   .kpi-strip{grid-template-columns:1fr 1fr}
 }
 /* Tabelle a schermo largo (siti, clienti) diventano schede impilate su
-   telefono: niente piu' scroll orizzontale, un campo per riga. */
-@media(max-width:900px){
+   telefono E portatile: con tutte le colonne finanza aggiunte, la
+   tabella non ci sta nemmeno su un laptop da 13"/14" (1280-1440px),
+   quindi la soglia qui e' piu' alta di quella del layout sopra. */
+@media(max-width:1400px){
   .mbl-table thead{display:none}
   .mbl-table tbody{display:flex;flex-direction:column;gap:10px}
   .mbl-table tr{display:block;border:1px solid rgba(255,255,255,.08)!important;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.012)}
