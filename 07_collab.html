@@ -804,18 +804,22 @@ async function pagaClientePocket(cliente,cid){
   showToast('Cliente '+cliente+' pagato ✓','ok');
   renderDetail(cid);
 }
+function nuovoClientePocketSelectHtml(c,clienteEsistente){
+  var tariffe=tariffeForCollab(c);
+  var clArg=clienteEsistente?"'"+clienteEsistente.replace(/'/g,"\\'")+"'":'null';
+  var placeholder=clienteEsistente?'+ Aggiungi un altro sito...':'+ Nuovo cliente (scegli il primo sito)';
+  return '<select onchange="if(this.value){apriSitoPerCliente(\''+c.id+'\',this.value,'+clArg+');this.value=\'\';}" style="background:rgba(10,13,32,.98);border:1px dashed rgba(255,255,255,.15);border-radius:8px;padding:8px 14px;color:var(--tx3);font-size:11.5px;font-weight:700;outline:none;font-family:inherit;cursor:pointer">'+
+    '<option value="">'+placeholder+'</option>'+
+    tariffe.map(function(t){return '<option value="'+t.bookmaker+'">'+t.bookmaker+' (€ '+fmt(t.prezzo)+')</option>';}).join('')+
+    '</select>';
+}
+
 function renderPocketDetail(c){
   var allBns=bnsForCollab(c);
-  var tariffe=tariffeForCollab(c);
   var col=PALETTE[_collabs.indexOf(c)%PALETTE.length];
   var byCliente={};
   allBns.forEach(function(b){var cl=b.cliente||'—';if(!byCliente[cl])byCliente[cl]=[];byCliente[cl].push(b);});
   var nomiClienti=Object.keys(byCliente).sort();
-
-  var selectHtml='<select onchange="if(this.value){apriSitoPerCliente(\''+c.id+'\',this.value,CLIENTE);this.value=\'\';}" style="background:rgba(10,13,32,.98);border:1px dashed rgba(255,255,255,.15);border-radius:8px;padding:7px 12px;color:var(--tx3);font-size:11px;font-weight:700;outline:none;font-family:inherit;cursor:pointer">'+
-    '<option value="">+ Aggiungi sito...</option>'+
-    tariffe.map(function(t){return '<option value="'+t.bookmaker+'">'+t.bookmaker+' (€ '+fmt(t.prezzo)+')</option>';}).join('')+
-    '</select>';
 
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">'+
     '<div style="display:flex;align-items:center;gap:12px">'+
@@ -823,50 +827,114 @@ function renderPocketDetail(c){
       ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+((c.nome||'?')[0]).toUpperCase()+'</div>'+
     '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
     '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">Modello a soglia: si accumula sito per sito, si paga quando un cliente arriva a € '+POCKET_SOGLIA+'</div></div></div>'+
-    (!isReadOnlyCollab()?selectHtml.replace('CLIENTE','null'):'')+
+    (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
 
   if(!nomiClienti.length){
-    html+='<div class="empty-state"><div class="empty-ic">&#128176;</div>Nessun cliente ancora per '+(c.nome||'')+'. Usa "+ Aggiungi sito..." qui sopra per iniziare.</div>';
+    html+='<div class="empty-state"><div class="empty-ic">&#128176;</div>Nessun cliente ancora per '+(c.nome||'')+'.</div>';
+    if(!isReadOnlyCollab())html+='<div style="text-align:center;margin-top:14px">'+nuovoClientePocketSelectHtml(c,null)+'</div>';
     g('collab-detail').innerHTML=html;
     return;
   }
+
+  html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:14px">'+
+    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">'+
+    '<span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">CLIENTI</span>'+
+    '<span style="font-size:10.5px;color:var(--tx3)">clicca un cliente per vedere username/password/siti</span></div>'+
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+    '<thead><tr style="background:rgba(255,255,255,.025)">'+
+    '<th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
+    '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
+    '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">ACCUMULATO</th>'+
+    '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
+    '</tr></thead><tbody>';
 
   nomiClienti.forEach(function(cl){
     var righe=byCliente[cl];
     var accumulato=righe.filter(function(b){return b.pocket_stato==='ACCUMULATO'||b.pocket_stato==='PAGATO';})
       .reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
     var giaPagato=righe.some(function(b){return b.pocket_stato==='PAGATO';});
-    var pct=Math.min(100,accumulato/POCKET_SOGLIA*100);
     var pronto=accumulato>=POCKET_SOGLIA&&!giaPagato;
-    var clEsc=cl.replace(/'/g,"\\'");
-
-    html+='<div style="background:rgba(10,13,32,.95);border:1px solid '+(pronto?'rgba(0,229,138,.4)':'rgba(255,255,255,.08)')+';border-radius:12px;padding:16px 18px;margin-bottom:14px">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px">'+
-      '<div style="font-size:14px;font-weight:800;color:var(--tx)">'+cl+'</div>'+
-      '<div style="display:flex;align-items:center;gap:10px">'+
-      '<span style="font-size:13px;font-weight:900;color:'+(pronto?'var(--green)':giaPagato?'var(--tx3)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</span>'+
-      (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; pagato</span>':
-        pronto&&!isReadOnlyCollab()?'<button onclick="pagaClientePocket(\''+clEsc+'\',\''+c.id+'\')" style="padding:7px 16px;background:linear-gradient(135deg,#00c07a,var(--green));border:none;border-radius:8px;color:#001a0e;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">&#128176; Paga Cliente ('+POCKET_SOGLIA+'&euro;)</button>':'')+
-      '</div></div>'+
-      '<div style="height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;margin-bottom:12px"><div style="height:100%;width:'+pct+'%;background:'+(pronto?'var(--green)':col)+'"></div></div>'+
-      '<div style="display:flex;flex-direction:column;gap:6px">'+
-      righe.map(function(b){
-        var st=b.pocket_stato||null;
-        var badgeColor=st==='PAGATO'?'var(--green)':st==='ACCUMULATO'?'var(--gold)':'var(--tx3)';
-        var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,.02);border-radius:8px">'+
-          '<span style="font-size:12px;color:var(--tx2)">'+(b.bookmaker||'—')+'</span>'+
-          '<div style="display:flex;align-items:center;gap:10px">'+
-          '<span style="font-size:12px;font-weight:700;color:var(--gold)">€ '+fmt(b.comp_referral)+'</span>'+
-          (st?'<span style="font-size:9.5px;font-weight:800;color:'+badgeColor+'">'+badgeLabel+'</span>':
-            (isReadOnlyCollab()?'':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+c.id+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">Metti da parte</button>'))+
-          '</div></div>';
-      }).join('')+
-      '</div>'+
-      (!isReadOnlyCollab()?'<div style="margin-top:10px">'+selectHtml.replace('CLIENTE',"'"+clEsc+"'")+'</div>':'')+
-    '</div>';
+    html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl)+'\')" style="cursor:pointer;transition:.12s" onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" onmouseout="this.style.background=\'transparent\'">'+
+      '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--tx);font-size:13px"><span style="color:var(--gold);margin-right:6px">&#8594;</span>'+cl+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);font-weight:700">'+righe.length+'</td>'+
+      '<td style="padding:11px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; pagato</span>':
+         pronto?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3);background:rgba(0,229,138,.08)">pronto a pagare</span>':
+         '<span class="badge-nuovo">in corso</span>')+
+      '</td></tr>';
   });
+
+  html+='</tbody></table></div></div>';
+  if(!isReadOnlyCollab())html+='<div style="display:flex;justify-content:flex-end">'+nuovoClientePocketSelectHtml(c,null)+'</div>';
+
+  g('collab-detail').innerHTML=html;
+}
+
+function renderPocketCliente(cid,clienteEnc){
+  var c=_collabs.find(function(x){return String(x.id)===String(cid);});
+  if(!c)return;
+  var cliente=decodeURIComponent(clienteEnc);
+  var col=PALETTE[_collabs.indexOf(c)%PALETTE.length];
+  var righe=bnsForCollab(c).filter(function(b){return (b.cliente||'')===cliente;});
+  var accumulato=righe.filter(function(b){return b.pocket_stato==='ACCUMULATO'||b.pocket_stato==='PAGATO';})
+    .reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
+  var giaPagato=righe.some(function(b){return b.pocket_stato==='PAGATO';});
+  var pronto=accumulato>=POCKET_SOGLIA&&!giaPagato;
+  var pct=Math.min(100,accumulato/POCKET_SOGLIA*100);
+
+  var html='<div style="margin-bottom:14px">'+
+    '<span onclick="selectCollab(\''+cid+'\')" style="cursor:pointer;font-size:11px;color:var(--tx3);font-weight:700">&#8592; Torna a '+(c.nome||'')+'</span>'+
+    '</div>';
+
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;padding:14px 18px;background:rgba(10,13,32,.9);border:1px solid '+(pronto?'rgba(0,229,138,.4)':'rgba(255,255,255,.07)')+';border-radius:12px">'+
+    '<div><div style="font-size:16px;font-weight:900;color:var(--tx)">'+cliente+'</div>'+
+    '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+(c.nome||'')+' &middot; pocket a '+POCKET_SOGLIA+'&euro;</div></div>'+
+    '<div style="display:flex;align-items:center;gap:14px">'+
+    '<div style="text-align:right"><div style="font-size:20px;font-weight:900;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</div>'+
+    '<div style="height:6px;width:140px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:4px"><div style="height:100%;width:'+pct+'%;background:'+(pronto?'var(--green)':col)+'"></div></div></div>'+
+    (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; pagato</span>':
+      pronto&&!isReadOnlyCollab()?'<button onclick="pagaClientePocket(\''+cliente.replace(/'/g,"\\'")+'\',\''+cid+'\')" style="padding:8px 18px;background:linear-gradient(135deg,#00c07a,var(--green));border:none;border-radius:8px;color:#001a0e;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">&#128176; Paga Cliente ('+POCKET_SOGLIA+'&euro;)</button>':'')+
+    '</div></div>';
+
+  html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+    '<thead><tr style="background:rgba(245,200,66,.06)">'+
+    '<th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
+    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
+    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
+    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DATA INIZIO</th>'+
+    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">POCKET</th>'+
+    '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
+    '</tr></thead><tbody>';
+
+  righe.forEach(function(b,ri){
+    var st=b.pocket_stato||null;
+    var badgeColor=st==='PAGATO'?'var(--green)':st==='ACCUMULATO'?'var(--gold)':'var(--tx3)';
+    var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
+    var bg=ri%2===0?'rgba(255,255,255,.012)':'transparent';
+    html+='<tr style="background:'+bg+'">'+
+      '<td style="padding:10px 16px;font-weight:700;color:var(--tx);border-bottom:1px solid rgba(255,255,255,.04)">'+(b.bookmaker||'—')+'</td>'+
+      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
+      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
+      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+      '<td style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (st?'<span style="font-size:9.5px;font-weight:800;color:'+badgeColor+'">'+badgeLabel+'</span>':
+          (isReadOnlyCollab()?'<span style="font-size:9.5px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">Metti da parte</button>'))+
+      '</td>'+
+      '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (isReadOnlyCollab()?'':'<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px">&#9998;</button>')+
+      '</td></tr>';
+  });
+
+  html+='</tbody></table></div></div>';
+
+  if(!isReadOnlyCollab())html+='<div style="margin-top:12px">'+nuovoClientePocketSelectHtml(c,cliente)+'</div>';
 
   g('collab-detail').innerHTML=html;
 }
@@ -1215,7 +1283,9 @@ async function deleteBonus(bonusId,cid,bkEnc){
     _bns=_bns.filter(function(b){return String(b.id)!==String(bonusId);});
     showToast('Cliente eliminato','ok');
     renderList();
-    renderBkDetail(cid,bkEnc);
+    var cDel=_collabs.find(function(x){return String(x.id)===String(cid);});
+    if(cDel&&cDel.modello==='POCKET'){selectCollab(cid);}
+    else{renderBkDetail(cid,bkEnc);}
   }catch(e){
     alert('Errore eliminazione: '+(e.message||String(e)));
   }
@@ -1428,7 +1498,13 @@ async function saveEditBonus(){
     if(idx>=0)Object.assign(_bns[idx],payload);
     closeEditBonus();
     showToast('Salvato ✓','ok');
-    renderBkDetail(_editBnsCid,_editBnsEnc);
+    var cEd=_collabs.find(function(x){return String(x.id)===String(_editBnsCid);});
+    if(cEd&&cEd.modello==='POCKET'){
+      var bEd=_bns.find(function(x){return String(x.id)===String(_editBnsId);});
+      renderPocketCliente(_editBnsCid,encodeURIComponent(bEd?bEd.cliente:''));
+    }else{
+      renderBkDetail(_editBnsCid,_editBnsEnc);
+    }
   }catch(e){
     g('eb-err').textContent='Errore: '+(e.message||String(e));
     btn.disabled=false;btn.textContent='💾 Salva';
