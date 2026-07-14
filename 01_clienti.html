@@ -1431,6 +1431,23 @@ function miniChart(id,vals,lbls,col){
   pts.forEach(function(p,i){cx.fillText(lbls[i]||'',p.x,pT+cH+4);});
 }
 
+// Supabase/PostgREST risponde al massimo 1000 righe per chiamata: la
+// tabella bonus ne ha migliaia, quindi va scaricata a pagine, altrimenti
+// i bonus FATTO piu' vecchi delle ultime 1000 righe restano invisibili
+// qui (es. i filtri "Ha fatto / Non ha" per bookmaker risultano sbagliati).
+async function fetchAllBonusLite(){
+  var all=[],from=0,step=1000;
+  while(true){
+    var r=await db.from('bonus').select('id_cli,bookmaker,stato').range(from,from+step-1);
+    if(r.error)throw r.error;
+    var rows=r.data||[];
+    all=all.concat(rows);
+    if(rows.length<step)break;
+    from+=step;
+  }
+  return all;
+}
+
 /* ── LOAD ── */
 async function loadData(){
   var data=MOCK;
@@ -1440,12 +1457,12 @@ async function loadData(){
     if(!_tuttiMesi){var se=meseStartEnd(gm);cliQuery=cliQuery.gte('created_at',se.start).lt('created_at',se.end);}
     var results=await Promise.all([
       cliQuery,
-      db.from('bonus').select('id_cli,bookmaker,stato')
+      fetchAllBonusLite()
     ]);
-    var rCli=results[0],rBns=results[1];
+    var rCli=results[0],rBnsRows=results[1];
     if(rCli.data&&rCli.data.length>0){
       var bnsMap={};
-      if(rBns.data){rBns.data.forEach(function(row){
+      if(rBnsRows){rBnsRows.forEach(function(row){
         var cId=row.id_cli;if(!cId)return;
         if(!bnsMap[cId])bnsMap[cId]={c:[],p:[],l:[]};
         if(row.stato==='FATTO')bnsMap[cId].c.push(row.bookmaker);
