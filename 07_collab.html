@@ -1075,6 +1075,8 @@ function openNewBonus(cid,bkEnc){
   if(!c)return;
   _newBnsCid=cid;_newBnsEnc=bkEnc;
   var _nbOpDefault=['Mary','Manuele','Serena','Samuele'].find(function(o){return (currentNome||'').indexOf(o)===0;})||'';
+  var _nbTariffa=tariffeForCollab(c).find(function(t){return (t.bookmaker||'').toLowerCase()===bkName.toLowerCase();});
+  var _nbImpDefault=_nbTariffa?parseFloat(_nbTariffa.prezzo)||0:'';
   var mese=_collabMese?parseInt(_collabMese.split('-')[1]):new Date().getMonth()+1;
   var anno=_collabMese?parseInt(_collabMese.split('-')[0]):new Date().getFullYear();
   var nd=g('new-bonus-modal');
@@ -1099,8 +1101,8 @@ function openNewBonus(cid,bkEnc){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
         '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">DATA INIZIO</div>'+
           '<input id="nb-dt" type="date" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
-        '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">IMPORTO (€)</div>'+
-          '<input id="nb-imp" type="number" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" step="0.01" min="0" placeholder="0.00"></div>'+
+        '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">IMPORTO (€)'+(_nbTariffa?' <span style="color:var(--green);font-weight:800">— dal listino</span>':'')+'</div>'+
+          '<input id="nb-imp" type="number" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" step="0.01" min="0" placeholder="0.00" value="'+_nbImpDefault+'"></div>'+
       '</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
         '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">RICARICA EFFETTUATA</div>'+
