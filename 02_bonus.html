@@ -2136,7 +2136,11 @@ function g(id){return document.getElementById(id);}
 function sf(fn){try{fn();}catch(e){}}
 function ini(nm){return (nm||'').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2)||'?';}
 function fmtE(n){return n==null||n===''||n===0&&typeof n==='string'?'—':'€'+Math.round(n).toLocaleString('it-IT');}
-function fmtDate(d){if(!d)return '—';var dt=new Date(d);var df=Math.floor((Date.now()-dt)/864e5);if(df===0)return 'Oggi';if(df===1)return 'Ieri';if(df<7)return df+'gg fa';return dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});}
+function fmtDate(d){if(!d)return '—';var dt=new Date(d);var df=Math.floor((Date.now()-dt)/864e5);if(df===0)return 'Oggi';if(df===1)return 'Ieri';if(df>=0&&df<7)return df+'gg fa';return dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});}
+function daysBetween(d1,d2){return Math.round((new Date(d2)-new Date(d1))/(1000*60*60*24));}
+function addDays(d,n){var dt=new Date(d);dt.setDate(dt.getDate()+n);return dt.toISOString().slice(0,10);}
+function _todayIso(){return new Date().toISOString().slice(0,10);}
+function fmtDateShort(d){if(!d)return'—';var p=d.split('-');return p[2]+'/'+p[1];}
 function statoClass(s){return {LIBERO:'sb-lib',IN_CORSO:'sb-inc',FATTO:'sb-fat',GIA_REGISTRATO:'sb-reg',LIMITATO:'sb-lim',BANNATO:'sb-ban',NON_IDONEO:'sb-non',IN_ATTESA_CLIENTE:'sb-inc',DA_VERIFICARE:'sb-lim'}[s]||'sb-non';}
 function statoLbl(s){return {LIBERO:'&#9898; Libero',IN_CORSO:'&#8635; In Corso',FATTO:'&#10003; Fatto',GIA_REGISTRATO:'&#128274; Già Reg.',LIMITATO:'&#9888; Limitato',BANNATO:'&#10005; Bannato',NON_IDONEO:'&#8212; Non Idoneo',IN_ATTESA_CLIENTE:'&#8987; Attesa',DA_VERIFICARE:'? Verificare'}[s]||s;}
 function priCls(p){return p==='ALTA'?'pri-h':p==='MEDIA'?'pri-m':'pri-b';}
@@ -3987,8 +3991,8 @@ function renderBkWorkspace(op, bk){
     +'<tr>'
       +'<th class="ot-sg" rowspan="2" style="vertical-align:middle;font-size:'+FSS+'">Cliente</th>'
       +'<th class="ot-sg ot-sg-access" colspan="2" style="font-size:'+FSS+'">🔑 Accesso</th>'
-      +'<th class="ot-sg ot-sg-adv" colspan="3" style="font-size:'+FSS+'">📊 Stato & Inizio</th>'
-      +'<th class="ot-sg ot-sg-fin" colspan="6" style="border-top-color:'+col+'44;font-size:'+FSS+'">💰 Finanza — '+meseLabel+'</th>'
+      +'<th class="ot-sg ot-sg-adv" colspan="4" style="font-size:'+FSS+'">📊 Stato & Inizio</th>'
+      +'<th class="ot-sg ot-sg-fin" colspan="8" style="border-top-color:'+col+'44;font-size:'+FSS+'">💰 Finanza — '+meseLabel+'</th>'
       +'<th class="ot-sg ot-sg-note" colspan="1" style="font-size:'+FSS+'">📋 Note</th>'
       +'<th class="ot-sg" style="border-top:2px solid rgba(255,255,255,.04)"></th>'
     +'</tr><tr>'
@@ -3997,8 +4001,11 @@ function renderBkWorkspace(op, bk){
       +'<th class="ot-th" style="color:var(--gold);font-size:'+FSS+'">Stato</th>'
       +'<th class="ot-th" style="color:var(--gold);font-size:'+FSS+'">Fase</th>'
       +'<th class="ot-th" style="color:var(--teal);font-size:'+FSS+'">Data Inizio</th>'
+      +'<th class="ot-th" style="color:var(--gold);font-size:'+FSS+'">Scadenza</th>'
       +'<th class="ot-th" style="color:var(--purple);font-size:'+FSS+'">Deposito</th>'
-      +'<th class="ot-th" style="color:var(--cyan);font-size:'+FSS+'">Ricavo Reale</th>'
+      +'<th class="ot-th" style="color:var(--blue);font-size:'+FSS+'">Bonus Ottenuto</th>'
+      +'<th class="ot-th" style="color:var(--cyan);font-size:'+FSS+'">Prelievo</th>'
+      +'<th class="ot-th" style="color:var(--cyan);font-size:'+FSS+'">Ricavo Totale</th>'
       +'<th class="ot-th" style="color:var(--orange);font-size:'+FSS+'">Pagato Cliente</th>'
       +'<th class="ot-th" style="color:var(--red);font-size:'+FSS+'">Costi Extra</th>'
       +'<th class="ot-th" style="color:var(--teal);font-size:'+FSS+'">Margine MBBET</th>'
@@ -4013,6 +4020,12 @@ function renderBkWorkspace(op, bk){
     var faseSel=OT_FASI.map(function(f){return '<option'+(f===r.fase?' selected':'')+' value="'+f+'">'+f+'</option>';}).join('');
     var marg=r.margine!==null&&r.margine!==undefined?r.margine:(r.profitto_mb||0);
     var tdS='padding:10px 14px;font-size:'+FS;
+    var scad=r.data_inizio?addDays(r.data_inizio,7):'';
+    var gg=scad?daysBetween(_todayIso(),scad):null;
+    var opDone=r.stato_op==='Completato';
+    var ggCol=opDone||gg===null?'var(--tx3)':(gg<=2?'var(--red)':'var(--green)');
+    var ggTxt=gg===null?'—':(gg<0?Math.abs(gg)+'gg fa':gg===0?'oggi':gg+'gg');
+    var ricTot=r.ricavo_reale||0;
     h+='<tr class="'+rc+'" data-rid="'+r.id+'">'
       /* cliente */
       +'<td class="ot-td" style="'+tdS+';min-width:170px"><div style="display:flex;align-items:center;gap:10px">'
@@ -4031,10 +4044,16 @@ function renderBkWorkspace(op, bk){
       +'<td class="ot-td" style="'+tdS+'"><select class="ot-fase" style="font-size:11px" onchange="otFase(\''+r.id+'\',this.value)">'+faseSel+'</select></td>'
       /* data inizio */
       +'<td class="ot-td editable" id="di-cell-'+r.id+'" style="'+tdS+';color:var(--teal)" onclick="otEd(\'di-cell-'+r.id+'\',\''+r.id+'\',\'data_inizio\')">'+(r.data_inizio?'<b style="font-size:13px">'+fmtDate(r.data_inizio)+'</b>':'<span style="color:var(--tx4)">✏</span>')+'</td>'
+      /* scadenza — 7gg da data inizio, avviso quando restano 2gg o meno */
+      +'<td class="ot-td" id="scad-cell-'+r.id+'" style="'+tdS+'">'+(scad?'<div style="font-size:11px;color:var(--tx2)">'+fmtDateShort(scad)+'</div><div id="scad-gg-'+r.id+'" style="font-weight:800;font-size:11px;color:'+ggCol+'">'+ggTxt+'</div>':'<span style="color:var(--tx4)">—</span>')+'</td>'
       /* deposito */
       +'<td class="ot-td editable" id="dep-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'dep-cell-'+r.id+'\',\''+r.id+'\',\'deposito\')"><span id="dep-v-'+r.id+'" style="color:var(--purple);font-weight:700;font-size:'+FS+'">'+(r.deposito>0?fmtE(r.deposito):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
-      /* ricavo reale */
-      +'<td class="ot-td editable" id="rr-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'rr-cell-'+r.id+'\',\''+r.id+'\',\'ric_real\')"><span id="rr-v-'+r.id+'" style="color:var(--cyan);font-weight:700;font-size:'+FS+'">'+(r.ricavo_reale>0?fmtE(r.ricavo_reale):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      /* bonus ottenuto */
+      +'<td class="ot-td editable" id="bonRic-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'bonRic-cell-'+r.id+'\',\''+r.id+'\',\'bonus_ric\')"><span id="bonRic-v-'+r.id+'" style="color:var(--blue);font-weight:700;font-size:'+FS+'">'+(r.bonus_ric>0?fmtE(r.bonus_ric):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      /* prelievo */
+      +'<td class="ot-td editable" id="prel-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'prel-cell-'+r.id+'\',\''+r.id+'\',\'prelievo\')"><span id="prel-v-'+r.id+'" style="color:var(--cyan);font-weight:700;font-size:'+FS+'">'+(r.prelievo>0?fmtE(r.prelievo):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      /* ricavo totale — calcolato automaticamente da prelievo - deposito */
+      +'<td class="ot-td" style="'+tdS+'"><b id="rr-v-'+r.id+'" style="font-size:14px;color:'+(ricTot>0?'var(--cyan)':ricTot<0?'var(--red)':'var(--tx4)')+'">'+(ricTot?fmtE(ricTot):'—')+'</b></td>'
       /* pagato cliente */
       +'<td class="ot-td editable" id="pc-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'pc-cell-'+r.id+'\',\''+r.id+'\',\'pag_cli\')"><span id="pc-v-'+r.id+'" style="color:var(--orange);font-weight:700;font-size:'+FS+'">'+(r.pag_cli>0?fmtE(r.pag_cli):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* costi extra */
@@ -4128,7 +4147,7 @@ function _updFinCells(rowId,r){
   var gt=sel('gt-v-'+rowId);if(gt)gt.textContent=r.guad_tot!==0?fmtE(r.guad_tot):'—';
   var go=sel('gop-v-'+rowId);if(go)go.textContent=r.guad_op>0?fmtE(r.guad_op):'—';
   var pm=sel('pmb-v-'+rowId);if(pm)pm.textContent=r.profitto_mb!==0?fmtE(r.profitto_mb):'—';
-  var rrel=sel('rr-v-'+rowId);if(rrel)rrel.textContent=r.ricavo_reale>0?fmtE(r.ricavo_reale):'—';
+  var rrel=sel('rr-v-'+rowId);if(rrel){rrel.textContent=r.ricavo_reale?fmtE(r.ricavo_reale):'—';rrel.style.color=r.ricavo_reale>0?'var(--cyan)':r.ricavo_reale<0?'var(--red)':'var(--tx4)';}
   var pc=sel('pc-v-'+rowId);if(pc)pc.textContent=r.pag_cli>0?fmtE(r.pag_cli):'—';
   var ce=sel('ce-v-'+rowId);if(ce)ce.textContent=r.costi_extra>0?fmtE(r.costi_extra):'—';
   var mg=sel('marg-v-'+rowId);if(mg){mg.textContent=r.margine!==0&&r.margine!==null?fmtE(r.margine):'—';mg.style.color=r.margine>0?'var(--teal)':r.margine<0?'var(--red)':'var(--tx4)';}
@@ -4147,6 +4166,13 @@ function otEdNum(cellId,rowId,field){
     if(field==='ric_real')r.ricavo_reale=v;
     if(field==='ric_prev')r.ricavo_prev=v;
     if(field==='pag_cli')r.pag_cli=v;
+    /* deposito e prelievo alimentano il Ricavo Totale, calcolato sempre
+       in automatico (prelievo - deposito), non piu' inserito a mano */
+    var autoRic=null;
+    if(field==='deposito'||field==='prelievo'){
+      r.ricavo_reale=(r.prelievo||0)-(r.deposito||0);
+      autoRic=r.ricavo_reale;
+    }
     /* ricalcolo margine + derivati */
     _recalcFin(r);
     /* aggiorna cella corrente */
@@ -4159,6 +4185,7 @@ function otEdNum(cellId,rowId,field){
     if(r._real){
       try{
         var u={};u[m.db]=v||null;
+        if(autoRic!==null)u.ric_real=autoRic;
         if(field!=='ult_azione')u.ult_azione=new Date().toISOString();
         await db.from('bonus').update(u).eq('id',rowId);
         showToast('Salvato ✓','ok');
