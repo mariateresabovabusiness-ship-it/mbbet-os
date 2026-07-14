@@ -2227,7 +2227,7 @@ async function loadData(){
   await autoSyncRadar();
 }
 
-var _OP_PERC={'Riccardo Tavagnacco':30,'Alessia Ciman':25,'Ciro Bisogno':25,'Antonio La Barbera':25,'Francesco Bova':25,'Mary + Samuele':100};
+var _OP_PERC={'Mari+Samu':100,'Riccardo Tavagnacco':30,'Francesco Domenico Bova':25,'Ciro Bisogno':25,'Alessia Ciman':25,'Antonio Michele La Barbera':25};
 function mapBonusRow(r){
   var rr=parseFloat(r.ric_real)||0;
   var defPerc=_OP_PERC[r.operatore]||20;
@@ -4506,7 +4506,7 @@ async function otAssegna(op){
           +'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:5px;font-weight:700">Password BK</div><input id="ap-pwd" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13px;font-family:inherit;outline:none" type="password" placeholder="password sito"></div>'
         +'</div>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-          +'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:5px;font-weight:700">% Operatore</div><input id="ap-perc" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13px;font-family:inherit;outline:none" type="number" min="1" max="100" value="20"></div>'
+          +'<div><div style="font-size:11px;color:var(--tx3);margin-bottom:5px;font-weight:700">% Operatore</div><input id="ap-perc" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13px;font-family:inherit;outline:none" type="number" min="1" max="100" value="'+(_OP_PERC[op]||20)+'"></div>'
           +'<div><div style="font-size:11px;color:var(--teal);margin-bottom:5px;font-weight:800">⭐ Data Inizio</div><input id="ap-dt" style="width:100%;box-sizing:border-box;background:rgba(0,212,176,.04);border:1px solid rgba(0,212,176,.2);border-radius:9px;padding:11px 13px;color:var(--tx);font-size:13px;font-family:inherit;outline:none;color-scheme:dark" type="date" value="'+new Date().toISOString().slice(0,10)+'"></div>'
         +'</div>'
       +'</div>'
