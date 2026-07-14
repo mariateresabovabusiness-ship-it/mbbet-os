@@ -488,6 +488,19 @@ function showToast(msg,type){
   setTimeout(function(){t.classList.remove('show');},2800);
 }
 
+// Link personale del modulo pubblico "segnala un cliente" per un collaboratore:
+// chi lo condivide (scuola, community, ecc) puo' aggiungere clienti da solo,
+// gia' taggati col nome collab giusto, senza passare da qui.
+var SITE_BASE='https://effervescent-tapioca-e827c7.netlify.app';
+function copyModuloLink(nomeCollab){
+  var url=SITE_BASE+'/13_modulo_collab.html?collab='+encodeURIComponent(nomeCollab);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){showToast('Link copiato ✓','ok');},function(){prompt('Copia questo link:',url);});
+  }else{
+    prompt('Copia questo link:',url);
+  }
+}
+
 /* ══ PAYMENT STATUS STORAGE (condiviso via database, colonna bonus.stato_collab) ══ */
 function _getOldLocalPagMap(){try{return JSON.parse(localStorage.getItem(PAG_KEY)||'{}');}catch(e){return{};}}
 function getPagMap(){
@@ -858,6 +871,7 @@ function renderPocketDetail(c){
       ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+((c.nome||'?')[0]).toUpperCase()+'</div>'+
     '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
     '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">Modello a soglia: si accumula sito per sito, si paga quando un cliente arriva a € '+POCKET_SOGLIA+'</div></div></div>'+
+    (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11.5px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(245,200,66,.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
 
@@ -1100,6 +1114,7 @@ function renderDetail(cid){
       ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+((c.nome||'?')[0]).toUpperCase()+'</div>'+
     '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
     '<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(c.contatto||'')+(c.tipo?' · '+c.tipo:'')+'</div></div></div>'+
+    (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(245,200,66,.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
 
