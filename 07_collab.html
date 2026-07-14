@@ -221,6 +221,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <div class="tb-g">COLLABORATORI</div>
       <div class="tb-sub">REFERRAL · PAGAMENTI · COMMISSIONI</div>
     </div>
+    <button class="btn-add-cl" id="btn-pagamenti" onclick="togglePagamentiView()" style="width:auto;padding:8px 14px;margin:0 8px 0 0;border-radius:9px;font-size:11.5px;background:rgba(79,157,255,.12);border:1px dashed rgba(79,157,255,.35);color:var(--blue)">&#128176; Pagamenti Clienti</button>
     <button class="btn-add-cl" onclick="openForm(null)" style="width:auto;padding:8px 14px;margin:0;border-radius:9px;font-size:11px">&#43; Nuovo Collab</button>
     <div class="tb-usr" style="margin-left:6px">
       <div class="tb-av" id="tb-av">MB</div>
@@ -250,6 +251,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
         <div style="font-size:12px">Scegli dalla lista a sinistra o aggiungine uno nuovo</div>
       </div>
       <div id="collab-detail" style="display:none"></div>
+      <div id="pagamenti-view" style="display:none"></div>
     </div>
 
   </div>
@@ -479,6 +481,111 @@ function setPagStatus(bonusId,status){
 function getPagStatus(bonusId){
   var b=_bns.find(function(x){return String(x.id)===String(bonusId);});
   return (b&&b.stato_collab)||'IN_CORSO';
+}
+
+/* ══ VISTA UNICA: PAGAMENTI CLIENTI (tutti i collaboratori insieme) ══ */
+var _pagFiltroSito='';
+var _pagMostraPagati=false;
+var PAG_PRIORITA={SCADUTO:0,URGENTE:1,IN_SCADENZA:2,IN_CORSO:3,PAGATO:4};
+
+function togglePagamentiView(){
+  if(isReadOnlyCollab())return;
+  var pv=g('pagamenti-view');
+  var cl=document.querySelector('.collab-list');
+  var showing=pv.style.display!=='none';
+  if(showing){
+    pv.style.display='none';
+    if(cl)cl.style.display='';
+    if(_selectedId){g('collab-detail').style.display='block';}
+    else{g('empty-collab').style.display='flex';}
+    g('btn-pagamenti').innerHTML='&#128176; Pagamenti Clienti';
+  }else{
+    if(cl)cl.style.display='none';
+    g('empty-collab').style.display='none';
+    g('collab-detail').style.display='none';
+    pv.style.display='block';
+    g('btn-pagamenti').innerHTML='&#8592; Torna ai Collaboratori';
+    renderPagamenti();
+  }
+}
+function setPagFiltroSito(v){_pagFiltroSito=v;renderPagamenti();}
+function togglePagMostraPagati(){_pagMostraPagati=!_pagMostraPagati;renderPagamenti();}
+function pagCicloStato(bonusId){
+  var cur=getPagStatus(bonusId);
+  var next=STATI[(STATI.indexOf(cur)+1)%STATI.length];
+  setPagStatus(bonusId,next);
+  renderPagamenti();
+  renderList();
+}
+function renderPagamenti(){
+  var el=g('pagamenti-view');
+  if(!el)return;
+  var siti=[];
+  _bns.forEach(function(b){var bk=b.bookmaker||'—';if(siti.indexOf(bk)<0)siti.push(bk);});
+  siti.sort();
+
+  var righe=_bns.filter(function(b){
+    if(_pagFiltroSito&&b.bookmaker!==_pagFiltroSito)return false;
+    var st=getPagStatus(b.id);
+    if(!_pagMostraPagati&&st==='PAGATO')return false;
+    return true;
+  }).sort(function(a,b){
+    var pa=PAG_PRIORITA[getPagStatus(a.id)],pb=PAG_PRIORITA[getPagStatus(b.id)];
+    if(pa!==pb)return pa-pb;
+    return (a.data_inizio||'').localeCompare(b.data_inizio||'');
+  });
+
+  var totDaPagare=righe.filter(function(b){return getPagStatus(b.id)!=='PAGATO';})
+    .reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
+
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">'+
+    '<div><div style="font-size:16px;font-weight:900;color:var(--tx)">&#128176; Pagamenti Clienti</div>'+
+    '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">Tutti i collaboratori insieme, in un unico posto</div></div>'+
+    '<div style="text-align:right"><div style="font-size:22px;font-weight:900;color:var(--gold)">€ '+fmt(totDaPagare)+'</div>'+
+    '<div style="font-size:10.5px;color:var(--tx3)">totale ancora da pagare'+(_pagFiltroSito?' · '+_pagFiltroSito:'')+'</div></div>'+
+    '</div>';
+
+  html+='<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;background:rgba(10,13,32,.9);border:1px solid rgba(255,255,255,.07);border-radius:10px">'+
+    '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px">SITO →</span>'+
+    '<select onchange="setPagFiltroSito(this.value)" style="background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:7px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
+    '<option value=""'+(!_pagFiltroSito?' selected':'')+'>Tutti i siti</option>'+
+    siti.map(function(s){return '<option value="'+s+'"'+(s===_pagFiltroSito?' selected':'')+'>'+s+'</option>';}).join('')+
+    '</select></div>'+
+    '<label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:11.5px;color:var(--tx3);font-weight:700">'+
+    '<input type="checkbox" onchange="togglePagMostraPagati()" '+(_pagMostraPagati?'checked':'')+' style="width:15px;height:15px;accent-color:var(--gold);cursor:pointer">Mostra anche i pagati</label>'+
+    '<span style="margin-left:auto;font-size:11px;color:var(--tx3)">'+righe.length+' '+(righe.length===1?'riga':'righe')+'</span>'+
+    '</div>';
+
+  if(!righe.length){
+    html+='<div class="empty-state"><div class="empty-ic">&#10003;</div>Nessun pagamento in sospeso'+(_pagFiltroSito?' per '+_pagFiltroSito:'')+' — tutto in ordine.</div>';
+  }else{
+    html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden">'+
+      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+      '<thead><tr style="background:rgba(255,255,255,.025)">'+
+      '<th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
+      '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">COLLABORATORE</th>'+
+      '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
+      '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DATA INIZIO</th>'+
+      '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+      '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
+      '</tr></thead><tbody>'+
+      righe.map(function(b){
+        var st=getPagStatus(b.id);
+        return '<tr>'+
+          '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--tx);font-size:13px">'+(b.cliente||'—')+'</td>'+
+          '<td style="padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx2);font-size:12px">'+(b.nome_collab||'—')+'</td>'+
+          '<td style="padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx2);font-size:12px">'+(b.bookmaker||'—')+'</td>'+
+          '<td style="padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx3);font-size:12px">'+fmtDate(b.data_inizio)+'</td>'+
+          '<td style="padding:11px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--gold);font-size:13px">€ '+fmt(b.comp_referral)+'</td>'+
+          '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+            '<span class="st-badge st-'+st+'" onclick="pagCicloStato(\''+b.id+'\')">'+STATI_LABEL[st]+'</span>'+
+          '</td>'+
+          '</tr>';
+      }).join('')+
+      '</tbody></table></div></div>';
+  }
+
+  el.innerHTML=html;
 }
 function cycleStatus(bonusId,cid){
   if(isReadOnlyCollab())return;
