@@ -1045,6 +1045,7 @@ function openNewBonus(cid,bkEnc){
   var c=_collabs.find(function(x){return String(x.id)===String(cid);});
   if(!c)return;
   _newBnsCid=cid;_newBnsEnc=bkEnc;
+  var _nbOpDefault=['Mary','Manuele','Serena','Samuele'].find(function(o){return (currentNome||'').indexOf(o)===0;})||'';
   var mese=_collabMese?parseInt(_collabMese.split('-')[1]):new Date().getMonth()+1;
   var anno=_collabMese?parseInt(_collabMese.split('-')[0]):new Date().getFullYear();
   var nd=g('new-bonus-modal');
@@ -1084,11 +1085,8 @@ function openNewBonus(cid,bkEnc){
       '</div>'+
       '<div><div style="font-size:9px;font-weight:700;color:var(--tx3);margin-bottom:4px">OPERATORE</div>'+
         '<select id="nb-op" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
-          '<option value="">— Nessuno</option>'+
-          '<option value="Mary">Mary</option>'+
-          '<option value="Manuele">Manuele</option>'+
-          '<option value="Serena">Serena</option>'+
-          '<option value="Samuele">Samuele</option>'+
+          '<option value=""'+(_nbOpDefault?'':' selected')+'>— Nessuno</option>'+
+          ['Mary','Manuele','Serena','Samuele'].map(function(o){return '<option value="'+o+'"'+(o===_nbOpDefault?' selected':'')+'>'+o+'</option>';}).join('')+
         '</select></div>'+
       '<div><div style="font-size:9px;font-weight:700;color:var(--tx3);margin-bottom:4px">NOTE</div>'+
         '<input id="nb-note" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" placeholder="Note opzionali..."></div>'+
