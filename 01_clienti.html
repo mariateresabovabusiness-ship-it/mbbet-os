@@ -891,7 +891,14 @@ function applyFilters(){
     if(_f.stato&&c.stato!==_f.stato)return false;
     if(_f.op&&bkOps(c).indexOf(_f.op)<0)return false;
     for(var i=0;i<bkK.length;i++){
-      var bk=bkK[i],m=_f.bk[bk],done=(c.bk_completati||[]).indexOf(bk)>=0;
+      var bk=bkK[i],m=_f.bk[bk];
+      // "Ha fatto" deve valere per qualunque stato diverso da libero (fatto,
+      // in corso, limitato/bannato, gia' registrato): se e' successo qualcosa
+      // su quel sito, quel cliente non e' piu' "disponibile" per registrarlo.
+      var done=(c.bk_completati||[]).indexOf(bk)>=0
+        ||(c.bk_in_corso||[]).indexOf(bk)>=0
+        ||(c.bk_limitati||[]).indexOf(bk)>=0
+        ||(c.bk_gia_registrato||[]).indexOf(bk)>=0;
       if(m==='none'&&done)return false;
       if(m==='done'&&!done)return false;
     }
@@ -1465,17 +1472,19 @@ async function loadData(){
       var bnsMap={};
       if(rBnsRows){rBnsRows.forEach(function(row){
         var cId=row.id_cli;if(!cId)return;
-        if(!bnsMap[cId])bnsMap[cId]={c:[],p:[],l:[]};
+        if(!bnsMap[cId])bnsMap[cId]={c:[],p:[],l:[],g:[]};
         if(row.stato==='FATTO')bnsMap[cId].c.push(row.bookmaker);
         else if(row.stato==='IN_CORSO')bnsMap[cId].p.push(row.bookmaker);
         else if(row.stato==='LIMITATO'||row.stato==='BANNATO')bnsMap[cId].l.push(row.bookmaker);
+        else if(row.stato==='GIA_REGISTRATO')bnsMap[cId].g.push(row.bookmaker);
       });}
       data=rCli.data.map(function(c,i){
-        var bm=bnsMap[c.id]||{c:[],p:[],l:[]};
+        var bm=bnsMap[c.id]||{c:[],p:[],l:[],g:[]};
         var bkC=(c.bk_completati&&c.bk_completati.length)?c.bk_completati:bm.c;
         var bkP=(c.bk_in_corso&&c.bk_in_corso.length)?c.bk_in_corso:bm.p;
         var bkL=(c.bk_limitati&&c.bk_limitati.length)?c.bk_limitati:bm.l;
-        return Object.assign({},{id:i+1,potenziale:c.stato==='ATTIVO'?680:c.stato==='IN_LAVORAZIONE'?340:120,score:c.stato==='ATTIVO'?72+Math.floor(Math.random()*20):c.stato==='IN_LAVORAZIONE'?42+Math.floor(Math.random()*22):18+Math.floor(Math.random()*20),bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL,pagamenti:[],ultima_attivita:c.updated_at||new Date().toISOString(),data_ingresso:c.created_at||new Date().toISOString(),note:'',provincia:'—'},c,{bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL});
+        var bkG=(c.bk_gia_registrato&&c.bk_gia_registrato.length)?c.bk_gia_registrato:bm.g;
+        return Object.assign({},{id:i+1,potenziale:c.stato==='ATTIVO'?680:c.stato==='IN_LAVORAZIONE'?340:120,score:c.stato==='ATTIVO'?72+Math.floor(Math.random()*20):c.stato==='IN_LAVORAZIONE'?42+Math.floor(Math.random()*22):18+Math.floor(Math.random()*20),bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL,bk_gia_registrato:bkG,pagamenti:[],ultima_attivita:c.updated_at||new Date().toISOString(),data_ingresso:c.created_at||new Date().toISOString(),note:'',provincia:'—'},c,{bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL,bk_gia_registrato:bkG});
       });
     }
   }catch(e){console.warn('Mock data in uso');}
