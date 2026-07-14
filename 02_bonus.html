@@ -4091,7 +4091,7 @@ function renderBkWorkspace(op, bk){
       /* password */
       +'<td class="ot-td editable" data-lbl="PASSWORD" id="pwd-cell-'+r.id+'" style="'+tdS+'" onclick="otEd(\'pwd-cell-'+r.id+'\',\''+r.id+'\',\'password\')"><div class="pw-cell"><span id="pwd-v-'+r.id+'" style="flex:1;font-size:'+FS+';color:'+(r.password?'var(--tx3)':'var(--tx4)')+'">'+(r.password?'••••••••':'<span style="color:var(--tx4)">✏ inserisci</span>')+'</span><span hidden id="pwd-r-'+r.id+'">'+escQ(r.password||'')+'</span>'+(r.password?'<button class="pw-btn" id="pwd-eye-'+r.id+'" onclick="event.stopPropagation();otPwdShow(\''+r.id+'\')">👁</button>':'')+(r.password?'<button class="pw-btn" onclick="event.stopPropagation();otCopy(document.getElementById(\'pwd-r-'+r.id+'\').textContent,\'Password\')">📋</button>':'')+'</div></td>'
       /* stato */
-      +'<td class="ot-td" data-lbl="STATO" style="'+tdS+'"><select class="sto sto-'+({'In corso':'inc','Completato':'comp','Problema':'prob','Bloccato':'bloc'}[r.stato_op]||'inc')+'" style="font-size:12px" onchange="otStato(\''+r.id+'\',this)">'+stSel+'</select></td>'
+      +'<td class="ot-td" data-lbl="STATO" style="'+tdS+'"><div style="display:flex;align-items:center;gap:6px"><select class="sto sto-'+({'In corso':'inc','Completato':'comp','Problema':'prob','Bloccato':'bloc'}[r.stato_op]||'inc')+'" style="font-size:12px" onchange="otStato(\''+r.id+'\',this)">'+stSel+'</select>'+(canDelete()?'<button class="pw-btn" style="color:var(--red)" onclick="otEliminaRiga(\''+r.id+'\')" title="Elimina cliente">&#128465;</button>':'')+'</div></td>'
       /* fase */
       +'<td class="ot-td" data-lbl="FASE" style="'+tdS+'"><select class="ot-fase" style="font-size:11px" onchange="otFase(\''+r.id+'\',this.value)">'+faseSel+'</select></td>'
       /* data inizio */
@@ -4326,6 +4326,24 @@ async function otStato(rowId,sel){
   /* aggiorna KPI strip senza ri-renderare tutta la tabella */
   _refreshKpis();
   if(r._real){try{await db.from('bonus').update({stato_op:v,ult_azione:new Date().toISOString()}).eq('id',rowId);showToast('Stato aggiornato','ok');}catch(e){showToast('Errore','err');}}
+}
+
+/* ── Elimina cliente dalla tabella (rimuove la riga bonus per quel sito) ── */
+async function otEliminaRiga(rowId){
+  if(!canDelete()){showToast('Non hai i permessi per eliminare','err');return;}
+  var r=BONUS_CLI.find(function(x){return x.id===rowId;});if(!r)return;
+  var ok=confirm('Eliminare '+(r.cli_nm||'questo cliente')+' da '+(r.bk_nm||'questo sito')+'?\n\nQuesta azione non si può annullare.');
+  if(!ok)return;
+  if(r._real){
+    try{
+      var res=await db.from('bonus').delete().eq('id',rowId);
+      if(res.error){showToast('Errore eliminazione','err');return;}
+    }catch(e){showToast('Errore eliminazione','err');return;}
+  }
+  var idx=BONUS_CLI.findIndex(function(x){return x.id===rowId;});
+  if(idx>=0)BONUS_CLI.splice(idx,1);
+  showToast('Cliente eliminato','ok');
+  if(g('tab-ws')&&g('tab-ws').classList.contains('open'))renderTwContent();else renderView();
 }
 
 /* ── Fase cambio ── */
