@@ -1421,10 +1421,40 @@ function openNewBonus(cid,bkEnc){
   setTimeout(function(){var e=g('nb-nome');if(e)e.focus();},80);
 }
 function closeNewBonus(){var nd=g('new-bonus-modal');if(nd)nd.style.display='none';}
-function genBonusId(){
+async function genBonusId(){
+  // _bns contiene solo le righe con nome_collab: non basta per calcolare il
+  // vero massimo di TUTTA la tabella bonus (usata anche da 02_bonus.html),
+  // quindi lo chiediamo al database per evitare collisioni di id.
   var max=0;
+  try{
+    var r=await db.from('bonus').select('id').order('id',{ascending:false}).limit(1);
+    if(r.data&&r.data[0]){var m=String(r.data[0].id).match(/BNS-(\d+)/);if(m)max=parseInt(m[1]);}
+  }catch(e){}
   _bns.forEach(function(b){var m=String(b.id).match(/BNS-(\d+)/);if(m&&parseInt(m[1])>max)max=parseInt(m[1]);});
   return 'BNS-'+String(max+1).padStart(5,'0');
+}
+// Se il cliente non esiste ancora nel CRM (tabella clienti), lo crea al volo
+// come cliente Referral collegato al collaboratore, cosi' appare anche li'
+// e nella dashboard dell'operatore (che gia' legge bonus.operatore).
+async function collegaClienteCrm(nomeCliente,nomeCollab,operatore){
+  try{
+    var esiste=await db.from('clienti').select('id').ilike('nome',nomeCliente).limit(1);
+    if(esiste.data&&esiste.data.length)return esiste.data[0].id;
+    var tutti=await db.from('clienti').select('id');
+    var max=0;
+    (tutti.data||[]).forEach(function(cl){
+      var m=String(cl.id).match(/MBBET-0*(\d+)/i);
+      if(m&&parseInt(m[1])>max)max=parseInt(m[1]);
+    });
+    var newId='MBBET-'+String(max+1).padStart(3,'0');
+    var r=await db.from('clienti').insert({
+      id:newId,nome:nomeCliente,operatore:operatore||null,collab:nomeCollab||null,
+      tipologia:'Referral',referral:nomeCollab||null,stato:'LIBERO',
+      data_ingresso:new Date().toISOString().slice(0,10)
+    }).select();
+    if(r.error){console.warn(r.error);return null;}
+    return newId;
+  }catch(e){console.warn(e);return null;}
 }
 async function saveNewBonus(){
   if(isReadOnlyCollab())return;
@@ -1438,7 +1468,7 @@ async function saveNewBonus(){
   var c=_collabs.find(function(x){return String(x.id)===String(_newBnsCid);});
   var anno=_collabMese?parseInt(_collabMese.split('-')[0]):new Date().getFullYear();
   var payload={
-    id:genBonusId(),
+    id:await genBonusId(),
     cliente:nome,
     bookmaker:bkName,
     nome_collab:c?c.nome:null,
@@ -1455,6 +1485,8 @@ async function saveNewBonus(){
   var pwd=(g('nb-pwd').value||'').trim();
   if(pwd)payload.password_bk=pwd;
   try{
+    var idCli=await collegaClienteCrm(nome,c?c.nome:null,payload.operatore);
+    if(idCli)payload.id_cli=idCli;
     var r=await db.from('bonus').insert(payload).select();
     if(r.error)throw r.error;
     var newRow=r.data&&r.data[0];
@@ -1463,8 +1495,9 @@ async function saveNewBonus(){
       _bns.push(newRow);
     }
     closeNewBonus();
-    showToast('Cliente aggiunto ✓','ok');
-    renderBkDetail(_newBnsCid,_newBnsEnc);
+    showToast('Cliente aggiunto ✓ (anche in CRM)','ok');
+    if(c&&c.modello==='POCKET'){renderPocketCliente(_newBnsCid,encodeURIComponent(nome));}
+    else{renderBkDetail(_newBnsCid,_newBnsEnc);}
   }catch(e){
     var errMsg='Errore: '+(e.message||JSON.stringify(e)||String(e));
     alert('DEBUG ERRORE AGGIUNGI:\n'+errMsg);
