@@ -2,13 +2,15 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MBBET OS — Coda Clienti</title>
+<title>MBBET OS — Clienti Attivi</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#050714;--gold:#f5c842;--glow-g:rgba(245,200,66,.28);--green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;--tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--sb:224px}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;overflow:hidden;font-size:14px}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(245,200,66,.2);border-radius:2px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,87,87,.5)}50%{box-shadow:0 0 0 12px rgba(255,87,87,0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
 /* SIDEBAR */
 .sb{width:var(--sb);height:100vh;flex-shrink:0;background:rgba(3,4,14,.99);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;position:relative;z-index:30}
@@ -45,6 +47,26 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 
 .main-area{flex:1;overflow-y:auto;padding:20px 22px 40px}
 
+/* COMANDO */
+.cmd-wrap{background:linear-gradient(135deg,rgba(245,200,66,.1),rgba(10,13,32,.98) 60%);border:1px solid rgba(245,200,66,.28);border-radius:18px;padding:20px 22px;margin-bottom:20px;box-shadow:0 0 44px rgba(245,200,66,.06)}
+.cmd-lbl{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:900;letter-spacing:2px;color:var(--gold);margin-bottom:10px}
+.cmd-row{display:flex;gap:10px}
+.cmd-inp{flex:1;padding:13px 16px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:var(--tx);font-size:14px;font-family:inherit;outline:none}
+.cmd-inp:focus{border-color:rgba(245,200,66,.5)}
+.cmd-mic{width:46px;height:46px;border-radius:12px;background:rgba(255,87,87,.1);border:1px solid rgba(255,87,87,.3);color:var(--red);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+.cmd-mic:hover{background:rgba(255,87,87,.18)}
+.cmd-mic.listening{animation:micPulse 1.4s infinite;background:rgba(255,87,87,.25)}
+.cmd-send{padding:0 20px;border-radius:12px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;color:#000;font-weight:900;font-size:13px;cursor:pointer;font-family:inherit}
+.cmd-hint{font-size:11px;color:var(--tx3);margin-top:9px}
+.cmd-confirm{margin-top:14px;padding:16px 18px;background:rgba(0,0,0,.35);border:1px solid rgba(245,200,66,.3);border-radius:12px;animation:popIn .2s ease both}
+.cmd-confirm-txt{font-size:14px;line-height:1.6}
+.cmd-confirm-txt b{color:var(--gold)}
+.cmd-confirm-btns{display:flex;gap:10px;margin-top:12px}
+.cmd-btn{padding:8px 18px;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;border:none}
+.cmd-btn-ok{background:linear-gradient(135deg,#0d5a3a,var(--green));color:#001a0e}
+.cmd-btn-no{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--tx2)}
+.cmd-err{margin-top:12px;padding:12px 16px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.25);border-radius:10px;font-size:12.5px;color:var(--tx2)}
+
 .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
 .kpi-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-top:3px solid var(--gold);border-radius:14px;padding:16px 18px}
 .kpi-lbl{font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px}
@@ -58,16 +80,13 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .q-av{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0}
 .q-nm{font-size:15px;font-weight:900;color:var(--tx)}
 .q-sub{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.q-wa{width:34px;height:34px;border-radius:9px;background:rgba(0,229,138,.1);border:1px solid rgba(0,229,138,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;flex-shrink:0}
 .q-collab-badge{padding:4px 11px;border-radius:999px;font-size:10.5px;font-weight:800;white-space:nowrap}
-.q-sites-lbl{font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;margin:14px 0 8px}
-.q-sites{display:flex;flex-wrap:wrap;gap:6px}
-.q-site-chip{padding:5px 11px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:11.5px;color:var(--tx2);font-weight:600}
-.q-actions{display:flex;gap:10px;margin-top:16px}
-.q-btn{padding:9px 16px;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;border:none;transition:.14s}
-.q-btn-wa{background:linear-gradient(135deg,#0d5a3a,var(--green));color:#001a0e}
-.q-btn-wa:hover{transform:translateY(-1px)}
-.q-btn-done{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--tx2)}
-.q-btn-done:hover{border-color:rgba(0,229,138,.4);color:var(--green)}
+.q-next{margin-top:14px;padding:10px 14px;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);border-radius:10px;font-size:12.5px;color:var(--tx2)}
+.q-next b{color:var(--gold)}
+.q-sites{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.q-site-chip{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px}
+.q-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
 .empty-state{text-align:center;padding:60px 20px;color:var(--tx3)}
 .empty-ic{font-size:40px;margin-bottom:14px}
@@ -105,7 +124,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <div class="sb-sec">NAVIGAZIONE</div>
       <a class="sb-lnk" onclick="navTo('index.html')"><span class="ic">🏘️</span>Hub Centrale</a>
       <a class="sb-lnk" onclick="navTo('01_clienti.html')"><span class="ic">👤</span>CRM Clienti</a>
-      <a class="sb-lnk act"><span class="ic">📥</span>Coda Clienti</a>
+      <a class="sb-lnk act"><span class="ic">⚡</span>Clienti Attivi</a>
       <a class="sb-lnk" onclick="navTo('02_bonus.html')"><span class="ic">🎯</span>Bookmaker</a>
       <a class="sb-lnk" onclick="navTo('03_team.html')"><span class="ic">👥</span>Team</a>
       <a class="sb-lnk" onclick="navTo('04_finanze.html')"><span class="ic">💸</span>Revenue & Finanza</a>
@@ -120,8 +139,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <div class="topbar">
         <a class="tb-back" onclick="navTo('index.html')">← Hub</a>
         <div class="tb-title">
-          <div class="tb-g">CODA CLIENTI</div>
-          <div class="tb-sub">Nuovi clienti da avviare — messaggio pronto + siti da registrare</div>
+          <div class="tb-g">CLIENTI ATTIVI</div>
+          <div class="tb-sub">Parla o scrivi per aggiornare un sito — WhatsApp e stato sempre a portata</div>
         </div>
         <div class="tb-usr">
           <div class="tb-av" id="tb-av">MB</div>
@@ -131,10 +150,22 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       </div>
 
       <div class="main-area">
+
+        <div class="cmd-wrap">
+          <div class="cmd-lbl">🤖 DETTA O SCRIVI UN COMANDO</div>
+          <div class="cmd-row">
+            <input class="cmd-inp" id="cmd-inp" placeholder="es. Mario Rossi ha fatto Sisal" onkeydown="if(event.key==='Enter')runCommand()">
+            <button class="cmd-mic" id="cmd-mic" onclick="toggleMic()" title="Parla">🎙️</button>
+            <button class="cmd-send" onclick="runCommand()">Invia</button>
+          </div>
+          <div class="cmd-hint">Es. "Giulia ha fatto Eurobet" &middot; "Marco è in corso su Snai" &middot; "Alessio limitato su Betflag"</div>
+          <div id="cmd-result"></div>
+        </div>
+
         <div class="kpi-strip">
-          <div class="kpi-card"><div class="kpi-lbl">IN CODA</div><div class="kpi-val" id="kpi-tot">—</div></div>
+          <div class="kpi-card"><div class="kpi-lbl">CLIENTI ATTIVI</div><div class="kpi-val" id="kpi-tot">—</div></div>
           <div class="kpi-card"><div class="kpi-lbl">DA COLLABORATORI</div><div class="kpi-val" id="kpi-collab">—</div></div>
-          <div class="kpi-card"><div class="kpi-lbl">OGGI</div><div class="kpi-val" id="kpi-oggi">—</div></div>
+          <div class="kpi-card"><div class="kpi-lbl">SITI FATTI OGGI</div><div class="kpi-val" id="kpi-oggi">—</div></div>
           <div class="kpi-card"><div class="kpi-lbl">SENZA TELEFONO</div><div class="kpi-val" id="kpi-notel">—</div></div>
         </div>
 
@@ -153,8 +184,10 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>
 <script>
-var _clienti=[], _tariffe=[];
+var _clienti=[], _bonusByClient={}, _pending=null;
 var PALETTE=['#f7cc46','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
+var STATO_COL={'FATTO':'var(--green)','IN_CORSO':'var(--blue)','LIMITATO':'var(--red)','BANNATO':'var(--red)','GIA_REGISTRATO':'var(--purple)','LIBERO':'var(--tx4)'};
+var STATO_LBL={'FATTO':'Fatto','IN_CORSO':'In corso','LIMITATO':'Limitato','BANNATO':'Bannato','GIA_REGISTRATO':'Già reg.','LIBERO':'Libero'};
 
 function showToast(msg,type){
   var t=document.getElementById('toast');if(!t)return;
@@ -189,19 +222,20 @@ initAuth(function(){
 
 async function loadAll(){
   try{
-    var r=await Promise.all([
-      db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at').eq('stato','LIBERO').order('created_at',{ascending:false}),
-      db.from('collab_tariffe').select('*').order('ordine')
-    ]);
-    _clienti=r[0].data||[];
-    _tariffe=r[1].data||[];
-  }catch(e){_clienti=[];_tariffe=[];}
+    var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at')
+      .in('stato',['IN_LAVORAZIONE','ATTIVO']).order('created_at',{ascending:false});
+    _clienti=rc.data||[];
+    var ids=_clienti.map(function(c){return c.id;}).filter(Boolean);
+    _bonusByClient={};
+    if(ids.length){
+      var rb=await db.from('bonus').select('id,id_cli,bookmaker,stato,updated_at').in('id_cli',ids);
+      (rb.data||[]).forEach(function(row){
+        if(!_bonusByClient[row.id_cli])_bonusByClient[row.id_cli]=[];
+        _bonusByClient[row.id_cli].push(row);
+      });
+    }
+  }catch(e){_clienti=[];_bonusByClient={};}
   renderQueue();
-}
-
-function getSitiPerCollab(nomeCollab){
-  if(!nomeCollab)return[];
-  return _tariffe.filter(function(t){return (t.nome_collab||'').toLowerCase()===nomeCollab.toLowerCase();});
 }
 
 function collabColor(nomeCollab){
@@ -209,34 +243,104 @@ function collabColor(nomeCollab){
   var h=0;for(var i=0;i<nomeCollab.length;i++)h=nomeCollab.charCodeAt(i)+((h<<5)-h);
   return PALETTE[Math.abs(h)%PALETTE.length];
 }
-
-function waMessage(c){
-  var nome=(c.nome||'').trim().split(' ')[0]||c.nome||'';
-  var siti=getSitiPerCollab(c.collab);
-  var lista=siti.length?siti.map(function(s){return '• '+s.bookmaker;}).join('\n'):'ti aggiorneremo a breve su quali siti registrarti';
-  return 'Ciao '+nome+'! 👋\n\nBenvenuto/a in MBBET! 🎉\n\nDa oggi ti seguiamo passo passo per registrarti e completare le promozioni sui seguenti siti:\n\n'+lista+'\n\nTi scriveremo qui ogni volta che ci serve qualcosa da te (documenti, SPID, conferme). Per qualsiasi dubbio scrivi pure in questo gruppo!\n\nA presto 🚀';
+function waLink(tel){
+  if(!tel)return null;
+  var digits=tel.replace(/[^\d]/g,'');
+  if(!digits)return null;
+  if(digits.length<=10)digits='39'+digits;
+  return 'https://wa.me/'+digits;
 }
-
-function copyWa(idx){
-  var c=_clienti[idx];if(!c)return;
-  var msg=waMessage(c);
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(msg).then(function(){showToast('Messaggio copiato ✓','ok');},function(){prompt('Copia il messaggio:',msg);});
-  }else{prompt('Copia il messaggio:',msg);}
-}
-
-async function markStarted(idx){
-  var c=_clienti[idx];if(!c)return;
-  if(!confirm('Segnare "'+c.nome+'" come lavorazione iniziata? Uscirà dalla coda.'))return;
-  try{
-    await db.from('clienti').update({stato:'IN_LAVORAZIONE'}).eq('id',c.id);
-    _clienti=_clienti.filter(function(x){return x.id!==c.id;});
-    showToast('Fatto ✓ rimosso dalla coda','ok');
-    renderQueue();
-  }catch(e){showToast('Errore salvataggio','er');}
-}
-
 function fmtDateIt(d){if(!d)return'—';var p=(d||'').slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+
+/* ══ COMANDO: parsing testo → cliente + sito + stato ══ */
+var STATUS_RULES=[
+  {re:/gi[àa]\s*registrat/i, stato:'GIA_REGISTRATO'},
+  {re:/bannat|conto\s*chius/i, stato:'BANNATO'},
+  {re:/limitat|bloccat/i, stato:'LIMITATO'},
+  {re:/in\s*corso|iniziat|sta\s*facendo|avviat/i, stato:'IN_CORSO'},
+  {re:/fatt[oa]|completat|finit[oa]|conclus[oa]/i, stato:'FATTO'},
+  {re:/^libero$|annulla|resetta/i, stato:'LIBERO'}
+];
+
+function parseCommand(text){
+  var t=(text||'').toLowerCase().trim();
+  if(!t)return{error:'Scrivi o detta un comando.'};
+
+  var statusRule=null;
+  for(var i=0;i<STATUS_RULES.length;i++){if(STATUS_RULES[i].re.test(t)){statusRule=STATUS_RULES[i];break;}}
+  if(!statusRule)return{error:'Non ho capito cosa è successo (fatto, in corso, limitato...). Riprova.'};
+
+  var bestClient=null,bestLen=0;
+  _clienti.forEach(function(c){
+    var nm=(c.nome||'').toLowerCase().trim();
+    if(!nm)return;
+    if(t.indexOf(nm)>=0&&nm.length>bestLen){bestClient=c;bestLen=nm.length;}
+  });
+  if(!bestClient){
+    // fallback: prova solo col primo nome
+    _clienti.forEach(function(c){
+      var first=(c.nome||'').toLowerCase().trim().split(' ')[0];
+      if(first&&first.length>2&&t.indexOf(first)>=0&&first.length>bestLen){bestClient=c;bestLen=first.length;}
+    });
+  }
+  if(!bestClient)return{error:'Non trovo questo cliente tra quelli attivi.'};
+
+  var rows=_bonusByClient[bestClient.id]||[];
+  var bestSite=null,bestSiteLen=0;
+  rows.forEach(function(r){
+    var bk=(r.bookmaker||'').toLowerCase().trim();
+    if(bk&&t.indexOf(bk)>=0&&bk.length>bestSiteLen){bestSite=r;bestSiteLen=bk.length;}
+  });
+  if(!bestSite)return{error:'Ho trovato "'+bestClient.nome+'" ma non capisco su quale sito. Prova a scrivere il nome del sito per intero.'};
+
+  return{client:bestClient,site:bestSite,stato:statusRule.stato};
+}
+
+function toggleMic(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('Il tuo browser non supporta il microfono, scrivi pure il comando','er');return;}
+  var btn=document.getElementById('cmd-mic');
+  if(window._rec&&window._recActive){window._rec.stop();return;}
+  var rec=new SR();
+  rec.lang='it-IT';rec.interimResults=true;rec.continuous=false;
+  window._rec=rec;window._recActive=true;
+  btn.classList.add('listening');
+  rec.onresult=function(e){
+    var txt='';for(var i=0;i<e.results.length;i++)txt+=e.results[i][0].transcript;
+    document.getElementById('cmd-inp').value=txt;
+  };
+  rec.onend=function(){btn.classList.remove('listening');window._recActive=false;};
+  rec.onerror=function(){btn.classList.remove('listening');window._recActive=false;};
+  rec.start();
+}
+
+function runCommand(){
+  var inp=document.getElementById('cmd-inp');
+  var res=parseCommand(inp.value);
+  var box=document.getElementById('cmd-result');
+  if(res.error){
+    box.innerHTML='<div class="cmd-err">⚠ '+res.error+'</div>';
+    _pending=null;
+    return;
+  }
+  _pending=res;
+  box.innerHTML='<div class="cmd-confirm"><div class="cmd-confirm-txt">Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → <b>'+STATO_LBL[res.stato]+'</b>. Confermi?</div>'+
+    '<div class="cmd-confirm-btns"><button class="cmd-btn cmd-btn-ok" onclick="confirmCommand()">✓ Conferma</button><button class="cmd-btn cmd-btn-no" onclick="cancelCommand()">✕ Annulla</button></div></div>';
+}
+function cancelCommand(){_pending=null;document.getElementById('cmd-result').innerHTML='';document.getElementById('cmd-inp').value='';}
+
+async function confirmCommand(){
+  if(!_pending)return;
+  var p=_pending;
+  try{
+    await db.from('bonus').update({stato:p.stato,updated_at:new Date().toISOString()}).eq('id',p.site.id);
+    p.site.stato=p.stato;
+    showToast('Fatto! '+p.site.bookmaker+' → '+STATO_LBL[p.stato]+' per '+p.client.nome+' 🎉','ok');
+    document.getElementById('kpi-oggi').textContent=parseInt(document.getElementById('kpi-oggi').textContent||0)+(p.stato==='FATTO'?1:0);
+    cancelCommand();
+    renderQueue();
+  }catch(e){showToast('Errore nel salvataggio','er');}
+}
 
 function renderQueue(){
   var search=(document.getElementById('q-search').value||'').toLowerCase();
@@ -247,34 +351,35 @@ function renderQueue(){
 
   document.getElementById('kpi-tot').textContent=_clienti.length;
   document.getElementById('kpi-collab').textContent=_clienti.filter(function(c){return c.collab;}).length;
-  var today=new Date().toISOString().slice(0,10);
-  document.getElementById('kpi-oggi').textContent=_clienti.filter(function(c){return (c.data_ingresso||'').slice(0,10)===today||(c.created_at||'').slice(0,10)===today;}).length;
   document.getElementById('kpi-notel').textContent=_clienti.filter(function(c){return !(c.tel||c.telefono);}).length;
+  if(document.getElementById('kpi-oggi').textContent==='—')document.getElementById('kpi-oggi').textContent=0;
 
   var el=document.getElementById('q-list');
   if(!list.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-ic">📭</div>Nessun cliente in coda al momento.</div>';
+    el.innerHTML='<div class="empty-state"><div class="empty-ic">✨</div>Nessun cliente attivo al momento — tutto sotto controllo.</div>';
     return;
   }
 
   el.innerHTML=list.map(function(c){
-    var idx=_clienti.indexOf(c);
     var col=collabColor(c.collab);
-    var siti=getSitiPerCollab(c.collab);
     var ini=(c.nome||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+    var rows=(_bonusByClient[c.id]||[]).slice().sort(function(a,b){return (a.bookmaker||'').localeCompare(b.bookmaker||'');});
+    var next=rows.find(function(r){return r.stato==='LIBERO'||!r.stato;});
+    var tel=c.tel||c.telefono;
+    var wa=waLink(tel);
     return '<div class="q-card">'+
       '<div class="q-top">'+
         '<div class="q-av" style="background:'+col+'22;border:1px solid '+col+'55;color:'+col+'">'+ini+'</div>'+
         '<div style="flex:1"><div class="q-nm">'+(c.nome||'—')+'</div>'+
-          '<div class="q-sub">'+(c.tel||c.telefono||'nessun telefono')+' &middot; entrato il '+fmtDateIt(c.data_ingresso||c.created_at)+'</div></div>'+
+          '<div class="q-sub">'+(tel||'nessun telefono')+' &middot; cliente dal '+fmtDateIt(c.data_ingresso||c.created_at)+'</div></div>'+
+        (wa?'<a class="q-wa" href="'+wa+'" target="_blank" title="Apri WhatsApp">💬</a>':'')+
         (c.collab?'<span class="q-collab-badge" style="background:'+col+'1a;color:'+col+';border:1px solid '+col+'44">'+c.collab+'</span>':'<span class="q-collab-badge" style="background:rgba(255,255,255,.05);color:var(--tx3);border:1px solid rgba(255,255,255,.1)">Nessun collaboratore</span>')+
       '</div>'+
-      (siti.length?('<div class="q-sites-lbl">SITI DA REGISTRARE ('+siti.length+')</div><div class="q-sites">'+
-        siti.map(function(s){return '<span class="q-site-chip">'+s.bookmaker+'</span>';}).join('')+'</div>'):'')+
-      '<div class="q-actions">'+
-        '<button class="q-btn q-btn-wa" onclick="copyWa('+idx+')">💬 Copia messaggio WhatsApp</button>'+
-        '<button class="q-btn q-btn-done" onclick="markStarted('+idx+')">✓ Ho iniziato la lavorazione</button>'+
-      '</div>'+
+      (next?'<div class="q-next">👉 Prossimo sito: <b>'+next.bookmaker+'</b></div>':'')+
+      (rows.length?'<div class="q-sites">'+rows.map(function(r){
+        var sc=STATO_COL[r.stato]||'var(--tx4)';
+        return '<span class="q-site-chip" style="background:'+sc+'14;color:'+sc+'"><span class="q-dot" style="background:'+sc+'"></span>'+r.bookmaker+'</span>';
+      }).join('')+'</div>':'')+
     '</div>';
   }).join('');
 }
