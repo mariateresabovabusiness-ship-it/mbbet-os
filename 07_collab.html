@@ -443,7 +443,7 @@ function isReadOnlyCollab() { return currentRole === 'COLLAB_SELF'; }
 </script>
 <script>
 /* ══ GLOBALS ══ */
-var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[];
+var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[];
 var PAG_KEY='mbbet_collab_pag_v1'; // localStorage key for payment statuses
 var STATI=['PAGATO','IN_CORSO','IN_SCADENZA','URGENTE','SCADUTO'];
 var STATI_LABEL={PAGATO:'PAGATO',IN_CORSO:'IN CORSO',IN_SCADENZA:'IN SCADENZA',URGENTE:'URGENTE',SCADUTO:'SCADUTO'};
@@ -614,10 +614,12 @@ async function loadAll(){
     var risultati=await Promise.all([
       db.from('collab').select('*').order('created_at',{ascending:false}),
       fetchBonusCollab(),
-      db.from('collab_tariffe').select('*').order('ordine')
+      db.from('collab_tariffe').select('*').order('ordine'),
+      db.from('clienti').select('id,nome,collab').not('collab','is',null)
     ]);
-    var rc=risultati[0], rb=risultati[1], rt=risultati[2];
+    var rc=risultati[0], rb=risultati[1], rt=risultati[2], rcl=risultati[3];
     _collabTariffe=(rt&&rt.data)||[];
+    _clientiCollab=(rcl&&rcl.data)||[];
     _collabs=rc.data||[];
     _bns=(rb.data||[]).filter(function(b){return b.nome_collab&&b.nome_collab.trim();});
     // Merge: also create virtual collabs from bonus nome_collab if not in registry
@@ -819,6 +821,11 @@ function renderPocketDetail(c){
   var col=PALETTE[_collabs.indexOf(c)%PALETTE.length];
   var byCliente={};
   allBns.forEach(function(b){var cl=b.cliente||'—';if(!byCliente[cl])byCliente[cl]=[];byCliente[cl].push(b);});
+  // Includi anche i clienti gia' collegati a questo collaboratore nel CRM ma
+  // senza ancora nessun sito segnato (0 accumulato finora, comunque visibili)
+  _clientiCollab.filter(function(cc){return (cc.collab||'')===c.nome;}).forEach(function(cc){
+    if(!byCliente[cc.nome])byCliente[cc.nome]=[];
+  });
   var nomiClienti=Object.keys(byCliente).sort();
 
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">'+
@@ -910,11 +917,30 @@ function renderPocketCliente(cid,clienteEnc){
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
     '</tr></thead><tbody>';
 
-  righe.forEach(function(b,ri){
+  // Mostra SEMPRE tutti i siti del listino per questo cliente: quelli gia'
+  // fatti con i dati reali, quelli non ancora fatti come riga spenta con
+  // un'azione rapida per segnarli.
+  var tariffe=tariffeForCollab(c);
+  var righeBySito={};
+  righe.forEach(function(b){righeBySito[(b.bookmaker||'').toLowerCase()]=b;});
+
+  tariffe.forEach(function(t,ri){
+    var b=righeBySito[t.bookmaker.toLowerCase()];
+    var bg=ri%2===0?'rgba(255,255,255,.012)':'transparent';
+    if(!b){
+      html+='<tr style="background:'+bg+';opacity:.5">'+
+        '<td style="padding:10px 16px;font-weight:700;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.04)">'+t.bookmaker+'</td>'+
+        '<td colspan="3" style="padding:10px 14px;color:var(--tx3);font-size:10.5px;font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          (isReadOnlyCollab()?'—':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">&#43; Segna fatto</button>')+
+        '</td>'+
+        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td></tr>';
+      return;
+    }
     var st=b.pocket_stato||null;
     var badgeColor=st==='PAGATO'?'var(--green)':st==='ACCUMULATO'?'var(--gold)':'var(--tx3)';
     var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
-    var bg=ri%2===0?'rgba(255,255,255,.012)':'transparent';
     html+='<tr style="background:'+bg+'">'+
       '<td style="padding:10px 16px;font-weight:700;color:var(--tx);border-bottom:1px solid rgba(255,255,255,.04)">'+(b.bookmaker||'—')+'</td>'+
       '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
@@ -933,8 +959,6 @@ function renderPocketCliente(cid,clienteEnc){
   });
 
   html+='</tbody></table></div></div>';
-
-  if(!isReadOnlyCollab())html+='<div style="margin-top:12px">'+nuovoClientePocketSelectHtml(c,cliente)+'</div>';
 
   g('collab-detail').innerHTML=html;
 }
