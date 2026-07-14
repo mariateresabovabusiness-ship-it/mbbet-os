@@ -927,32 +927,10 @@ function renderPocketDetail(c){
   g('collab-detail').innerHTML=html;
 }
 
-// Colonne finanziarie interne (deposito/bonus/prelievo/ricavo/pagato
-// cliente/margine): visibili SOLO all'admin, mai al collaboratore stesso.
-var FIN_HEAD_COLS=
-  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--purple);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DEPOSITO</th>'+
-  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--blue);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">BONUS OTT.</th>'+
-  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PRELIEVO</th>'+
-  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--cyan);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">RICAVO TOT.</th>'+
-  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--orange);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PAGATO CLIENTE</th>'+
-  '<th style="padding:10px 14px;font-size:10.5px;font-weight:800;color:var(--teal);letter-spacing:1px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">MARGINE MBBET</th>';
-
-function finCellsHtml(b,cid,clienteEnc,isPocket){
-  if(isReadOnlyCollab())return'';
-  var tdS='padding:10px 14px;text-align:right;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)';
-  var dep=parseFloat(b.deposito)||0,bonRic=parseFloat(b.bonus_ricevuto)||0,prel=parseFloat(b.prelievo)||0;
-  var ricTot=parseFloat(b.ric_real)||0,pagCli=parseFloat(b.pag_cli)||0,costiEx=parseFloat(b.costi_extra)||0;
-  var compRef=parseFloat(b.comp_referral)||0;
-  var marg=ricTot-pagCli-costiEx-compRef;
-  var pk=isPocket?'1':'0';
-  var ph='<span style="color:rgba(255,255,255,.25)">✏</span>';
-  return '<td id="dep-c-'+b.id+'" data-lbl="DEPOSITO" class="editable" style="'+tdS+';color:var(--purple);font-weight:700" onclick="collabEdNum(\'dep-c-'+b.id+'\',\''+b.id+'\',\'deposito\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(dep?'€ '+fmt(dep):ph)+'</td>'+
-    '<td id="bon-c-'+b.id+'" data-lbl="BONUS OTT." class="editable" style="'+tdS+';color:var(--blue);font-weight:700" onclick="collabEdNum(\'bon-c-'+b.id+'\',\''+b.id+'\',\'bonus_ricevuto\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(bonRic?'€ '+fmt(bonRic):ph)+'</td>'+
-    '<td id="prel-c-'+b.id+'" data-lbl="PRELIEVO" class="editable" style="'+tdS+';color:var(--cyan);font-weight:700" onclick="collabEdNum(\'prel-c-'+b.id+'\',\''+b.id+'\',\'prelievo\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(prel?'€ '+fmt(prel):ph)+'</td>'+
-    '<td data-lbl="RICAVO TOT." style="'+tdS+';color:'+(ricTot>0?'var(--cyan)':ricTot<0?'var(--red)':'rgba(255,255,255,.25)')+';font-weight:800">'+(ricTot?'€ '+fmt(ricTot):'—')+'</td>'+
-    '<td id="pc-c-'+b.id+'" data-lbl="PAGATO CLIENTE" class="editable" style="'+tdS+';color:var(--orange);font-weight:700" onclick="collabEdNum(\'pc-c-'+b.id+'\',\''+b.id+'\',\'pag_cli\',\''+cid+'\',\''+clienteEnc+'\','+pk+')">'+(pagCli?'€ '+fmt(pagCli):ph)+'</td>'+
-    '<td data-lbl="MARGINE MBBET" style="'+tdS+';color:'+(marg>0?'var(--teal)':marg<0?'var(--red)':'rgba(255,255,255,.25)')+';font-weight:800">'+(marg?'€ '+fmt(marg):'—')+'</td>';
-}
+// I dettagli finanziari (deposito/bonus/prelievo/ricavo/pagato/margine)
+// si vedono e modificano dal modale "Modifica Cliente" (openEditBonus),
+// non nella tabella — su desktop niente scroll orizzontale, si apre
+// tutto il dettaglio con un click.
 
 function renderPocketCliente(cid,clienteEnc){
   var c=_collabs.find(function(x){return String(x.id)===String(cid);});
@@ -990,14 +968,13 @@ function renderPocketCliente(cid,clienteEnc){
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
     '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(245,200,66,.06)">'+
-    '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
-    (isReadOnlyCollab()?'':FIN_HEAD_COLS)+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
+    '<th style="padding:8px 12px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
     '</tr></thead><tbody>';
 
@@ -1005,16 +982,15 @@ function renderPocketCliente(cid,clienteEnc){
     var b=righeBySito[t.bookmaker.toLowerCase()];
     var bg=idx%2===0?'rgba(255,255,255,.012)':'transparent';
     var col2=PALETTE[idx%PALETTE.length];
-    var chip='<div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:10.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
+    var chip='<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:22px;border-radius:7px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
     if(!b){
       html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
-        '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-        '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-        '<td colspan="3" data-lbl="STATO" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
-        '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
-        (isReadOnlyCollab()?'':'<td colspan="6" class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>')+
+        '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="3" data-lbl="STATO" style="padding:8px 10px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
-        '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
         '</td></tr>';
       return;
@@ -1024,22 +1000,21 @@ function renderPocketCliente(cid,clienteEnc){
     var badgeBg=st==='PAGATO'?'rgba(0,229,138,.1)':st==='ACCUMULATO'?'rgba(245,200,66,.1)':'rgba(255,255,255,.05)';
     var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
     html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(245,200,66,.04)\'" onmouseout="this.style.background=\''+bg+'\'">'+
-      '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-      '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-      '<td data-lbl="USERNAME" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+      '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);'+(isReadOnlyCollab()?'':'cursor:pointer')+'" '+(isReadOnlyCollab()?'':'onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Apri dettaglio"')+'>'+chip+'</td>'+
+      '<td data-lbl="USERNAME" style="padding:8px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td data-lbl="PASSWORD" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="PASSWORD" style="padding:8px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td data-lbl="DATA" style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
-      '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
-      finCellsHtml(b,cid,clienteEnc,true)+
-      '<td data-lbl="STATO" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="DATA" style="padding:8px 10px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+      '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      '<td data-lbl="STATO" style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (st?'<span style="padding:4px 10px;border-radius:999px;background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:800;white-space:nowrap">'+badgeLabel+'</span>':
           (isReadOnlyCollab()?'<span style="font-size:10px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">Metti da parte</button>'))+
       '</td>'+
-      '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (isReadOnlyCollab()?'':'<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(245,200,66,.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>')+
       '</td></tr>';
   });
@@ -1428,15 +1403,14 @@ function renderFlatCliente(cid,clienteEnc){
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
     '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(245,200,66,.06)">'+
-    '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SCADENZA</th>'+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
-    (isReadOnlyCollab()?'':FIN_HEAD_COLS)+
-    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
+    '<th style="padding:8px 12px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SCADENZA</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
     '</tr></thead><tbody>';
 
@@ -1444,16 +1418,15 @@ function renderFlatCliente(cid,clienteEnc){
     var b=righeBySito[t.bookmaker.toLowerCase()];
     var bg=idx%2===0?'rgba(255,255,255,.012)':'transparent';
     var col2=PALETTE[idx%PALETTE.length];
-    var chip='<div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:10.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
+    var chip='<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:22px;border-radius:7px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
     if(!b){
       html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
-        '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-        '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-        '<td colspan="4" data-lbl="STATO" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
-        '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
-        (isReadOnlyCollab()?'':'<td colspan="6" class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>')+
+        '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="4" data-lbl="STATO" style="padding:8px 10px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
-        '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
         '</td></tr>';
       return;
@@ -1465,22 +1438,21 @@ function renderFlatCliente(cid,clienteEnc){
     var ggCol=isPaid||gg===null?'var(--tx3)':(gg<=2?'var(--red)':'var(--green)');
     var ggTxt=gg===null?'—':(gg<0?Math.abs(gg)+'gg fa':gg===0?'oggi':gg+'gg');
     html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(245,200,66,.04)\'" onmouseout="this.style.background=\''+bg+'\'">'+
-      '<td class="mbl-idx" style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
-      '<td class="mbl-head" style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
-      '<td data-lbl="USERNAME" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+      '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);'+(isReadOnlyCollab()?'':'cursor:pointer')+'" '+(isReadOnlyCollab()?'':'onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Apri dettaglio"')+'>'+chip+'</td>'+
+      '<td data-lbl="USERNAME" style="padding:8px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td data-lbl="PASSWORD" style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="PASSWORD" style="padding:8px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
-      '<td data-lbl="DATA" style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
-      '<td data-lbl="SCADENZA" style="padding:10px 14px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)"><div style="color:var(--tx2);font-size:11px">'+(scad?fmtDate(scad):'—')+'</div><div style="color:'+ggCol+';font-weight:800;font-size:10.5px;margin-top:2px">'+ggTxt+'</div></td>'+
-      '<td data-lbl="IMPORTO" style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
-      finCellsHtml(b,cid,clienteEnc,false)+
-      '<td data-lbl="STATO" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td data-lbl="DATA" style="padding:8px 10px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+      '<td data-lbl="SCADENZA" style="padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)"><div style="color:var(--tx2);font-size:11px">'+(scad?fmtDate(scad):'—')+'</div><div style="color:'+ggCol+';font-weight:800;font-size:10.5px;margin-top:2px">'+ggTxt+'</div></td>'+
+      '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      '<td data-lbl="STATO" style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<span class="st-badge st-'+st+'" '+(isReadOnlyCollab()?'style="cursor:default"':'onclick="cycleStatusCliente(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" style="cursor:pointer"')+'>'+STATI_LABEL[st]+'</span>'+
       '</td>'+
-      '<td class="mbl-actions" style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+      '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
           '<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(245,200,66,.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>'+
           '<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Elimina" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,87,87,.5)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'rgba(255,87,87,.15)\';this.style.color=\'rgba(255,87,87,.5)\'">&#128465;</button>'+
@@ -1490,37 +1462,6 @@ function renderFlatCliente(cid,clienteEnc){
   html+='</tbody></table></div></div>';
 
   g('collab-detail').innerHTML=html;
-}
-
-// Modifica inline (solo admin) dei campi finanziari deposito/bonus/prelievo/
-// pagato-cliente/costi-extra su un bonus del collaboratore. Il Ricavo Totale
-// e il Margine MBBET si ricalcolano sempre in automatico, mai a mano.
-function collabEdNum(cellId,bonusId,field,cid,clienteEnc,isPocket){
-  if(isReadOnlyCollab())return;
-  var td=g(cellId);if(!td||td.querySelector('input'))return;
-  var b=_bns.find(function(x){return String(x.id)===String(bonusId);});if(!b)return;
-  var cur=parseFloat(b[field])||0;
-  var inp=document.createElement('input');
-  inp.type='number';inp.step='0.01';inp.min='0';inp.value=cur||'';
-  inp.style.cssText='width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1px solid rgba(245,200,66,.35);border-radius:6px;padding:5px 7px;color:var(--tx);font-size:12px;font-family:inherit;outline:none';
-  td.innerHTML='';td.appendChild(inp);inp.focus();inp.select();
-  function refresh(){
-    if(isPocket)renderPocketCliente(cid,clienteEnc);else renderFlatCliente(cid,clienteEnc);
-  }
-  async function save(){
-    var v=Math.max(0,parseFloat(inp.value)||0);
-    b[field]=v;
-    var upd={};upd[field]=v;
-    if(field==='deposito'||field==='prelievo'){
-      b.ric_real=(parseFloat(b.prelievo)||0)-(parseFloat(b.deposito)||0);
-      upd.ric_real=b.ric_real;
-    }
-    refresh();
-    try{await db.from('bonus').update(upd).eq('id',bonusId);showToast('Salvato ✓','ok');}
-    catch(e){showToast('Errore salvataggio','er');}
-  }
-  inp.onblur=save;
-  inp.onkeydown=function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape')refresh();};
 }
 
 function cycleStatusCliente(bonusId,cid,clienteEnc){
@@ -1591,16 +1532,30 @@ function openEditBonus(bonusId,cid,bkEnc){
         '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">IMPORTO (€)</div>'+
           '<input id="eb-imp" type="number" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" value="'+(b.comp_referral||'')+'" step="0.01" min="0"></div>'+
       '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
-        '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">RICARICA EFFETTUATA</div>'+
-          '<select id="eb-dep" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
-            '<option value="0"'+((!b.deposito||b.deposito==0)?' selected':'')+'>No</option>'+
-            '<option value="1"'+((b.deposito&&b.deposito>0)?' selected':'')+'>Sì</option>'+
-          '</select></div>'+
-        '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">MESE OPERATIVO</div>'+
+      '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">MESE OPERATIVO</div>'+
           '<select id="eb-mese" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
           [['','— Seleziona'],['1','Gen 2026'],['2','Feb 2026'],['3','Mar 2026'],['4','Apr 2026'],['5','Mag 2026'],['6','Giu 2026'],['7','Lug 2026'],['8','Ago 2026'],['9','Set 2026'],['10','Ott 2026'],['11','Nov 2026'],['12','Dic 2026']].map(function(o){return '<option value="'+o[0]+'"'+(b.mese_operativo==o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+
           '</select></div>'+
+      '<div style="border-top:1px dashed rgba(255,255,255,.1);padding-top:12px;margin-top:2px">'+
+        '<div style="font-size:10.5px;font-weight:800;color:var(--gold);letter-spacing:1.5px;margin-bottom:10px">💰 FINANZA (solo admin)</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'+
+          '<div><div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px">DEPOSITO (€)</div>'+
+            '<input id="eb-fin-dep" type="number" step="0.01" min="0" oninput="ebRecalcFin()" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--purple);font-size:12px;outline:none;font-family:inherit" value="'+(b.deposito||'')+'"></div>'+
+          '<div><div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px">BONUS OTTENUTO (€)</div>'+
+            '<input id="eb-fin-bon" type="number" step="0.01" min="0" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--blue);font-size:12px;outline:none;font-family:inherit" value="'+(b.bonus_ricevuto||'')+'"></div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'+
+          '<div><div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px">PRELIEVO (€)</div>'+
+            '<input id="eb-fin-prel" type="number" step="0.01" min="0" oninput="ebRecalcFin()" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--cyan);font-size:12px;outline:none;font-family:inherit" value="'+(b.prelievo||'')+'"></div>'+
+          '<div><div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px">PAGATO CLIENTE (€)</div>'+
+            '<input id="eb-fin-pc" type="number" step="0.01" min="0" oninput="ebRecalcFin()" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--orange);font-size:12px;outline:none;font-family:inherit" value="'+(b.pag_cli||'')+'"></div>'+
+        '</div>'+
+        '<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px">COSTI EXTRA (€)</div>'+
+          '<input id="eb-fin-ce" type="number" step="0.01" min="0" oninput="ebRecalcFin()" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--red);font-size:12px;outline:none;font-family:inherit" value="'+(b.costi_extra||'')+'"></div>'+
+        '<div style="display:flex;gap:10px;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:9px">'+
+          '<div style="flex:1;text-align:center"><div style="font-size:9.5px;color:var(--tx3);font-weight:800;letter-spacing:1px">RICAVO TOTALE</div><div id="eb-fin-ricavo" style="font-size:15px;font-weight:900;color:var(--cyan);margin-top:2px">—</div></div>'+
+          '<div style="flex:1;text-align:center;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:9.5px;color:var(--tx3);font-weight:800;letter-spacing:1px">MARGINE MBBET</div><div id="eb-fin-margine" style="font-size:15px;font-weight:900;color:var(--teal);margin-top:2px">—</div></div>'+
+        '</div>'+
       '</div>'+
       '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">OPERATORE</div>'+
         '<select id="eb-op" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
@@ -1616,9 +1571,24 @@ function openEditBonus(bonusId,cid,bkEnc){
       '<button id="eb-save" onclick="saveEditBonus()" style="padding:8px 22px;background:linear-gradient(135deg,#00c07a,var(--green));border:none;border-radius:8px;color:#001a0e;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">💾 Salva</button>'+
     '</div></div>';
   ed.style.display='flex';
-  setTimeout(function(){var e=g('eb-usr');if(e)e.focus();},80);
+  setTimeout(function(){var e=g('eb-usr');if(e)e.focus();ebRecalcFin();},80);
 }
 function closeEditBonus(){var ed=g('bonus-edit-modal');if(ed)ed.style.display='none';}
+
+// Ricalcola Ricavo Totale (prelievo-deposito) e Margine MBBET in tempo
+// reale mentre si modificano i campi finanza, senza dover salvare prima.
+function ebRecalcFin(){
+  var dep=parseFloat(g('eb-fin-dep').value)||0;
+  var prel=parseFloat(g('eb-fin-prel').value)||0;
+  var pc=parseFloat(g('eb-fin-pc').value)||0;
+  var ce=parseFloat(g('eb-fin-ce').value)||0;
+  var compRef=parseFloat(g('eb-imp').value)||0;
+  var ricavo=prel-dep;
+  var margine=ricavo-pc-ce-compRef;
+  var rEl=g('eb-fin-ricavo'),mEl=g('eb-fin-margine');
+  if(rEl){rEl.textContent=ricavo?'€ '+fmt(ricavo):'—';rEl.style.color=ricavo>0?'var(--cyan)':ricavo<0?'var(--red)':'var(--tx3)';}
+  if(mEl){mEl.textContent=margine?'€ '+fmt(margine):'—';mEl.style.color=margine>0?'var(--teal)':margine<0?'var(--red)':'var(--tx3)';}
+}
 
 /* ══ AGGIUNGI CLIENTE COLLAB ══ */
 var _newBnsCid=null,_newBnsEnc=null;
@@ -1658,16 +1628,10 @@ function openNewBonus(cid,bkEnc){
         '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">IMPORTO (€)'+(_nbTariffa?' <span style="color:var(--green);font-weight:800">— dal listino</span>':'')+'</div>'+
           '<input id="nb-imp" type="number" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit" step="0.01" min="0" placeholder="0.00" value="'+_nbImpDefault+'"></div>'+
       '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
-        '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">RICARICA EFFETTUATA</div>'+
-          '<select id="nb-dep" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
-            '<option value="0">No</option><option value="1">Sì</option>'+
-          '</select></div>'+
-        '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">MESE OPERATIVO *</div>'+
+      '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">MESE OPERATIVO *</div>'+
           '<select id="nb-mese" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
           meseOpts.map(function(o){return '<option value="'+o[0]+'"'+(parseInt(o[0])===mese?' selected':'')+'>'+o[1]+(o[0]?' '+anno:'')+'</option>';}).join('')+
           '</select></div>'+
-      '</div>'+
       '<div><div style="font-size:11.5px;font-weight:700;color:var(--tx3);margin-bottom:4px">OPERATORE</div>'+
         '<select id="nb-op" style="width:100%;background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--tx);font-size:12px;outline:none;font-family:inherit">'+
           '<option value="" selected>— Nessuno</option>'+
@@ -1739,7 +1703,6 @@ async function saveNewBonus(){
     username_bk:(g('nb-usr').value||'').trim()||null,
     data_inizio:g('nb-dt').value||null,
     comp_referral:parseFloat(g('nb-imp').value)||null,
-    deposito:g('nb-dep').value==='1'?1:0,
     mese_operativo:mese,
     anno_operativo:anno,
     operatore:(g('nb-op').value||'').trim()||null,
@@ -1777,12 +1740,19 @@ async function saveEditBonus(){
   var btn=g('eb-save');btn.disabled=true;btn.textContent='Salvataggio...';
   g('eb-err').textContent='';
   var mese=parseInt(g('eb-mese').value)||null;
+  var dep=parseFloat(g('eb-fin-dep').value)||0;
+  var prel=parseFloat(g('eb-fin-prel').value)||0;
   var payload={
     username_bk:(g('eb-usr').value||'').trim()||null,
     password_bk:(g('eb-pwd').value||'').trim()||null,
     data_inizio:g('eb-dt').value||null,
     comp_referral:parseFloat(g('eb-imp').value)||null,
-    deposito:g('eb-dep').value==='1'?1:0,
+    deposito:dep,
+    bonus_ricevuto:parseFloat(g('eb-fin-bon').value)||0,
+    prelievo:prel,
+    ric_real:prel-dep,
+    pag_cli:parseFloat(g('eb-fin-pc').value)||0,
+    costi_extra:parseFloat(g('eb-fin-ce').value)||0,
     mese_operativo:mese,
     anno_operativo:mese?2026:null,
     operatore:(g('eb-op').value||'').trim()||null,
