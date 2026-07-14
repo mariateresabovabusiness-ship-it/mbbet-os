@@ -110,6 +110,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .listino-title{font-size:17px;font-weight:900;color:var(--gold);letter-spacing:2.5px;text-shadow:0 0 22px rgba(245,200,66,.4)}
 .listino-sub{font-size:10px;color:var(--tx3);margin-top:3px}
 .badge-nuovo{font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--tx3);letter-spacing:.4px;text-transform:uppercase}
+
 .welcome-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:20px 24px;margin-bottom:20px;border-radius:16px;background:linear-gradient(120deg,rgba(245,200,66,.1),rgba(10,13,32,.98) 65%);border:1px solid rgba(245,200,66,.25)}
 .welcome-hi{font-size:20px;font-weight:900;color:var(--tx)}
 .welcome-hi span{color:var(--gold)}
@@ -907,59 +908,66 @@ function renderPocketCliente(cid,clienteEnc){
       pronto&&!isReadOnlyCollab()?'<button onclick="pagaClientePocket(\''+cliente.replace(/'/g,"\\'")+'\',\''+cid+'\')" style="padding:8px 18px;background:linear-gradient(135deg,#00c07a,var(--green));border:none;border-radius:8px;color:#001a0e;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">&#128176; Paga Cliente ('+POCKET_SOGLIA+'&euro;)</button>':'')+
     '</div></div>';
 
-  html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
-    '<thead><tr style="background:rgba(245,200,66,.06)">'+
-    '<th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
-    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
-    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
-    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DATA INIZIO</th>'+
-    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
-    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">POCKET</th>'+
-    '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
-    '</tr></thead><tbody>';
-
-  // Mostra SEMPRE tutti i siti del listino per questo cliente: quelli gia'
-  // fatti con i dati reali, quelli non ancora fatti come riga spenta con
-  // un'azione rapida per segnarli.
+  // Mostra SEMPRE tutti i siti del listino per questo cliente, in una
+  // tabella: quelli gia' fatti con i dati reali, quelli non ancora fatti
+  // in grigio con un'azione rapida per segnarli.
   var tariffe=tariffeForCollab(c);
   var righeBySito={};
   righe.forEach(function(b){righeBySito[(b.bookmaker||'').toLowerCase()]=b;});
 
-  tariffe.forEach(function(t,ri){
+  html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+    '<thead><tr style="background:rgba(245,200,66,.06)">'+
+    '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
+    '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
+    '</tr></thead><tbody>';
+
+  tariffe.forEach(function(t,idx){
     var b=righeBySito[t.bookmaker.toLowerCase()];
-    var bg=ri%2===0?'rgba(255,255,255,.012)':'transparent';
+    var bg=idx%2===0?'rgba(255,255,255,.012)':'transparent';
+    var col2=PALETTE[idx%PALETTE.length];
+    var chip='<div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:10.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
     if(!b){
-      html+='<tr style="background:'+bg+';opacity:.5">'+
-        '<td style="padding:10px 16px;font-weight:700;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.04)">'+t.bookmaker+'</td>'+
-        '<td colspan="3" style="padding:10px 14px;color:var(--tx3);font-size:10.5px;font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
-        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
-        '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-          (isReadOnlyCollab()?'—':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">&#43; Segna fatto</button>')+
-        '</td>'+
-        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td></tr>';
+      html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
+        '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="3" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
+        '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
+        '</td></tr>';
       return;
     }
     var st=b.pocket_stato||null;
     var badgeColor=st==='PAGATO'?'var(--green)':st==='ACCUMULATO'?'var(--gold)':'var(--tx3)';
+    var badgeBg=st==='PAGATO'?'rgba(0,229,138,.1)':st==='ACCUMULATO'?'rgba(245,200,66,.1)':'rgba(255,255,255,.05)';
     var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
-    html+='<tr style="background:'+bg+'">'+
-      '<td style="padding:10px 16px;font-weight:700;color:var(--tx);border-bottom:1px solid rgba(255,255,255,.04)">'+(b.bookmaker||'—')+'</td>'+
+    html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(245,200,66,.04)\'" onmouseout="this.style.background=\''+bg+'\'">'+
+      '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+      '<td style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
       '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
+        (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
+      '</td>'+
       '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
-      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+        (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
+      '</td>'+
+      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
       '<td style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
       '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (st?'<span style="font-size:9.5px;font-weight:800;color:'+badgeColor+'">'+badgeLabel+'</span>':
-          (isReadOnlyCollab()?'<span style="font-size:9.5px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">Metti da parte</button>'))+
+        (st?'<span style="padding:4px 10px;border-radius:999px;background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:800;white-space:nowrap">'+badgeLabel+'</span>':
+          (isReadOnlyCollab()?'<span style="font-size:10px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">Metti da parte</button>'))+
       '</td>'+
       '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (isReadOnlyCollab()?'':'<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px">&#9998;</button>')+
+        (isReadOnlyCollab()?'':'<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(245,200,66,.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>')+
       '</td></tr>';
   });
-
   html+='</tbody></table></div></div>';
 
   g('collab-detail').innerHTML=html;
@@ -1343,49 +1351,55 @@ function renderFlatCliente(cid,clienteEnc){
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
     '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(245,200,66,.06)">'+
-    '<th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
-    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
-    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
-    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DATA INIZIO</th>'+
-    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
-    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
+    '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
     '</tr></thead><tbody>';
 
-  tariffe.forEach(function(t,ri){
+  tariffe.forEach(function(t,idx){
     var b=righeBySito[t.bookmaker.toLowerCase()];
-    var bg=ri%2===0?'rgba(255,255,255,.012)':'transparent';
+    var bg=idx%2===0?'rgba(255,255,255,.012)':'transparent';
+    var col2=PALETTE[idx%PALETTE.length];
+    var chip='<div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:10.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
     if(!b){
-      html+='<tr style="background:'+bg+';opacity:.5">'+
-        '<td style="padding:10px 16px;font-weight:700;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.04)">'+t.bookmaker+'</td>'+
-        '<td colspan="3" style="padding:10px 14px;color:var(--tx3);font-size:10.5px;font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
-        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
-        '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-          (isReadOnlyCollab()?'—':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">&#43; Segna fatto</button>')+
-        '</td>'+
-        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td></tr>';
+      html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
+        '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td style="padding:10px 14px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="3" style="padding:10px 14px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
+        '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
+        '</td></tr>';
       return;
     }
     var st=getPagStatus(b.id);
-    html+='<tr style="background:'+bg+'">'+
-      '<td style="padding:10px 16px;font-weight:700;color:var(--tx);border-bottom:1px solid rgba(255,255,255,.04)">'+(b.bookmaker||'—')+'</td>'+
+    html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(245,200,66,.04)\'" onmouseout="this.style.background=\''+bg+'\'">'+
+      '<td style="padding:10px 16px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+      '<td style="padding:10px 14px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
       '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
+        (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
+      '</td>'+
       '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
-      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+        (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
+      '</td>'+
+      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
       '<td style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
       '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<span class="st-badge st-'+st+'" '+(isReadOnlyCollab()?'style="cursor:default"':'onclick="cycleStatusCliente(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" style="cursor:pointer"')+'>'+STATI_LABEL[st]+'</span>'+
       '</td>'+
       '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
-          '<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px">&#9998;</button>'+
-          '<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Elimina" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px">&#128465;</button>'+
+          '<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(245,200,66,.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>'+
+          '<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Elimina" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,87,87,.5)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'rgba(255,87,87,.15)\';this.style.color=\'rgba(255,87,87,.5)\'">&#128465;</button>'+
         '</div>')+
       '</td></tr>';
   });
-
   html+='</tbody></table></div></div>';
 
   g('collab-detail').innerHTML=html;
