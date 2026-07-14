@@ -220,6 +220,21 @@ initAuth(function(){
   startApp();
 }, function(){});
 
+// Anche una query filtrata su .in('id_cli', ids) resta soggetta al limite
+// di 1000 righe di Supabase/PostgREST: con ~200 clienti attivi e decine di
+// bookmaker a testa si superano facilmente le 1000 righe, e i clienti "in
+// fondo" restavano senza nessun sito caricato. Si pagina anche qui.
+async function fetchAllBonusForClients(ids){
+  var out=[],step=1000,from=0;
+  while(true){
+    var r=await db.from('bonus').select('id,id_cli,bookmaker,stato,updated_at').in('id_cli',ids).range(from,from+step-1);
+    var rows=r.data||[];
+    out=out.concat(rows);
+    if(rows.length<step)break;
+    from+=step;
+  }
+  return out;
+}
 async function loadAll(){
   try{
     var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at')
@@ -228,8 +243,8 @@ async function loadAll(){
     var ids=_clienti.map(function(c){return c.id;}).filter(Boolean);
     _bonusByClient={};
     if(ids.length){
-      var rb=await db.from('bonus').select('id,id_cli,bookmaker,stato,updated_at').in('id_cli',ids);
-      (rb.data||[]).forEach(function(row){
+      var allRows=await fetchAllBonusForClients(ids);
+      allRows.forEach(function(row){
         if(!_bonusByClient[row.id_cli])_bonusByClient[row.id_cli]=[];
         _bonusByClient[row.id_cli].push(row);
       });
