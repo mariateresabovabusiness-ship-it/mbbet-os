@@ -45,7 +45,9 @@ insert into collab (id, nome, tipo, stato, modello, data_inizio)
 select 'COLLAB-003','Ale e Fede','Individuale','Attiva','POCKET',current_date
 where not exists (select 1 from collab where nome='Ale e Fede');
 
--- ── Listino condiviso Gas / Ale e Fede (stesse 14 quote per sito) ────
+-- ── Listino condiviso Gas / Ale e Fede: tutti i 22 siti esistenti ────
+-- (14 con quota reale + 8 non profittevoli per ora, quota 0 ma comunque
+-- visibili nella lista completa dei siti)
 insert into collab_tariffe (nome_collab, bookmaker, prezzo, ordine)
 select v.nome_collab, v.bookmaker, v.prezzo, v.ordine from (values
   ('Gas','Betflag SPID',75,1),  ('Ale e Fede','Betflag SPID',75,1),
@@ -61,7 +63,15 @@ select v.nome_collab, v.bookmaker, v.prezzo, v.ordine from (values
   ('Gas','Stanleybet',16,11),   ('Ale e Fede','Stanleybet',16,11),
   ('Gas','Sunbet',11,12),       ('Ale e Fede','Sunbet',11,12),
   ('Gas','Tombola',9,13),       ('Ale e Fede','Tombola',9,13),
-  ('Gas','MyLottery',6,14),     ('Ale e Fede','MyLottery',6,14)
+  ('Gas','MyLottery',6,14),     ('Ale e Fede','MyLottery',6,14),
+  ('Gas','Giocodigitale',0,15), ('Ale e Fede','Giocodigitale',0,15),
+  ('Gas','Daznbet',0,16),       ('Ale e Fede','Daznbet',0,16),
+  ('Gas','Vincitu',0,17),       ('Ale e Fede','Vincitu',0,17),
+  ('Gas','Netwin',0,18),        ('Ale e Fede','Netwin',0,18),
+  ('Gas','Zonagioco',0,19),     ('Ale e Fede','Zonagioco',0,19),
+  ('Gas','Betsson',0,20),       ('Ale e Fede','Betsson',0,20),
+  ('Gas','Lottomatica',0,21),   ('Ale e Fede','Lottomatica',0,21),
+  ('Gas','Planetwin',0,22),     ('Ale e Fede','Planetwin',0,22)
 ) as v(nome_collab,bookmaker,prezzo,ordine)
 on conflict (nome_collab, bookmaker) do update set prezzo=excluded.prezzo, ordine=excluded.ordine;
 
