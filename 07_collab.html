@@ -1070,47 +1070,58 @@ function renderDetail(cid){
       '<div class="alan-kpi-sub">'+k.s+'</div></div>';
   }).join('')+'</div>';
 
-  // TABELLA RIEPILOGO (dashboard-style, come il Drive)
+  // TABELLA CLIENTI (parte dal cliente, non dal sito — click apre i suoi siti)
+  var byClienteFlat={};
+  allBns.forEach(function(b){
+    var cl=b.cliente||'—';
+    if(!byClienteFlat[cl])byClienteFlat[cl]={cliente:cl,rows:[],pagati:0,daPagare:0,scaduti:0,inc:0,daInc:0};
+  });
+  bnsFiltered.forEach(function(b){
+    var cl=b.cliente||'—';
+    if(!byClienteFlat[cl])byClienteFlat[cl]={cliente:cl,rows:[],pagati:0,daPagare:0,scaduti:0,inc:0,daInc:0};
+    var st=pag[String(b.id)]||'IN_CORSO';
+    var val=parseFloat(b.comp_referral)||0;
+    byClienteFlat[cl].rows.push(b);
+    if(st==='PAGATO'){byClienteFlat[cl].pagati++;byClienteFlat[cl].inc+=val;}
+    else{byClienteFlat[cl].daPagare++;byClienteFlat[cl].daInc+=val;if(st==='SCADUTO'||st==='URGENTE')byClienteFlat[cl].scaduti++;}
+  });
+  var clientiListFlat=Object.values(byClienteFlat).sort(function(a,b){return b.rows.length-a.rows.length;});
+
   html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;margin-bottom:6px">'+
     '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">'+
-    '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">RIEPILOGO SITI</span>'+
-    '<span style="font-size:10px;color:var(--tx3)">clicca un sito per vedere i clienti</span></div>'+
+    '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">CLIENTI</span>'+
+    '<span style="font-size:10px;color:var(--tx3)">clicca un cliente per vedere i suoi siti</span></div>'+
     '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
     '<thead><tr style="background:rgba(255,255,255,.025)">'+
-    '<th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
-    '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PAGAMENTO</th>'+
-    '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTI</th>'+
+    '<th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
+    '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PAGATI</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DA PAGARE</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SCADUTI</th>'+
     '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">INCASSATO</th>'+
     '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DA INCASSARE</th>'+
-    '</tr></thead><tbody id="bk-tbody-'+cid+'">';
+    '</tr></thead><tbody>';
 
-  bkList.forEach(function(bkData){
-    var bk=bkData.bk;
-    var bkEnc=encodeURIComponent(bk);
-    var haCliente=bkData.rows.length>0;
-    html+='<tr onclick="renderBkDetail(\''+cid+'\',\''+bkEnc+'\')" style="cursor:pointer;transition:.12s;'+(haCliente?'':'opacity:.5')+'" '+
+  clientiListFlat.forEach(function(cd){
+    var clEnc=encodeURIComponent(cd.cliente);
+    html+='<tr onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')" style="cursor:pointer;transition:.12s" '+
       'onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" '+
       'onmouseout="this.style.background=\'transparent\'">'+
       '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<div style="display:flex;align-items:center;gap:8px">'+
-        '<span style="font-size:11px;color:'+(haCliente?'var(--gold)':'var(--tx3)')+'">→</span>'+
-        '<span style="font-weight:800;color:var(--tx);font-size:13px">'+bk+'</span>'+
-        (!haCliente?'<span class="badge-nuovo">nessun cliente</span>':'')+
+        '<span style="font-size:11px;color:var(--gold)">→</span>'+
+        '<span style="font-weight:800;color:var(--tx);font-size:13px">'+cd.cliente+'</span>'+
         '</div></td>'+
-      '<td style="padding:11px 14px;text-align:center;color:var(--gold);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(bkData.tariff)+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04);color:'+(haCliente?'var(--tx)':'var(--tx3)')+'">'+bkData.rows.length+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04);color:'+(haCliente?'var(--green)':'var(--tx3)')+'">'+bkData.pagati+'</td>'+
-      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04);color:'+(haCliente?'var(--blue)':'var(--tx3)')+'">'+bkData.daPagare+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+cd.rows.length+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;font-weight:700;color:var(--green);border-bottom:1px solid rgba(255,255,255,.04)">'+cd.pagati+'</td>'+
+      '<td style="padding:11px 14px;text-align:center;font-weight:700;color:var(--blue);border-bottom:1px solid rgba(255,255,255,.04)">'+cd.daPagare+'</td>'+
       '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (bkData.scaduti>0?'<span style="color:var(--red);font-weight:700">'+bkData.scaduti+'</span>':'<span style="color:var(--tx3)">0</span>')+
+        (cd.scaduti>0?'<span style="color:var(--red);font-weight:700">'+cd.scaduti+'</span>':'<span style="color:var(--tx3)">0</span>')+
       '</td>'+
       '<td style="padding:11px 14px;text-align:right;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (bkData.inc>0?'€ '+fmt(bkData.inc):'—')+'</td>'+
-      '<td style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(bkData.daInc>0?'var(--gold)':'var(--tx3)')+'">'+
-        (bkData.daInc>0?'€ '+fmt(bkData.daInc):(haCliente?'✓':'—'))+'</td>'+
+        (cd.inc>0?'€ '+fmt(cd.inc):'—')+'</td>'+
+      '<td style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':'var(--tx3)')+'">'+
+        (cd.daInc>0?'€ '+fmt(cd.daInc):'✓')+'</td>'+
       '</tr>';
   });
 
@@ -1289,6 +1300,99 @@ function renderBkDetail(cid, bkEnc){
   g('collab-detail').innerHTML=html;
 }
 
+// Vista "cliente-first" per i collaboratori modello FLAT (Alan): mostra
+// tutti i siti del listino per un cliente specifico, con stato reale
+// (pagato subito, non ad accumulo come nel modello Pocket).
+function renderFlatCliente(cid,clienteEnc){
+  var c=_collabs.find(function(x){return String(x.id)===String(cid);});
+  if(!c)return;
+  var cliente=decodeURIComponent(clienteEnc);
+  var righe=bnsForCollab(c).filter(function(b){return (b.cliente||'')===cliente;});
+  var pag=getPagMap();
+  var pagati=0,daPagare=0,scaduti=0,inc=0,daInc=0;
+  righe.forEach(function(b){
+    var st=pag[String(b.id)]||'IN_CORSO';
+    var val=parseFloat(b.comp_referral)||0;
+    if(st==='PAGATO'){pagati++;inc+=val;}else{daPagare++;daInc+=val;if(st==='SCADUTO'||st==='URGENTE')scaduti++;}
+  });
+
+  var html='<div style="margin-bottom:14px">'+
+    '<span onclick="selectCollab(\''+cid+'\')" style="cursor:pointer;font-size:11px;color:var(--tx3);font-weight:700">&#8592; Torna a '+(c.nome||'')+'</span>'+
+    '</div>';
+
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;padding:14px 18px;background:rgba(10,13,32,.9);border:1px solid rgba(255,255,255,.07);border-radius:12px">'+
+    '<div><div style="font-size:16px;font-weight:900;color:var(--tx)">'+cliente+'</div>'+
+    '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+(c.nome||'')+' &middot; '+righe.length+' siti fatti</div></div>'+
+    '<div style="display:flex;align-items:center;gap:18px">'+
+    '<div style="text-align:right"><div style="font-size:16px;font-weight:900;color:var(--green)">€ '+fmt(inc)+'</div><div style="font-size:9px;color:var(--tx3)">incassato</div></div>'+
+    '<div style="text-align:right"><div style="font-size:16px;font-weight:900;color:var(--gold)">€ '+fmt(daInc)+'</div><div style="font-size:9px;color:var(--tx3)">da incassare</div></div>'+
+    (scaduti>0?'<div style="text-align:right"><div style="font-size:16px;font-weight:900;color:var(--red)">'+scaduti+'</div><div style="font-size:9px;color:var(--tx3)">scaduti</div></div>':'')+
+    '</div></div>';
+
+  var tariffe=tariffeForCollab(c);
+  var righeBySito={};
+  righe.forEach(function(b){righeBySito[(b.bookmaker||'').toLowerCase()]=b;});
+
+  html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
+    '<thead><tr style="background:rgba(245,200,66,.06)">'+
+    '<th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
+    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
+    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
+    '<th style="padding:10px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DATA INIZIO</th>'+
+    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
+    '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
+    '</tr></thead><tbody>';
+
+  tariffe.forEach(function(t,ri){
+    var b=righeBySito[t.bookmaker.toLowerCase()];
+    var bg=ri%2===0?'rgba(255,255,255,.012)':'transparent';
+    if(!b){
+      html+='<tr style="background:'+bg+';opacity:.5">'+
+        '<td style="padding:10px 16px;font-weight:700;color:var(--tx2);border-bottom:1px solid rgba(255,255,255,.04)">'+t.bookmaker+'</td>'+
+        '<td colspan="3" style="padding:10px 14px;color:var(--tx3);font-size:10.5px;font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
+        '<td style="padding:10px 14px;text-align:right;color:var(--tx3);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          (isReadOnlyCollab()?'—':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">&#43; Segna fatto</button>')+
+        '</td>'+
+        '<td style="border-bottom:1px solid rgba(255,255,255,.04)"></td></tr>';
+      return;
+    }
+    var st=getPagStatus(b.id);
+    html+='<tr style="background:'+bg+'">'+
+      '<td style="padding:10px 16px;font-weight:700;color:var(--tx);border-bottom:1px solid rgba(255,255,255,.04)">'+(b.bookmaker||'—')+'</td>'+
+      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (b.username_bk?'<span style="color:var(--cyan);font-family:monospace">'+b.username_bk+'</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
+      '<td style="padding:10px 14px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+'</td>'+
+      '<td style="padding:10px 14px;color:var(--tx2);font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
+      '<td style="padding:10px 14px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<span class="st-badge st-'+st+'" '+(isReadOnlyCollab()?'style="cursor:default"':'onclick="cycleStatusCliente(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" style="cursor:pointer"')+'>'+STATI_LABEL[st]+'</span>'+
+      '</td>'+
+      '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
+          '<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px">&#9998;</button>'+
+          '<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Elimina" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px">&#128465;</button>'+
+        '</div>')+
+      '</td></tr>';
+  });
+
+  html+='</tbody></table></div></div>';
+
+  g('collab-detail').innerHTML=html;
+}
+
+function cycleStatusCliente(bonusId,cid,clienteEnc){
+  if(isReadOnlyCollab())return;
+  var cur=getPagStatus(bonusId);
+  var next=STATI[(STATI.indexOf(cur)+1)%STATI.length];
+  setPagStatus(bonusId,next);
+  renderList();
+  renderFlatCliente(cid,clienteEnc);
+}
+
 function cycleStatusBk(bonusId,cid,bkEnc){
   if(isReadOnlyCollab())return;
   var cur=getPagStatus(bonusId);
@@ -1309,7 +1413,7 @@ async function deleteBonus(bonusId,cid,bkEnc){
     renderList();
     var cDel=_collabs.find(function(x){return String(x.id)===String(cid);});
     if(cDel&&cDel.modello==='POCKET'){selectCollab(cid);}
-    else{renderBkDetail(cid,bkEnc);}
+    else{renderFlatCliente(cid,bkEnc);}
   }catch(e){
     alert('Errore eliminazione: '+(e.message||String(e)));
   }
@@ -1521,7 +1625,7 @@ async function saveNewBonus(){
     closeNewBonus();
     showToast('Cliente aggiunto ✓ (anche in CRM)','ok');
     if(c&&c.modello==='POCKET'){renderPocketCliente(_newBnsCid,encodeURIComponent(nome));}
-    else{renderBkDetail(_newBnsCid,_newBnsEnc);}
+    else{renderFlatCliente(_newBnsCid,encodeURIComponent(nome));}
   }catch(e){
     var errMsg='Errore: '+(e.message||JSON.stringify(e)||String(e));
     alert('DEBUG ERRORE AGGIUNGI:\n'+errMsg);
@@ -1556,11 +1660,11 @@ async function saveEditBonus(){
     closeEditBonus();
     showToast('Salvato ✓','ok');
     var cEd=_collabs.find(function(x){return String(x.id)===String(_editBnsCid);});
+    var bEd=_bns.find(function(x){return String(x.id)===String(_editBnsId);});
     if(cEd&&cEd.modello==='POCKET'){
-      var bEd=_bns.find(function(x){return String(x.id)===String(_editBnsId);});
       renderPocketCliente(_editBnsCid,encodeURIComponent(bEd?bEd.cliente:''));
     }else{
-      renderBkDetail(_editBnsCid,_editBnsEnc);
+      renderFlatCliente(_editBnsCid,encodeURIComponent(bEd?bEd.cliente:''));
     }
   }catch(e){
     g('eb-err').textContent='Errore: '+(e.message||String(e));
