@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MBBET OS — Coda Clienti</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050714;--gold:#f5c842;--glow-g:rgba(245,200,66,.28);--green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;--tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--sb:224px}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;overflow:hidden;font-size:14px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(245,200,66,.2);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* SIDEBAR */
+.sb{width:var(--sb);height:100vh;flex-shrink:0;background:rgba(3,4,14,.99);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;position:relative;z-index:30}
+.sb::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(245,200,66,.25) 30%,rgba(245,200,66,.25) 70%,transparent)}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
+.sb-crown{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 28px var(--glow-g)}
+.sb-nm{font-size:14px;font-weight:900;letter-spacing:1.5px;color:var(--gold)}
+.sb-sub{font-size:11px;color:var(--tx3);letter-spacing:2px;margin-top:2px}
+.sb-sec{padding:13px 16px 3px;font-size:11px;font-weight:800;color:var(--tx4);letter-spacing:2.5px}
+.sb-lnk{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--tx3);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:.14s;text-decoration:none;position:relative}
+.sb-lnk:hover{color:var(--tx2);background:rgba(255,255,255,.022);border-left-color:rgba(245,200,66,.2)}
+.sb-lnk.act{color:var(--gold);background:rgba(245,200,66,.08);border-left-color:var(--gold);font-weight:700}
+.sb-lnk .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.05)}
+.sb-mode{background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.14);border-radius:9px;padding:9px 12px}
+.sb-ml{font-size:11px;color:var(--tx3);letter-spacing:1.5px;margin-bottom:4px}
+.sb-mv{font-size:13px;font-weight:800;color:var(--gold)}
+
+/* TOPBAR */
+.pg{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:62px;padding:0 20px;flex-shrink:0;display:flex;align-items:center;gap:10px;background:rgba(3,4,14,.98);border-bottom:1px solid rgba(255,255,255,.06);position:relative;z-index:20}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,200,66,.25),transparent)}
+.tb-back{display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx3);text-decoration:none;transition:.14s;flex-shrink:0}
+.tb-back:hover{border-color:rgba(245,200,66,.3);color:var(--gold)}
+.tb-title{flex:1;text-align:center}
+.tb-g{font-size:18px;font-weight:900;letter-spacing:3px;color:var(--gold);text-shadow:0 0 28px var(--glow-g)}
+.tb-sub{font-size:11.5px;color:var(--tx3);margin-top:3px}
+.tb-usr{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;flex-shrink:0}
+.tb-av{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6b4500,var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000}
+.tb-nm{font-size:11px;font-weight:700;color:var(--tx2)}
+.tb-rl{font-size:11.5px;color:var(--tx3)}
+.tb-logout{width:26px;height:26px;border-radius:6px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.15);cursor:pointer;font-size:11px;color:var(--red);display:flex;align-items:center;justify-content:center;transition:.14s;margin-left:4px}
+.tb-logout:hover{background:rgba(255,87,87,.18)}
+
+.main-area{flex:1;overflow-y:auto;padding:20px 22px 40px}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-top:3px solid var(--gold);border-radius:14px;padding:16px 18px}
+.kpi-lbl{font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px}
+.kpi-val{font-size:28px;font-weight:900;margin-top:6px;color:var(--gold)}
+
+.search-row{display:flex;gap:10px;margin-bottom:18px}
+.search-inp{flex:1;padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx);font-size:13px;font-family:inherit;outline:none}
+
+.q-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;margin-bottom:14px;animation:fadeUp .25s ease both}
+.q-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.q-av{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0}
+.q-nm{font-size:15px;font-weight:900;color:var(--tx)}
+.q-sub{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.q-collab-badge{padding:4px 11px;border-radius:999px;font-size:10.5px;font-weight:800;white-space:nowrap}
+.q-sites-lbl{font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;margin:14px 0 8px}
+.q-sites{display:flex;flex-wrap:wrap;gap:6px}
+.q-site-chip{padding:5px 11px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:11.5px;color:var(--tx2);font-weight:600}
+.q-actions{display:flex;gap:10px;margin-top:16px}
+.q-btn{padding:9px 16px;border-radius:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;border:none;transition:.14s}
+.q-btn-wa{background:linear-gradient(135deg,#0d5a3a,var(--green));color:#001a0e}
+.q-btn-wa:hover{transform:translateY(-1px)}
+.q-btn-done{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--tx2)}
+.q-btn-done:hover{border-color:rgba(0,229,138,.4);color:var(--green)}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--tx3)}
+.empty-ic{font-size:40px;margin-bottom:14px}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#ls{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500}
+.li-card{width:340px;background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px 28px}
+.li-t{font-size:20px;font-weight:900;color:var(--gold);text-align:center;margin-bottom:22px;letter-spacing:1px}
+.li-inp{width:100%;padding:11px 14px;margin-bottom:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:var(--tx);font-size:13px;font-family:inherit;outline:none}
+.li-btn{width:100%;padding:12px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:9px;color:#000;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px}
+.li-err{font-size:11px;color:var(--red);text-align:center;min-height:16px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div id="ls">
+  <div class="li-card">
+    <div class="li-t">👑 MBBET OS</div>
+    <input class="li-inp" id="li-e" type="email" placeholder="Email aziendale">
+    <input class="li-inp" id="li-p" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLoginPage()">
+    <button class="li-btn" onclick="doLoginPage()">ACCEDI</button>
+    <div class="li-err" id="li-err"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none;height:100%">
+  <div style="display:flex;height:100%">
+    <div class="sb">
+      <div class="sb-logo">
+        <div class="sb-crown">👑</div>
+        <div><div class="sb-nm">MBBET OS</div><div class="sb-sub">SISTEMA OPERATIVO</div></div>
+      </div>
+      <div class="sb-sec">NAVIGAZIONE</div>
+      <a class="sb-lnk" onclick="navTo('index.html')"><span class="ic">🏘️</span>Hub Centrale</a>
+      <a class="sb-lnk" onclick="navTo('01_clienti.html')"><span class="ic">👤</span>CRM Clienti</a>
+      <a class="sb-lnk act"><span class="ic">📥</span>Coda Clienti</a>
+      <a class="sb-lnk" onclick="navTo('02_bonus.html')"><span class="ic">🎯</span>Bookmaker</a>
+      <a class="sb-lnk" onclick="navTo('03_team.html')"><span class="ic">👥</span>Team</a>
+      <a class="sb-lnk" onclick="navTo('04_finanze.html')"><span class="ic">💸</span>Revenue & Finanza</a>
+      <a class="sb-lnk" onclick="navTo('07_collab.html')"><span class="ic">🤝</span>Collaboratori</a>
+      <a class="sb-lnk" onclick="navTo('09_social.html')"><span class="ic">📱</span>Social MBBET</a>
+      <div class="sb-bot">
+        <div class="sb-mode"><div class="sb-ml">RUOLO ATTIVO</div><div class="sb-mv" id="sb-role">—</div></div>
+      </div>
+    </div>
+
+    <div class="pg">
+      <div class="topbar">
+        <a class="tb-back" onclick="navTo('index.html')">← Hub</a>
+        <div class="tb-title">
+          <div class="tb-g">CODA CLIENTI</div>
+          <div class="tb-sub">Nuovi clienti da avviare — messaggio pronto + siti da registrare</div>
+        </div>
+        <div class="tb-usr">
+          <div class="tb-av" id="tb-av">MB</div>
+          <div><div class="tb-nm" id="tb-nm">—</div><div class="tb-rl" id="tb-rl">—</div></div>
+          <div class="tb-logout" onclick="doLogout()">✕</div>
+        </div>
+      </div>
+
+      <div class="main-area">
+        <div class="kpi-strip">
+          <div class="kpi-card"><div class="kpi-lbl">IN CODA</div><div class="kpi-val" id="kpi-tot">—</div></div>
+          <div class="kpi-card"><div class="kpi-lbl">DA COLLABORATORI</div><div class="kpi-val" id="kpi-collab">—</div></div>
+          <div class="kpi-card"><div class="kpi-lbl">OGGI</div><div class="kpi-val" id="kpi-oggi">—</div></div>
+          <div class="kpi-card"><div class="kpi-lbl">SENZA TELEFONO</div><div class="kpi-val" id="kpi-notel">—</div></div>
+        </div>
+
+        <div class="search-row">
+          <input class="search-inp" id="q-search" placeholder="🔎 Cerca per nome, telefono, collaboratore..." oninput="renderQueue()">
+        </div>
+
+        <div id="q-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="shared/supabase.min.js"></script>
+<script src="shared/auth.js"></script>
+<script>
+var _clienti=[], _tariffe=[];
+var PALETTE=['#f7cc46','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
+
+function showToast(msg,type){
+  var t=document.getElementById('toast');if(!t)return;
+  t.textContent=msg;
+  t.style.color=type==='er'?'var(--red)':type==='ok'?'var(--green)':'var(--gold)';
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2800);
+}
+
+function doLoginPage(){
+  var email=document.getElementById('li-e').value, pw=document.getElementById('li-p').value;
+  var r=doLogin(email,pw);
+  if(r.error){document.getElementById('li-err').textContent=r.error;return;}
+  if(!canAccess('coda')){document.getElementById('li-err').textContent='Non hai i permessi per questa sezione.';return;}
+  startApp();
+}
+
+function startApp(){
+  document.getElementById('ls').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('tb-nm').textContent=currentNome;
+  document.getElementById('tb-rl').textContent=ROLE_LABELS[currentRole]||currentRole;
+  document.getElementById('sb-role').textContent=ROLE_LABELS[currentRole]||currentRole;
+  document.getElementById('tb-av').textContent=(currentNome||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+  loadAll();
+}
+
+initAuth(function(){
+  if(!canAccess('coda')){window.location.href='index.html';return;}
+  startApp();
+}, function(){});
+
+async function loadAll(){
+  try{
+    var r=await Promise.all([
+      db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at').eq('stato','LIBERO').order('created_at',{ascending:false}),
+      db.from('collab_tariffe').select('*').order('ordine')
+    ]);
+    _clienti=r[0].data||[];
+    _tariffe=r[1].data||[];
+  }catch(e){_clienti=[];_tariffe=[];}
+  renderQueue();
+}
+
+function getSitiPerCollab(nomeCollab){
+  if(!nomeCollab)return[];
+  return _tariffe.filter(function(t){return (t.nome_collab||'').toLowerCase()===nomeCollab.toLowerCase();});
+}
+
+function collabColor(nomeCollab){
+  if(!nomeCollab)return '#6b83a0';
+  var h=0;for(var i=0;i<nomeCollab.length;i++)h=nomeCollab.charCodeAt(i)+((h<<5)-h);
+  return PALETTE[Math.abs(h)%PALETTE.length];
+}
+
+function waMessage(c){
+  var nome=(c.nome||'').trim().split(' ')[0]||c.nome||'';
+  var siti=getSitiPerCollab(c.collab);
+  var lista=siti.length?siti.map(function(s){return '• '+s.bookmaker;}).join('\n'):'ti aggiorneremo a breve su quali siti registrarti';
+  return 'Ciao '+nome+'! 👋\n\nBenvenuto/a in MBBET! 🎉\n\nDa oggi ti seguiamo passo passo per registrarti e completare le promozioni sui seguenti siti:\n\n'+lista+'\n\nTi scriveremo qui ogni volta che ci serve qualcosa da te (documenti, SPID, conferme). Per qualsiasi dubbio scrivi pure in questo gruppo!\n\nA presto 🚀';
+}
+
+function copyWa(idx){
+  var c=_clienti[idx];if(!c)return;
+  var msg=waMessage(c);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(msg).then(function(){showToast('Messaggio copiato ✓','ok');},function(){prompt('Copia il messaggio:',msg);});
+  }else{prompt('Copia il messaggio:',msg);}
+}
+
+async function markStarted(idx){
+  var c=_clienti[idx];if(!c)return;
+  if(!confirm('Segnare "'+c.nome+'" come lavorazione iniziata? Uscirà dalla coda.'))return;
+  try{
+    await db.from('clienti').update({stato:'IN_LAVORAZIONE'}).eq('id',c.id);
+    _clienti=_clienti.filter(function(x){return x.id!==c.id;});
+    showToast('Fatto ✓ rimosso dalla coda','ok');
+    renderQueue();
+  }catch(e){showToast('Errore salvataggio','er');}
+}
+
+function fmtDateIt(d){if(!d)return'—';var p=(d||'').slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+
+function renderQueue(){
+  var search=(document.getElementById('q-search').value||'').toLowerCase();
+  var list=_clienti.filter(function(c){
+    if(!search)return true;
+    return ((c.nome||'')+' '+(c.tel||c.telefono||'')+' '+(c.collab||'')).toLowerCase().indexOf(search)>=0;
+  });
+
+  document.getElementById('kpi-tot').textContent=_clienti.length;
+  document.getElementById('kpi-collab').textContent=_clienti.filter(function(c){return c.collab;}).length;
+  var today=new Date().toISOString().slice(0,10);
+  document.getElementById('kpi-oggi').textContent=_clienti.filter(function(c){return (c.data_ingresso||'').slice(0,10)===today||(c.created_at||'').slice(0,10)===today;}).length;
+  document.getElementById('kpi-notel').textContent=_clienti.filter(function(c){return !(c.tel||c.telefono);}).length;
+
+  var el=document.getElementById('q-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-ic">📭</div>Nessun cliente in coda al momento.</div>';
+    return;
+  }
+
+  el.innerHTML=list.map(function(c){
+    var idx=_clienti.indexOf(c);
+    var col=collabColor(c.collab);
+    var siti=getSitiPerCollab(c.collab);
+    var ini=(c.nome||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+    return '<div class="q-card">'+
+      '<div class="q-top">'+
+        '<div class="q-av" style="background:'+col+'22;border:1px solid '+col+'55;color:'+col+'">'+ini+'</div>'+
+        '<div style="flex:1"><div class="q-nm">'+(c.nome||'—')+'</div>'+
+          '<div class="q-sub">'+(c.tel||c.telefono||'nessun telefono')+' &middot; entrato il '+fmtDateIt(c.data_ingresso||c.created_at)+'</div></div>'+
+        (c.collab?'<span class="q-collab-badge" style="background:'+col+'1a;color:'+col+';border:1px solid '+col+'44">'+c.collab+'</span>':'<span class="q-collab-badge" style="background:rgba(255,255,255,.05);color:var(--tx3);border:1px solid rgba(255,255,255,.1)">Nessun collaboratore</span>')+
+      '</div>'+
+      (siti.length?('<div class="q-sites-lbl">SITI DA REGISTRARE ('+siti.length+')</div><div class="q-sites">'+
+        siti.map(function(s){return '<span class="q-site-chip">'+s.bookmaker+'</span>';}).join('')+'</div>'):'')+
+      '<div class="q-actions">'+
+        '<button class="q-btn q-btn-wa" onclick="copyWa('+idx+')">💬 Copia messaggio WhatsApp</button>'+
+        '<button class="q-btn q-btn-done" onclick="markStarted('+idx+')">✓ Ho iniziato la lavorazione</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+</script>
+</body>
+</html>

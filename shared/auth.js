@@ -24,14 +24,14 @@ var currentNome = '';
 var currentCollabNome = '';
 
 var ROLE_SECTIONS = {
-  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab'],
-  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab'],
-  'OPERATORE':     ['clienti','bonus','task','social','collab'],
+  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda'],
+  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab','coda'],
+  'OPERATORE':     ['clienti','bonus','task','social','collab','coda'],
   'COLLAB':        ['clienti','bonus','social','collab'],
   'COLLAB_SELF':   ['collab'],
   'REFERRAL':      ['report'],
   'VIEWER':        ['clienti'],
-  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab']
+  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda']
 };
 
 var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','COLLAB_SELF':'Collaboratore','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
