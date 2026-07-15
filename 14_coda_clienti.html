@@ -70,6 +70,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
 .kpi-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-top:3px solid var(--gold);border-radius:14px;padding:14px 16px}
 .kpi-card.hot{border-top-color:var(--orange)}
+.kpi-card.sms-stale{border-top-color:var(--red);animation:micPulse 1.8s infinite}
+.kpi-card.sms-stale .kpi-val{color:var(--red)}
 .kpi-lbl{font-size:10.5px;font-weight:800;color:var(--tx3);letter-spacing:1.2px}
 .kpi-val{font-size:26px;font-weight:900;margin-top:6px;color:var(--gold)}
 .kpi-card.hot .kpi-val{color:var(--orange)}
@@ -124,6 +126,10 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .prep-copy{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--tx3);cursor:pointer;flex-shrink:0;font-size:11px}
 .prep-docs{margin-top:14px}
 .prep-doc-lnk{display:block;padding:8px 12px;margin-bottom:6px;background:rgba(183,148,244,.06);border:1px solid rgba(183,148,244,.2);border-radius:9px;color:var(--purple);font-size:12px;text-decoration:none}
+.prep-doc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.prep-doc-item{background:rgba(183,148,244,.05);border:1px solid rgba(183,148,244,.18);border-radius:10px;padding:6px;text-align:center}
+.prep-doc-item img{width:100%;height:90px;object-fit:cover;border-radius:6px;cursor:grab;background:rgba(0,0,0,.2)}
+.prep-doc-cap{font-size:9.5px;color:var(--tx3);margin-top:5px}
 .prep-all-btn{width:100%;margin-top:16px;padding:11px;border-radius:10px;background:linear-gradient(135deg,#4a2f7a,var(--purple));border:none;color:#0a0518;font-weight:900;font-size:12.5px;cursor:pointer;font-family:inherit}
 .prep-note{margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:9px;font-size:10.5px;color:var(--tx3);line-height:1.5}
 .q-cred-form{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
@@ -223,6 +229,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
           <select class="collab-sel" id="q-collab-filter" onchange="renderQueue()">
             <option value="">Tutti i collaboratori</option>
           </select>
+          <button class="collab-sel" id="q-fermi-btn" onclick="toggleFermiOnly()" style="cursor:pointer;font-weight:800">⚠ Solo clienti fermi</button>
         </div>
 
         <div id="kanban-board" class="kanban-board"></div>
@@ -248,7 +255,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>
 <script>
-var _clienti=[], _bonusByClient={}, _pending=null;
+var _clienti=[], _bonusByClient={}, _pending=null, _operatoriList=[];
 var PALETTE=['#f7cc46','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
 var STATO_COL={'FATTO':'var(--green)','IN_CORSO':'var(--blue)','LIMITATO':'var(--red)','BANNATO':'var(--red)','GIA_REGISTRATO':'var(--purple)','LIBERO':'var(--tx4)'};
 var STATO_LBL={'FATTO':'Fatto','IN_CORSO':'In corso','LIMITATO':'Limitato','BANNATO':'Bannato','GIA_REGISTRATO':'Già reg.','LIBERO':'Libero'};
@@ -298,7 +305,7 @@ initAuth(function(){
 async function fetchAllBonusForClients(ids){
   var out=[],step=1000,from=0;
   while(true){
-    var r=await db.from('bonus').select('id,id_cli,bookmaker,stato,fase_attuale,username_bk,password_bk,data_inizio,note,updated_at').in('id_cli',ids).range(from,from+step-1);
+    var r=await db.from('bonus').select('id,id_cli,bookmaker,stato,fase_attuale,username_bk,password_bk,data_inizio,note,updated_at,operatore').in('id_cli',ids).range(from,from+step-1);
     var rows=r.data||[];
     out=out.concat(rows);
     if(rows.length<step)break;
@@ -306,9 +313,22 @@ async function fetchAllBonusForClients(ids){
   }
   return out;
 }
+var _bkLinks={};
+async function loadBkLinks(){
+  try{
+    var r=await db.from('bookmaker').select('nome,link_sito');
+    (r.data||[]).forEach(function(b){if(b.link_sito)_bkLinks[b.nome]=b.link_sito;});
+  }catch(e){}
+}
+async function loadOperatori(){
+  try{
+    var r=await db.from('operatori').select('nome').eq('stato','Attivo');
+    _operatoriList=(r.data||[]).map(function(o){return o.nome;}).filter(Boolean);
+  }catch(e){_operatoriList=[];}
+}
 async function loadAll(){
   try{
-    var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at,accettazione_ok,email,data_nascita,citta,provincia,doc_ci_fronte,doc_ci_retro,doc_ts_fronte,doc_ts_retro,doc_foto_fronte,doc_foto_retro')
+    var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at,accettazione_ok,email,email_siti,data_nascita,citta,provincia,doc_ci_fronte,doc_ci_retro,doc_ts_fronte,doc_ts_retro,doc_foto_fronte,doc_foto_retro')
       .in('stato',['IN_LAVORAZIONE','ATTIVO']).order('created_at',{ascending:false});
     _clienti=rc.data||[];
     var ids=_clienti.map(function(c){return c.id;}).filter(Boolean);
@@ -320,6 +340,8 @@ async function loadAll(){
         _bonusByClient[row.id_cli].push(row);
       });
     }
+    await loadBkLinks();
+    await loadOperatori();
   }catch(e){_clienti=[];_bonusByClient={};}
   fillCollabFilter();
   renderQueue();
@@ -376,6 +398,10 @@ function computeUrgency(c){
       var gg=Math.floor((scad-Date.now())/864e5);
       if(gg<=2)reasons.push('scadenza vicina su '+r.bookmaker);
     }
+    if(r.fase_attuale==='Aspetto Codice SMS'&&r.updated_at){
+      var oreAttesa=(Date.now()-new Date(r.updated_at))/36e5;
+      if(oreAttesa>=2)reasons.push('aspetta il codice da '+Math.floor(oreAttesa)+'h su '+r.bookmaker);
+    }
     var nota=(r.note||'').trim();
     if(nota&&!NOTE_BOILERPLATE.some(function(re){return re.test(nota);})&&!noteViste[nota]){
       noteViste[nota]=true;
@@ -429,10 +455,17 @@ function parseCommand(text){
   var cs=findClientAndSite(t);
   if(cs.error)return cs;
 
-  // credenziali: "username X password Y"
+  // credenziali: "username X password Y [operatore Nome]"
   var um=raw.match(/username\s+(\S+)/i);
   var pm=raw.match(/password\s+(\S+)/i);
-  if(um&&pm)return{type:'cred',client:cs.client,site:cs.site,username:um[1],password:pm[1]};
+  if(um&&pm){
+    var op=null,opBestLen=0;
+    _operatoriList.forEach(function(o){
+      var on=(o||'').toLowerCase();
+      if(on&&t.indexOf('operatore '+on)>=0&&on.length>opBestLen){op=o;opBestLen=on.length;}
+    });
+    return{type:'cred',client:cs.client,site:cs.site,username:um[1],password:pm[1],operatore:op};
+  }
 
   // aspetto codice sms
   if(/aspett[oa].*codic|codice.*sms|sms.*codice|aspetta.*sms/i.test(t))return{type:'fase',client:cs.client,site:cs.site,fase:'Aspetto Codice SMS'};
@@ -472,7 +505,7 @@ function runCommand(){
   }
   _pending=res;
   var txt;
-  if(res.type==='cred')txt='Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → username <b>'+res.username+'</b> / password <b>'+res.password+'</b>. Confermi?';
+  if(res.type==='cred')txt='Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → username <b>'+res.username+'</b> / password <b>'+res.password+'</b>'+(res.operatore?' / operatore <b>'+res.operatore+'</b>':'')+'. Confermi?';
   else if(res.type==='fase')txt='Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → <b>⏳ Aspetto Codice SMS</b>. Confermi?';
   else txt='Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → <b>'+STATO_LBL[res.stato]+'</b>. Confermi?';
   box.innerHTML='<div class="cmd-confirm"><div class="cmd-confirm-txt">'+txt+'</div>'+
@@ -485,8 +518,11 @@ async function confirmCommand(){
   var p=_pending;
   try{
     if(p.type==='cred'){
-      await db.from('bonus').update({username_bk:p.username,password_bk:p.password,fase_attuale:(p.site.fase_attuale==='Da iniziare'||!p.site.fase_attuale)?'Registrato':p.site.fase_attuale,updated_at:new Date().toISOString()}).eq('id',p.site.id);
+      var upd={username_bk:p.username,password_bk:p.password,fase_attuale:(p.site.fase_attuale==='Da iniziare'||!p.site.fase_attuale)?'Registrato':p.site.fase_attuale,updated_at:new Date().toISOString()};
+      if(p.operatore)upd.operatore=p.operatore;
+      await db.from('bonus').update(upd).eq('id',p.site.id);
       p.site.username_bk=p.username;p.site.password_bk=p.password;
+      if(p.operatore)p.site.operatore=p.operatore;
       if(p.site.fase_attuale==='Da iniziare'||!p.site.fase_attuale)p.site.fase_attuale='Registrato';
       showToast('Salvate le credenziali per '+p.client.nome+' su '+p.site.bookmaker+' ✓','ok');
     }else if(p.type==='fase'){
@@ -518,6 +554,34 @@ async function quickMarkDone(cid,sid){
   r.stato='FATTO';r.fase_attuale='Completato';
   showToast('Sito completato ✓','ok');
   renderQueue();
+  openNextUrgent(cid);
+}
+
+/* ══ CODA "PROSSIMO CLIENTE" — dopo un "Fatto" apre da solo il pannello
+   dati del prossimo cliente più urgente, così Serena non deve cercarlo
+   sulla bacheca. Rispetta i filtri attivi (ricerca/collaboratore). ══ */
+function openNextUrgent(excludeCid){
+  var search=(document.getElementById('q-search').value||'').toLowerCase();
+  var collabFilter=document.getElementById('q-collab-filter').value;
+  var list=_clienti.filter(function(c){
+    if(c.id===excludeCid)return false;
+    if(collabFilter&&c.collab!==collabFilter)return false;
+    if(search&&((c.nome||'')+' '+(c.tel||c.telefono||'')+' '+(c.collab||'')).toLowerCase().indexOf(search)<0)return false;
+    return true;
+  });
+  var priorita=['sms','fermo','reg','nuovo'];
+  var best=null,bestStage=99,bestUrg=-1;
+  list.forEach(function(c){
+    var stage=computeStage(c);var si=priorita.indexOf(stage);if(si<0)return;
+    var urg=computeUrgency(c).length;
+    if(si<bestStage||(si===bestStage&&urg>bestUrg)){best=c;bestStage=si;bestUrg=urg;}
+  });
+  if(!best)return;
+  var rows=_bonusByClient[best.id]||[];
+  var next=rows.find(function(r){return r.fase_attuale==='Aspetto Codice SMS';})||
+            rows.find(function(r){return r.stato==='IN_CORSO';})||
+            rows.find(function(r){return r.stato==='LIBERO'||!r.stato;});
+  if(next){setTimeout(function(){openPrepPanel(best.id,next.id);},400);}
 }
 function toggleCredForm(sid){
   var el=document.getElementById('cf-'+sid);
@@ -554,6 +618,13 @@ function copyText(txt){
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){showToast('Copiato ✓','ok');});
   else showToast('Copia non supportata dal browser','er');
 }
+// Link Drive tipo "open?id=XXX" non si vedono come immagine — questa forma
+// "uc?export=view" sì (se il file è condiviso "chiunque abbia il link").
+// Se il browser non riesce comunque a mostrarla, resta il link cliccabile.
+function driveImgUrl(url){
+  var m=(url||'').match(/[?&]id=([^&]+)/);
+  return m?('https://drive.google.com/uc?export=view&id='+m[1]):url;
+}
 function openPrepPanel(cid,sid){
   var c=_clienti.find(function(x){return x.id===cid;});if(!c)return;
   var site=(_bonusByClient[cid]||[]).find(function(x){return x.id===sid;});
@@ -561,11 +632,18 @@ function openPrepPanel(cid,sid){
   document.getElementById('prep-title').textContent='📋 '+(c.nome||'Cliente')+(site?' — '+site.bookmaker:'');
   document.getElementById('prep-sub').textContent='Tutti i dati pronti da incollare sul modulo di registrazione';
 
+  // apre da sola il sito del bookmaker in una nuova scheda — Serena incolla
+  // e registra lei stessa, nessuna azione automatica sulla pagina del sito
+  if(site&&_bkLinks[site.bookmaker]){
+    window.open(_bkLinks[site.bookmaker],'_blank');
+  }
+
   var tel=c.tel||c.telefono;
   var fields=[
     ['Nome completo',c.nome],
     ['Telefono',tel],
     ['Email',c.email],
+    ['Email per i siti',c.email_siti],
     ['Data di nascita',c.data_nascita?fmtDateIt(c.data_nascita):null],
     ['Città',c.citta],
     ['Provincia',c.provincia]
@@ -574,12 +652,19 @@ function openPrepPanel(cid,sid){
     return '<div class="prep-field"><span class="prep-field-l">'+f[0].toUpperCase()+'</span>'+
       '<span style="display:flex;align-items:center;gap:8px"><span class="prep-field-v">'+f[1]+'</span>'+
       '<button class="prep-copy" onclick="copyText('+JSON.stringify(String(f[1])).replace(/"/g,'&quot;')+')" title="Copia">📋</button></span></div>';
-  }).join('')||'<div style="font-size:11.5px;color:var(--tx3);padding:10px 0">Nessun dato anagrafico salvato per questo cliente.</div>';
+  }).join('')||'<div style="font-size:11.5px;color:var(--tx3);padding:10px 0">Nessun dato anagrafico salvato per questo cliente. Manca ancora via e CAP: non sono raccolti oggi dal modulo — dimmi se vuoi che li aggiunga.</div>';
 
   var docs=[['Carta identità (fronte)',c.doc_ci_fronte],['Carta identità (retro)',c.doc_ci_retro],['Tessera sanitaria (fronte)',c.doc_ts_fronte],['Tessera sanitaria (retro)',c.doc_ts_retro],['Foto con documento (fronte)',c.doc_foto_fronte],['Foto con documento (retro)',c.doc_foto_retro]]
     .filter(function(d){return d[1];});
   document.getElementById('prep-docs').innerHTML=docs.length?
-    ('<div class="prep-field-l" style="margin-bottom:8px">DOCUMENTI</div>'+docs.map(function(d){return '<a class="prep-doc-lnk" href="'+d[1]+'" target="_blank">📎 '+d[0]+'</a>';}).join('')):
+    ('<div class="prep-field-l" style="margin-bottom:8px">DOCUMENTI — trascinali col mouse dentro il modulo del sito</div>'+
+     '<div class="prep-doc-grid">'+docs.map(function(d){
+       return '<div class="prep-doc-item">'+
+         '<img src="'+driveImgUrl(d[1])+'" draggable="true" alt="'+d[0]+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">'+
+         '<a class="prep-doc-lnk" href="'+d[1]+'" target="_blank" style="display:none">📎 Apri "'+d[0]+'"</a>'+
+         '<div class="prep-doc-cap">'+d[0]+'</div>'+
+       '</div>';
+     }).join('')+'</div>'):
     '<div style="font-size:11.5px;color:var(--tx3)">Nessun documento caricato per questo cliente.</div>';
 
   document.getElementById('prep-overlay').classList.add('open');
@@ -593,6 +678,7 @@ function copyAllPrep(){
     'Cliente: '+(c.nome||''),
     tel?('Telefono: '+tel):null,
     c.email?('Email: '+c.email):null,
+    c.email_siti?('Email per i siti: '+c.email_siti):null,
     c.data_nascita?('Data di nascita: '+fmtDateIt(c.data_nascita)):null,
     c.citta?('Città: '+c.citta):null,
     c.provincia?('Provincia: '+c.provincia):null,
@@ -653,11 +739,20 @@ function renderCard(c){
   '</div>';
 }
 
+var _fermiOnly=false;
+function toggleFermiOnly(){
+  _fermiOnly=!_fermiOnly;
+  document.getElementById('q-fermi-btn').style.background=_fermiOnly?'rgba(255,87,87,.15)':'';
+  document.getElementById('q-fermi-btn').style.color=_fermiOnly?'var(--red)':'';
+  document.getElementById('q-fermi-btn').style.borderColor=_fermiOnly?'rgba(255,87,87,.4)':'';
+  renderQueue();
+}
 function renderQueue(){
   var search=(document.getElementById('q-search').value||'').toLowerCase();
   var collabFilter=document.getElementById('q-collab-filter').value;
   var list=_clienti.filter(function(c){
     if(collabFilter&&c.collab!==collabFilter)return false;
+    if(_fermiOnly&&!computeUrgency(c).some(function(r){return r.indexOf('giorni senza nessun sito')>=0;}))return false;
     if(!search)return true;
     return ((c.nome||'')+' '+(c.tel||c.telefono||'')+' '+(c.collab||'')).toLowerCase().indexOf(search)>=0;
   });
@@ -666,18 +761,25 @@ function renderQueue(){
   document.getElementById('kpi-collab').textContent=_clienti.filter(function(c){return c.collab;}).length;
   document.getElementById('kpi-notel').textContent=_clienti.filter(function(c){return !(c.tel||c.telefono);}).length;
   var today=_todayIso();
-  var doneToday=0,smsCount=0;
+  var doneToday=0,smsCount=0,smsStale=0;
   _clienti.forEach(function(c){
     var rows=_bonusByClient[c.id]||[];
     if(rows.some(function(r){return (r.stato==='FATTO'||r.stato==='GIA_REGISTRATO')&&(r.updated_at||'').slice(0,10)===today;}))doneToday++;
-    if(rows.some(function(r){return r.fase_attuale==='Aspetto Codice SMS';}))smsCount++;
+    rows.forEach(function(r){
+      if(r.fase_attuale==='Aspetto Codice SMS'){
+        smsCount++;
+        if(r.updated_at&&(Date.now()-new Date(r.updated_at))/36e5>=2)smsStale++;
+      }
+    });
   });
   document.getElementById('kpi-oggi').textContent=doneToday;
   document.getElementById('kpi-sms').textContent=smsCount;
+  var smsCard=document.getElementById('kpi-sms').closest('.kpi-card');
+  if(smsCard)smsCard.classList.toggle('sms-stale',smsStale>0);
 
   var board=document.getElementById('kanban-board');
   if(!list.length){
-    board.innerHTML=(search||collabFilter)?
+    board.innerHTML=(search||collabFilter||_fermiOnly)?
       '<div class="empty-state" style="grid-column:1/-1"><div class="empty-ic">🔎</div>Nessun cliente trovato con questi filtri.</div>':
       '<div class="empty-state" style="grid-column:1/-1"><div class="empty-ic">✨</div>Nessun cliente attivo al momento — tutto sotto controllo.</div>';
     return;
