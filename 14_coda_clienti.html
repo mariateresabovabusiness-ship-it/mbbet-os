@@ -79,8 +79,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .collab-sel{padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx2);font-size:13px;font-family:inherit;outline:none}
 
 /* KANBAN */
-.kanban-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
-.kanban-col{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;min-height:100px}
+.kanban-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;align-items:start}
+.kanban-col{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;min-height:100px;max-height:calc(100vh - 300px);display:flex;flex-direction:column}
 .kanban-col-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px}
 .kanban-col-t{font-size:12px;font-weight:900;letter-spacing:.4px}
 .kanban-col-c{font-size:11px;font-weight:800;color:var(--tx3);background:rgba(255,255,255,.06);padding:2px 9px;border-radius:999px}
@@ -89,7 +89,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .kanban-col.reg .kanban-col-t{color:var(--blue)}
 .kanban-col.oggi .kanban-col-t{color:var(--green)}
 .kanban-col.nuovo .kanban-col-t{color:var(--tx3)}
-.kanban-cards{display:flex;flex-direction:column;gap:10px}
+.kanban-cards{display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-right:4px;flex:1}
 
 .q-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:13px 14px;animation:fadeUp .25s ease both}
 .q-card.urgent{border-color:rgba(255,87,87,.4);box-shadow:0 0 0 1px rgba(255,87,87,.15) inset}
@@ -591,7 +591,9 @@ function renderQueue(){
 
   var board=document.getElementById('kanban-board');
   if(!list.length){
-    board.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-ic">✨</div>Nessun cliente attivo al momento — tutto sotto controllo.</div>';
+    board.innerHTML=(search||collabFilter)?
+      '<div class="empty-state" style="grid-column:1/-1"><div class="empty-ic">🔎</div>Nessun cliente trovato con questi filtri.</div>':
+      '<div class="empty-state" style="grid-column:1/-1"><div class="empty-ic">✨</div>Nessun cliente attivo al momento — tutto sotto controllo.</div>';
     return;
   }
 
