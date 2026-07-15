@@ -1082,6 +1082,32 @@ function renderPocketCliente(cid,clienteEnc){
   g('collab-detail').innerHTML=html;
 }
 
+/* ── Rimuovi cliente da un collaboratore ──
+   Toglie solo il collegamento (clienti.collab), non tocca mai comp_referral
+   o lo storico dei siti/commissioni già segnati: se il cliente ha ancora
+   siti con nome_collab su questo collaboratore, quei soldi restano intatti
+   e il cliente continua a comparire finché quei siti non vengono spostati
+   altrove (da Vista Operativa). */
+async function rimuoviClienteDaCollab(cid,clEnc){
+  var c=_collabs.find(function(x){return String(x.id)===String(cid);});if(!c)return;
+  var cliente=decodeURIComponent(clEnc);
+  if(!confirm('Rimuovere "'+cliente+'" dai clienti di '+c.nome+'?\n\nSe ha già siti/commissioni segnate su questo collaboratore, quelle restano invariate.'))return;
+  var righeQui=bnsForCollab(c).filter(function(b){return (b.cliente||'—')===cliente;});
+  var ccMatch=_clientiCollab.find(function(cc){return cc.nome===cliente&&(cc.collab||'')===c.nome;});
+  var clienteId=ccMatch?ccMatch.id:(righeQui.length?righeQui[0].id_cli:null);
+  if(!clienteId){showToast('Cliente non trovato nel CRM','er');return;}
+  try{
+    await db.from('clienti').update({collab:null}).eq('id',clienteId);
+    if(ccMatch)_clientiCollab=_clientiCollab.filter(function(cc){return cc!==ccMatch;});
+    if(righeQui.length){
+      showToast(cliente+' scollegato — ha ancora '+righeQui.length+' sito/i con commissione qui, resta visibile finché non li sposti','ok');
+    }else{
+      showToast(cliente+' rimosso da '+c.nome,'ok');
+    }
+    renderDetail(cid);
+  }catch(e){showToast('Errore: '+(e&&e.message?e.message:e),'er');}
+}
+
 function renderDetail(cid){
   var c=_collabs.find(function(x){return String(x.id)===String(cid);});
   if(!c)return;
@@ -1226,6 +1252,7 @@ function renderDetail(cid){
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SCADUTI</th>'+
     '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">INCASSATO</th>'+
     '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DA INCASSARE</th>'+
+    (canDelete()?'<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)"></th>':'')+
     '</tr></thead><tbody>';
 
   clientiListFlat.forEach(function(cd){
@@ -1248,6 +1275,9 @@ function renderDetail(cid){
         (cd.inc>0?'€ '+fmt(cd.inc):'—')+'</td>'+
       '<td data-lbl="DA INCASSARE" style="padding:11px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':cd.rows.length>0?'var(--green)':'var(--tx3)')+'">'+
         (cd.daInc>0?'€ '+fmt(cd.daInc):cd.rows.length>0?'✓':'—')+'</td>'+
+      (canDelete()?('<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<button onclick="event.stopPropagation();rimuoviClienteDaCollab(\''+cid+'\',\''+clEnc+'\')" title="Rimuovi '+cd.cliente+' da questo collaboratore" '+
+        'style="background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.25);color:var(--red);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px">&#128465;</button></td>'):'')+
       '</tr>';
   });
 
