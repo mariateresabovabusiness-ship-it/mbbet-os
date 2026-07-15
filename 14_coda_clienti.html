@@ -108,6 +108,24 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .q-abtn.sms{color:var(--orange);border-color:rgba(255,138,61,.35)}
 .q-abtn.done{color:var(--green);border-color:rgba(0,229,138,.35)}
 .q-abtn.cred{color:var(--cyan);border-color:rgba(34,228,255,.35)}
+.q-abtn.prep{color:var(--purple);border-color:rgba(183,148,244,.35)}
+
+/* PANNELLO "PREPARA DATI" — solo lettura/copia, nessuna azione sul sito del bookmaker */
+#prep-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:400;padding:20px}
+#prep-overlay.open{display:flex}
+.prep-box{width:460px;max-width:100%;max-height:85vh;overflow-y:auto;background:rgba(10,13,32,.98);border:1px solid rgba(183,148,244,.3);border-radius:18px;padding:24px}
+.prep-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.prep-title-t{font-size:15px;font-weight:900;color:var(--purple)}
+.prep-close{cursor:pointer;color:var(--tx3);font-size:18px}
+.prep-sub{font-size:11px;color:var(--tx3);margin-bottom:16px}
+.prep-field{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.prep-field-l{font-size:10.5px;color:var(--tx3);font-weight:800;letter-spacing:.5px}
+.prep-field-v{font-size:13px;color:var(--tx2);text-align:right;word-break:break-word}
+.prep-copy{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--tx3);cursor:pointer;flex-shrink:0;font-size:11px}
+.prep-docs{margin-top:14px}
+.prep-doc-lnk{display:block;padding:8px 12px;margin-bottom:6px;background:rgba(183,148,244,.06);border:1px solid rgba(183,148,244,.2);border-radius:9px;color:var(--purple);font-size:12px;text-decoration:none}
+.prep-all-btn{width:100%;margin-top:16px;padding:11px;border-radius:10px;background:linear-gradient(135deg,#4a2f7a,var(--purple));border:none;color:#0a0518;font-weight:900;font-size:12.5px;cursor:pointer;font-family:inherit}
+.prep-note{margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:9px;font-size:10.5px;color:var(--tx3);line-height:1.5}
 .q-cred-form{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
 .q-cred-inp{flex:1;min-width:90px;padding:6px 9px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx);font-size:11px;font-family:inherit;outline:none}
 .q-doc-chip{margin-top:9px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--tx3)}
@@ -215,6 +233,18 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 
 <div id="toast"></div>
 
+<!-- PREPARA DATI: pannello di sola lettura/copia, Serena registra lei stessa sul sito -->
+<div id="prep-overlay">
+  <div class="prep-box">
+    <div class="prep-title"><span class="prep-title-t" id="prep-title">📋 Prepara dati</span><span class="prep-close" onclick="closePrepPanel()">✕</span></div>
+    <div class="prep-sub" id="prep-sub">—</div>
+    <div id="prep-fields"></div>
+    <div class="prep-docs" id="prep-docs"></div>
+    <button class="prep-all-btn" onclick="copyAllPrep()">📋 Copia tutti i dati</button>
+    <div class="prep-note">Questi dati restano solo per uso interno: apri tu il sito del bookmaker e incollali a mano — nessuna registrazione automatica.</div>
+  </div>
+</div>
+
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>
 <script>
@@ -278,7 +308,7 @@ async function fetchAllBonusForClients(ids){
 }
 async function loadAll(){
   try{
-    var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at,accettazione_ok')
+    var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at,accettazione_ok,email,data_nascita,citta,provincia,doc_ci_fronte,doc_ci_retro,doc_ts_fronte,doc_ts_retro,doc_foto_fronte,doc_foto_retro')
       .in('stato',['IN_LAVORAZIONE','ATTIVO']).order('created_at',{ascending:false});
     _clienti=rc.data||[];
     var ids=_clienti.map(function(c){return c.id;}).filter(Boolean);
@@ -516,6 +546,61 @@ function toggleSites(cid){
   if(el)el.classList.toggle('open');
 }
 
+/* ══ PREPARA DATI — pannello di sola lettura per velocizzare la registrazione manuale.
+   Non tocca nessun sito bookmaker: raccoglie solo i dati che Serena già ha sparsi
+   tra CRM/documenti, così deve solo copiare e incollare lei stessa sul sito. ══ */
+var _prepCtx=null;
+function copyText(txt){
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(function(){showToast('Copiato ✓','ok');});
+  else showToast('Copia non supportata dal browser','er');
+}
+function openPrepPanel(cid,sid){
+  var c=_clienti.find(function(x){return x.id===cid;});if(!c)return;
+  var site=(_bonusByClient[cid]||[]).find(function(x){return x.id===sid;});
+  _prepCtx={c:c,site:site};
+  document.getElementById('prep-title').textContent='📋 '+(c.nome||'Cliente')+(site?' — '+site.bookmaker:'');
+  document.getElementById('prep-sub').textContent='Tutti i dati pronti da incollare sul modulo di registrazione';
+
+  var tel=c.tel||c.telefono;
+  var fields=[
+    ['Nome completo',c.nome],
+    ['Telefono',tel],
+    ['Email',c.email],
+    ['Data di nascita',c.data_nascita?fmtDateIt(c.data_nascita):null],
+    ['Città',c.citta],
+    ['Provincia',c.provincia]
+  ];
+  document.getElementById('prep-fields').innerHTML=fields.filter(function(f){return f[1];}).map(function(f){
+    return '<div class="prep-field"><span class="prep-field-l">'+f[0].toUpperCase()+'</span>'+
+      '<span style="display:flex;align-items:center;gap:8px"><span class="prep-field-v">'+f[1]+'</span>'+
+      '<button class="prep-copy" onclick="copyText('+JSON.stringify(String(f[1])).replace(/"/g,'&quot;')+')" title="Copia">📋</button></span></div>';
+  }).join('')||'<div style="font-size:11.5px;color:var(--tx3);padding:10px 0">Nessun dato anagrafico salvato per questo cliente.</div>';
+
+  var docs=[['Carta identità (fronte)',c.doc_ci_fronte],['Carta identità (retro)',c.doc_ci_retro],['Tessera sanitaria (fronte)',c.doc_ts_fronte],['Tessera sanitaria (retro)',c.doc_ts_retro],['Foto con documento (fronte)',c.doc_foto_fronte],['Foto con documento (retro)',c.doc_foto_retro]]
+    .filter(function(d){return d[1];});
+  document.getElementById('prep-docs').innerHTML=docs.length?
+    ('<div class="prep-field-l" style="margin-bottom:8px">DOCUMENTI</div>'+docs.map(function(d){return '<a class="prep-doc-lnk" href="'+d[1]+'" target="_blank">📎 '+d[0]+'</a>';}).join('')):
+    '<div style="font-size:11.5px;color:var(--tx3)">Nessun documento caricato per questo cliente.</div>';
+
+  document.getElementById('prep-overlay').classList.add('open');
+}
+function closePrepPanel(){document.getElementById('prep-overlay').classList.remove('open');_prepCtx=null;}
+function copyAllPrep(){
+  if(!_prepCtx)return;
+  var c=_prepCtx.c,site=_prepCtx.site;
+  var tel=c.tel||c.telefono;
+  var lines=[
+    'Cliente: '+(c.nome||''),
+    tel?('Telefono: '+tel):null,
+    c.email?('Email: '+c.email):null,
+    c.data_nascita?('Data di nascita: '+fmtDateIt(c.data_nascita)):null,
+    c.citta?('Città: '+c.citta):null,
+    c.provincia?('Provincia: '+c.provincia):null,
+    site?('Sito: '+site.bookmaker):null
+  ].filter(Boolean);
+  copyText(lines.join('\n'));
+}
+
 /* ══ RENDER ══ */
 function renderCard(c){
   var col=collabColor(c.collab);
@@ -533,6 +618,7 @@ function renderCard(c){
   var nextActions='';
   if(next){
     nextActions='<div class="q-actions">'+
+      '<button class="q-abtn prep" onclick="openPrepPanel(\''+c.id+'\',\''+next.id+'\')">📋 Prepara dati</button>'+
       (next.fase_attuale!=='Aspetto Codice SMS'?'<button class="q-abtn sms" onclick="quickMarkSms(\''+c.id+'\',\''+next.id+'\')">⏳ Aspetto codice</button>':'')+
       (next.stato!=='FATTO'?'<button class="q-abtn done" onclick="quickMarkDone(\''+c.id+'\',\''+next.id+'\')">✅ Fatto</button>':'')+
       '<button class="q-abtn cred" onclick="toggleCredForm(\''+next.id+'\')">🔑 Username/Password</button>'+
