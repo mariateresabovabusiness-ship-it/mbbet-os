@@ -132,6 +132,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .prep-doc-item{background:rgba(183,148,244,.05);border:1px solid rgba(183,148,244,.18);border-radius:10px;padding:6px;text-align:center}
 .prep-doc-item img{width:100%;height:90px;object-fit:cover;border-radius:6px;cursor:grab;background:rgba(0,0,0,.2)}
 .prep-doc-cap{font-size:9.5px;color:var(--tx3);margin-top:5px}
+.prep-doc-item img{cursor:zoom-in}
+
+#zoom-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:500;cursor:zoom-out;padding:30px}
+#zoom-overlay.open{display:flex}
+#zoom-img{max-width:92vw;max-height:82vh;object-fit:contain;border-radius:6px;box-shadow:0 0 60px rgba(0,0,0,.6)}
+#zoom-cap{margin-top:14px;color:var(--tx2);font-size:13px;font-weight:700}
 .prep-all-btn{width:100%;margin-top:16px;padding:11px;border-radius:10px;background:linear-gradient(135deg,#4a2f7a,var(--purple));border:none;color:#0a0518;font-weight:900;font-size:12.5px;cursor:pointer;font-family:inherit}
 .prep-note{margin-top:12px;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:9px;font-size:10.5px;color:var(--tx3);line-height:1.5}
 .q-cred-form{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
@@ -252,6 +258,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
     <button class="prep-all-btn" onclick="copyAllPrep()">📋 Copia tutti i dati</button>
     <div class="prep-note">Questi dati restano solo per uso interno: apri tu il sito del bookmaker e incollali a mano — nessuna registrazione automatica.</div>
   </div>
+</div>
+
+<!-- Zoom documento: per leggere ogni dato scritto sulla carta senza aprire Drive -->
+<div id="zoom-overlay" onclick="closeZoomDoc()">
+  <img id="zoom-img" src="">
+  <div id="zoom-cap"></div>
 </div>
 
 <script src="shared/supabase.min.js"></script>
@@ -683,10 +695,10 @@ function openPrepPanel(cid,sid){
   var docs=[['Carta identità (fronte)',c.doc_ci_fronte],['Carta identità (retro)',c.doc_ci_retro],['Tessera sanitaria (fronte)',c.doc_ts_fronte],['Tessera sanitaria (retro)',c.doc_ts_retro],['Foto con documento (fronte)',c.doc_foto_fronte],['Foto con documento (retro)',c.doc_foto_retro]]
     .filter(function(d){return d[1];});
   document.getElementById('prep-docs').innerHTML=docs.length?
-    ('<div class="prep-field-l" style="margin-bottom:8px">DOCUMENTI — trascinali col mouse dentro il modulo del sito</div>'+
+    ('<div class="prep-field-l" style="margin-bottom:8px">DOCUMENTI — clicca per ingrandire e leggere ogni dato, trascina col mouse per allegarli al sito</div>'+
      '<div class="prep-doc-grid">'+docs.map(function(d){
        return '<div class="prep-doc-item">'+
-         '<img src="'+driveImgUrl(d[1])+'" draggable="true" alt="'+d[0]+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">'+
+         '<img src="'+driveImgUrl(d[1])+'" draggable="true" alt="'+d[0]+'" loading="lazy" onclick="zoomDoc(this.src,'+JSON.stringify(d[0]).replace(/"/g,'&quot;')+')" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">'+
          '<a class="prep-doc-lnk" href="'+d[1]+'" target="_blank" style="display:none">📎 Apri "'+d[0]+'"</a>'+
          '<div class="prep-doc-cap">'+d[0]+'</div>'+
        '</div>';
@@ -696,6 +708,12 @@ function openPrepPanel(cid,sid){
   document.getElementById('prep-overlay').classList.add('open');
 }
 function closePrepPanel(){document.getElementById('prep-overlay').classList.remove('open');_prepCtx=null;}
+function zoomDoc(src,cap){
+  document.getElementById('zoom-img').src=src;
+  document.getElementById('zoom-cap').textContent=cap||'';
+  document.getElementById('zoom-overlay').classList.add('open');
+}
+function closeZoomDoc(){document.getElementById('zoom-overlay').classList.remove('open');}
 function copyAllPrep(){
   if(!_prepCtx)return;
   var c=_prepCtx.c,site=_prepCtx.site;
@@ -758,11 +776,11 @@ function renderCard(c){
     (urgencies.length?'<div class="q-urgent-badge">⚠ '+urgencies.join(' · ')+'</div>':'')+
     (next?'<div class="q-next">👉 '+(next.fase_attuale==='Aspetto Codice SMS'?'In attesa codice su':'Prossimo sito:')+' <b>'+next.bookmaker+'</b></div>':'')+
     nextActions+
-    (rows.length?'<span class="q-sites-toggle" onclick="toggleSites(\''+c.id+'\')">▾ tutti i siti ('+rows.length+', '+visibleRows.length+' avviati)</span>'+
+    (rows.length?'<span class="q-sites-toggle" onclick="toggleSites(\''+c.id+'\')">▾ tutti i siti ('+rows.length+', '+visibleRows.length+' avviati) — clicca un sito per prepararlo</span>'+
       '<div class="q-sites" id="sites-'+c.id+'">'+rows.map(function(r){
         var sc=STATO_COL[r.stato]||'var(--tx4)';
         var lbl=r.fase_attuale==='Aspetto Codice SMS'?'⏳ '+r.bookmaker:r.bookmaker;
-        return '<span class="q-site-chip" style="background:'+sc+'14;color:'+sc+'"><span class="q-dot" style="background:'+sc+'"></span>'+lbl+'</span>';
+        return '<span class="q-site-chip" style="background:'+sc+'14;color:'+sc+';cursor:pointer" onclick="openPrepPanel(\''+c.id+'\',\''+r.id+'\')" title="Prepara dati per '+r.bookmaker+'"><span class="q-dot" style="background:'+sc+'"></span>'+lbl+'</span>';
       }).join('')+'</div>':'')+
   '</div>';
 }
