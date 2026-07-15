@@ -132,6 +132,11 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .prep-doc-item{background:rgba(183,148,244,.05);border:1px solid rgba(183,148,244,.18);border-radius:10px;padding:6px;text-align:center}
 .prep-doc-item img{width:100%;height:90px;object-fit:cover;border-radius:6px;cursor:grab;background:rgba(0,0,0,.2)}
 .prep-doc-cap{font-size:9.5px;color:var(--tx3);margin-top:5px}
+.ocr-warn{font-size:9px;color:var(--orange);margin-top:7px;text-align:left}
+.ocr-err{font-size:9.5px;color:var(--red);margin-top:7px;text-align:left}
+.ocr-cap{font-size:11px;color:var(--tx2);margin-top:6px;text-align:left;display:flex;align-items:center;gap:6px;background:rgba(0,229,138,.08);border:1px solid rgba(0,229,138,.25);border-radius:7px;padding:5px 8px}
+.ocr-cap b{color:var(--green)}
+.ocr-text{width:100%;margin-top:6px;min-height:70px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--tx3);font-size:9.5px;font-family:inherit;padding:6px;resize:vertical}
 .prep-doc-item img{cursor:zoom-in}
 
 #zoom-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:500;cursor:zoom-out;padding:30px}
@@ -268,6 +273,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
 <script>
 var _clienti=[], _bonusByClient={}, _pending=null, _operatoriList=[];
 var PALETTE=['#f7cc46','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
@@ -695,12 +701,14 @@ function openPrepPanel(cid,sid){
   var docs=[['Carta identità (fronte)',c.doc_ci_fronte],['Carta identità (retro)',c.doc_ci_retro],['Tessera sanitaria (fronte)',c.doc_ts_fronte],['Tessera sanitaria (retro)',c.doc_ts_retro],['Foto con documento (fronte)',c.doc_foto_fronte],['Foto con documento (retro)',c.doc_foto_retro]]
     .filter(function(d){return d[1];});
   document.getElementById('prep-docs').innerHTML=docs.length?
-    ('<div class="prep-field-l" style="margin-bottom:8px">DOCUMENTI — clicca per ingrandire e leggere ogni dato, trascina col mouse per allegarli al sito</div>'+
-     '<div class="prep-doc-grid">'+docs.map(function(d){
+    ('<div class="prep-field-l" style="margin-bottom:8px">DOCUMENTI — clicca per ingrandire, trascina col mouse per allegarli al sito</div>'+
+     '<div class="prep-doc-grid">'+docs.map(function(d,i){
        return '<div class="prep-doc-item">'+
-         '<img src="'+driveImgUrl(d[1])+'" draggable="true" alt="'+d[0]+'" loading="lazy" onclick="zoomDoc(this.src,'+JSON.stringify(d[0]).replace(/"/g,'&quot;')+')" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">'+
+         '<img id="doc-img-'+i+'" src="'+driveImgUrl(d[1])+'" draggable="true" alt="'+d[0]+'" loading="lazy" onclick="zoomDoc(this.src,'+JSON.stringify(d[0]).replace(/"/g,'&quot;')+')" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';document.getElementById(\'ocr-btn-'+i+'\').disabled=true;">'+
          '<a class="prep-doc-lnk" href="'+d[1]+'" target="_blank" style="display:none">📎 Apri "'+d[0]+'"</a>'+
          '<div class="prep-doc-cap">'+d[0]+'</div>'+
+         '<button class="q-abtn prep" id="ocr-btn-'+i+'" style="width:100%;margin-top:6px;justify-content:center" onclick="ocrDoc('+i+')">🔎 Estrai testo</button>'+
+         '<div id="ocr-out-'+i+'"></div>'+
        '</div>';
      }).join('')+'</div>'):
     '<div style="font-size:11.5px;color:var(--tx3)">Nessun documento caricato per questo cliente.</div>';
@@ -714,6 +722,38 @@ function zoomDoc(src,cap){
   document.getElementById('zoom-overlay').classList.add('open');
 }
 function closeZoomDoc(){document.getElementById('zoom-overlay').classList.remove('open');}
+
+// Lettura automatica del testo sul documento (nome, indirizzo, CAP...) via
+// Tesseract.js, tutto dentro il browser — nessuna immagine lascia il PC
+// verso servizi esterni di terzi. Non è perfetta su foto storte/sfocate:
+// va sempre controllata prima di usarla, per questo resta sempre visibile
+// l'avviso e il testo originale, non solo il CAP che trovo.
+async function ocrDoc(i){
+  var img=document.getElementById('doc-img-'+i);
+  var btn=document.getElementById('ocr-btn-'+i);
+  var out=document.getElementById('ocr-out-'+i);
+  if(!out||!btn)return;
+  if(!img||img.style.display==='none'){
+    out.innerHTML='<div class="ocr-err">Non riesco a leggere questa immagine — probabilmente il documento su Drive non è condiviso come "chiunque abbia il link".</div>';
+    return;
+  }
+  btn.disabled=true;var origLbl=btn.textContent;btn.textContent='⏳ Leggo il testo...';
+  out.innerHTML='';
+  try{
+    var result=await Tesseract.recognize(img.src,'ita');
+    var text=(result&&result.data&&result.data.text||'').trim();
+    if(!text){out.innerHTML='<div class="ocr-err">Non ho trovato testo leggibile in questa foto.</div>';}
+    else{
+      var capMatch=text.match(/\b\d{5}\b/);
+      out.innerHTML='<div class="ocr-warn">⚠ Testo letto automaticamente — verifica sempre prima di usarlo</div>'+
+        (capMatch?'<div class="ocr-cap">📮 CAP trovato: <b>'+capMatch[0]+'</b><button class="prep-copy" onclick="copyText(\''+capMatch[0]+'\')" title="Copia CAP">📋</button></div>':'')+
+        '<textarea class="ocr-text" readonly onclick="this.select()">'+text+'</textarea>';
+    }
+  }catch(e){
+    out.innerHTML='<div class="ocr-err">Non sono riuscita a leggere il testo (documento non accessibile o immagine poco chiara).</div>';
+  }
+  btn.disabled=false;btn.textContent='🔎 Estrai testo di nuovo';
+}
 function copyAllPrep(){
   if(!_prepCtx)return;
   var c=_prepCtx.c,site=_prepCtx.site;
