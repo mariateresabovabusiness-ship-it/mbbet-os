@@ -338,7 +338,7 @@ function computeUrgency(c){
   var rows=_bonusByClient[c.id]||[];
   var giorni=Math.floor((Date.now()-new Date(c.data_ingresso||c.created_at))/864e5);
   var nessunSitoFatto=!rows.some(function(r){return r.stato==='FATTO'||r.stato==='GIA_REGISTRATO';});
-  if(nessunSitoFatto&&giorni>=5)reasons.push(giorni+' giorni senza nessun sito fatto');
+  if(nessunSitoFatto&&giorni>=15)reasons.push(giorni+' giorni senza nessun sito fatto');
   var noteViste={};
   rows.forEach(function(r){
     if(r.data_inizio&&r.stato!=='FATTO'&&r.stato!=='GIA_REGISTRATO'){
