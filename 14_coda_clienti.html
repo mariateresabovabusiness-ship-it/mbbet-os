@@ -67,29 +67,59 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .cmd-btn-no{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--tx2)}
 .cmd-err{margin-top:12px;padding:12px 16px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.25);border-radius:10px;font-size:12.5px;color:var(--tx2)}
 
-.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-.kpi-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-top:3px solid var(--gold);border-radius:14px;padding:16px 18px}
-.kpi-lbl{font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px}
-.kpi-val{font-size:28px;font-weight:900;margin-top:6px;color:var(--gold)}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.kpi-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-top:3px solid var(--gold);border-radius:14px;padding:14px 16px}
+.kpi-card.hot{border-top-color:var(--orange)}
+.kpi-lbl{font-size:10.5px;font-weight:800;color:var(--tx3);letter-spacing:1.2px}
+.kpi-val{font-size:26px;font-weight:900;margin-top:6px;color:var(--gold)}
+.kpi-card.hot .kpi-val{color:var(--orange)}
 
-.search-row{display:flex;gap:10px;margin-bottom:18px}
-.search-inp{flex:1;padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx);font-size:13px;font-family:inherit;outline:none}
+.filter-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.search-inp{flex:1;min-width:220px;padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx);font-size:13px;font-family:inherit;outline:none}
+.collab-sel{padding:11px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx2);font-size:13px;font-family:inherit;outline:none}
 
-.q-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;margin-bottom:14px;animation:fadeUp .25s ease both}
-.q-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.q-av{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0}
-.q-nm{font-size:15px;font-weight:900;color:var(--tx)}
-.q-sub{font-size:11.5px;color:var(--tx3);margin-top:2px}
-.q-wa{width:34px;height:34px;border-radius:9px;background:rgba(0,229,138,.1);border:1px solid rgba(0,229,138,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;flex-shrink:0}
-.q-collab-badge{padding:4px 11px;border-radius:999px;font-size:10.5px;font-weight:800;white-space:nowrap}
-.q-next{margin-top:14px;padding:10px 14px;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);border-radius:10px;font-size:12.5px;color:var(--tx2)}
+/* KANBAN */
+.kanban-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
+.kanban-col{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;min-height:100px}
+.kanban-col-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px}
+.kanban-col-t{font-size:12px;font-weight:900;letter-spacing:.4px}
+.kanban-col-c{font-size:11px;font-weight:800;color:var(--tx3);background:rgba(255,255,255,.06);padding:2px 9px;border-radius:999px}
+.kanban-col.sms .kanban-col-t{color:var(--orange)}
+.kanban-col.fermo .kanban-col-t{color:var(--red)}
+.kanban-col.reg .kanban-col-t{color:var(--blue)}
+.kanban-col.oggi .kanban-col-t{color:var(--green)}
+.kanban-col.nuovo .kanban-col-t{color:var(--tx3)}
+.kanban-cards{display:flex;flex-direction:column;gap:10px}
+
+.q-card{background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:13px 14px;animation:fadeUp .25s ease both}
+.q-card.urgent{border-color:rgba(255,87,87,.4);box-shadow:0 0 0 1px rgba(255,87,87,.15) inset}
+.q-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.q-av{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:900;flex-shrink:0}
+.q-nm{font-size:13.5px;font-weight:900;color:var(--tx)}
+.q-sub{font-size:10.5px;color:var(--tx3);margin-top:1px}
+.q-wa{width:28px;height:28px;border-radius:8px;background:rgba(0,229,138,.1);border:1px solid rgba(0,229,138,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;text-decoration:none;flex-shrink:0;margin-left:auto}
+.q-collab-badge{padding:3px 9px;border-radius:999px;font-size:9.5px;font-weight:800;white-space:nowrap}
+.q-urgent-badge{margin-top:8px;padding:6px 10px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.28);border-radius:8px;font-size:10.5px;color:#ffb0b0}
+.q-next{margin-top:9px;padding:8px 10px;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);border-radius:9px;font-size:11.5px;color:var(--tx2)}
 .q-next b{color:var(--gold)}
-.q-sites{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.q-site-chip{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px}
-.q-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.q-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.q-abtn{padding:5px 9px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--tx2);font-family:inherit}
+.q-abtn:hover{background:rgba(255,255,255,.08)}
+.q-abtn.sms{color:var(--orange);border-color:rgba(255,138,61,.35)}
+.q-abtn.done{color:var(--green);border-color:rgba(0,229,138,.35)}
+.q-abtn.cred{color:var(--cyan);border-color:rgba(34,228,255,.35)}
+.q-cred-form{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.q-cred-inp{flex:1;min-width:90px;padding:6px 9px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx);font-size:11px;font-family:inherit;outline:none}
+.q-doc-chip{margin-top:9px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:var(--tx3)}
+.q-doc-chip.ok{color:var(--green);border-color:rgba(0,229,138,.3);background:rgba(0,229,138,.06)}
+.q-sites-toggle{font-size:9.5px;color:var(--tx3);cursor:pointer;margin-top:8px;display:inline-block}
+.q-sites{display:none;flex-wrap:wrap;gap:5px;margin-top:8px}
+.q-sites.open{display:flex}
+.q-site-chip{padding:4px 8px;border-radius:7px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px}
+.q-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
-.empty-state{text-align:center;padding:60px 20px;color:var(--tx3)}
-.empty-ic{font-size:40px;margin-bottom:14px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--tx3);font-size:12px}
+.empty-ic{font-size:28px;margin-bottom:10px}
 
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,13,32,.98);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:999}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -140,7 +170,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
         <a class="tb-back" onclick="navTo('index.html')">← Hub</a>
         <div class="tb-title">
           <div class="tb-g">CLIENTI ATTIVI</div>
-          <div class="tb-sub">Parla o scrivi per aggiornare un sito — WhatsApp e stato sempre a portata</div>
+          <div class="tb-sub">Bacheca per fase — parla, scrivi o clicca, WhatsApp resta a un tocco</div>
         </div>
         <div class="tb-usr">
           <div class="tb-av" id="tb-av">MB</div>
@@ -158,22 +188,26 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
             <button class="cmd-mic" id="cmd-mic" onclick="toggleMic()" title="Parla">🎙️</button>
             <button class="cmd-send" onclick="runCommand()">Invia</button>
           </div>
-          <div class="cmd-hint">Es. "Giulia ha fatto Eurobet" &middot; "Marco è in corso su Snai" &middot; "Alessio limitato su Betflag"</div>
+          <div class="cmd-hint">Es. "Giulia ha fatto Eurobet" &middot; "Marco aspetta il codice sms su Snai" &middot; "Alessio username mrossi123 password Xyz12 su Sisal"</div>
           <div id="cmd-result"></div>
         </div>
 
         <div class="kpi-strip">
           <div class="kpi-card"><div class="kpi-lbl">CLIENTI ATTIVI</div><div class="kpi-val" id="kpi-tot">—</div></div>
           <div class="kpi-card"><div class="kpi-lbl">DA COLLABORATORI</div><div class="kpi-val" id="kpi-collab">—</div></div>
+          <div class="kpi-card hot"><div class="kpi-lbl">ASPETTO CODICE SMS</div><div class="kpi-val" id="kpi-sms">—</div></div>
           <div class="kpi-card"><div class="kpi-lbl">SITI FATTI OGGI</div><div class="kpi-val" id="kpi-oggi">—</div></div>
           <div class="kpi-card"><div class="kpi-lbl">SENZA TELEFONO</div><div class="kpi-val" id="kpi-notel">—</div></div>
         </div>
 
-        <div class="search-row">
+        <div class="filter-row">
           <input class="search-inp" id="q-search" placeholder="🔎 Cerca per nome, telefono, collaboratore..." oninput="renderQueue()">
+          <select class="collab-sel" id="q-collab-filter" onchange="renderQueue()">
+            <option value="">Tutti i collaboratori</option>
+          </select>
         </div>
 
-        <div id="q-list"></div>
+        <div id="kanban-board" class="kanban-board"></div>
       </div>
     </div>
   </div>
@@ -188,6 +222,13 @@ var _clienti=[], _bonusByClient={}, _pending=null;
 var PALETTE=['#f7cc46','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
 var STATO_COL={'FATTO':'var(--green)','IN_CORSO':'var(--blue)','LIMITATO':'var(--red)','BANNATO':'var(--red)','GIA_REGISTRATO':'var(--purple)','LIBERO':'var(--tx4)'};
 var STATO_LBL={'FATTO':'Fatto','IN_CORSO':'In corso','LIMITATO':'Limitato','BANNATO':'Bannato','GIA_REGISTRATO':'Già reg.','LIBERO':'Libero'};
+var COLONNE=[
+  {key:'sms',cls:'sms',label:'⏳ Aspetto Codice SMS'},
+  {key:'fermo',cls:'fermo',label:'⚠ Fermo — serve azione'},
+  {key:'reg',cls:'reg',label:'🔧 In registrazione'},
+  {key:'oggi',cls:'oggi',label:'✅ Fatto oggi'},
+  {key:'nuovo',cls:'nuovo',label:'🆕 Nuovo'}
+];
 
 function showToast(msg,type){
   var t=document.getElementById('toast');if(!t)return;
@@ -227,7 +268,7 @@ initAuth(function(){
 async function fetchAllBonusForClients(ids){
   var out=[],step=1000,from=0;
   while(true){
-    var r=await db.from('bonus').select('id,id_cli,bookmaker,stato,updated_at').in('id_cli',ids).range(from,from+step-1);
+    var r=await db.from('bonus').select('id,id_cli,bookmaker,stato,fase_attuale,username_bk,password_bk,data_inizio,note,updated_at').in('id_cli',ids).range(from,from+step-1);
     var rows=r.data||[];
     out=out.concat(rows);
     if(rows.length<step)break;
@@ -237,7 +278,7 @@ async function fetchAllBonusForClients(ids){
 }
 async function loadAll(){
   try{
-    var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at')
+    var rc=await db.from('clienti').select('id,nome,tel,telefono,collab,referral,stato,data_ingresso,created_at,accettazione_ok')
       .in('stato',['IN_LAVORAZIONE','ATTIVO']).order('created_at',{ascending:false});
     _clienti=rc.data||[];
     var ids=_clienti.map(function(c){return c.id;}).filter(Boolean);
@@ -250,7 +291,16 @@ async function loadAll(){
       });
     }
   }catch(e){_clienti=[];_bonusByClient={};}
+  fillCollabFilter();
   renderQueue();
+}
+
+function fillCollabFilter(){
+  var sel=document.getElementById('q-collab-filter');
+  var cur=sel.value;
+  var nomi=Array.from(new Set(_clienti.map(function(c){return c.collab;}).filter(Boolean))).sort();
+  sel.innerHTML='<option value="">Tutti i collaboratori</option>'+nomi.map(function(n){return '<option value="'+n.replace(/"/g,'&quot;')+'">'+n+'</option>';}).join('');
+  sel.value=nomi.indexOf(cur)>=0?cur:'';
 }
 
 function collabColor(nomeCollab){
@@ -266,8 +316,47 @@ function waLink(tel){
   return 'https://wa.me/'+digits;
 }
 function fmtDateIt(d){if(!d)return'—';var p=(d||'').slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;}
+function _todayIso(){return new Date().toISOString().slice(0,10);}
 
-/* ══ COMANDO: parsing testo → cliente + sito + stato ══ */
+/* ══ CALCOLO FASE/COLONNA E URGENZA PER CLIENTE ══ */
+function computeStage(c){
+  var rows=_bonusByClient[c.id]||[];
+  if(rows.some(function(r){return r.fase_attuale==='Aspetto Codice SMS';}))return 'sms';
+  if(rows.some(function(r){return r.stato==='LIMITATO'||r.stato==='BANNATO'||r.fase_attuale==='Problema rilevato';}))return 'fermo';
+  if(rows.some(function(r){return r.stato==='IN_CORSO'||(r.fase_attuale&&r.fase_attuale!=='Da iniziare'&&r.fase_attuale!=='Completato');}))return 'reg';
+  var today=_todayIso();
+  if(rows.some(function(r){return (r.stato==='FATTO'||r.stato==='GIA_REGISTRATO')&&(r.updated_at||'').slice(0,10)===today;}))return 'oggi';
+  return 'nuovo';
+}
+// Note tipo "RECUPERARE USER, PASSWORD E GIOCATA" o "Drive: PAGATO" sono
+// etichette ricorrenti/di importazione, non segnalazioni vere di un
+// collaboratore: le escludo dalle urgenze, altrimenti ogni sito ripete la
+// stessa frase e la scheda esplode. Tengo solo note "vere" e uniche, max 2.
+var NOTE_BOILERPLATE=[/^recuperare\s+user/i,/^drive\s*:/i];
+function computeUrgency(c){
+  var reasons=[];
+  var rows=_bonusByClient[c.id]||[];
+  var giorni=Math.floor((Date.now()-new Date(c.data_ingresso||c.created_at))/864e5);
+  var nessunSitoFatto=!rows.some(function(r){return r.stato==='FATTO'||r.stato==='GIA_REGISTRATO';});
+  if(nessunSitoFatto&&giorni>=5)reasons.push(giorni+' giorni senza nessun sito fatto');
+  var noteViste={};
+  rows.forEach(function(r){
+    if(r.data_inizio&&r.stato!=='FATTO'&&r.stato!=='GIA_REGISTRATO'){
+      var scad=new Date(r.data_inizio);scad.setDate(scad.getDate()+7);
+      var gg=Math.floor((scad-Date.now())/864e5);
+      if(gg<=2)reasons.push('scadenza vicina su '+r.bookmaker);
+    }
+    var nota=(r.note||'').trim();
+    if(nota&&!NOTE_BOILERPLATE.some(function(re){return re.test(nota);})&&!noteViste[nota]){
+      noteViste[nota]=true;
+      reasons.push('nota: "'+nota+'"');
+    }
+  });
+  if(reasons.length>3)reasons=reasons.slice(0,3).concat(['+'+(reasons.length-3)+' altro']);
+  return reasons;
+}
+
+/* ══ COMANDO: parsing testo → cliente + sito + azione (stato / fase sms / credenziali) ══ */
 var STATUS_RULES=[
   {re:/gi[àa]\s*registrat/i, stato:'GIA_REGISTRATO'},
   {re:/bannat|conto\s*chius/i, stato:'BANNATO'},
@@ -277,14 +366,7 @@ var STATUS_RULES=[
   {re:/^libero$|annulla|resetta/i, stato:'LIBERO'}
 ];
 
-function parseCommand(text){
-  var t=(text||'').toLowerCase().trim();
-  if(!t)return{error:'Scrivi o detta un comando.'};
-
-  var statusRule=null;
-  for(var i=0;i<STATUS_RULES.length;i++){if(STATUS_RULES[i].re.test(t)){statusRule=STATUS_RULES[i];break;}}
-  if(!statusRule)return{error:'Non ho capito cosa è successo (fatto, in corso, limitato...). Riprova.'};
-
+function findClientAndSite(t){
   var bestClient=null,bestLen=0;
   _clienti.forEach(function(c){
     var nm=(c.nome||'').toLowerCase().trim();
@@ -292,7 +374,6 @@ function parseCommand(text){
     if(t.indexOf(nm)>=0&&nm.length>bestLen){bestClient=c;bestLen=nm.length;}
   });
   if(!bestClient){
-    // fallback: prova solo col primo nome
     _clienti.forEach(function(c){
       var first=(c.nome||'').toLowerCase().trim().split(' ')[0];
       if(first&&first.length>2&&t.indexOf(first)>=0&&first.length>bestLen){bestClient=c;bestLen=first.length;}
@@ -307,8 +388,29 @@ function parseCommand(text){
     if(bk&&t.indexOf(bk)>=0&&bk.length>bestSiteLen){bestSite=r;bestSiteLen=bk.length;}
   });
   if(!bestSite)return{error:'Ho trovato "'+bestClient.nome+'" ma non capisco su quale sito. Prova a scrivere il nome del sito per intero.'};
+  return{client:bestClient,site:bestSite};
+}
 
-  return{client:bestClient,site:bestSite,stato:statusRule.stato};
+function parseCommand(text){
+  var raw=(text||'').trim();
+  var t=raw.toLowerCase();
+  if(!t)return{error:'Scrivi o detta un comando.'};
+
+  var cs=findClientAndSite(t);
+  if(cs.error)return cs;
+
+  // credenziali: "username X password Y"
+  var um=raw.match(/username\s+(\S+)/i);
+  var pm=raw.match(/password\s+(\S+)/i);
+  if(um&&pm)return{type:'cred',client:cs.client,site:cs.site,username:um[1],password:pm[1]};
+
+  // aspetto codice sms
+  if(/aspett[oa].*codic|codice.*sms|sms.*codice|aspetta.*sms/i.test(t))return{type:'fase',client:cs.client,site:cs.site,fase:'Aspetto Codice SMS'};
+
+  var statusRule=null;
+  for(var i=0;i<STATUS_RULES.length;i++){if(STATUS_RULES[i].re.test(t)){statusRule=STATUS_RULES[i];break;}}
+  if(!statusRule)return{error:'Non ho capito cosa è successo (fatto, in corso, aspetto sms, username/password...). Riprova.'};
+  return{type:'stato',client:cs.client,site:cs.site,stato:statusRule.stato};
 }
 
 function toggleMic(){
@@ -339,7 +441,11 @@ function runCommand(){
     return;
   }
   _pending=res;
-  box.innerHTML='<div class="cmd-confirm"><div class="cmd-confirm-txt">Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → <b>'+STATO_LBL[res.stato]+'</b>. Confermi?</div>'+
+  var txt;
+  if(res.type==='cred')txt='Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → username <b>'+res.username+'</b> / password <b>'+res.password+'</b>. Confermi?';
+  else if(res.type==='fase')txt='Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → <b>⏳ Aspetto Codice SMS</b>. Confermi?';
+  else txt='Ho capito: <b>'+res.client.nome+'</b> → <b>'+res.site.bookmaker+'</b> → <b>'+STATO_LBL[res.stato]+'</b>. Confermi?';
+  box.innerHTML='<div class="cmd-confirm"><div class="cmd-confirm-txt">'+txt+'</div>'+
     '<div class="cmd-confirm-btns"><button class="cmd-btn cmd-btn-ok" onclick="confirmCommand()">✓ Conferma</button><button class="cmd-btn cmd-btn-no" onclick="cancelCommand()">✕ Annulla</button></div></div>';
 }
 function cancelCommand(){_pending=null;document.getElementById('cmd-result').innerHTML='';document.getElementById('cmd-inp').value='';}
@@ -348,18 +454,124 @@ async function confirmCommand(){
   if(!_pending)return;
   var p=_pending;
   try{
-    await db.from('bonus').update({stato:p.stato,updated_at:new Date().toISOString()}).eq('id',p.site.id);
-    p.site.stato=p.stato;
-    showToast('Fatto! '+p.site.bookmaker+' → '+STATO_LBL[p.stato]+' per '+p.client.nome+' 🎉','ok');
-    document.getElementById('kpi-oggi').textContent=parseInt(document.getElementById('kpi-oggi').textContent||0)+(p.stato==='FATTO'?1:0);
+    if(p.type==='cred'){
+      await db.from('bonus').update({username_bk:p.username,password_bk:p.password,fase_attuale:(p.site.fase_attuale==='Da iniziare'||!p.site.fase_attuale)?'Registrato':p.site.fase_attuale,updated_at:new Date().toISOString()}).eq('id',p.site.id);
+      p.site.username_bk=p.username;p.site.password_bk=p.password;
+      if(p.site.fase_attuale==='Da iniziare'||!p.site.fase_attuale)p.site.fase_attuale='Registrato';
+      showToast('Salvate le credenziali per '+p.client.nome+' su '+p.site.bookmaker+' ✓','ok');
+    }else if(p.type==='fase'){
+      await db.from('bonus').update({fase_attuale:p.fase,updated_at:new Date().toISOString()}).eq('id',p.site.id);
+      p.site.fase_attuale=p.fase;
+      showToast('Segnato: aspetto il codice per '+p.client.nome+' su '+p.site.bookmaker,'ok');
+    }else{
+      await db.from('bonus').update({stato:p.stato,updated_at:new Date().toISOString()}).eq('id',p.site.id);
+      p.site.stato=p.stato;
+      if(p.stato==='FATTO')p.site.fase_attuale='Completato';
+      showToast('Fatto! '+p.site.bookmaker+' → '+STATO_LBL[p.stato]+' per '+p.client.nome+' 🎉','ok');
+    }
     cancelCommand();
     renderQueue();
   }catch(e){showToast('Errore nel salvataggio','er');}
 }
 
+/* ══ AZIONI RAPIDE SULLE SCHEDE (senza passare dal comando) ══ */
+async function quickMarkSms(cid,sid){
+  var r=(_bonusByClient[cid]||[]).find(function(x){return x.id===sid;});if(!r)return;
+  try{await db.from('bonus').update({fase_attuale:'Aspetto Codice SMS',updated_at:new Date().toISOString()}).eq('id',sid);}catch(e){showToast('Errore','er');return;}
+  r.fase_attuale='Aspetto Codice SMS';
+  showToast('Segnato: aspetto il codice ✓','ok');
+  renderQueue();
+}
+async function quickMarkDone(cid,sid){
+  var r=(_bonusByClient[cid]||[]).find(function(x){return x.id===sid;});if(!r)return;
+  try{await db.from('bonus').update({stato:'FATTO',fase_attuale:'Completato',updated_at:new Date().toISOString()}).eq('id',sid);}catch(e){showToast('Errore','er');return;}
+  r.stato='FATTO';r.fase_attuale='Completato';
+  showToast('Sito completato ✓','ok');
+  renderQueue();
+}
+function toggleCredForm(sid){
+  var el=document.getElementById('cf-'+sid);
+  if(el)el.style.display=el.style.display==='none'?'flex':'none';
+}
+async function quickSaveCred(cid,sid){
+  var r=(_bonusByClient[cid]||[]).find(function(x){return x.id===sid;});if(!r)return;
+  var u=(document.getElementById('cf-u-'+sid).value||'').trim();
+  var p=(document.getElementById('cf-p-'+sid).value||'').trim();
+  if(!u||!p){showToast('Inserisci username e password','er');return;}
+  var newFase=(r.fase_attuale==='Da iniziare'||!r.fase_attuale)?'Registrato':r.fase_attuale;
+  try{await db.from('bonus').update({username_bk:u,password_bk:p,fase_attuale:newFase,updated_at:new Date().toISOString()}).eq('id',sid);}catch(e){showToast('Errore','er');return;}
+  r.username_bk=u;r.password_bk=p;r.fase_attuale=newFase;
+  showToast('Credenziali salvate ✓','ok');
+  renderQueue();
+}
+async function toggleDocOk(cid){
+  var c=_clienti.find(function(x){return x.id===cid;});if(!c)return;
+  var nv=!c.accettazione_ok;
+  try{await db.from('clienti').update({accettazione_ok:nv}).eq('id',cid);}catch(e){showToast('Errore','er');return;}
+  c.accettazione_ok=nv;
+  renderQueue();
+}
+function toggleSites(cid){
+  var el=document.getElementById('sites-'+cid);
+  if(el)el.classList.toggle('open');
+}
+
+/* ══ RENDER ══ */
+function renderCard(c){
+  var col=collabColor(c.collab);
+  var ini=(c.nome||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+  var rows=(_bonusByClient[c.id]||[]).slice().sort(function(a,b){return (a.bookmaker||'').localeCompare(b.bookmaker||'');});
+  var visibleRows=rows.filter(function(r){return r.stato&&r.stato!=='LIBERO';});
+  var next=rows.find(function(r){return r.fase_attuale==='Aspetto Codice SMS';})||
+            rows.find(function(r){return r.stato==='IN_CORSO';})||
+            rows.find(function(r){return r.stato==='LIBERO'||!r.stato;});
+  var tel=c.tel||c.telefono;
+  var wa=waLink(tel);
+  var urgencies=computeUrgency(c);
+  var docOk=!!c.accettazione_ok;
+
+  var nextActions='';
+  if(next){
+    nextActions='<div class="q-actions">'+
+      (next.fase_attuale!=='Aspetto Codice SMS'?'<button class="q-abtn sms" onclick="quickMarkSms(\''+c.id+'\',\''+next.id+'\')">⏳ Aspetto codice</button>':'')+
+      (next.stato!=='FATTO'?'<button class="q-abtn done" onclick="quickMarkDone(\''+c.id+'\',\''+next.id+'\')">✅ Fatto</button>':'')+
+      '<button class="q-abtn cred" onclick="toggleCredForm(\''+next.id+'\')">🔑 Username/Password</button>'+
+      '</div>'+
+      '<div class="q-cred-form" id="cf-'+next.id+'" style="display:none">'+
+        '<input class="q-cred-inp" id="cf-u-'+next.id+'" placeholder="username" value="'+(next.username_bk||'')+'">'+
+        '<input class="q-cred-inp" id="cf-p-'+next.id+'" placeholder="password" value="'+(next.password_bk||'')+'">'+
+        '<button class="q-abtn cred" onclick="quickSaveCred(\''+c.id+'\',\''+next.id+'\')">💾 Salva</button>'+
+      '</div>';
+  }
+
+  return '<div class="q-card'+(urgencies.length?' urgent':'')+'">'+
+    '<div class="q-top">'+
+      '<div class="q-av" style="background:'+col+'22;border:1px solid '+col+'55;color:'+col+'">'+ini+'</div>'+
+      '<div style="flex:1;min-width:0"><div class="q-nm">'+(c.nome||'—')+'</div>'+
+        '<div class="q-sub">'+(tel||'nessun telefono')+' &middot; dal '+fmtDateIt(c.data_ingresso||c.created_at)+'</div></div>'+
+      (wa?'<a class="q-wa" href="'+wa+'" target="_blank" title="Apri WhatsApp">💬</a>':'')+
+    '</div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+
+      (c.collab?'<span class="q-collab-badge" style="background:'+col+'1a;color:'+col+';border:1px solid '+col+'44">'+c.collab+'</span>':'<span class="q-collab-badge" style="background:rgba(255,255,255,.05);color:var(--tx3);border:1px solid rgba(255,255,255,.1)">Nessun collaboratore</span>')+
+      '<span class="q-doc-chip'+(docOk?' ok':'')+'" onclick="toggleDocOk(\''+c.id+'\')" title="Documenti/contratto verificati (Manu)">'+(docOk?'✔':'○')+' Documenti OK</span>'+
+    '</div>'+
+    (urgencies.length?'<div class="q-urgent-badge">⚠ '+urgencies.join(' · ')+'</div>':'')+
+    (next?'<div class="q-next">👉 '+(next.fase_attuale==='Aspetto Codice SMS'?'In attesa codice su':'Prossimo sito:')+' <b>'+next.bookmaker+'</b></div>':'')+
+    nextActions+
+    (rows.length?'<span class="q-sites-toggle" onclick="toggleSites(\''+c.id+'\')">▾ tutti i siti ('+rows.length+', '+visibleRows.length+' avviati)</span>'+
+      '<div class="q-sites" id="sites-'+c.id+'">'+rows.map(function(r){
+        var sc=STATO_COL[r.stato]||'var(--tx4)';
+        var lbl=r.fase_attuale==='Aspetto Codice SMS'?'⏳ '+r.bookmaker:r.bookmaker;
+        return '<span class="q-site-chip" style="background:'+sc+'14;color:'+sc+'"><span class="q-dot" style="background:'+sc+'"></span>'+lbl+'</span>';
+      }).join('')+'</div>':'')+
+  '</div>';
+}
+
 function renderQueue(){
   var search=(document.getElementById('q-search').value||'').toLowerCase();
+  var collabFilter=document.getElementById('q-collab-filter').value;
   var list=_clienti.filter(function(c){
+    if(collabFilter&&c.collab!==collabFilter)return false;
     if(!search)return true;
     return ((c.nome||'')+' '+(c.tel||c.telefono||'')+' '+(c.collab||'')).toLowerCase().indexOf(search)>=0;
   });
@@ -367,34 +579,34 @@ function renderQueue(){
   document.getElementById('kpi-tot').textContent=_clienti.length;
   document.getElementById('kpi-collab').textContent=_clienti.filter(function(c){return c.collab;}).length;
   document.getElementById('kpi-notel').textContent=_clienti.filter(function(c){return !(c.tel||c.telefono);}).length;
-  if(document.getElementById('kpi-oggi').textContent==='—')document.getElementById('kpi-oggi').textContent=0;
+  var today=_todayIso();
+  var doneToday=0,smsCount=0;
+  _clienti.forEach(function(c){
+    var rows=_bonusByClient[c.id]||[];
+    if(rows.some(function(r){return (r.stato==='FATTO'||r.stato==='GIA_REGISTRATO')&&(r.updated_at||'').slice(0,10)===today;}))doneToday++;
+    if(rows.some(function(r){return r.fase_attuale==='Aspetto Codice SMS';}))smsCount++;
+  });
+  document.getElementById('kpi-oggi').textContent=doneToday;
+  document.getElementById('kpi-sms').textContent=smsCount;
 
-  var el=document.getElementById('q-list');
+  var board=document.getElementById('kanban-board');
   if(!list.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-ic">✨</div>Nessun cliente attivo al momento — tutto sotto controllo.</div>';
+    board.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-ic">✨</div>Nessun cliente attivo al momento — tutto sotto controllo.</div>';
     return;
   }
 
-  el.innerHTML=list.map(function(c){
-    var col=collabColor(c.collab);
-    var ini=(c.nome||'?').split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
-    var rows=(_bonusByClient[c.id]||[]).slice().sort(function(a,b){return (a.bookmaker||'').localeCompare(b.bookmaker||'');});
-    var next=rows.find(function(r){return r.stato==='LIBERO'||!r.stato;});
-    var tel=c.tel||c.telefono;
-    var wa=waLink(tel);
-    return '<div class="q-card">'+
-      '<div class="q-top">'+
-        '<div class="q-av" style="background:'+col+'22;border:1px solid '+col+'55;color:'+col+'">'+ini+'</div>'+
-        '<div style="flex:1"><div class="q-nm">'+(c.nome||'—')+'</div>'+
-          '<div class="q-sub">'+(tel||'nessun telefono')+' &middot; cliente dal '+fmtDateIt(c.data_ingresso||c.created_at)+'</div></div>'+
-        (wa?'<a class="q-wa" href="'+wa+'" target="_blank" title="Apri WhatsApp">💬</a>':'')+
-        (c.collab?'<span class="q-collab-badge" style="background:'+col+'1a;color:'+col+';border:1px solid '+col+'44">'+c.collab+'</span>':'<span class="q-collab-badge" style="background:rgba(255,255,255,.05);color:var(--tx3);border:1px solid rgba(255,255,255,.1)">Nessun collaboratore</span>')+
-      '</div>'+
-      (next?'<div class="q-next">👉 Prossimo sito: <b>'+next.bookmaker+'</b></div>':'')+
-      (rows.length?'<div class="q-sites">'+rows.map(function(r){
-        var sc=STATO_COL[r.stato]||'var(--tx4)';
-        return '<span class="q-site-chip" style="background:'+sc+'14;color:'+sc+'"><span class="q-dot" style="background:'+sc+'"></span>'+r.bookmaker+'</span>';
-      }).join('')+'</div>':'')+
+  var byCol={};COLONNE.forEach(function(cc){byCol[cc.key]=[];});
+  list.forEach(function(c){byCol[computeStage(c)].push(c);});
+  // urgenti prima, dentro ogni colonna
+  Object.keys(byCol).forEach(function(k){
+    byCol[k].sort(function(a,b){return computeUrgency(b).length-computeUrgency(a).length;});
+  });
+
+  board.innerHTML=COLONNE.map(function(cc){
+    var cards=byCol[cc.key];
+    return '<div class="kanban-col '+cc.cls+'">'+
+      '<div class="kanban-col-hd"><span class="kanban-col-t">'+cc.label+'</span><span class="kanban-col-c">'+cards.length+'</span></div>'+
+      '<div class="kanban-cards">'+(cards.length?cards.map(renderCard).join(''):'<div class="empty-state" style="padding:16px 6px">Nessuno qui</div>')+'</div>'+
     '</div>';
   }).join('');
 }
