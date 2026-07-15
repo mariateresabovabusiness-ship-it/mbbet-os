@@ -1720,8 +1720,20 @@ async function genBonusId(){
 // e nella dashboard dell'operatore (che gia' legge bonus.operatore).
 async function collegaClienteCrm(nomeCliente,nomeCollab,operatore){
   try{
-    var esiste=await db.from('clienti').select('id').ilike('nome',nomeCliente).limit(1);
-    if(esiste.data&&esiste.data.length)return esiste.data[0].id;
+    var esiste=await db.from('clienti').select('id,collab').ilike('nome',nomeCliente).limit(1);
+    if(esiste.data&&esiste.data.length){
+      var idEsistente=esiste.data[0].id;
+      // Il cliente esiste già nel CRM (magari aggiunto prima, con un altro
+      // operatore o senza collaboratore): se stiamo collegandolo ORA a un
+      // collaboratore, dobbiamo davvero scrivere collab/referral sul suo
+      // record — altrimenti l'azione sembra riuscita (appare nella lista
+      // finché resti su questa pagina) ma sparisce al primo ricaricamento
+      // perché in database non è mai stata salvata.
+      if(nomeCollab&&esiste.data[0].collab!==nomeCollab){
+        await db.from('clienti').update({collab:nomeCollab,referral:nomeCollab}).eq('id',idEsistente);
+      }
+      return idEsistente;
+    }
     var tutti=await db.from('clienti').select('id');
     var max=0;
     (tutti.data||[]).forEach(function(cl){
