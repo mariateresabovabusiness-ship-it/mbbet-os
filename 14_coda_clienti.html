@@ -736,6 +736,10 @@ function openPrepPanel(cid,sid){
   // legge da sola i documenti appena si apre il pannello — niente più
   // bottone da cliccare per ogni singolo documento
   docs.forEach(function(d,i){autoOcr(i);});
+
+  // stima subito un CAP dalla città, mentre l'OCR (più preciso, se lo trova)
+  // gira in parallelo sui documenti
+  if(c.citta){lookupCapByCitta(c.citta).then(function(cap){if(cap)addCapField(cap,'citta');});}
 }
 function closePrepPanel(){document.getElementById('prep-overlay').classList.remove('open');_prepCtx=null;}
 function openBkSite(){
@@ -784,7 +788,7 @@ async function runOcrOnImg(i){
     if(!text){out.innerHTML='<div class="ocr-err">Non ho trovato testo leggibile in questa foto.</div>';}
     else{
       var capMatch=text.match(/\b\d{5}\b/);
-      if(capMatch)addCapField(capMatch[0]);
+      if(capMatch)addCapField(capMatch[0],'documento');
       out.innerHTML='<div class="ocr-warn">⚠ Testo letto automaticamente — verifica sempre prima di usarlo</div>'+
         (capMatch?'<div class="ocr-cap">📮 CAP trovato e aggiunto ai dati sopra: <b>'+capMatch[0]+'</b></div>':'')+
         '<textarea class="ocr-text" readonly onclick="this.select()">'+text+'</textarea>';
@@ -797,14 +801,45 @@ async function runOcrOnImg(i){
 function ocrDoc(i){runOcrOnImg(i);}
 // Il CAP trovato via OCR va con gli altri dati copiabili in alto, non
 // nascosto sotto il documento — lo aggiungo una sola volta.
-function addCapField(cap){
+// source: 'documento' (letto davvero sulla carta, più preciso) oppure
+// 'citta' (stimato dal nome del comune — nelle città grandi ci sono più
+// CAP diversi per zona, quindi resta una stima da controllare, non il
+// CAP esatto della via del cliente). Se arriva più tardi un CAP letto
+// davvero dal documento, sostituisce la stima.
+function addCapField(cap,source){
+  if(_prepCtx&&_prepCtx.capSource==='documento'&&source==='citta')return;
   var container=document.getElementById('prep-fields');
-  if(!container||document.getElementById('cap-field-row'))return;
-  container.insertAdjacentHTML('beforeend',
-    '<div class="prep-field" id="cap-field-row"><span class="prep-field-l">CAP (dal documento)</span>'+
+  if(!container)return;
+  var label=source==='documento'?'CAP (dal documento)':'CAP (stimato dalla città — verifica)';
+  var html='<div class="prep-field" id="cap-field-row"><span class="prep-field-l">'+label+'</span>'+
     '<span style="display:flex;align-items:center;gap:8px"><span class="prep-field-v">'+cap+'</span>'+
-    '<button class="prep-copy" onclick="copyText(\''+cap+'\')" title="Copia CAP">📋</button></span></div>');
-  if(_prepCtx)_prepCtx.capTrovato=cap;
+    '<button class="prep-copy" onclick="copyText(\''+cap+'\')" title="Copia CAP">📋</button></span></div>';
+  var existing=document.getElementById('cap-field-row');
+  if(existing)existing.outerHTML=html;else container.insertAdjacentHTML('beforeend',html);
+  if(_prepCtx){_prepCtx.capTrovato=cap;_prepCtx.capSource=source;}
+}
+
+// Elenco pubblico dei comuni italiani con CAP (matteocontrini/comuni-json,
+// dataset aperto). Si scarica una volta sola e resta in cache per tutta
+// la sessione. Città con più CAP (grandi città) restituiscono il primo:
+// per questo la stima va sempre controllata.
+var _comuniCap=null,_comuniCapLoading=null;
+function loadComuniCap(){
+  if(_comuniCap)return Promise.resolve(_comuniCap);
+  if(_comuniCapLoading)return _comuniCapLoading;
+  _comuniCapLoading=fetch('https://raw.githubusercontent.com/matteocontrini/comuni-json/master/comuni.json')
+    .then(function(r){return r.json();})
+    .then(function(data){_comuniCap=data;return data;})
+    .catch(function(){_comuniCap=[];return [];});
+  return _comuniCapLoading;
+}
+async function lookupCapByCitta(citta){
+  var norm=(citta||'').trim().toLowerCase();
+  if(!norm)return null;
+  var list=await loadComuniCap();
+  var match=list.find(function(x){return (x.nome||'').toLowerCase()===norm;})||
+            list.find(function(x){return (x.nome||'').toLowerCase().indexOf(norm)>=0;});
+  return (match&&match.cap&&match.cap[0])||null;
 }
 function copyAllPrep(){
   if(!_prepCtx)return;
