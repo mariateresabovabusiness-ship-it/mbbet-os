@@ -105,6 +105,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .q-next{margin-top:9px;padding:8px 10px;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);border-radius:9px;font-size:11.5px;color:var(--tx2)}
 .q-next b{color:var(--gold)}
 .q-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.q-site-sel{width:100%;margin-top:9px;padding:8px 10px;background:rgba(183,148,244,.08);border:1px solid rgba(183,148,244,.3);border-radius:8px;color:var(--purple);font-size:11px;font-weight:700;font-family:inherit;cursor:pointer}
 .q-abtn{padding:5px 9px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);color:var(--tx2);font-family:inherit}
 .q-abtn:hover{background:rgba(255,255,255,.08)}
 .q-abtn.sms{color:var(--orange);border-color:rgba(255,138,61,.35)}
@@ -652,9 +653,13 @@ function splitNomeCognome(nomeCompleto,cognomeDb){
 // Link Drive tipo "open?id=XXX" non si vedono come immagine — questa forma
 // "uc?export=view" sì (se il file è condiviso "chiunque abbia il link").
 // Se il browser non riesce comunque a mostrarla, resta il link cliccabile.
+// Passa dal proxy Netlify (netlify/functions/drive-proxy.js): Drive non manda
+// intestazioni CORS sui suoi link diretti, quindi l'<img> si vedrebbe ma
+// l'OCR non potrebbe leggerne i pixel. Il proxy la riscarica lato server e
+// la restituisce con l'intestazione giusta.
 function driveImgUrl(url){
   var m=(url||'').match(/[?&]id=([^&]+)/);
-  return m?('https://drive.google.com/uc?export=view&id='+m[1]):url;
+  return m?('/.netlify/functions/drive-proxy?id='+m[1]):url;
 }
 function openPrepPanel(cid,sid){
   var c=_clienti.find(function(x){return x.id===cid;});if(!c)return;
@@ -787,10 +792,17 @@ function renderCard(c){
   var urgencies=computeUrgency(c);
   var docOk=!!c.accettazione_ok;
 
-  var nextActions='';
+  var siteSel='<select class="q-site-sel" onchange="if(this.value)openPrepPanel(\''+c.id+'\',this.value);this.value=\'\';">'+
+    '<option value="">📋 Scegli un sito da preparare...</option>'+
+    rows.map(function(r){
+      var mark=r.fase_attuale==='Aspetto Codice SMS'?'⏳ ':(r.stato==='FATTO'||r.stato==='GIA_REGISTRATO')?'✅ ':'';
+      return '<option value="'+r.id+'">'+mark+r.bookmaker+'</option>';
+    }).join('')+
+    '</select>';
+
+  var nextActions=siteSel;
   if(next){
-    nextActions='<div class="q-actions">'+
-      '<button class="q-abtn prep" onclick="openPrepPanel(\''+c.id+'\',\''+next.id+'\')">📋 Prepara dati</button>'+
+    nextActions+='<div class="q-actions">'+
       (next.fase_attuale!=='Aspetto Codice SMS'?'<button class="q-abtn sms" onclick="quickMarkSms(\''+c.id+'\',\''+next.id+'\')">⏳ Aspetto codice</button>':'')+
       (next.stato!=='FATTO'?'<button class="q-abtn done" onclick="quickMarkDone(\''+c.id+'\',\''+next.id+'\')">✅ Fatto</button>':'')+
       '<button class="q-abtn cred" onclick="toggleCredForm(\''+next.id+'\')">🔑 Username/Password</button>'+
