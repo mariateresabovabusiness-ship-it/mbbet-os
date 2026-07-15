@@ -2440,6 +2440,7 @@ function renderTable(){
           +'<button class="ta ta-st" onclick="modalCambiaStato(\''+r.id+'\')">&#9998; Stato</button>'
           +'<button class="ta ta-ric" onclick="modalAggRicavo(\''+r.id+'\')">&#8364;</button>'
           +'<button class="ta ta-tsk" onclick="modalCreaTask(\''+r.id+'\')">&#9989;</button>'
+          +(canDelete()?'<button class="ta ta-st" style="color:var(--red)" onclick="otEliminaRiga(\''+r.id+'\')" title="Elimina cliente">&#128465;</button>':'')
         +'</div></td></tr>';
     });
   }
@@ -3116,12 +3117,12 @@ function modalAggRicavo(rid){
   openModal('&#8364; Aggiorna Ricavo',
     '<div class="mod-row-info">&#128100; <b>'+r.cli_nm+'</b> &nbsp;&#8212;&nbsp; <b>'+r.bk_nm+'</b></div>'
     +'<div class="mod-grid">'
-      +'<div class="mod-field"><label>Deposito (€)</label><input id="i-dep" type="number" step="1" min="0" class="mod-inp" value="'+(r.deposito||'')+'" oninput="calcPrev()" placeholder="Es. 50"></div>'
-      +'<div class="mod-field"><label>Bonus Ottenuto (€)</label><input id="i-bon" type="number" step="1" min="0" class="mod-inp" value="'+(r.bonus_ric||'')+'" oninput="calcPrev()" placeholder="Es. 30"></div>'
-      +'<div class="mod-field"><label>Prelievo (€)</label><input id="i-prel" type="number" step="1" min="0" class="mod-inp" value="'+(r.prelievo||'')+'" oninput="calcPrev()" placeholder="Es. 200"></div>'
+      +'<div class="mod-field"><label>Deposito (€)</label><input id="i-dep" type="number" step="1" class="mod-inp" value="'+(r.deposito||'')+'" oninput="calcPrev()" placeholder="Es. 50"></div>'
+      +'<div class="mod-field"><label>Bonus Ottenuto (€)</label><input id="i-bon" type="number" step="1" class="mod-inp" value="'+(r.bonus_ric||'')+'" oninput="calcPrev()" placeholder="Es. 30"></div>'
+      +'<div class="mod-field"><label>Prelievo (€)</label><input id="i-prel" type="number" step="1" class="mod-inp" value="'+(r.prelievo||'')+'" oninput="calcPrev()" placeholder="Es. 200"></div>'
       +'<div class="mod-field"><label>Ricavo Reale (€)</label><div class="mod-inp" style="display:flex;align-items:center;color:var(--cyan);font-weight:800" id="i-rr-disp">'+fmtE(r.ricavo_reale||0)+'</div><input type="hidden" id="i-rr" value="'+(r.ricavo_reale||0)+'"></div>'
-      +'<div class="mod-field"><label>Pagato al Cliente (€)</label><input id="i-pc" type="number" step="1" min="0" class="mod-inp" value="'+(r.pag_cli||'')+'" oninput="calcPrev()" placeholder="Es. 120"></div>'
-      +'<div class="mod-field"><label>Costi Extra (€)</label><input id="i-ce" type="number" step="1" min="0" class="mod-inp" value="'+(r.costi_extra||0)+'" oninput="calcPrev()"></div>'
+      +'<div class="mod-field"><label>Pagato al Cliente (€)</label><input id="i-pc" type="number" step="1" class="mod-inp" value="'+(r.pag_cli||'')+'" oninput="calcPrev()" placeholder="Es. 120"></div>'
+      +'<div class="mod-field"><label>Costi Extra (€)</label><input id="i-ce" type="number" step="1" class="mod-inp" value="'+(r.costi_extra||0)+'" oninput="calcPrev()"></div>'
     +'</div>'
     +'<div class="marg-box"><div class="marg-box-l">Margine Calcolato</div><div id="marg-prev">€—</div><div style="font-size:9px;color:var(--tx3);margin-top:4px">Op '+r.perc_op+'% &middot; Collab '+(r.perc_collab||0)+'%</div></div>'
     +'<div class="mod-grid" style="margin-top:12px">'
@@ -3802,19 +3803,19 @@ function otSiteTableHtml(brows){
         +'</div></div></td>'
       +'<td class="ot-td editable" id="usr-cell-'+r.id+'" onclick="otEd(\'usr-cell-'+r.id+'\',\''+r.id+'\',\'username\')"><div class="pw-cell"><span id="usr-v-'+r.id+'" style="flex:1;color:'+(r.username?'var(--tx2)':'var(--tx4)')+'">'+(r.username||'✏ inserisci')+'</span>'+(r.username?'<button class="pw-btn" onclick="event.stopPropagation();otCopy(\''+escQ(r.username)+'\',\'Username\')">📋</button>':'')+'</div></td>'
       +'<td class="ot-td editable" id="pwd-cell-'+r.id+'" onclick="otEd(\'pwd-cell-'+r.id+'\',\''+r.id+'\',\'password\')"><div class="pw-cell"><span id="pwd-v-'+r.id+'" style="flex:1;color:'+(r.password?'var(--tx3)':'var(--tx4)')+'">'+(r.password?'•••••••':'✏ inserisci')+'</span><span hidden id="pwd-r-'+r.id+'">'+escQ(r.password||'')+'</span>'+(r.password?'<button class="pw-btn" id="pwd-eye-'+r.id+'" onclick="event.stopPropagation();otPwdShow(\''+r.id+'\')">👁</button>':'')+(r.password?'<button class="pw-btn" onclick="event.stopPropagation();otCopy(document.getElementById(\'pwd-r-'+r.id+'\').textContent,\'Password\')">📋</button>':'')+'</div></td>'
-      +'<td class="ot-td"><select class="sto sto-'+({'In corso':'inc','Completato':'comp','Problema':'prob','Bloccato':'bloc'}[r.stato_op]||'inc')+'" onchange="otStato(\''+r.id+'\',this)">'+stSel+'</select></td>'
+      +'<td class="ot-td"><div style="display:flex;align-items:center;gap:6px"><select class="sto sto-'+({'In corso':'inc','Completato':'comp','Problema':'prob','Bloccato':'bloc'}[r.stato_op]||'inc')+'" onchange="otStato(\''+r.id+'\',this)">'+stSel+'</select>'+(canDelete()?'<button class="pw-btn" style="color:var(--red)" onclick="otEliminaRiga(\''+r.id+'\')" title="Elimina cliente">&#128465;</button>':'')+'</div></td>'
       +'<td class="ot-td"><select class="ot-fase" onchange="otFase(\''+r.id+'\',this.value)">'+faseSel+'</select></td>'
       +'<td class="ot-td editable" id="di-cell-'+r.id+'" onclick="otEd(\'di-cell-'+r.id+'\',\''+r.id+'\',\'data_inizio\')" style="color:var(--tx3)">'+fmtDate(r.data_inizio)+'</td>'
-      +'<td class="ot-td editable" id="dep-cell-'+r.id+'" onclick="otEdNum(\'dep-cell-'+r.id+'\',\''+r.id+'\',\'deposito\')"><span id="dep-v-'+r.id+'" style="color:var(--purple);font-weight:700">'+(r.deposito>0?fmtE(r.deposito):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
-      +'<td class="ot-td editable" id="bonRic-cell-'+r.id+'" onclick="otEdNum(\'bonRic-cell-'+r.id+'\',\''+r.id+'\',\'bonus_ric\')"><span id="bonRic-v-'+r.id+'" style="color:var(--blue);font-weight:700">'+(r.bonus_ric>0?fmtE(r.bonus_ric):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
-      +'<td class="ot-td editable" id="prel-cell-'+r.id+'" onclick="otEdNum(\'prel-cell-'+r.id+'\',\''+r.id+'\',\'prelievo\')"><span id="prel-v-'+r.id+'" style="color:var(--cyan);font-weight:700">'+(r.prelievo>0?fmtE(r.prelievo):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" id="dep-cell-'+r.id+'" onclick="otEdNum(\'dep-cell-'+r.id+'\',\''+r.id+'\',\'deposito\')"><span id="dep-v-'+r.id+'" style="color:var(--purple);font-weight:700">'+(r.deposito?fmtE(r.deposito):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" id="bonRic-cell-'+r.id+'" onclick="otEdNum(\'bonRic-cell-'+r.id+'\',\''+r.id+'\',\'bonus_ric\')"><span id="bonRic-v-'+r.id+'" style="color:var(--blue);font-weight:700">'+(r.bonus_ric?fmtE(r.bonus_ric):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" id="prel-cell-'+r.id+'" onclick="otEdNum(\'prel-cell-'+r.id+'\',\''+r.id+'\',\'prelievo\')"><span id="prel-v-'+r.id+'" style="color:var(--cyan);font-weight:700">'+(r.prelievo?fmtE(r.prelievo):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       +'<td class="ot-td"><b id="gt-v-'+r.id+'" style="color:var(--gold)">'+(gt!==0?fmtE(gt):'—')+'</b></td>'
       +'<td class="ot-td" style="color:var(--tx3);font-size:10px">'+(r.perc_op||20)+'%</td>'
       +'<td class="ot-td"><span id="gop-v-'+r.id+'" style="color:var(--orange);font-weight:700">'+(gop>0?fmtE(gop):'—')+'</span></td>'
       +'<td class="ot-td"><b id="pmb-v-'+r.id+'" style="color:var(--teal)">'+(pmb!==0?fmtE(pmb):'—')+'</b></td>'
       +'<td class="ot-td editable" id="alrt-cell-'+r.id+'" onclick="otEd(\'alrt-cell-'+r.id+'\',\''+r.id+'\',\'alert\')">'+(r.alert?'<span class="ot-alrt">'+r.alert+'</span>':'<span style="color:var(--tx4);font-size:10px">✏</span>')+'</td>'
       +'<td class="ot-td" style="min-width:140px"><div id="crn-'+r.id+'" class="ot-crn">'+(r.cronologia&&r.cronologia.length?'<span class="ot-crn-line">'+r.cronologia[r.cronologia.length-1].testo+'</span>':'<span style="color:var(--tx4)">—</span>')+' <button class="pw-btn" onclick="otCrnToggle(\''+r.id+'\')">📑</button> <button class="pw-btn" style="color:var(--teal);font-weight:700" onclick="otCrnAdd(\''+r.id+'\')" title="Aggiungi nota">+</button></div></td>'
-      +'<td class="ot-td"><div class="tbl-acts"><button class="ta ta-st" onclick="modalCambiaStato(\''+r.id+'\')">&#9998;</button><button class="ta ta-tsk" onclick="modalCreaTask(\''+r.id+'\')">&#9989;</button></div></td>'
+      +'<td class="ot-td"><div class="tbl-acts"><button class="ta ta-st" onclick="modalCambiaStato(\''+r.id+'\')">&#9998;</button><button class="ta ta-tsk" onclick="modalCreaTask(\''+r.id+'\')">&#9989;</button>'+(canDelete()?'<button class="ta ta-st" style="color:var(--red)" onclick="otEliminaRiga(\''+r.id+'\')" title="Elimina cliente">&#128465;</button>':'')+'</div></td>'
       +'</tr>';
   });
   return h+'</tbody></table></div>';
@@ -3887,7 +3888,7 @@ function renderOpDashboard(op){
     var nCB=brows.filter(function(r){return r.stato_op==='Bloccato';}).length;
     var nNoUsr=brows.filter(function(r){return r.stato_op==='In corso'&&!r.username;}).length;
     var nNoPwd=brows.filter(function(r){return r.stato_op==='In corso'&&!r.password;}).length;
-    var nNoDep=brows.filter(function(r){return r.stato_op==='In corso'&&!(r.deposito>0);}).length;
+    var nNoDep=brows.filter(function(r){return r.stato_op==='In corso'&&!r.deposito;}).length;
     var hasAlert=(nNoUsr>0||nNoPwd>0||nNoDep>0);
     var bkDep=brows.reduce(function(s,r){return s+(r.deposito||0);},0);
     var bkPmb=brows.reduce(function(s,r){return s+(r.profitto_mb||0);},0);
@@ -4099,17 +4100,17 @@ function renderBkWorkspace(op, bk){
       /* scadenza — 7gg da data inizio, avviso quando restano 2gg o meno */
       +'<td class="ot-td" data-lbl="SCADENZA" id="scad-cell-'+r.id+'" style="'+tdS+'">'+(scad?'<div style="font-size:11px;color:var(--tx2)">'+fmtDateShort(scad)+'</div><div id="scad-gg-'+r.id+'" style="font-weight:800;font-size:11px;color:'+ggCol+'">'+ggTxt+'</div>':'<span style="color:var(--tx4)">—</span>')+'</td>'
       /* deposito */
-      +'<td class="ot-td editable" data-lbl="DEPOSITO" id="dep-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'dep-cell-'+r.id+'\',\''+r.id+'\',\'deposito\')"><span id="dep-v-'+r.id+'" style="color:var(--purple);font-weight:700;font-size:'+FS+'">'+(r.deposito>0?fmtE(r.deposito):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="DEPOSITO" id="dep-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'dep-cell-'+r.id+'\',\''+r.id+'\',\'deposito\')"><span id="dep-v-'+r.id+'" style="color:var(--purple);font-weight:700;font-size:'+FS+'">'+(r.deposito?fmtE(r.deposito):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* bonus ottenuto */
-      +'<td class="ot-td editable" data-lbl="BONUS OTT." id="bonRic-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'bonRic-cell-'+r.id+'\',\''+r.id+'\',\'bonus_ric\')"><span id="bonRic-v-'+r.id+'" style="color:var(--blue);font-weight:700;font-size:'+FS+'">'+(r.bonus_ric>0?fmtE(r.bonus_ric):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="BONUS OTT." id="bonRic-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'bonRic-cell-'+r.id+'\',\''+r.id+'\',\'bonus_ric\')"><span id="bonRic-v-'+r.id+'" style="color:var(--blue);font-weight:700;font-size:'+FS+'">'+(r.bonus_ric?fmtE(r.bonus_ric):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* prelievo */
-      +'<td class="ot-td editable" data-lbl="PRELIEVO" id="prel-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'prel-cell-'+r.id+'\',\''+r.id+'\',\'prelievo\')"><span id="prel-v-'+r.id+'" style="color:var(--cyan);font-weight:700;font-size:'+FS+'">'+(r.prelievo>0?fmtE(r.prelievo):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="PRELIEVO" id="prel-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'prel-cell-'+r.id+'\',\''+r.id+'\',\'prelievo\')"><span id="prel-v-'+r.id+'" style="color:var(--cyan);font-weight:700;font-size:'+FS+'">'+(r.prelievo?fmtE(r.prelievo):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* ricavo totale — calcolato automaticamente da prelievo - deposito */
       +'<td class="ot-td" data-lbl="RICAVO TOT." style="'+tdS+'"><b id="rr-v-'+r.id+'" style="font-size:14px;color:'+(ricTot>0?'var(--cyan)':ricTot<0?'var(--red)':'var(--tx4)')+'">'+(ricTot?fmtE(ricTot):'—')+'</b></td>'
       /* pagato cliente */
-      +'<td class="ot-td editable" data-lbl="PAGATO CLIENTE" id="pc-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'pc-cell-'+r.id+'\',\''+r.id+'\',\'pag_cli\')"><span id="pc-v-'+r.id+'" style="color:var(--orange);font-weight:700;font-size:'+FS+'">'+(r.pag_cli>0?fmtE(r.pag_cli):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="PAGATO CLIENTE" id="pc-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'pc-cell-'+r.id+'\',\''+r.id+'\',\'pag_cli\')"><span id="pc-v-'+r.id+'" style="color:var(--orange);font-weight:700;font-size:'+FS+'">'+(r.pag_cli?fmtE(r.pag_cli):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* costi extra */
-      +'<td class="ot-td editable" data-lbl="COSTI EXTRA" id="ce-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'ce-cell-'+r.id+'\',\''+r.id+'\',\'costi_extra\')"><span id="ce-v-'+r.id+'" style="color:var(--red);font-size:'+FS+'">'+(r.costi_extra>0?fmtE(r.costi_extra):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
+      +'<td class="ot-td editable" data-lbl="COSTI EXTRA" id="ce-cell-'+r.id+'" style="'+tdS+'" onclick="otEdNum(\'ce-cell-'+r.id+'\',\''+r.id+'\',\'costi_extra\')"><span id="ce-v-'+r.id+'" style="color:var(--red);font-size:'+FS+'">'+(r.costi_extra?fmtE(r.costi_extra):'<span style="color:var(--tx4)">✏</span>')+'</span></td>'
       /* margine MBBET — calcolato auto */
       +'<td class="ot-td" data-lbl="MARGINE MBBET" style="'+tdS+'"><b id="marg-v-'+r.id+'" style="font-size:14px;color:'+(marg>0?'var(--teal)':marg<0?'var(--red)':'var(--tx4)')+';">'+(marg?fmtE(marg):'—')+'</b></td>'
       /* %Op */
@@ -4212,8 +4213,8 @@ function _updFinCells(rowId,r){
   var go=sel('gop-v-'+rowId);if(go)go.textContent=r.guad_op>0?fmtE(r.guad_op):'—';
   var pm=sel('pmb-v-'+rowId);if(pm)pm.textContent=r.profitto_mb!==0?fmtE(r.profitto_mb):'—';
   var rrel=sel('rr-v-'+rowId);if(rrel){rrel.textContent=r.ricavo_reale?fmtE(r.ricavo_reale):'—';rrel.style.color=r.ricavo_reale>0?'var(--cyan)':r.ricavo_reale<0?'var(--red)':'var(--tx4)';}
-  var pc=sel('pc-v-'+rowId);if(pc)pc.textContent=r.pag_cli>0?fmtE(r.pag_cli):'—';
-  var ce=sel('ce-v-'+rowId);if(ce)ce.textContent=r.costi_extra>0?fmtE(r.costi_extra):'—';
+  var pc=sel('pc-v-'+rowId);if(pc)pc.textContent=r.pag_cli?fmtE(r.pag_cli):'—';
+  var ce=sel('ce-v-'+rowId);if(ce)ce.textContent=r.costi_extra?fmtE(r.costi_extra):'—';
   var mg=sel('marg-v-'+rowId);if(mg){mg.textContent=r.margine!==0&&r.margine!==null?fmtE(r.margine):'—';mg.style.color=r.margine>0?'var(--teal)':r.margine<0?'var(--red)':'var(--tx4)';}
 }
 function otEdNum(cellId,rowId,field){
@@ -4221,10 +4222,10 @@ function otEdNum(cellId,rowId,field){
   var r=BONUS_CLI.find(function(x){return x.id===rowId;});if(!r)return;
   var m=_OT_NM[field];if(!m)return;
   var cur=r[field]||0;
-  var inp=document.createElement('input');inp.type='number';inp.value=cur||'';inp.step='0.01';inp.min='0';inp.className='ot-num-v2';
+  var inp=document.createElement('input');inp.type='number';inp.value=cur||'';inp.step='0.01';inp.className='ot-num-v2';
   td.innerHTML='';td.appendChild(inp);inp.focus();inp.select();
   async function save(){
-    var v=Math.max(0,parseFloat(inp.value)||0);
+    var v=parseFloat(inp.value)||0;
     r[field]=v;
     /* aggiorna il campo nel row object correttamente */
     if(field==='ric_real')r.ricavo_reale=v;
@@ -4240,7 +4241,7 @@ function otEdNum(cellId,rowId,field){
     /* ricalcolo margine + derivati */
     _recalcFin(r);
     /* aggiorna cella corrente */
-    td.innerHTML='<span id="'+m.pfx+'-v-'+rowId+'" style="color:'+m.col+';font-weight:700">'+(v>0?fmtE(v):'<span style=\'color:var(--tx4)\'>✏</span>')+'</span>';
+    td.innerHTML='<span id="'+m.pfx+'-v-'+rowId+'" style="color:'+m.col+';font-weight:700">'+(v?fmtE(v):'<span style=\'color:var(--tx4)\'>✏</span>')+'</span>';
     td.onclick=function(){otEdNum(cellId,rowId,field);};
     /* aggiorna tutte le celle finanziarie della riga e il KPI bar */
     _updFinCells(rowId,r);
@@ -4259,7 +4260,7 @@ function otEdNum(cellId,rowId,field){
   inp.onblur=save;
   inp.onkeydown=function(e){
     if(e.key==='Enter')inp.blur();
-    if(e.key==='Escape'){td.innerHTML='<span style="color:'+m.col+';font-weight:700">'+(cur>0?fmtE(cur):'<span style=\'color:var(--tx4)\'>✏</span>')+'</span>';td.onclick=function(){otEdNum(cellId,rowId,field);};}
+    if(e.key==='Escape'){td.innerHTML='<span style="color:'+m.col+';font-weight:700">'+(cur?fmtE(cur):'<span style=\'color:var(--tx4)\'>✏</span>')+'</span>';td.onclick=function(){otEdNum(cellId,rowId,field);};}
   };
 }
 
@@ -4400,7 +4401,7 @@ function otEditNum(cellId,rowId,field){
     var colMap={deposito:'var(--purple)',bonus_ric:'var(--blue)',prelievo:'var(--cyan)'};
     var vEl=document.getElementById((col?col.pfx:field)+'-v-'+rowId);
     if(vEl)vEl.innerHTML=v>0?'<span style="color:'+colMap[field]+';font-variant-numeric:tabular-nums">'+fmtE(v)+'</span>':'<span style="color:var(--tx4)">—</span>';
-    td.innerHTML='<span id="'+(col?col.pfx:field)+'-v-'+rowId+'" style="color:'+colMap[field]+';font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer" onclick="otEditNum(\''+cellId+'\',\''+rowId+'\',\''+field+'\')">'+( v>0?fmtE(v):'<span style=\'color:var(--tx4)\'>— clicca</span>')+'</span>';
+    td.innerHTML='<span id="'+(col?col.pfx:field)+'-v-'+rowId+'" style="color:'+colMap[field]+';font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer" onclick="otEditNum(\''+cellId+'\',\''+rowId+'\',\''+field+'\')">'+( v?fmtE(v):'<span style=\'color:var(--tx4)\'>— clicca</span>')+'</span>';
     var _gt0=(r.prelievo||0)-(r.deposito||0);
     var _gop0=_gt0>0?Math.round(_gt0*(r.perc_op||20)/100*100)/100:0;
     var _rr=r.ricavo_reale||0;
@@ -4414,7 +4415,7 @@ function otEditNum(cellId,rowId,field){
     var pmbEl=document.getElementById('pmb-v-'+rowId);if(pmbEl)pmbEl.textContent=r.profitto_mb!==0?fmtE(r.profitto_mb):'—';
     if(r._real){try{var upd={};upd[col?col.db:field]=v||null;upd.ult_azione=new Date().toISOString();await db.from('bonus').update(upd).eq('id',rowId);showToast('Salvato','ok');}catch(e){showToast('Errore','err');}}
   }
-  inp.onblur=save;inp.onkeydown=function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape'){td.classList.remove('ot-edit');td.textContent=cur>0?fmtE(cur):'—';}};
+  inp.onblur=save;inp.onkeydown=function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape'){td.classList.remove('ot-edit');td.textContent=cur?fmtE(cur):'—';}};
 }
 
 /* ── Password show/hide ── */
@@ -4771,6 +4772,7 @@ function renderTwTable(rows,hideBk,hideOp){
         +'<button class="ta ta-st" title="Cambia Stato" onclick="modalCambiaStato(\''+r.id+'\')">&#9998;</button>'
         +'<button class="ta ta-ric" title="Aggiorna Ricavo" onclick="modalAggRicavo(\''+r.id+'\')">&#8364;</button>'
         +'<button class="ta ta-tsk" title="Crea Task" onclick="modalCreaTask(\''+r.id+'\')">&#9989;</button>'
+        +(canDelete()?'<button class="ta ta-st" style="color:var(--red)" title="Elimina cliente" onclick="otEliminaRiga(\''+r.id+'\')">&#128465;</button>':'')
       +'</div></td>'
       +'</tr>';
   });
