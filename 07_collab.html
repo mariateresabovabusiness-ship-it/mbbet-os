@@ -701,7 +701,7 @@ function cycleStatus(bonusId,cid){
 }
 
 /* ══ LOAD ══ */
-var BONUS_COLS='id,id_cli,cliente,bookmaker,stato,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,bonus_ricevuto,prelievo,costi_extra,created_at';
+var BONUS_COLS='id,id_cli,cliente,bookmaker,stato,stato_op,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,bonus_ricevuto,prelievo,costi_extra,created_at';
 async function fetchBonusCollab(){
   // Prova con stato_collab+pocket_stato (colonne condivise); se la migration
   // non e' ancora stata eseguita su Supabase, ripiega su query piu' semplici
@@ -1749,21 +1749,24 @@ async function saveNewBonus(){
   var bkName=decodeURIComponent(_newBnsEnc);
   var c=_collabs.find(function(x){return String(x.id)===String(_newBnsCid);});
   var anno=_collabMese?parseInt(_collabMese.split('-')[0]):new Date().getFullYear();
+  var usr=(g('nb-usr').value||'').trim()||null;
+  var pwd=(g('nb-pwd').value||'').trim()||null;
+  var completo=!!(usr&&pwd);
   var payload={
     id:await genBonusId(),
     cliente:nome,
     bookmaker:bkName,
     nome_collab:c?c.nome:null,
-    username_bk:(g('nb-usr').value||'').trim()||null,
+    username_bk:usr,
     data_inizio:g('nb-dt').value||null,
     comp_referral:parseFloat(g('nb-imp').value)||null,
     mese_operativo:mese,
     anno_operativo:anno,
     operatore:(g('nb-op').value||'').trim()||null,
     note:(g('nb-note').value||'').trim()||null,
-    stato:'FATTO'
+    stato:completo?'FATTO':'IN_CORSO',
+    stato_op:completo?'Completato':'In corso'
   };
-  var pwd=(g('nb-pwd').value||'').trim();
   if(pwd)payload.password_bk=pwd;
   try{
     var idCli=await collegaClienteCrm(nome,c?c.nome:null,payload.operatore);
@@ -1776,7 +1779,7 @@ async function saveNewBonus(){
       _bns.push(newRow);
     }
     closeNewBonus();
-    showToast('Cliente aggiunto ✓ (anche in CRM)','ok');
+    showToast(completo?'✓ Auto: cliente aggiunto e FATTO (dati completi)':'Cliente aggiunto ✓ (anche in CRM) — In corso, mancano username/password','ok');
     if(c&&c.modello==='POCKET'){renderPocketCliente(_newBnsCid,encodeURIComponent(nome));}
     else{renderFlatCliente(_newBnsCid,encodeURIComponent(nome));}
   }catch(e){
@@ -1794,9 +1797,11 @@ async function saveEditBonus(){
   var btn=g('eb-save');btn.disabled=true;btn.textContent='Salvataggio...';
   g('eb-err').textContent='';
   var mese=parseInt(g('eb-mese').value)||null;
+  var usr=(g('eb-usr').value||'').trim()||null;
+  var pwd=(g('eb-pwd').value||'').trim()||null;
   var payload={
-    username_bk:(g('eb-usr').value||'').trim()||null,
-    password_bk:(g('eb-pwd').value||'').trim()||null,
+    username_bk:usr,
+    password_bk:pwd,
     data_inizio:g('eb-dt').value||null,
     comp_referral:parseFloat(g('eb-imp').value)||null,
     mese_operativo:mese,
@@ -1804,6 +1809,15 @@ async function saveEditBonus(){
     operatore:(g('eb-op').value||'').trim()||null,
     note:(g('eb-note').value||'').trim()||null
   };
+  // Ricalcola Fatto/In Corso da username+password, come in Vista Operativa —
+  // ma senza mai toccare stati speciali scelti a mano (Problema/Bloccato o
+  // fuori dal percorso normale Libero/In Corso/Fatto).
+  var bOrig=_bns.find(function(x){return String(x.id)===String(_editBnsId);});
+  if(bOrig&&bOrig.stato_op!=='Problema'&&bOrig.stato_op!=='Bloccato'&&(!bOrig.stato||bOrig.stato==='LIBERO'||bOrig.stato==='IN_CORSO'||bOrig.stato==='FATTO')){
+    var completo=!!(usr&&pwd);
+    payload.stato=completo?'FATTO':'IN_CORSO';
+    payload.stato_op=completo?'Completato':'In corso';
+  }
   try{
     var r=await db.from('bonus').update(payload).eq('id',_editBnsId);
     if(r.error)throw r.error;
