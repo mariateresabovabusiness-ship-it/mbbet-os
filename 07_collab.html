@@ -556,9 +556,13 @@ async function salvaNuovoClienteManuale(){
   var idCli=await collegaClienteCrm(nome,c.nome,null);
   btn.disabled=false;btn.textContent='+ Aggiungi';
   if(!idCli){showToast('Errore, riprova','er');return;}
-  if(!_clientiCollab.some(function(cc){return cc.id===idCli;})){
-    _clientiCollab.push({id:idCli,nome:nome,collab:c.nome,tipologia:'Referral',referral:c.nome,stato:'LIBERO'});
-  }
+  // Se il cliente era già collegato a un ALTRO collaboratore, in memoria va
+  // aggiornato (non solo aggiunto): altrimenti il salvataggio nel database
+  // riesce ma la pagina, finché non la ricarichi, continua a mostrarlo nel
+  // collaboratore vecchio come se il collegamento non fosse mai cambiato.
+  var ccEsistente=_clientiCollab.find(function(cc){return cc.id===idCli;});
+  if(ccEsistente){ccEsistente.collab=c.nome;ccEsistente.referral=c.nome;}
+  else{_clientiCollab.push({id:idCli,nome:nome,collab:c.nome,tipologia:'Referral',referral:c.nome,stato:'LIBERO'});}
   closeNuovoClienteChoice();
   showToast('Cliente aggiunto ✓','ok');
   selectCollab(c.id);
