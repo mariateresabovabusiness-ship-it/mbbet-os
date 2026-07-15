@@ -3669,6 +3669,23 @@ var BK_INFO={
 var OT_STATI=['In corso','Completato','Problema','Bloccato'];
 var OT_FASI=['Da iniziare','Registrato','Aspetto Codice SMS','Deposito effettuato','Bonus ricevuto','Scommesse in corso','Prelievo richiesto','Completato','Problema rilevato'];
 
+/* ── Stato automatico ──
+   Username+password compilati => sito "Fatto/Completato" da solo, niente
+   click manuale. "Problema" resta sempre l'eccezione che vince su tutto.
+   Non tocca MAI stati speciali scelti a mano (Già Reg./Limitato/Bannato/
+   Non Idoneo/Attesa Cliente/Da Verificare, o Bloccato): quelli restano
+   decisioni dell'operatore, il calcolo automatico gioca solo dentro al
+   percorso normale Libero/In Corso <-> Fatto. */
+function otCalcAuto(r){
+  if(r.stato_op==='Problema'||r.stato_op==='Bloccato')return null;
+  if(r.stato!=='LIBERO'&&r.stato!=='IN_CORSO'&&r.stato!=='FATTO')return null;
+  var completo=!!(r.username&&r.password);
+  var stato_op=completo?'Completato':'In corso';
+  var stato=completo?'FATTO':'IN_CORSO';
+  if(stato_op===r.stato_op&&stato===r.stato)return null;
+  return {stato_op:stato_op,stato:stato};
+}
+
 function renderTwBkView(){
   if(!_tw.selOp) return renderOtGrid();
   if(!_tw.selBk) return renderOpDashboard(_tw.selOp);
@@ -4179,7 +4196,10 @@ function otEd(cellId,rowId,field){
       td.innerHTML='<span style="color:var(--tx3);font-size:11px">'+(v||'<span style="color:var(--tx4)">✏</span>')+'</span>';
       td.onclick=function(){otEd('note-cell-'+rowId,rowId,'note');};
     }
-    if(r._real){try{var u={};u[dbMap[field]||field]=v||null;if(field!=='ult_azione'&&field!=='ultima_az')u.ult_azione=new Date().toISOString();if(field==='data_inizio'&&v){u.mese_operativo=r.mese_op;u.anno_operativo=r.anno_op;}await db.from('bonus').update(u).eq('id',rowId);showToast('Salvato ✓','ok');}catch(e){showToast('Errore','err');}}
+    var auto=(field==='username'||field==='password')?otCalcAuto(r):null;
+    if(auto){r.stato_op=auto.stato_op;r.stato=auto.stato;}
+    if(r._real){try{var u={};u[dbMap[field]||field]=v||null;if(field!=='ult_azione'&&field!=='ultima_az')u.ult_azione=new Date().toISOString();if(field==='data_inizio'&&v){u.mese_operativo=r.mese_op;u.anno_operativo=r.anno_op;}if(auto){u.stato_op=auto.stato_op;u.stato=auto.stato;}await db.from('bonus').update(u).eq('id',rowId);showToast(auto?(auto.stato==='FATTO'?'✓ Auto: sito segnato FATTO (dati completi)':'Salvato ✓ — in attesa dell\'altro dato per completare'):'Salvato ✓','ok');}catch(e){showToast('Errore','err');}}
+    if(auto)renderTwContent();
   }
   inp.onblur=save;inp.onkeydown=function(e){if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderTwContent();};
 }
@@ -4315,18 +4335,33 @@ function _refreshKpis(){
   var stcProb=document.getElementById('ws-stc-Problema');if(stcProb)stcProb.textContent=nProb;
 }
 
-/* ── Stato Op cambio ── */
+/* ── Stato Op cambio ──
+   "Problema" è un segnale esplicito dell'operatore e vince sempre: si
+   riflette subito anche sullo stato CRM (-> Da Verificare). Uscendo da
+   Problema, si riparte dal calcolo automatico in base a username/password
+   già inseriti, invece di restare bloccati su Da Verificare per sempre. */
 async function otStato(rowId,sel){
   var v=sel.value;
   var r=BONUS_CLI.find(function(x){return x.id===rowId;});if(!r)return;
+  var wasProblema=r.stato_op==='Problema';
   r.stato_op=v;
+  var statoCambiato=false;
+  if(v==='Problema'){
+    r.stato='DA_VERIFICARE';statoCambiato=true;
+  } else if(wasProblema&&(v==='In corso'||v==='Completato')){
+    r.stato='IN_CORSO';
+    var auto=otCalcAuto(r);
+    if(auto){r.stato_op=auto.stato_op;r.stato=auto.stato;}
+    statoCambiato=true;
+  }
   var clsMap={'In corso':'sto-inc','Completato':'sto-comp','Problema':'sto-prob','Bloccato':'sto-bloc'};
-  sel.className='sto '+(clsMap[v]||'sto-inc');
+  sel.className='sto '+(clsMap[r.stato_op]||'sto-inc');
   var tr=document.querySelector('[data-rid="'+rowId+'"]');
-  if(tr)tr.className='otr-'+(v==='Completato'?'comp':v==='Problema'?'prob':v==='Bloccato'?'bloc':'inc');
+  if(tr)tr.className='otr-'+(r.stato_op==='Completato'?'comp':r.stato_op==='Problema'?'prob':r.stato_op==='Bloccato'?'bloc':'inc');
   /* aggiorna KPI strip senza ri-renderare tutta la tabella */
   _refreshKpis();
-  if(r._real){try{await db.from('bonus').update({stato_op:v,ult_azione:new Date().toISOString()}).eq('id',rowId);showToast('Stato aggiornato','ok');}catch(e){showToast('Errore','err');}}
+  if(r._real){try{var u={stato_op:r.stato_op,ult_azione:new Date().toISOString()};if(statoCambiato)u.stato=r.stato;await db.from('bonus').update(u).eq('id',rowId);showToast(v==='Problema'?'Segnalato ⚠ — stato CRM aggiornato a Da Verificare':'Stato aggiornato','ok');}catch(e){showToast('Errore','err');}}
+  if(statoCambiato)renderTwContent();
 }
 
 /* ── Elimina cliente dalla tabella (rimuove la riga bonus per quel sito) ── */
@@ -4663,24 +4698,27 @@ async function doAssegna(op){
   var newId='BNS-'+String(maxN+1).padStart(5,'0');
   var dtStr=document.getElementById('ap-dt').value||new Date().toISOString().slice(0,10);
   var dtObj=new Date(dtStr);
+  var usr=document.getElementById('ap-usr').value.trim()||null;
+  var pwd=document.getElementById('ap-pwd').value||null;
+  var completo=!!(usr&&pwd);
   var payload={
     id:newId,id_cli:cliSel.value,cliente:cliNm,bookmaker:bk,
     operatore:op,perc_op:parseFloat(document.getElementById('ap-perc').value)||(_OP_PERC[op]||20),
-    stato_op:'In corso',fase_attuale:'Da iniziare',
+    stato_op:completo?'Completato':'In corso',fase_attuale:completo?'Completato':'Da iniziare',
     data_inizio:dtStr,
     mese_operativo:dtObj.getMonth()+1,
     anno_operativo:dtObj.getFullYear(),
-    username_bk:document.getElementById('ap-usr').value.trim()||null,
-    password_bk:document.getElementById('ap-pwd').value||null,
+    username_bk:usr,
+    password_bk:pwd,
     deposito:0,bonus_ricevuto:0,prelievo:0,cronologia:[],
-    stato:'IN_CORSO',priorita:'MEDIA'
+    stato:completo?'FATTO':'IN_CORSO',priorita:'MEDIA'
   };
   try{
     var r=await db.from('bonus').insert(payload).select();
     if(r.error)throw r.error;
     BONUS_CLI.push(mapBonusRow(Object.assign({},payload,{_real:true})));
     closeNewCli2();
-    showToast('Sito '+bk+' assegnato a '+op+' — '+newId,'ok');
+    showToast(completo?'✓ Auto: '+bk+' già FATTO (dati completi) — '+newId:'Sito '+bk+' assegnato a '+op+' — '+newId,'ok');
     _tw.selOp=op;renderTw();
   }catch(e){
     errEl.textContent=e&&e.message?e.message:'Errore durante il salvataggio.';
