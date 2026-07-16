@@ -65,6 +65,14 @@ create index if not exists idx_utenti_email      on utenti_crm(email);
 create index if not exists idx_utenti_ruolo      on utenti_crm(ruolo);
 create index if not exists idx_utenti_operatore  on utenti_crm(operatore_id);
 
+-- La tabella esisteva già da prima (creata quando questo file non includeva
+-- ancora COLLAB_SELF) — "create table if not exists" non aggiorna un vincolo
+-- su una tabella già esistente, va rifatto esplicitamente.
+alter table utenti_crm drop constraint if exists ruolo_valido;
+alter table utenti_crm add constraint ruolo_valido check (ruolo in (
+  'SOCIO_ADMIN','SOCIO','OPERATORE','COLLAB','COLLAB_SELF','REFERRAL','VIEWER','ADMIN_TECNICO'
+));
+
 
 -- ════════════════════════════════════════════════════════════════════
 -- PARTE B — FUNZIONI HELPER (SECURITY DEFINER)
