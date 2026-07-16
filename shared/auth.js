@@ -12,11 +12,21 @@ var db = supabase.createClient(SUPA_URL, SUPA_ANON);
 var LOCAL_USERS = {
   'mariateresabova.business@gmail.com': { password: 'Luna2002@',  nome: 'Mary Bova', ruolo: 'SOCIO_ADMIN' },
   'manuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Manuele',   ruolo: 'SOCIO' },
-  'serena@mbbet.it':          { password: 'Mbbet2024!', nome: 'Serena',    ruolo: 'OPERATORE' },
+  'serena@mbbet.it':          { password: 'Mbbet2024!', nome: 'Serena',    ruolo: 'SOCIO' },
   'samuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Samuele',   ruolo: 'COLLAB' },
   'alan@mbbet.it':            { password: 'Mbbet2026!', nome: 'Alan', ruolo: 'COLLAB_SELF', collabNome: 'Alan' },
   'isma@mbbet.it':            { password: 'Mbbet2026!', nome: 'Isma', ruolo: 'COLLAB_SELF', collabNome: 'Isma' },
-  'lorenzo@mbbet.it':         { password: 'Mbbet2026!', nome: 'Lorenzo Cestola', ruolo: 'COLLAB_SELF', collabNome: 'Lorenzo Cestola' }
+  'lorenzo@mbbet.it':         { password: 'Mbbet2026!', nome: 'Lorenzo Cestola', ruolo: 'COLLAB_SELF', collabNome: 'Lorenzo Cestola' },
+  'ciro@mbbet.it':            { password: 'Mbbet2026!', nome: 'Ciro Bisogno',               ruolo: 'OPERATORE' },
+  'antonio@mbbet.it':         { password: 'Mbbet2026!', nome: 'Antonio Michele La Barbera', ruolo: 'OPERATORE' },
+  'alessia.maffioli@mbbet.it':{ password: 'Mbbet2026!', nome: 'Alessia Maffioli',           ruolo: 'OPERATORE' },
+  'alessia.ciman@mbbet.it':   { password: 'Mbbet2026!', nome: 'Alessia Ciman',              ruolo: 'OPERATORE' },
+  'elisa@mbbet.it':           { password: 'Mbbet2026!', nome: 'Elisa Qualantoni',           ruolo: 'OPERATORE' },
+  'riccardo@mbbet.it':        { password: 'Mbbet2026!', nome: 'Riccardo Tavagnacco',        ruolo: 'OPERATORE' },
+  'luca@mbbet.it':            { password: 'Mbbet2026!', nome: 'Luca Alberti',               ruolo: 'OPERATORE' },
+  'emilian@mbbet.it':         { password: 'Mbbet2026!', nome: 'Emilian Cozmiuc',            ruolo: 'OPERATORE' },
+  'mariaadele@mbbet.it':      { password: 'Mbbet2026!', nome: 'Maria Adele Catania',        ruolo: 'OPERATORE' },
+  'francesco@mbbet.it':       { password: 'Mbbet2026!', nome: 'Francesco Domenico Bova',    ruolo: 'OPERATORE' }
 };
 
 var SESSION_KEY = 'mbbet_v2_session';

@@ -36,6 +36,7 @@ create table if not exists utenti_crm (
     'SOCIO',         -- vede tutto, no delete
     'OPERATORE',     -- solo clienti/bonus/task suoi
     'COLLAB',        -- solo clienti portati + compensi
+    'COLLAB_SELF',   -- vista personale in 07_collab.html, un solo collaboratore
     'REFERRAL',      -- solo riepilogo + saldo
     'VIEWER',        -- sola lettura su sezioni autorizzate
     'ADMIN_TECNICO'  -- struttura tecnica, no documenti sensibili
@@ -472,20 +473,60 @@ create policy "inattivi_write" on clienti_inattivi
 
 
 -- ════════════════════════════════════════════════════════════════════
--- PARTE L — SEED UTENTI_CRM (i 4 soci)
--- auth_user_id è NULL: andrà aggiunto quando si crea l'account Auth
+-- PARTE L — SEED UTENTI_CRM
+-- Ruoli allineati a shared/auth.js LOCAL_USERS (la fonte di verità oggi).
+-- auth_user_id è NULL: va popolato con PARTE M dopo aver creato i veri account
+-- Supabase Auth (Mary li crea a mano da Authentication → Users, vedi lista
+-- comunicata a parte).
+-- Serena: confermato da Mary è socia (si occupa principalmente dei clienti),
+-- non un'operatrice con un nome dedicato in `operatori` — ruolo SOCIO, nessun
+-- operatore_id (is_socio_or_above() non richiede lo scoping per nome).
+-- I 10 operatori reali sotto sono le persone già in `operatori` senza alcun
+-- login oggi (esclusa "Mari+Samu", non una persona distinta ma un'etichetta
+-- congiunta Mary+Samuele già coperta dai loro account).
 -- ════════════════════════════════════════════════════════════════════
 
-insert into utenti_crm (email, nome, ruolo, operatore_id, attivo)
+insert into utenti_crm (email, nome, ruolo, operatore_id, collab_id, attivo)
 values
-  ('dm.businessita@gmail.com',           'Mary',    'SOCIO_ADMIN', 'OP-001', true),
-  ('manuele@mbbet.it',                   'Manuele', 'SOCIO_ADMIN', 'OP-002', true),
-  ('serena@mbbet.it',                    'Serena',  'SOCIO_ADMIN', 'OP-003', true),
-  ('samuele@mbbet.it',                   'Samuele', 'SOCIO_ADMIN', 'OP-004', true)
+  ('mariateresabova.business@gmail.com', 'Mary Bova',                  'SOCIO_ADMIN', null,     null,          true),
+  ('manuele@mbbet.it',                   'Manuele',                    'SOCIO',       null,     null,          true),
+  ('serena@mbbet.it',                    'Serena',                     'SOCIO',       null,     null,          true),
+  ('samuele@mbbet.it',                   'Samuele',                    'COLLAB',      null,     null,          true),
+  ('alan@mbbet.it',                      'Alan',                       'COLLAB_SELF', null,     'COLLAB-001',  true),
+  ('isma@mbbet.it',                      'Isma',                       'COLLAB_SELF', null,     'COLLAB-004',  true),
+  ('lorenzo@mbbet.it',                   'Lorenzo Cestola',            'COLLAB_SELF', null,     'COLLAB-005',  true),
+  ('ciro@mbbet.it',                      'Ciro Bisogno',               'OPERATORE',   'OP-012', null,          true),
+  ('antonio@mbbet.it',                   'Antonio Michele La Barbera', 'OPERATORE',   'OP-013', null,          true),
+  ('alessia.maffioli@mbbet.it',          'Alessia Maffioli',           'OPERATORE',   'OP-007', null,          true),
+  ('alessia.ciman@mbbet.it',             'Alessia Ciman',              'OPERATORE',   'OP-014', null,          true),
+  ('elisa@mbbet.it',                     'Elisa Qualantoni',           'OPERATORE',   'OP-008', null,          true),
+  ('riccardo@mbbet.it',                  'Riccardo Tavagnacco',        'OPERATORE',   'OP-015', null,          true),
+  ('luca@mbbet.it',                      'Luca Alberti',               'OPERATORE',   'OP-010', null,          true),
+  ('emilian@mbbet.it',                   'Emilian Cozmiuc',            'OPERATORE',   'OP-006', null,          true),
+  ('mariaadele@mbbet.it',                'Maria Adele Catania',        'OPERATORE',   'OP-009', null,          true),
+  ('francesco@mbbet.it',                 'Francesco Domenico Bova',    'OPERATORE',   'OP-005', null,          true)
 on conflict (email) do update set
   ruolo = excluded.ruolo,
   operatore_id = excluded.operatore_id,
+  collab_id = excluded.collab_id,
   updated_at = now();
+
+
+-- ════════════════════════════════════════════════════════════════════
+-- PARTE M — COLLEGA I VERI ACCOUNT SUPABASE AUTH (esegui DOPO averli creati)
+-- Fa combaciare utenti_crm.auth_user_id con auth.users.id tramite l'email,
+-- così non serve copiare gli UUID a mano uno per uno. Rieseguibile.
+-- ════════════════════════════════════════════════════════════════════
+
+update utenti_crm u
+set auth_user_id = a.id
+from auth.users a
+where a.email = u.email
+  and u.auth_user_id is distinct from a.id;
+
+select email, nome, ruolo, auth_user_id is not null as account_collegato
+from utenti_crm
+order by ruolo, nome;
 
 -- Config: ruoli attivi
 insert into config (chiave, valore) values
