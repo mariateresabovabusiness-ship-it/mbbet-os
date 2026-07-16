@@ -496,17 +496,23 @@ function isReadOnlyCollab() { return currentRole === 'COLLAB_SELF'; }
 </script>
 <script>
 /* ══ GLOBALS ══ */
-var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[], _operatoriList=[], _opTelegram={};
+var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[], _operatoriList=[], _opTelegram={}, _bkLinks={};
 /* Avvisa l'operatore su Telegram quando gli viene assegnato un nuovo sito.
    Non blocca mai il salvataggio principale: se manca il chat_id o Telegram
    non risponde, fallisce in silenzio (l'assegnazione resta comunque valida). */
-function notificaOperatoreTelegram(nomeOp,messaggio){
+function notificaOperatoreTelegram(nomeOp,messaggio,bonusId){
   var chatId=_opTelegram[nomeOp];
   if(!chatId)return;
   fetch('/.netlify/functions/telegram-notify',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:chatId,message:messaggio})
+    body:JSON.stringify({chat_id:chatId,message:messaggio,bonus_id:bonusId||undefined})
   }).catch(function(){});
+}
+function tgMsgNuovoSito(cliNm,bk,completo){
+  var bkLink=_bkLinks[bk]||'';
+  return '🔔 <b>Nuovo sito assegnato</b>\n👤 Cliente: '+cliNm+'\n🎰 Sito: '+bk+
+    (completo?'\n✅ Già completo (dati inseriti)':'')+
+    (bkLink?'\n🔗 <a href="'+bkLink+'">Apri '+bk+'</a>':'');
 }
 var PAG_KEY='mbbet_collab_pag_v1'; // localStorage key for payment statuses
 var STATI=['PAGATO','IN_CORSO','IN_SCADENZA','URGENTE','SCADUTO'];
@@ -734,13 +740,15 @@ async function loadAll(){
       fetchBonusCollab(),
       db.from('collab_tariffe').select('*').order('ordine'),
       db.from('clienti').select('id,nome,collab').not('collab','is',null),
-      db.from('operatori').select('nome,is_joint,telegram_chat_id').eq('stato','Attivo')
+      db.from('operatori').select('nome,is_joint,telegram_chat_id').eq('stato','Attivo'),
+      db.from('bookmaker').select('nome,link_promo,link_sito')
     ]);
-    var rc=risultati[0], rb=risultati[1], rt=risultati[2], rcl=risultati[3], rop=risultati[4];
+    var rc=risultati[0], rb=risultati[1], rt=risultati[2], rcl=risultati[3], rop=risultati[4], rbk=risultati[5];
     _collabTariffe=(rt&&rt.data)||[];
     _clientiCollab=(rcl&&rcl.data)||[];
     _operatoriList=(rop&&rop.data)?rop.data.map(function(o){return o.nome;}):['Mary','Manuele','Serena','Samuele'];
     _opTelegram={};(rop&&rop.data||[]).forEach(function(o){if(o.telegram_chat_id)_opTelegram[o.nome]=o.telegram_chat_id;});
+    _bkLinks={};(rbk&&rbk.data||[]).forEach(function(b){_bkLinks[b.nome]=b.link_promo||b.link_sito||'';});
     _collabs=rc.data||[];
     _bns=(rb.data||[]).filter(function(b){return b.nome_collab&&b.nome_collab.trim();});
     // Merge: also create virtual collabs from bonus nome_collab if not in registry
@@ -1808,7 +1816,7 @@ async function saveNewBonus(){
     }
     closeNewBonus();
     showToast(completo?'✓ Auto: cliente aggiunto e FATTO (dati completi)':'Cliente aggiunto ✓ (anche in CRM) — In corso, mancano username/password','ok');
-    if(payload.operatore)notificaOperatoreTelegram(payload.operatore,'🔔 <b>Nuovo sito assegnato</b>\n👤 Cliente: '+nome+'\n🎰 Sito: '+bkName+(completo?'\n✅ Già completo (dati inseriti)':''));
+    if(payload.operatore)notificaOperatoreTelegram(payload.operatore,tgMsgNuovoSito(nome,bkName,completo),payload.id);
     if(c&&c.modello==='POCKET'){renderPocketCliente(_newBnsCid,encodeURIComponent(nome));}
     else{renderFlatCliente(_newBnsCid,encodeURIComponent(nome));}
   }catch(e){
@@ -1855,7 +1863,8 @@ async function saveEditBonus(){
     closeEditBonus();
     showToast('Salvato ✓','ok');
     if(payload.operatore&&(!bOrig||bOrig.operatore!==payload.operatore)){
-      notificaOperatoreTelegram(payload.operatore,'🔔 <b>Sito assegnato</b>\n👤 Cliente: '+(bOrig?bOrig.cliente:'')+'\n🎰 Sito: '+(bOrig?bOrig.bookmaker:''));
+      var completoEd=payload.stato==='FATTO';
+      notificaOperatoreTelegram(payload.operatore,tgMsgNuovoSito(bOrig?bOrig.cliente:'',bOrig?bOrig.bookmaker:'',completoEd),_editBnsId);
     }
     var cEd=_collabs.find(function(x){return String(x.id)===String(_editBnsCid);});
     var bEd=_bns.find(function(x){return String(x.id)===String(_editBnsId);});

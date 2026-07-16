@@ -3680,13 +3680,21 @@ var OT_FASI=['Da iniziare','Registrato','Aspetto Codice SMS','Deposito effettuat
 /* Avvisa l'operatore su Telegram quando gli viene assegnato un nuovo sito.
    Non blocca mai il salvataggio principale: se manca il chat_id o Telegram
    non risponde, fallisce in silenzio (l'assegnazione resta comunque valida). */
-function notificaOperatoreTelegram(nomeOp,messaggio){
+function notificaOperatoreTelegram(nomeOp,messaggio,bonusId){
   var chatId=_opTelegram[nomeOp];
   if(!chatId)return;
   fetch('/.netlify/functions/telegram-notify',{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:chatId,message:messaggio})
+    body:JSON.stringify({chat_id:chatId,message:messaggio,bonus_id:bonusId||undefined})
   }).catch(function(){});
+}
+function tgMsgNuovoSito(cliNm,bk,percOp,completo){
+  var bkObj=BKS.find(function(x){return x.nome===bk;});
+  var bkLink=bkObj&&(bkObj.link_promo||bkObj.link_sito)||'';
+  return '🔔 <b>Nuovo sito assegnato</b>\n👤 Cliente: '+cliNm+'\n🎰 Sito: '+bk+
+    (percOp?'\n💰 Provvigione: '+percOp+'%':'')+
+    (completo?'\n✅ Già completo (dati inseriti)':'')+
+    (bkLink?'\n🔗 <a href="'+bkLink+'">Apri '+bk+'</a>':'');
 }
 function otCalcAuto(r){
   if(r.stato_op==='Problema'||r.stato_op==='Bloccato')return null;
@@ -4373,6 +4381,7 @@ async function otStato(rowId,sel){
   /* aggiorna KPI strip senza ri-renderare tutta la tabella */
   _refreshKpis();
   if(r._real){try{var u={stato_op:r.stato_op,ult_azione:new Date().toISOString()};if(statoCambiato)u.stato=r.stato;await db.from('bonus').update(u).eq('id',rowId);showToast(v==='Problema'?'Segnalato ⚠ — stato CRM aggiornato a Da Verificare':'Stato aggiornato','ok');}catch(e){showToast('Errore','err');}}
+  if(v==='Problema'&&r.cli_op)notificaOperatoreTelegram(r.cli_op,'⚠️ <b>Problema segnalato</b>\n👤 Cliente: '+r.cli_nm+'\n🎰 Sito: '+r.bk_nm+'\nControlla appena puoi.');
   if(statoCambiato)renderTwContent();
 }
 
@@ -4731,7 +4740,7 @@ async function doAssegna(op){
     BONUS_CLI.push(mapBonusRow(Object.assign({},payload,{_real:true})));
     closeNewCli2();
     showToast(completo?'✓ Auto: '+bk+' già FATTO (dati completi) — '+newId:'Sito '+bk+' assegnato a '+op+' — '+newId,'ok');
-    notificaOperatoreTelegram(op,'🔔 <b>Nuovo sito assegnato</b>\n👤 Cliente: '+cliNm+'\n🎰 Sito: '+bk+(completo?'\n✅ Già completo (dati inseriti)':''));
+    notificaOperatoreTelegram(op,tgMsgNuovoSito(cliNm,bk,payload.perc_op,completo),newId);
     _tw.selOp=op;renderTw();
   }catch(e){
     errEl.textContent=e&&e.message?e.message:'Errore durante il salvataggio.';

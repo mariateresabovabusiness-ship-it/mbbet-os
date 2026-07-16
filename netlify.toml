@@ -13,3 +13,6 @@
 
 [functions."mail-notify"]
   schedule = "*/30 * * * *"
+
+[functions."telegram-morning-digest"]
+  schedule = "0 6 * * *"
