@@ -106,16 +106,20 @@ async function gestisciDomandaAI(token, msg, domanda) {
       headers: { 'x-api-key': claudeKey, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-5',
-        max_tokens: 400,
+        max_tokens: 800,
         system: systemPrompt,
         messages: [{ role: 'user', content: domanda }]
       })
     });
     const data = await res.json();
-    const risposta = (res.ok && data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '⚠️ DEBUG status=' + res.status + ' body=' + JSON.stringify(data).slice(0, 300);
+    // Claude a volte antepone un blocco "thinking" prima del testo vero:
+    // va cercato il primo blocco di tipo "text", non dato per scontato che
+    // sia il primo elemento dell'array.
+    const textBlock = res.ok && Array.isArray(data.content) ? data.content.find(function (b) { return b.type === 'text'; }) : null;
+    const risposta = (textBlock && textBlock.text) ? textBlock.text : '⚠️ Non sono riuscito a rispondere, riprova tra poco.';
     await tg(token, 'sendMessage', { chat_id: chatId, text: risposta });
   } catch (e) {
-    await tg(token, 'sendMessage', { chat_id: chatId, text: '⚠️ DEBUG exception: ' + String(e && e.message || e) });
+    await tg(token, 'sendMessage', { chat_id: chatId, text: '⚠️ Errore nel contattare l\'assistente, riprova tra poco.' });
   }
 }
 
