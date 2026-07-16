@@ -133,19 +133,20 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .alan-kpi-lbl{font-size:12px;font-weight:800;color:var(--tx3);letter-spacing:1.5px}
 .alan-kpi-val{font-size:34px;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}
 .alan-kpi-sub{font-size:10.5px;color:var(--tx3);margin-top:7px}
-/* Vista personale del collaboratore: griglia di card cliente al posto
-   della tabella densa (quella resta per Mary/admin, più adatta a gestire
-   molti dati insieme). */
-.cli-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-bottom:6px}
-.cli-card{background:rgba(10,13,32,.96);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;cursor:pointer;transition:.18s;animation:fadeUp .35s ease both;position:relative;overflow:hidden}
-.cli-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cli-col,var(--gold));opacity:.6}
-.cli-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18);box-shadow:0 14px 30px rgba(0,0,0,.35)}
-.cli-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.cli-card-av{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;border:1.5px solid;flex-shrink:0}
-.cli-card-nm{font-size:14.5px;font-weight:800;color:var(--tx);margin-bottom:10px;line-height:1.25;min-height:37px;display:flex;align-items:center}
-.cli-card-bar{height:7px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:8px}
-.cli-card-bar-fill{height:100%;border-radius:4px;transition:width .3s ease}
-.cli-card-foot{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--tx3);font-weight:700}
+/* Vista personale del collaboratore: elenco verticale di righe cliente al
+   posto della tabella densa (quella resta per Mary/admin, più adatta a
+   gestire molti dati insieme) — una riga sotto l'altra, non a griglia,
+   più facile da scorrere e meno confusionaria. */
+.cli-card-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
+.cli-card{background:rgba(10,13,32,.96);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;cursor:pointer;transition:.16s;animation:fadeUp .3s ease both;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px}
+.cli-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--cli-col,var(--gold));opacity:.7}
+.cli-card:hover{transform:translateX(4px);border-color:rgba(255,255,255,.18);box-shadow:0 8px 22px rgba(0,0,0,.3)}
+.cli-card-av{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;border:1.5px solid;flex-shrink:0}
+.cli-card-mid{flex:1;min-width:0}
+.cli-card-nm{font-size:14px;font-weight:800;color:var(--tx);margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cli-card-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;max-width:320px}
+.cli-card-bar-fill{height:100%;border-radius:3px;transition:width .3s ease}
+.cli-card-foot{font-size:11px;color:var(--tx3);font-weight:700;white-space:nowrap;flex-shrink:0}
 .cli-card-empty{grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--tx3);font-size:12.5px}
 .st-PAGATO{background:rgba(0,229,138,.1);color:var(--green);border:1px solid rgba(0,229,138,.25)}
 .st-PAGATO:hover{background:rgba(0,229,138,.2)}
@@ -1009,13 +1010,14 @@ function renderPocketDetail(c){
         var cardCol=PALETTE[i%PALETTE.length];
         var badge=giaPagato?{t:'&#10003; concluso',c:'var(--green)',bg:'rgba(0,229,138,.1)'}:pronto?{t:'quasi concluso',c:'var(--green)',bg:'rgba(0,229,138,.08)'}:righe.length>0?{t:'in corso',c:'var(--blue)',bg:'rgba(79,157,255,.1)'}:{t:'nuovo',c:'var(--tx3)',bg:'rgba(255,255,255,.05)'};
         return '<div class="cli-card" style="--cli-col:'+cardCol+';animation-delay:'+(i*0.03)+'s" onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')">'+
-          '<div class="cli-card-top">'+
-            '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
-            '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px">'+badge.t+'</span>'+
+          '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
+          '<div class="cli-card-mid">'+
+            '<div class="cli-card-nm">'+cl+'</div>'+
+            '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctRow+'%;background:'+(pronto||giaPagato?'var(--green)':cardCol)+'"></div></div>'+
           '</div>'+
-          '<div class="cli-card-nm">'+cl+'</div>'+
-          '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctRow+'%;background:'+(pronto||giaPagato?'var(--green)':cardCol)+'"></div></div>'+
-          '<div class="cli-card-foot"><span>'+righe.length+' siti</span></div></div>';
+          '<div class="cli-card-foot">'+righe.length+' siti</div>'+
+          '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px;flex-shrink:0">'+badge.t+'</span>'+
+        '</div>';
       }).join('')+'</div></div>';
   }else{
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:14px">'+
@@ -1330,15 +1332,14 @@ function renderDetail(cid){
         var badge=doneAll?{t:'&#10003; completo',c:'var(--green)',bg:'rgba(0,229,138,.1)'}:cd.scaduti>0?{t:cd.scaduti+' scaduto'+(cd.scaduti>1?'i':''),c:'var(--red)',bg:'rgba(255,87,87,.1)'}:cd.rows.length>0?{t:'in corso',c:'var(--blue)',bg:'rgba(79,157,255,.1)'}:{t:'nuovo',c:'var(--tx3)',bg:'rgba(255,255,255,.05)'};
         var pctDone=cd.rows.length>0?Math.round(cd.pagati/cd.rows.length*100):0;
         return '<div class="cli-card" style="--cli-col:'+cardCol+';animation-delay:'+(i*0.03)+'s" onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')">'+
-          '<div class="cli-card-top">'+
-            '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
-            '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px">'+badge.t+'</span>'+
+          '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
+          '<div class="cli-card-mid">'+
+            '<div class="cli-card-nm">'+cd.cliente+'</div>'+
+            '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctDone+'%;background:'+(doneAll?'var(--green)':cardCol)+'"></div></div>'+
           '</div>'+
-          '<div class="cli-card-nm">'+cd.cliente+'</div>'+
-          '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctDone+'%;background:'+(doneAll?'var(--green)':cardCol)+'"></div></div>'+
-          '<div class="cli-card-foot"><span>'+cd.pagati+' / '+cd.rows.length+' siti fatti</span>'+
-          (cd.inc>0?'<span style="color:var(--green);font-weight:800">€ '+fmt(cd.inc)+'</span>':'')+
-          '</div></div>';
+          '<div class="cli-card-foot">'+cd.pagati+' / '+cd.rows.length+' siti'+(cd.inc>0?' &middot; <span style="color:var(--green);font-weight:800">€ '+fmt(cd.inc)+'</span>':'')+'</div>'+
+          '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px;flex-shrink:0">'+badge.t+'</span>'+
+        '</div>';
       }).join('')+'</div>';
     }
     html+='</div>';
