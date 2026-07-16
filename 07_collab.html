@@ -383,7 +383,8 @@ var LOCAL_USERS = {
   'serena@mbbet.it':          { password: 'Mbbet2024!', nome: 'Serena',    ruolo: 'OPERATORE' },
   'samuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Samuele',   ruolo: 'COLLAB' },
   'alan@mbbet.it':            { password: 'Mbbet2026!', nome: 'Alan', ruolo: 'COLLAB_SELF', collabNome: 'Alan' },
-  'isma@mbbet.it':            { password: 'Mbbet2026!', nome: 'Isma', ruolo: 'COLLAB_SELF', collabNome: 'Isma' }
+  'isma@mbbet.it':            { password: 'Mbbet2026!', nome: 'Isma', ruolo: 'COLLAB_SELF', collabNome: 'Isma' },
+  'lorenzo@mbbet.it':         { password: 'Mbbet2026!', nome: 'Lorenzo Cestola', ruolo: 'COLLAB_SELF', collabNome: 'Lorenzo Cestola' }
 };
 
 var SESSION_KEY = 'mbbet_v2_session';
@@ -916,10 +917,12 @@ async function pagaClientePocket(cliente,cid){
   if(!c)return;
   var righe=bnsForCollab(c).filter(function(b){return (b.cliente||'')===cliente&&b.pocket_stato==='ACCUMULATO';});
   var totale=righe.reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
-  var splitGas=0,splitAltro=0;
-  if(c.nome==='Ale e Fede'){splitAltro=125;splitGas=75;}else{splitGas=200;}
+  var splitGas=0,splitAltro=0,dettaglio='200 Gas';
+  if(c.nome==='Ale e Fede'){splitAltro=125;splitGas=75;dettaglio='125 Ale e Fede + 75 Gas';}
+  else if(c.nome==='Lorenzo Cestola'){splitAltro=25;splitGas=75;dettaglio='25 Lorenzo Cestola + 75 Gas';}
+  else{splitGas=200;}
   var msg='Confermi il pagamento di '+cliente+'?\n\nAccumulato: € '+fmt(totale)+'\n'+
-    (c.nome==='Ale e Fede'?'Ale e Fede: € 125,00\nGas (override): € 75,00':'Gas: € 200,00');
+    (splitAltro?c.nome+': € '+fmt(splitAltro)+'\nGas (override): € '+fmt(splitGas):'Gas: € '+fmt(splitGas));
   if(!confirm(msg))return;
   for(var i=0;i<righe.length;i++){
     righe[i].pocket_stato='PAGATO';
@@ -929,7 +932,7 @@ async function pagaClientePocket(cliente,cid){
     await db.from('collab_payout').insert({
       cliente:cliente,nome_collab:c.nome,importo_totale:POCKET_SOGLIA,
       split_gas:splitGas,split_altro:splitAltro,
-      dettaglio:(c.nome==='Ale e Fede'?'125 Ale e Fede + 75 Gas':'200 Gas'),
+      dettaglio:dettaglio,
       created_by:currentNome||null
     });
   }catch(e){}

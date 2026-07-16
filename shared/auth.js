@@ -15,7 +15,8 @@ var LOCAL_USERS = {
   'serena@mbbet.it':          { password: 'Mbbet2024!', nome: 'Serena',    ruolo: 'OPERATORE' },
   'samuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Samuele',   ruolo: 'COLLAB' },
   'alan@mbbet.it':            { password: 'Mbbet2026!', nome: 'Alan', ruolo: 'COLLAB_SELF', collabNome: 'Alan' },
-  'isma@mbbet.it':            { password: 'Mbbet2026!', nome: 'Isma', ruolo: 'COLLAB_SELF', collabNome: 'Isma' }
+  'isma@mbbet.it':            { password: 'Mbbet2026!', nome: 'Isma', ruolo: 'COLLAB_SELF', collabNome: 'Isma' },
+  'lorenzo@mbbet.it':         { password: 'Mbbet2026!', nome: 'Lorenzo Cestola', ruolo: 'COLLAB_SELF', collabNome: 'Lorenzo Cestola' }
 };
 
 var SESSION_KEY = 'mbbet_v2_session';
