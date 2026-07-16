@@ -390,6 +390,7 @@ async function loadData(){
 function login(){var em=(document.getElementById('li-e').value||'').trim();var pw=document.getElementById('li-p').value||'';var err=document.getElementById('l-err');err.textContent='';if(!em||!pw){err.textContent='Inserisci email e password';return;}var res=doLogin(em,pw);if(res.error){err.textContent=res.error;return;}boot();}
 
 function boot(){
+  if(!requireSection('team'))return;
   var _ls=document.getElementById('ls');if(_ls)_ls.setAttribute('style','display:none');
   var ini=(currentNome||'MB').split(' ').map(function(w){return w[0]||''}).join('').toUpperCase().slice(0,2);
   document.getElementById('tb-av').textContent=ini;

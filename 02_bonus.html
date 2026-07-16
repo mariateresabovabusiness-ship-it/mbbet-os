@@ -4880,6 +4880,7 @@ function login2(){
   boot();
 }
 function boot(){
+  if(!requireSection('bonus'))return;
   sf(function(){g('ls').style.display='none';});
   var nm=currentNome||'—';sf(function(){g('hdr-av').textContent=ini(nm);g('hdr-unm').textContent=nm;g('hdr-url').textContent=(currentRole||'').replace(/_/g,' ');});
   loadData();

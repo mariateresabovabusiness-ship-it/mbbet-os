@@ -590,7 +590,8 @@ var ROLE_SECTIONS = {
   'COLLAB':        ['clienti','bonus','social'],
   'REFERRAL':      ['report'],
   'VIEWER':        ['clienti'],
-  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social']
+  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social'],
+  'COLLAB_SELF':   ['collab']
 };
 
 var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
@@ -669,6 +670,12 @@ function navTo(url) {
 
 // ── Permessi ─────────────────────────────────────────────────────────────────
 function canAccess(s) { return (ROLE_SECTIONS[currentRole] || []).indexOf(s) >= 0; }
+function requireSection(s) {
+  if (canAccess(s)) return true;
+  alert('Non hai i permessi per accedere a questa sezione.');
+  window.location.href = 'index.html';
+  return false;
+}
 function isSocioAdmin() { return currentRole === 'SOCIO_ADMIN'; }
 function isSocio()      { return currentRole === 'SOCIO_ADMIN' || currentRole === 'SOCIO'; }
 function canWrite()     { return ['SOCIO_ADMIN','SOCIO','OPERATORE','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
@@ -1658,6 +1665,7 @@ function login(){
   boot();
 }
 function boot(){
+  if(!requireSection('finanze'))return;
   var ls=g('ls');if(ls)ls.style.display='none';
   var ini=(currentNome||'MB').split(' ').map(function(w){return w[0]||''}).join('').toUpperCase().slice(0,2);
   if(g('tb-av'))g('tb-av').textContent=ini;

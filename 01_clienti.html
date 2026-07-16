@@ -1510,6 +1510,7 @@ function login2(){
 }
 
 async function boot(){
+  if(!requireSection('clienti'))return;
   sf(function(){g('ls').style.display='none';});
   var nm=currentNome||'Maria Teresa Bova';
   var si=nm.trim().split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
