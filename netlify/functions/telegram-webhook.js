@@ -112,10 +112,10 @@ async function gestisciDomandaAI(token, msg, domanda) {
       })
     });
     const data = await res.json();
-    const risposta = (res.ok && data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '⚠️ Non sono riuscito a rispondere, riprova tra poco.';
+    const risposta = (res.ok && data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '⚠️ DEBUG status=' + res.status + ' body=' + JSON.stringify(data).slice(0, 300);
     await tg(token, 'sendMessage', { chat_id: chatId, text: risposta });
   } catch (e) {
-    await tg(token, 'sendMessage', { chat_id: chatId, text: '⚠️ Errore nel contattare l\'assistente, riprova tra poco.' });
+    await tg(token, 'sendMessage', { chat_id: chatId, text: '⚠️ DEBUG exception: ' + String(e && e.message || e) });
   }
 }
 
