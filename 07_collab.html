@@ -966,7 +966,7 @@ function renderPocketDetail(c){
     '<div style="width:46px;height:46px;border-radius:12px;background:'+col+'22;border:2px solid '+col+'55;color:'+col+
       ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+((c.nome||'?')[0]).toUpperCase()+'</div>'+
     '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
-    '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">Modello a soglia: si accumula sito per sito, si paga quando un cliente arriva a € '+POCKET_SOGLIA+'</div></div></div>'+
+    '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+(isReadOnlyCollab()?'Ogni sito completato avvicina il cliente al traguardo':'Modello a soglia: si accumula sito per sito, si paga quando un cliente arriva a € '+POCKET_SOGLIA)+'</div></div></div>'+
     (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
     (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11.5px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(245,200,66,.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
@@ -987,7 +987,8 @@ function renderPocketDetail(c){
     '<thead><tr style="background:rgba(255,255,255,.025)">'+
     '<th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
-    '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">ACCUMULATO</th>'+
+    (isReadOnlyCollab()?'<th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PROGRESSO</th>':
+      '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">ACCUMULATO</th>')+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '</tr></thead><tbody>';
 
@@ -997,13 +998,16 @@ function renderPocketDetail(c){
       .reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
     var giaPagato=righe.some(function(b){return b.pocket_stato==='PAGATO';});
     var pronto=accumulato>=POCKET_SOGLIA&&!giaPagato;
+    var pctRow=Math.min(100,accumulato/POCKET_SOGLIA*100);
     html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')" style="cursor:pointer;transition:.12s" onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" onmouseout="this.style.background=\'transparent\'">'+
       '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--tx);font-size:13px"><span style="color:var(--gold);margin-right:6px">&#8594;</span>'+cl+'</td>'+
       '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);font-weight:700">'+righe.length+'</td>'+
-      '<td style="padding:11px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</td>'+
+      (isReadOnlyCollab()?
+        '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><div style="height:7px;width:100%;max-width:160px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pctRow+'%;background:'+(pronto||giaPagato?'var(--green)':col)+'"></div></div></td>':
+        '<td style="padding:11px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</td>')+
       '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; pagato</span>':
-         pronto?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3);background:rgba(0,229,138,.08)">pronto a pagare</span>':
+        (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; '+(isReadOnlyCollab()?'concluso':'pagato')+'</span>':
+         pronto?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3);background:rgba(0,229,138,.08)">'+(isReadOnlyCollab()?'quasi concluso':'pronto a pagare')+'</span>':
          '<span class="badge-nuovo">in corso</span>')+
       '</td></tr>';
   });
@@ -1037,12 +1041,14 @@ function renderPocketCliente(cid,clienteEnc){
 
   html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;padding:14px 18px;background:rgba(10,13,32,.9);border:1px solid '+(pronto?'rgba(0,229,138,.4)':'rgba(255,255,255,.07)')+';border-radius:12px">'+
     '<div><div style="font-size:16px;font-weight:900;color:var(--tx)">'+cliente+'</div>'+
-    '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+(c.nome||'')+' &middot; pocket a '+POCKET_SOGLIA+'&euro;</div></div>'+
+    '<div style="font-size:10.5px;color:var(--tx3);margin-top:2px">'+(c.nome||'')+'</div></div>'+
     '<div style="display:flex;align-items:center;gap:14px">'+
-    '<div style="text-align:right"><div style="font-size:20px;font-weight:900;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</div>'+
+    (isReadOnlyCollab()?('<div style="text-align:right"><div style="height:7px;width:140px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(pronto||giaPagato?'var(--green)':col)+'"></div></div></div>'+
+      (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; concluso</span>':pronto?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3);background:rgba(0,229,138,.08)">quasi concluso</span>':'<span class="badge-nuovo">in corso</span>')):
+    ('<div style="text-align:right"><div style="font-size:20px;font-weight:900;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</div>'+
     '<div style="height:6px;width:140px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:4px"><div style="height:100%;width:'+pct+'%;background:'+(pronto?'var(--green)':col)+'"></div></div></div>'+
     (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; pagato</span>':
-      pronto&&!isReadOnlyCollab()?'<button onclick="pagaClientePocket(\''+cliente.replace(/'/g,"\\'")+'\',\''+cid+'\')" style="padding:8px 18px;background:linear-gradient(135deg,#00c07a,var(--green));border:none;border-radius:8px;color:#001a0e;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">&#128176; Paga Cliente ('+POCKET_SOGLIA+'&euro;)</button>':'')+
+      pronto?'<button onclick="pagaClientePocket(\''+cliente.replace(/'/g,"\\'")+'\',\''+cid+'\')" style="padding:8px 18px;background:linear-gradient(135deg,#00c07a,var(--green));border:none;border-radius:8px;color:#001a0e;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">&#128176; Paga Cliente ('+POCKET_SOGLIA+'&euro;)</button>':'')))+
     '</div></div>';
 
   // Mostra SEMPRE tutti i siti del listino per questo cliente, in una
@@ -1060,7 +1066,7 @@ function renderPocketCliente(cid,clienteEnc){
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">PASSWORD</th>'+
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">DATA</th>'+
-    '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>'+
+    (!isReadOnlyCollab()?'<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:right;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">IMPORTO</th>':'')+
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '<th style="padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.06)"></th>'+
     '</tr></thead><tbody>';
@@ -1075,7 +1081,7 @@ function renderPocketCliente(cid,clienteEnc){
         '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
         '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
         '<td colspan="3" data-lbl="STATO" style="padding:8px 10px;font-size:10.5px;color:var(--tx3);font-style:italic;border-bottom:1px solid rgba(255,255,255,.04)">non ancora fatto</td>'+
-        '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
+        (!isReadOnlyCollab()?'<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>':'')+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
@@ -1096,7 +1102,7 @@ function renderPocketCliente(cid,clienteEnc){
         (b.password_bk?'<span id="pw_'+b.id+'" style="font-family:monospace;color:var(--purple);cursor:pointer;letter-spacing:2px" onclick="this.textContent=this.textContent===\'••••••\'?\''+b.password_bk+'\':\'••••••\'" title="Clicca per mostrare">••••••</span>':'<span style="color:rgba(255,255,255,.2);font-size:10px;font-style:italic">—</span>')+
       '</td>'+
       '<td data-lbl="DATA" style="padding:8px 10px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
-      '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      (!isReadOnlyCollab()?'<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--gold);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>':'')+
       '<td data-lbl="STATO" style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (st?'<span style="padding:4px 10px;border-radius:999px;background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:800;white-space:nowrap">'+badgeLabel+'</span>':
           (isReadOnlyCollab()?'<span style="font-size:10px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">Metti da parte</button>'))+
@@ -1196,7 +1202,10 @@ function renderDetail(cid){
 
   var html='';
 
-  // BENVENUTO PERSONALIZZATO (solo per il collaboratore stesso)
+  // BENVENUTO PERSONALIZZATO (solo per il collaboratore stesso) — questo è
+  // il modello FLAT/percentuale (Alan, Isma): qui gli importi restano
+  // visibili, a differenza del modello POCKET (Gas/Ale e Fede/Lorenzo) dove
+  // sono nascosti perché condivisi con altri.
   if(isReadOnlyCollab()){
     html+='<div class="welcome-banner">'+
       '<div><div class="welcome-hi">Ciao <span>'+(c.nome||'')+'</span> &#128075;</div>'+
@@ -1233,7 +1242,7 @@ function renderDetail(cid){
     html+='</div>';
   }
 
-  // KPI
+  // KPI (Alan/Isma vedono gli importi regolarmente)
   html+='<div class="kpi-strip" style="margin-bottom:24px">'+[
     {l:'CLIENTI TOTALI',v:bns.length,c:col,s:bkList.length+' siti',ic:'&#128101;'},
     {l:'PAGATI',v:totPagati,c:'#00e58a',s:'€ '+fmt(totInc)+' incassati',ic:'&#9989;'},
