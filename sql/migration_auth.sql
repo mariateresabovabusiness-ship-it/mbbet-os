@@ -1,6 +1,6 @@
 -- ═══════════════════════════════════════════════════════════════════
 --   CRM MBBET · Migration AUTH — Supabase Auth + Ruoli + RLS
---   Data: 2026-07-01
+--   Data: 2026-07-01 (corretta 2026-07-17)
 --
 --   SAFE:
 --   • non elimina dati esistenti
@@ -8,6 +8,9 @@
 --   • aggiunge policy authenticated in parallelo
 --   • usa security definer per evitare ricorsione RLS
 --   • rollback incluso in fondo (commentato)
+--   • RIESEGUIBILE senza errori: ogni "create policy" è avvolta in un blocco
+--     che ignora l'errore "esiste già", perché non è certo quali parti di
+--     questo file siano già state eseguite in precedenza.
 -- ═══════════════════════════════════════════════════════════════════
 
 
@@ -165,20 +168,22 @@ $$;
 
 alter table utenti_crm enable row level security;
 
--- Lettura: sé stesso OPPURE se sei admin
-create policy "utenti_select" on utenti_crm
-  for select to authenticated
-  using (
-    auth_user_id = auth.uid()
-    or is_socio_admin()
-    or get_current_user_role() = 'ADMIN_TECNICO'
-  );
+do $$ begin
+  create policy "utenti_select" on utenti_crm
+    for select to authenticated
+    using (
+      auth_user_id = auth.uid()
+      or is_socio_admin()
+      or get_current_user_role() = 'ADMIN_TECNICO'
+    );
+exception when duplicate_object then null; end $$;
 
--- Scrittura: solo SOCIO_ADMIN e ADMIN_TECNICO
-create policy "utenti_write" on utenti_crm
-  for all to authenticated
-  using (is_socio_admin() or get_current_user_role() = 'ADMIN_TECNICO')
-  with check (is_socio_admin() or get_current_user_role() = 'ADMIN_TECNICO');
+do $$ begin
+  create policy "utenti_write" on utenti_crm
+    for all to authenticated
+    using (is_socio_admin() or get_current_user_role() = 'ADMIN_TECNICO')
+    with check (is_socio_admin() or get_current_user_role() = 'ADMIN_TECNICO');
+exception when duplicate_object then null; end $$;
 
 -- Accesso anon: nessuno (utenti_crm è sensibile)
 -- (nessuna policy anon → negato di default)
@@ -192,195 +197,242 @@ create policy "utenti_write" on utenti_crm
 -- REFERRAL: solo dove id_referral = suo referral
 -- ════════════════════════════════════════════════════════════════════
 
--- SELECT
-create policy "clienti_select_soci" on clienti
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "clienti_select_soci" on clienti
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "clienti_select_operatore" on clienti
-  for select to authenticated
-  using (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "clienti_select_operatore" on clienti
+    for select to authenticated
+    using (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "clienti_select_referral" on clienti
-  for select to authenticated
-  using (
-    get_current_user_role() = 'REFERRAL'
-    and id_referral = get_current_referral_id()
-  );
+do $$ begin
+  create policy "clienti_select_referral" on clienti
+    for select to authenticated
+    using (
+      get_current_user_role() = 'REFERRAL'
+      and id_referral = get_current_referral_id()
+    );
+exception when duplicate_object then null; end $$;
 
 -- INSERT: soci + operatori (l'operatore può inserire solo con sé stesso)
-create policy "clienti_insert" on clienti
-  for insert to authenticated
-  with check (
-    is_socio_or_above()
-    or (
-      get_current_user_role() = 'OPERATORE'
-      and operatore = get_current_operatore_nome()
-    )
-  );
+do $$ begin
+  create policy "clienti_insert" on clienti
+    for insert to authenticated
+    with check (
+      is_socio_or_above()
+      or (
+        get_current_user_role() = 'OPERATORE'
+        and operatore = get_current_operatore_nome()
+      )
+    );
+exception when duplicate_object then null; end $$;
 
 -- UPDATE: soci + operatore sui propri
-create policy "clienti_update" on clienti
-  for update to authenticated
-  using (
-    is_socio_or_above()
-    or (
-      get_current_user_role() = 'OPERATORE'
-      and operatore = get_current_operatore_nome()
+do $$ begin
+  create policy "clienti_update" on clienti
+    for update to authenticated
+    using (
+      is_socio_or_above()
+      or (
+        get_current_user_role() = 'OPERATORE'
+        and operatore = get_current_operatore_nome()
+      )
     )
-  )
-  with check (
-    is_socio_or_above()
-    or (
-      get_current_user_role() = 'OPERATORE'
-      and operatore = get_current_operatore_nome()
-    )
-  );
+    with check (
+      is_socio_or_above()
+      or (
+        get_current_user_role() = 'OPERATORE'
+        and operatore = get_current_operatore_nome()
+      )
+    );
+exception when duplicate_object then null; end $$;
 
 -- DELETE: solo SOCIO_ADMIN
-create policy "clienti_delete" on clienti
-  for delete to authenticated
-  using (is_socio_admin());
+do $$ begin
+  create policy "clienti_delete" on clienti
+    for delete to authenticated
+    using (is_socio_admin());
+exception when duplicate_object then null; end $$;
 
 
 -- ════════════════════════════════════════════════════════════════════
 -- PARTE E — RLS su BONUS
 -- ════════════════════════════════════════════════════════════════════
 
-create policy "bonus_select_soci" on bonus
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "bonus_select_soci" on bonus
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "bonus_select_operatore" on bonus
-  for select to authenticated
-  using (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "bonus_select_operatore" on bonus
+    for select to authenticated
+    using (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "bonus_select_referral" on bonus
-  for select to authenticated
-  using (
-    get_current_user_role() = 'REFERRAL'
-    and id_referral = get_current_referral_id()
-  );
+do $$ begin
+  create policy "bonus_select_referral" on bonus
+    for select to authenticated
+    using (
+      get_current_user_role() = 'REFERRAL'
+      and id_referral = get_current_referral_id()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "bonus_write_soci" on bonus
-  for all to authenticated
-  using (is_socio_or_above())
-  with check (is_socio_or_above());
+do $$ begin
+  create policy "bonus_write_soci" on bonus
+    for all to authenticated
+    using (is_socio_or_above())
+    with check (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "bonus_write_operatore" on bonus
-  for insert to authenticated
-  with check (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "bonus_write_operatore" on bonus
+    for insert to authenticated
+    with check (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "bonus_update_operatore" on bonus
-  for update to authenticated
-  using (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  )
-  with check (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "bonus_update_operatore" on bonus
+    for update to authenticated
+    using (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    )
+    with check (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
 
 -- ════════════════════════════════════════════════════════════════════
 -- PARTE F — RLS su TASK
 -- ════════════════════════════════════════════════════════════════════
 
-create policy "task_select_soci" on task
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "task_select_soci" on task
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "task_select_operatore" on task
-  for select to authenticated
-  using (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "task_select_operatore" on task
+    for select to authenticated
+    using (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "task_write" on task
-  for all to authenticated
-  using (
-    is_socio_or_above()
-    or (get_current_user_role() = 'OPERATORE' and operatore = get_current_operatore_nome())
-  )
-  with check (
-    is_socio_or_above()
-    or (get_current_user_role() = 'OPERATORE' and operatore = get_current_operatore_nome())
-  );
+do $$ begin
+  create policy "task_write" on task
+    for all to authenticated
+    using (
+      is_socio_or_above()
+      or (get_current_user_role() = 'OPERATORE' and operatore = get_current_operatore_nome())
+    )
+    with check (
+      is_socio_or_above()
+      or (get_current_user_role() = 'OPERATORE' and operatore = get_current_operatore_nome())
+    );
+exception when duplicate_object then null; end $$;
 
 
 -- ════════════════════════════════════════════════════════════════════
 -- PARTE G — RLS su PAGAMENTI (solo soci e admin)
 -- ════════════════════════════════════════════════════════════════════
 
-create policy "pagamenti_select_soci" on pagamenti
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "pagamenti_select_soci" on pagamenti
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "pagamenti_select_operatore" on pagamenti
-  for select to authenticated
-  using (
-    get_current_user_role() = 'OPERATORE'
-    and beneficiario = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "pagamenti_select_operatore" on pagamenti
+    for select to authenticated
+    using (
+      get_current_user_role() = 'OPERATORE'
+      and beneficiario = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "pagamenti_write_soci" on pagamenti
-  for all to authenticated
-  using (is_socio_or_above())
-  with check (is_socio_or_above());
+do $$ begin
+  create policy "pagamenti_write_soci" on pagamenti
+    for all to authenticated
+    using (is_socio_or_above())
+    with check (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
 
 -- ════════════════════════════════════════════════════════════════════
 -- PARTE H — RLS su COLLAB
 -- ════════════════════════════════════════════════════════════════════
 
-create policy "collab_select_soci" on collab
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "collab_select_soci" on collab
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
 -- La collab vede solo sé stessa
-create policy "collab_select_self" on collab
-  for select to authenticated
-  using (
-    get_current_user_role() = 'COLLAB'
-    and id = get_current_collab_id()
-  );
+do $$ begin
+  create policy "collab_select_self" on collab
+    for select to authenticated
+    using (
+      get_current_user_role() = 'COLLAB'
+      and id = get_current_collab_id()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "collab_write_soci" on collab
-  for all to authenticated
-  using (is_socio_or_above())
-  with check (is_socio_or_above());
+do $$ begin
+  create policy "collab_write_soci" on collab
+    for all to authenticated
+    using (is_socio_or_above())
+    with check (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
 
 -- ════════════════════════════════════════════════════════════════════
 -- PARTE I — RLS su REFERRAL
 -- ════════════════════════════════════════════════════════════════════
 
-create policy "referral_select_soci" on referral
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "referral_select_soci" on referral
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "referral_select_self" on referral
-  for select to authenticated
-  using (
-    get_current_user_role() = 'REFERRAL'
-    and id = get_current_referral_id()
-  );
+do $$ begin
+  create policy "referral_select_self" on referral
+    for select to authenticated
+    using (
+      get_current_user_role() = 'REFERRAL'
+      and id = get_current_referral_id()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "referral_write_soci" on referral
-  for all to authenticated
-  using (is_socio_or_above())
-  with check (is_socio_or_above());
+do $$ begin
+  create policy "referral_write_soci" on referral
+    for all to authenticated
+    using (is_socio_or_above())
+    with check (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
 
 -- ════════════════════════════════════════════════════════════════════
@@ -389,23 +441,33 @@ create policy "referral_write_soci" on referral
 
 do $$ begin
   if exists (select 1 from pg_tables where tablename='documenti' and schemaname='public') then
-    execute '
-      create policy "documenti_select_soci" on documenti
-        for select to authenticated
-        using (is_socio_or_above());
+    begin
+      execute '
+        create policy "documenti_select_soci" on documenti
+          for select to authenticated
+          using (is_socio_or_above());
+      ';
+    exception when duplicate_object then null; end;
 
-      create policy "documenti_select_operatore" on documenti
-        for select to authenticated
-        using (
-          get_current_user_role() = ''OPERATORE''
-          and operatore = get_current_operatore_nome()
-        );
+    begin
+      execute '
+        create policy "documenti_select_operatore" on documenti
+          for select to authenticated
+          using (
+            get_current_user_role() = ''OPERATORE''
+            and operatore = get_current_operatore_nome()
+          );
+      ';
+    exception when duplicate_object then null; end;
 
-      create policy "documenti_write_soci" on documenti
-        for all to authenticated
-        using (is_socio_or_above())
-        with check (is_socio_or_above());
-    ';
+    begin
+      execute '
+        create policy "documenti_write_soci" on documenti
+          for all to authenticated
+          using (is_socio_or_above())
+          with check (is_socio_or_above());
+      ';
+    exception when duplicate_object then null; end;
   end if;
 end $$;
 
@@ -415,61 +477,81 @@ end $$;
 -- ════════════════════════════════════════════════════════════════════
 
 -- Penali: soci + operatore coinvolto
-create policy "penali_select_soci" on penali
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "penali_select_soci" on penali
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "penali_select_operatore" on penali
-  for select to authenticated
-  using (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "penali_select_operatore" on penali
+    for select to authenticated
+    using (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "penali_write_soci" on penali
-  for all to authenticated
-  using (is_socio_or_above())
-  with check (is_socio_or_above());
+do $$ begin
+  create policy "penali_write_soci" on penali
+    for all to authenticated
+    using (is_socio_or_above())
+    with check (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
 -- Notifiche: ognuno vede le proprie + quelle broadcast (destinatario null)
-create policy "notifiche_select" on notifiche
-  for select to authenticated
-  using (
-    is_socio_or_above()
-    or destinatario is null
-    or destinatario = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "notifiche_select" on notifiche
+    for select to authenticated
+    using (
+      is_socio_or_above()
+      or destinatario is null
+      or destinatario = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "notifiche_write" on notifiche
-  for insert to authenticated
-  with check (true); -- chiunque autenticato può creare notifiche
+do $$ begin
+  create policy "notifiche_write" on notifiche
+    for insert to authenticated
+    with check (true); -- chiunque autenticato può creare notifiche
+exception when duplicate_object then null; end $$;
 
 -- Etica economica: solo soci (dati finanziari sensibili)
-create policy "etica_select_soci" on etica_economica
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "etica_select_soci" on etica_economica
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "etica_write_soci" on etica_economica
-  for all to authenticated
-  using (is_socio_or_above())
-  with check (is_socio_or_above());
+do $$ begin
+  create policy "etica_write_soci" on etica_economica
+    for all to authenticated
+    using (is_socio_or_above())
+    with check (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
 -- Clienti inattivi: soci + operatore assegnato
-create policy "inattivi_select_soci" on clienti_inattivi
-  for select to authenticated
-  using (is_socio_or_above());
+do $$ begin
+  create policy "inattivi_select_soci" on clienti_inattivi
+    for select to authenticated
+    using (is_socio_or_above());
+exception when duplicate_object then null; end $$;
 
-create policy "inattivi_select_operatore" on clienti_inattivi
-  for select to authenticated
-  using (
-    get_current_user_role() = 'OPERATORE'
-    and operatore = get_current_operatore_nome()
-  );
+do $$ begin
+  create policy "inattivi_select_operatore" on clienti_inattivi
+    for select to authenticated
+    using (
+      get_current_user_role() = 'OPERATORE'
+      and operatore = get_current_operatore_nome()
+    );
+exception when duplicate_object then null; end $$;
 
-create policy "inattivi_write" on clienti_inattivi
-  for all to authenticated
-  using (can_write())
-  with check (can_write());
+do $$ begin
+  create policy "inattivi_write" on clienti_inattivi
+    for all to authenticated
+    using (can_write())
+    with check (can_write());
+exception when duplicate_object then null; end $$;
 
 
 -- ════════════════════════════════════════════════════════════════════
