@@ -574,14 +574,16 @@ exception when duplicate_object then null; end $$;
 -- I 10 operatori reali sotto sono le persone già in `operatori` senza alcun
 -- login oggi (esclusa "Mari+Samu", non una persona distinta ma un'etichetta
 -- congiunta Mary+Samuele già coperta dai loro account).
+-- Manuele/Serena/Samuele: ESCLUSI per decisione esplicita di Mary — non devono
+-- avere un vero account Supabase Auth, quindi via anche da utenti_crm (righe
+-- rimosse sotto se già presenti da un run precedente).
 -- ════════════════════════════════════════════════════════════════════
+
+delete from utenti_crm where email in ('manuele@mbbet.it','serena@mbbet.it','samuele@mbbet.it');
 
 insert into utenti_crm (email, nome, ruolo, operatore_id, collab_id, attivo)
 values
   ('mariateresabova.business@gmail.com', 'Mary Bova',                  'SOCIO_ADMIN', null,     null,          true),
-  ('manuele@mbbet.it',                   'Manuele',                    'SOCIO',       null,     null,          true),
-  ('serena@mbbet.it',                    'Serena',                     'SOCIO',       null,     null,          true),
-  ('samuele@mbbet.it',                   'Samuele',                    'COLLAB',      null,     null,          true),
   ('alan@mbbet.it',                      'Alan',                       'COLLAB_SELF', null,     'COLLAB-001',  true),
   ('isma@mbbet.it',                      'Isma',                       'COLLAB_SELF', null,     'COLLAB-004',  true),
   ('lorenzo@mbbet.it',                   'Lorenzo Cestola',            'COLLAB_SELF', null,     'COLLAB-005',  true),
