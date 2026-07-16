@@ -993,7 +993,7 @@ function renderPocketDetail(c){
       .reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
     var giaPagato=righe.some(function(b){return b.pocket_stato==='PAGATO';});
     var pronto=accumulato>=POCKET_SOGLIA&&!giaPagato;
-    html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl)+'\')" style="cursor:pointer;transition:.12s" onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" onmouseout="this.style.background=\'transparent\'">'+
+    html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')" style="cursor:pointer;transition:.12s" onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" onmouseout="this.style.background=\'transparent\'">'+
       '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--tx);font-size:13px"><span style="color:var(--gold);margin-right:6px">&#8594;</span>'+cl+'</td>'+
       '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);font-weight:700">'+righe.length+'</td>'+
       '<td style="padding:11px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</td>'+
@@ -1280,7 +1280,11 @@ function renderDetail(cid){
     '</tr></thead><tbody>';
 
   clientiListFlat.forEach(function(cd){
-    var clEnc=encodeURIComponent(cd.cliente);
+    /* encodeURIComponent NON scappa l'apostrofo (') — nomi come "Nicolò
+       Vitali" (nessun problema) o "D'Urso"/"Nicolò'" con apostrofo rompono
+       l'attributo onclick a virgolette singole. %27 risolve e si decodifica
+       comunque correttamente con decodeURIComponent. */
+    var clEnc=encodeURIComponent(cd.cliente).replace(/'/g,'%27');
     html+='<tr onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')" style="cursor:pointer;transition:.12s" '+
       'onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" '+
       'onmouseout="this.style.background=\'transparent\'">'+
