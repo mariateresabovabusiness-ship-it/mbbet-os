@@ -133,6 +133,20 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .alan-kpi-lbl{font-size:12px;font-weight:800;color:var(--tx3);letter-spacing:1.5px}
 .alan-kpi-val{font-size:34px;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}
 .alan-kpi-sub{font-size:10.5px;color:var(--tx3);margin-top:7px}
+/* Vista personale del collaboratore: griglia di card cliente al posto
+   della tabella densa (quella resta per Mary/admin, più adatta a gestire
+   molti dati insieme). */
+.cli-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-bottom:6px}
+.cli-card{background:rgba(10,13,32,.96);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;cursor:pointer;transition:.18s;animation:fadeUp .35s ease both;position:relative;overflow:hidden}
+.cli-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cli-col,var(--gold));opacity:.6}
+.cli-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.18);box-shadow:0 14px 30px rgba(0,0,0,.35)}
+.cli-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cli-card-av{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;border:1.5px solid;flex-shrink:0}
+.cli-card-nm{font-size:14.5px;font-weight:800;color:var(--tx);margin-bottom:10px;line-height:1.25;min-height:37px;display:flex;align-items:center}
+.cli-card-bar{height:7px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:8px}
+.cli-card-bar-fill{height:100%;border-radius:4px;transition:width .3s ease}
+.cli-card-foot{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--tx3);font-weight:700}
+.cli-card-empty{grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--tx3);font-size:12.5px}
 .st-PAGATO{background:rgba(0,229,138,.1);color:var(--green);border:1px solid rgba(0,229,138,.25)}
 .st-PAGATO:hover{background:rgba(0,229,138,.2)}
 .st-IN_CORSO{background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.25)}
@@ -979,6 +993,31 @@ function renderPocketDetail(c){
     return;
   }
 
+  if(isReadOnlyCollab()){
+    html+='<div style="margin-bottom:6px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+      '<span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">I TUOI CLIENTI</span>'+
+      '<span style="font-size:10.5px;color:var(--tx3)">clicca per aprire</span></div>'+
+      '<div class="cli-card-grid">'+nomiClienti.map(function(cl,i){
+        var righe=byCliente[cl];
+        var accumulato=righe.filter(function(b){return b.pocket_stato==='ACCUMULATO'||b.pocket_stato==='PAGATO';})
+          .reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
+        var giaPagato=righe.some(function(b){return b.pocket_stato==='PAGATO';});
+        var pronto=accumulato>=POCKET_SOGLIA&&!giaPagato;
+        var pctRow=Math.min(100,accumulato/POCKET_SOGLIA*100);
+        var initials=cl.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
+        var cardCol=PALETTE[i%PALETTE.length];
+        var badge=giaPagato?{t:'&#10003; concluso',c:'var(--green)',bg:'rgba(0,229,138,.1)'}:pronto?{t:'quasi concluso',c:'var(--green)',bg:'rgba(0,229,138,.08)'}:righe.length>0?{t:'in corso',c:'var(--blue)',bg:'rgba(79,157,255,.1)'}:{t:'nuovo',c:'var(--tx3)',bg:'rgba(255,255,255,.05)'};
+        return '<div class="cli-card" style="--cli-col:'+cardCol+';animation-delay:'+(i*0.03)+'s" onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')">'+
+          '<div class="cli-card-top">'+
+            '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
+            '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px">'+badge.t+'</span>'+
+          '</div>'+
+          '<div class="cli-card-nm">'+cl+'</div>'+
+          '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctRow+'%;background:'+(pronto||giaPagato?'var(--green)':cardCol)+'"></div></div>'+
+          '<div class="cli-card-foot"><span>'+righe.length+' siti</span></div></div>';
+      }).join('')+'</div></div>';
+  }else{
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:14px">'+
     '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">'+
     '<span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">CLIENTI</span>'+
@@ -987,8 +1026,7 @@ function renderPocketDetail(c){
     '<thead><tr style="background:rgba(255,255,255,.025)">'+
     '<th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
-    (isReadOnlyCollab()?'<th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PROGRESSO</th>':
-      '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">ACCUMULATO</th>')+
+    '<th style="padding:9px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">ACCUMULATO</th>'+
     '<th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">STATO</th>'+
     '</tr></thead><tbody>';
 
@@ -998,21 +1036,19 @@ function renderPocketDetail(c){
       .reduce(function(s,b){return s+(parseFloat(b.comp_referral)||0);},0);
     var giaPagato=righe.some(function(b){return b.pocket_stato==='PAGATO';});
     var pronto=accumulato>=POCKET_SOGLIA&&!giaPagato;
-    var pctRow=Math.min(100,accumulato/POCKET_SOGLIA*100);
     html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')" style="cursor:pointer;transition:.12s" onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" onmouseout="this.style.background=\'transparent\'">'+
       '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--tx);font-size:13px"><span style="color:var(--gold);margin-right:6px">&#8594;</span>'+cl+'</td>'+
       '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);font-weight:700">'+righe.length+'</td>'+
-      (isReadOnlyCollab()?
-        '<td style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.04)"><div style="height:7px;width:100%;max-width:160px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pctRow+'%;background:'+(pronto||giaPagato?'var(--green)':col)+'"></div></div></td>':
-        '<td style="padding:11px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</td>')+
+      '<td style="padding:11px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:'+(pronto?'var(--green)':'var(--gold)')+'">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</td>'+
       '<td style="padding:11px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; '+(isReadOnlyCollab()?'concluso':'pagato')+'</span>':
-         pronto?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3);background:rgba(0,229,138,.08)">'+(isReadOnlyCollab()?'quasi concluso':'pronto a pagare')+'</span>':
+        (giaPagato?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3)">&#10003; pagato</span>':
+         pronto?'<span class="badge-nuovo" style="color:var(--green);border-color:rgba(0,229,138,.3);background:rgba(0,229,138,.08)">pronto a pagare</span>':
          '<span class="badge-nuovo">in corso</span>')+
       '</td></tr>';
   });
 
   html+='</tbody></table></div></div>';
+  }
   if(!isReadOnlyCollab())html+='<div style="display:flex;justify-content:flex-end">'+nuovoClientePocketSelectHtml(c,null)+'</div>';
 
   g('collab-detail').innerHTML=html;
@@ -1278,6 +1314,35 @@ function renderDetail(cid){
   });
   var clientiListFlat=Object.values(byClienteFlat).sort(function(a,b){return b.rows.length-a.rows.length;});
 
+  if(isReadOnlyCollab()){
+    html+='<div style="margin-bottom:6px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+      '<span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">I TUOI CLIENTI</span>'+
+      '<span style="font-size:10.5px;color:var(--tx3)">clicca per aprire</span></div>';
+    if(!clientiListFlat.length){
+      html+='<div class="cli-card-empty">Nessun cliente ancora.</div>';
+    }else{
+      html+='<div class="cli-card-grid">'+clientiListFlat.map(function(cd,i){
+        var clEnc=encodeURIComponent(cd.cliente).replace(/'/g,'%27');
+        var initials=cd.cliente.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
+        var cardCol=PALETTE[i%PALETTE.length];
+        var doneAll=cd.rows.length>0&&cd.pagati===cd.rows.length;
+        var badge=doneAll?{t:'&#10003; completo',c:'var(--green)',bg:'rgba(0,229,138,.1)'}:cd.scaduti>0?{t:cd.scaduti+' scaduto'+(cd.scaduti>1?'i':''),c:'var(--red)',bg:'rgba(255,87,87,.1)'}:cd.rows.length>0?{t:'in corso',c:'var(--blue)',bg:'rgba(79,157,255,.1)'}:{t:'nuovo',c:'var(--tx3)',bg:'rgba(255,255,255,.05)'};
+        var pctDone=cd.rows.length>0?Math.round(cd.pagati/cd.rows.length*100):0;
+        return '<div class="cli-card" style="--cli-col:'+cardCol+';animation-delay:'+(i*0.03)+'s" onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')">'+
+          '<div class="cli-card-top">'+
+            '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
+            '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px">'+badge.t+'</span>'+
+          '</div>'+
+          '<div class="cli-card-nm">'+cd.cliente+'</div>'+
+          '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctDone+'%;background:'+(doneAll?'var(--green)':cardCol)+'"></div></div>'+
+          '<div class="cli-card-foot"><span>'+cd.pagati+' / '+cd.rows.length+' siti fatti</span>'+
+          (cd.inc>0?'<span style="color:var(--green);font-weight:800">€ '+fmt(cd.inc)+'</span>':'')+
+          '</div></div>';
+      }).join('')+'</div>';
+    }
+    html+='</div>';
+  }else{
   html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;margin-bottom:6px">'+
     '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between">'+
     '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">CLIENTI</span>'+
@@ -1325,9 +1390,10 @@ function renderDetail(cid){
   });
 
   html+='</tbody></table></div></div>';
+  }
 
-  // Legenda
-  html+='<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px 2px 0;border-top:1px solid rgba(255,255,255,.05)">'+
+  // Legenda (solo vista admin — nella vista a card non serve)
+  if(!isReadOnlyCollab())html+='<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px 2px 0;border-top:1px solid rgba(255,255,255,.05)">'+
     '<span style="font-size:11px;color:var(--tx3);font-weight:800;letter-spacing:.5px">STATI →</span>'+
     ['PAGATO','IN_CORSO','IN_SCADENZA','URGENTE','SCADUTO'].map(function(s){
       return '<span class="st-badge st-'+s+'" style="cursor:default">'+STATI_LABEL[s]+'</span>';
