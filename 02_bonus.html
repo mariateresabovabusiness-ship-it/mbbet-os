@@ -835,7 +835,7 @@ var FB_COLS=['#f7cc46','#5aaaff','#00f093','#22eeff','#c4a4f8','#ff9040','#00d4b
 var FB_RGBS=['247,204,70','90,170,255','0,240,147','34,238,255','196,164,248','255,144,64','0,212,176','255,79,128','255,79,79'];
 
 /* ── STATE ── */
-var BKS=[],OPS_LIST=[],BONUS_CLI=[],PROMO=[];
+var BKS=[],OPS_LIST=[],BONUS_CLI=[],PROMO=[],_opTelegram={};
 
 /* ── GUIDE BOOKMAKER ── testo incollato dall'utente per ogni BK ── */
 var _BK_GUIDE_PDF={
@@ -2237,7 +2237,7 @@ async function fetchAllBonus(){
 async function loadData(){
   var settled=await Promise.allSettled([
     db.from('bookmaker').select('*').eq('attivo',true).order('priorita_num',{ascending:true,nullsFirst:false}),
-    db.from('operatori').select('nome,colore,is_joint').eq('stato','Attivo'),
+    db.from('operatori').select('nome,colore,is_joint,telegram_chat_id').eq('stato','Attivo'),
     fetchAllBonus()
   ]);
   var rb=settled[0].status==='fulfilled'?settled[0].value:null;
@@ -2249,6 +2249,7 @@ async function loadData(){
 
   if(ro&&ro.data&&ro.data.length)OPS_LIST=ro.data.map(function(o){return o.nome;});
   if(!OPS_LIST.length)OPS_LIST=['Riccardo Tavagnacco','Alessia Ciman','Ciro Bisogno','Antonio La Barbera','Francesco Bova','Emilian Cozmiuc','Alessia Maffioli','Elisa Qualantonio','Maria A. Catania','Luca Alberti','Mary + Samuele'];
+  _opTelegram={};(ro&&ro.data||[]).forEach(function(o){if(o.telegram_chat_id)_opTelegram[o.nome]=o.telegram_chat_id;});
 
   if(rbonRows&&rbonRows.length){BONUS_CLI=rbonRows.map(mapBonusRow);_DATA_REAL=true;}
   else genMock();
@@ -3676,6 +3677,17 @@ var OT_FASI=['Da iniziare','Registrato','Aspetto Codice SMS','Deposito effettuat
    Non Idoneo/Attesa Cliente/Da Verificare, o Bloccato): quelli restano
    decisioni dell'operatore, il calcolo automatico gioca solo dentro al
    percorso normale Libero/In Corso <-> Fatto. */
+/* Avvisa l'operatore su Telegram quando gli viene assegnato un nuovo sito.
+   Non blocca mai il salvataggio principale: se manca il chat_id o Telegram
+   non risponde, fallisce in silenzio (l'assegnazione resta comunque valida). */
+function notificaOperatoreTelegram(nomeOp,messaggio){
+  var chatId=_opTelegram[nomeOp];
+  if(!chatId)return;
+  fetch('/.netlify/functions/telegram-notify',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({chat_id:chatId,message:messaggio})
+  }).catch(function(){});
+}
 function otCalcAuto(r){
   if(r.stato_op==='Problema'||r.stato_op==='Bloccato')return null;
   if(r.stato!=='LIBERO'&&r.stato!=='IN_CORSO'&&r.stato!=='FATTO')return null;
@@ -4719,6 +4731,7 @@ async function doAssegna(op){
     BONUS_CLI.push(mapBonusRow(Object.assign({},payload,{_real:true})));
     closeNewCli2();
     showToast(completo?'✓ Auto: '+bk+' già FATTO (dati completi) — '+newId:'Sito '+bk+' assegnato a '+op+' — '+newId,'ok');
+    notificaOperatoreTelegram(op,'🔔 <b>Nuovo sito assegnato</b>\n👤 Cliente: '+cliNm+'\n🎰 Sito: '+bk+(completo?'\n✅ Già completo (dati inseriti)':''));
     _tw.selOp=op;renderTw();
   }catch(e){
     errEl.textContent=e&&e.message?e.message:'Errore durante il salvataggio.';

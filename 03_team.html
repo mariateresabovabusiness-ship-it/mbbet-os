@@ -227,6 +227,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Inter',s
       <div class="sec-wrap">
         <div class="sec-hdr">
           <div class="sec-title">&#9881; OPERATORI — GESTIONE CLIENTI</div>
+          <span onclick="openTgModal()" style="cursor:pointer;font-size:11px;color:var(--blue);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(79,157,255,.3);background:rgba(79,157,255,.06);white-space:nowrap;margin-right:10px">&#128276; Configura notifiche Telegram</span>
           <div class="sec-tag" style="background:rgba(79,157,255,.1);color:var(--blue);border:1px solid rgba(79,157,255,.2)" id="badge-op">11 operatori</div>
         </div>
         <div class="ops-grid" id="ops-grid">
@@ -234,6 +235,28 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'Inter',s
         </div>
       </div>
 
+    </div>
+
+    <!-- MODAL NOTIFICHE TELEGRAM -->
+    <div id="tg-modal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:20px">
+      <div style="background:linear-gradient(160deg,rgba(11,16,38,.99),rgba(7,10,24,.99));border:1px solid rgba(79,157,255,.25);border-radius:16px;width:560px;max-width:95vw;max-height:88vh;overflow-y:auto">
+        <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">&#128276;</span>
+          <div style="flex:1"><div style="font-size:13px;font-weight:900;color:var(--tx)">Notifiche Telegram per Operatore</div>
+          <div style="font-size:10px;color:var(--tx3)">Ogni operatore riceve un messaggio quando gli assegni un nuovo sito</div></div>
+          <span onclick="closeTgModal()" style="cursor:pointer;color:var(--tx3);font-size:16px;padding:4px 8px">&#10005;</span>
+        </div>
+        <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.06)">
+          <div style="font-size:11px;color:var(--tx3);line-height:1.7;margin-bottom:10px">
+            1) Crea un gruppo Telegram per l'operatore e aggiungi il bot.<br>
+            2) Scrivi un messaggio qualsiasi nel gruppo (es. "ciao").<br>
+            3) Clicca "Trova ID gruppi" qui sotto e copia l'ID giusto nel campo dell'operatore.
+          </div>
+          <button onclick="tgTrovaId()" id="tg-find-btn" style="padding:8px 16px;background:rgba(79,157,255,.1);border:1px solid rgba(79,157,255,.3);border-radius:8px;color:var(--blue);font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">&#128269; Trova ID gruppi</button>
+          <div id="tg-find-result" style="margin-top:10px;font-size:11px"></div>
+        </div>
+        <div id="tg-op-list" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -297,6 +320,54 @@ function updateQuote(){
   ['q0','q1','q2','q3'].forEach(function(id){
     document.getElementById(id).textContent=fmt(quota)+' €';
   });
+}
+
+/* ── NOTIFICHE TELEGRAM PER OPERATORE ── */
+function openTgModal(){
+  document.getElementById('tg-modal').style.display='flex';
+  document.getElementById('tg-find-result').innerHTML='';
+  loadTgOperatori();
+}
+function closeTgModal(){document.getElementById('tg-modal').style.display='none';}
+async function loadTgOperatori(){
+  var wrap=document.getElementById('tg-op-list');
+  wrap.innerHTML='<div style="color:var(--tx3);font-size:11px">Caricamento operatori...</div>';
+  try{
+    var r=await db.from('operatori').select('id,nome,telegram_chat_id').eq('stato','Attivo').order('nome');
+    var ops=r.data||[];
+    if(!ops.length){wrap.innerHTML='<div style="color:var(--tx3);font-size:11px">Nessun operatore trovato.</div>';return;}
+    wrap.innerHTML=ops.map(function(o){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:9px">'+
+        '<div style="flex:1;font-size:12px;font-weight:700;color:var(--tx2)">'+o.nome+'</div>'+
+        '<input type="text" id="tg-inp-'+o.id+'" value="'+(o.telegram_chat_id||'')+'" placeholder="ID chat (es. -100123456789)" style="width:200px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;color:var(--tx);font-size:11.5px;font-family:monospace;outline:none">'+
+        '<button onclick="saveTgChatId(\''+o.id+'\')" style="padding:7px 12px;background:rgba(0,192,122,.1);border:1px solid rgba(0,192,122,.3);border-radius:7px;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Salva</button>'+
+        '</div>';
+    }).join('');
+  }catch(e){wrap.innerHTML='<div style="color:var(--red);font-size:11px">Errore: '+(e.message||e)+'</div>';}
+}
+async function saveTgChatId(opId){
+  var inp=document.getElementById('tg-inp-'+opId);
+  var val=(inp.value||'').trim()||null;
+  try{
+    var r=await db.from('operatori').update({telegram_chat_id:val}).eq('id',opId);
+    if(r.error)throw r.error;
+    inp.style.borderColor='rgba(0,192,122,.5)';
+    setTimeout(function(){inp.style.borderColor='rgba(255,255,255,.1)';},900);
+  }catch(e){alert('Errore salvataggio: '+(e.message||e));}
+}
+async function tgTrovaId(){
+  var btn=document.getElementById('tg-find-btn');btn.disabled=true;btn.textContent='Cerco...';
+  var res=document.getElementById('tg-find-result');
+  try{
+    var r=await fetch('/.netlify/functions/telegram-updates');
+    var data=await r.json();
+    btn.disabled=false;btn.textContent='🔍 Trova ID gruppi';
+    if(!r.ok||!data.ok){res.innerHTML='<span style="color:var(--red)">Errore: '+(data.error||'sconosciuto')+'</span>';return;}
+    if(!data.chats||!data.chats.length){res.innerHTML='<span style="color:var(--tx3)">Nessun gruppo trovato — scrivi un messaggio nel gruppo Telegram dell\'operatore e riprova.</span>';return;}
+    res.innerHTML='<div style="display:flex;flex-direction:column;gap:5px">'+data.chats.map(function(c){
+      return '<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 10px;background:rgba(79,157,255,.06);border-radius:6px"><span style="color:var(--tx2)">'+c.titolo+' <span style="color:var(--tx3)">('+c.tipo+')</span></span><span style="font-family:monospace;color:var(--blue);cursor:pointer" onclick="navigator.clipboard.writeText(\''+c.chat_id+'\')" title="Clicca per copiare">'+c.chat_id+'</span></div>';
+    }).join('')+'</div>';
+  }catch(e){btn.disabled=false;btn.textContent='🔍 Trova ID gruppi';res.innerHTML='<span style="color:var(--red)">Errore: '+(e.message||e)+'</span>';}
 }
 
 async function loadData(){
