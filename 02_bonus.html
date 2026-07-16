@@ -3185,7 +3185,11 @@ async function doRic(rid){
     if(!ok)return;
   }
 
-  if(r._real){modLoad();var res=await db.from('bonus').update({deposito:dep,bonus_ricevuto:bon,prelievo:prel,ric_real:rr,pag_cli:pc,costi_extra:ce,incassato:inc,data_incasso:dInc,updated_at:new Date().toISOString()}).eq('id',rid);if(res.error){modErr(res.error.message);return;}}
+  var upd={deposito:dep,bonus_ricevuto:bon,prelievo:prel,ric_real:rr,pag_cli:pc,costi_extra:ce,incassato:inc,data_incasso:dInc,updated_at:new Date().toISOString()};
+  // Collaboratori pagati a percentuale del profitto reale (es. Isma, 50%):
+  // la commissione si ricalcola da sola qui, non va inserita a mano.
+  if(r.perc_collab>0)upd.comp_referral=Math.round(rr*r.perc_collab/100*100)/100;
+  if(r._real){modLoad();var res=await db.from('bonus').update(upd).eq('id',rid);if(res.error){modErr(res.error.message);return;}}
   if(chiusura&&deltaRic!==0)await registraRettifica(chiusura,deltaRic,'Modifica ricavo bonus dopo chiusura mese','bonus',rid);
   r.deposito=dep;r.bonus_ric=bon;r.prelievo=prel;r.ricavo_reale=rr;r.pag_cli=pc;r.costi_extra=ce;r.comp_op=rr?Math.round(rr*(r.perc_op||20)/100*100)/100:null;r.comp_col=rr&&r.perc_collab?Math.round(rr*r.perc_collab/100*100)/100:null;r.margine=rr?(rr-pc-(r.comp_op||0)-(r.comp_col||0)-ce):null;r.incassato=inc;r.data_incasso=dInc;
   closeModal();

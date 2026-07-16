@@ -1207,7 +1207,9 @@ function renderDetail(cid){
     '<div style="display:flex;align-items:center;gap:12px">'+
     '<div style="width:46px;height:46px;border-radius:12px;background:'+col+'22;border:2px solid '+col+'55;color:'+col+
       ';display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+((c.nome||'?')[0]).toUpperCase()+'</div>'+
-    '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
+    '<div><div style="font-size:18px;font-weight:900;color:var(--tx);display:flex;align-items:center;gap:8px">'+(c.nome||'')+
+      (c.perc>0&&c.modello!=='POCKET'?'<span style="font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:20px;background:rgba(0,192,122,.12);color:var(--green);border:1px solid rgba(0,192,122,.3)">'+c.perc+'% del profitto reale</span>':'')+
+      '</div>'+
     '<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(c.contatto||'')+(c.tipo?' · '+c.tipo:'')+'</div></div></div>'+
     (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
     (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(245,200,66,.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
@@ -1808,6 +1810,12 @@ async function saveNewBonus(){
     stato:completo?'FATTO':'IN_CORSO',
     stato_op:completo?'Completato':'In corso'
   };
+  // Collaboratori pagati a percentuale del profitto reale (es. Isma, 50%)
+  // invece che a listino fisso: niente importo manuale qui, si calcola da
+  // solo quando in Vista Operativa viene aggiornato il ricavo del sito.
+  // Escluso il modello POCKET (Gas/Ale e Fede) che usa già perc per altro
+  // (lo split dell'accumulo) e non deve essere toccato da questa logica.
+  if(c&&c.perc>0&&c.modello!=='POCKET'){payload.perc_collab=c.perc;payload.comp_referral=null;}
   if(pwd)payload.password_bk=pwd;
   try{
     var idCli=await collegaClienteCrm(nome,c?c.nome:null,payload.operatore);
