@@ -377,9 +377,12 @@ async function submitForm(){
     if(r.error){throw new Error(r.error.message);}
     showSuccess(r.data&&r.data.id?r.data.id:'');
   }catch(ex){
-    /* If DB fails (missing columns etc), still show a "received" confirmation */
-    console.warn('DB insert failed, showing success anyway:',ex.message);
-    showSuccess('');
+    console.warn('DB insert failed:',ex.message);
+    var ge=document.getElementById('global-err');
+    ge.textContent='Non siamo riusciti a completare l\'invio. Riprova tra qualche istante; se il problema persiste contatta il team MBBET prima di procedere.';
+    ge.style.display='block';
+    btn.disabled=false;btn.textContent='✅ INVIA REGISTRAZIONE';
+    return;
   }
   btn.disabled=false;btn.textContent='✅ INVIA REGISTRAZIONE';
 }

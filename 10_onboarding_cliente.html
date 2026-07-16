@@ -809,6 +809,13 @@ var _radio={spid:null,cc:null,ct:null};
 var _chk={1:false,2:false,3:false};
 var _forceSubmit=false;
 
+// Link personalizzato: es. 10_onboarding_cliente.html?op=Serena&collab=Isma&tipo=Nuovo
+var _qs=new URLSearchParams(location.search);
+var QS_OP=(_qs.get('op')||'').trim();
+var QS_MESE=(_qs.get('mese')||'').trim()||(new Date().getMonth()+1)+'/'+new Date().getFullYear();
+var QS_COLLAB=(_qs.get('collab')||'').trim();
+var QS_TIPO=(_qs.get('tipo')||'').trim()||'Nuovo';
+
 // BUILD BK GRID
 (function(){
   var h='';
@@ -920,8 +927,8 @@ function chkDoc(okId,val){var el=g(okId);if(el)el.style.display=val&&val.length>
 
 // RECAP
 function buildRecap(){
-  var nome=v('i_nome'),cog=v('i_cognome'),tel=v('i_tel'),email=v('i_email');
-  var op=v('i_op'),mese=v('i_mese');
+  var nome=v('i_nome'),cog=v('i_cognome'),tel=v('i_tel'),email=v('i_emailsiti');
+  var op=QS_OP,mese=QS_MESE;
   var docs=[v('d_cif'),v('d_cir'),v('d_tsf'),v('d_tsr'),v('d_foto')].filter(function(d){return d&&d.length>10;});
   var data=[
     {l:'Nome',v:nome||'—'},{l:'Cognome',v:cog||'—'},
@@ -979,9 +986,9 @@ async function doSubmit(){
   var ts=new Date().toISOString(),oggi=ts.split('T')[0];
   var mn=new Date().getMonth()+1,an=new Date().getFullYear();
   var nome=v('i_nome'),cog=v('i_cognome'),nomeCpl=(nome+' '+cog).trim();
-  var tel=v('i_tel'),email=v('i_email')||null,emailSiti=v('i_emailsiti')||null;
-  var op=v('i_op')||null,ref=v('i_ref')||null,collab=v('i_collab')||null;
-  var tipo=v('i_tipo')||'Nuovo',mese=v('i_mese')||null;
+  var tel=v('i_tel'),emailSiti=v('i_emailsiti')||null,email=emailSiti;
+  var op=QS_OP||null,ref=v('i_ref')||null,collab=QS_COLLAB||null;
+  var tipo=QS_TIPO||'Nuovo',mese=QS_MESE||null;
   var disp=v('i_disp')||null,dnascita=v('i_dnascita')||null;
   var citta=v('i_citta')||null,prov=v('i_prov')||null;
   var iban=v('d_iban')||null,noteRaw=v('i_note')||null;

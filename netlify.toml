@@ -16,3 +16,29 @@
 
 [functions."telegram-morning-digest"]
   schedule = "0 6 * * *"
+
+# Pagine di test/legacy con query dirette al DB e senza controllo ruolo — bloccate dal publish pubblico.
+# Reversibile: rimuovi questi blocchi per ripubblicarle.
+[[redirects]]
+  from = "/crm2.html"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/mini.html"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/test.html"
+  to = "/index.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/04_finanze_backup.html"
+  to = "/index.html"
+  status = 404
+  force = true

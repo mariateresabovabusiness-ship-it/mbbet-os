@@ -784,28 +784,16 @@ function login2(){
   if(!e||!p){g('l-err').textContent='Inserisci email e password';return;}
   var r=doLogin(e,p);
   if(r.error){g('l-err').textContent=r.error;return;}
+  if(!requireSection('import'))return;
   g('ls').style.display='none';
   document.documentElement.classList.add('mb-auth');
 }
 
 /* ── INIT ── */
-(function(){
-  var s=null;
-  try{var raw=localStorage.getItem('mbbet_v2_session');if(raw)s=JSON.parse(raw);}catch(e){}
-  if(!s){
-    try{
-      var h=window.location.hash||'';
-      if(h.indexOf('#mbbet=')===0){
-        s=JSON.parse(decodeURIComponent(atob(h.slice(7))));
-        if(s){localStorage.setItem('mbbet_v2_session',JSON.stringify(s));history.replaceState(null,'',window.location.pathname);}
-      }
-    }catch(e){}
-  }
-  if(s&&s.email){
-    document.documentElement.classList.add('mb-auth');
-    currentUser={email:s.email};currentNome=s.nome||s.email;currentRole=s.ruolo||'VIEWER';
-  }
-})();
+initAuth(function(){
+  if(!requireSection('import'))return;
+  document.documentElement.classList.add('mb-auth');
+}, function(){});
 </script>
 </body>
 </html>
