@@ -1,35 +1,8 @@
-// MBBET OS — Auth v4
+// MBBET OS — Auth v5 (Supabase Auth reale, Fase 1)
 var SUPA_URL  = 'https://ntwqfuvcosvzpqrfpipn.supabase.co';
 var SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
-try {
-  for (var _i = localStorage.length - 1; _i >= 0; _i--) {
-    var _k = localStorage.key(_i);
-    if (_k && _k.indexOf('sb-') === 0 && _k.indexOf('auth-token') !== -1) localStorage.removeItem(_k);
-  }
-} catch(e) {}
 var db = supabase.createClient(SUPA_URL, SUPA_ANON);
 
-var LOCAL_USERS = {
-  'mariateresabova.business@gmail.com': { password: 'Luna2002@',  nome: 'Mary Bova', ruolo: 'SOCIO_ADMIN' },
-  'manuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Manuele',   ruolo: 'SOCIO' },
-  'serena@mbbet.it':          { password: 'Mbbet2024!', nome: 'Serena',    ruolo: 'SOCIO' },
-  'samuele@mbbet.it':         { password: 'Mbbet2024!', nome: 'Samuele',   ruolo: 'COLLAB' },
-  'alan@mbbet.it':            { password: 'Mbbet2026!', nome: 'Alan', ruolo: 'COLLAB_SELF', collabNome: 'Alan' },
-  'isma@mbbet.it':            { password: 'Mbbet2026!', nome: 'Isma', ruolo: 'COLLAB_SELF', collabNome: 'Isma' },
-  'lorenzo@mbbet.it':         { password: 'Mbbet2026!', nome: 'Lorenzo Cestola', ruolo: 'COLLAB_SELF', collabNome: 'Lorenzo Cestola' },
-  'ciro@mbbet.it':            { password: 'Mbbet2026!', nome: 'Ciro Bisogno',               ruolo: 'OPERATORE' },
-  'antonio@mbbet.it':         { password: 'Mbbet2026!', nome: 'Antonio Michele La Barbera', ruolo: 'OPERATORE' },
-  'alessia.maffioli@mbbet.it':{ password: 'Mbbet2026!', nome: 'Alessia Maffioli',           ruolo: 'OPERATORE' },
-  'alessia.ciman@mbbet.it':   { password: 'Mbbet2026!', nome: 'Alessia Ciman',              ruolo: 'OPERATORE' },
-  'elisa@mbbet.it':           { password: 'Mbbet2026!', nome: 'Elisa Qualantoni',           ruolo: 'OPERATORE' },
-  'riccardo@mbbet.it':        { password: 'Mbbet2026!', nome: 'Riccardo Tavagnacco',        ruolo: 'OPERATORE' },
-  'luca@mbbet.it':            { password: 'Mbbet2026!', nome: 'Luca Alberti',               ruolo: 'OPERATORE' },
-  'emilian@mbbet.it':         { password: 'Mbbet2026!', nome: 'Emilian Cozmiuc',            ruolo: 'OPERATORE' },
-  'mariaadele@mbbet.it':      { password: 'Mbbet2026!', nome: 'Maria Adele Catania',        ruolo: 'OPERATORE' },
-  'francesco@mbbet.it':       { password: 'Mbbet2026!', nome: 'Francesco Domenico Bova',    ruolo: 'OPERATORE' }
-};
-
-var SESSION_KEY = 'mbbet_v2_session';
 var currentUser = null;
 var currentRole = 'VIEWER';
 var currentNome = '';
@@ -49,76 +22,65 @@ var ROLE_SECTIONS = {
 var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','COLLAB_SELF':'Collaboratore','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
 var ROLE_COLORS  = {'SOCIO_ADMIN':'#f59e0b','SOCIO':'#d97706','OPERATORE':'#3b82f6','COLLAB':'#a78bfa','COLLAB_SELF':'#22c55e','REFERRAL':'#10b981','VIEWER':'#6b7280','ADMIN_TECNICO':'#ef4444'};
 
-// ── Leggi sessione: prima da URL hash, poi da localStorage ──────────────────
-function _readSession() {
-  // Prova hash (#mbbet=base64)
-  try {
-    var h = window.location.hash || '';
-    if (h.indexOf('#mbbet=') === 0) {
-      var s = JSON.parse(decodeURIComponent(atob(h.slice(7))));
-      if (s && s.email && s.ruolo) {
-        try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch(e) {}
-        try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
-        return s;
-      }
-    }
-  } catch(e) {}
-  // Prova localStorage
-  try {
-    var r = localStorage.getItem(SESSION_KEY);
-    if (r) { var s2 = JSON.parse(r); if (s2 && s2.email && s2.ruolo) return s2; }
-  } catch(e) {}
-  return null;
+// ── Legge il profilo (ruolo/nome/collab) dell'utente autenticato da utenti_crm ──
+async function _loadProfile(authUser) {
+  var r = await db.from('utenti_crm')
+    .select('nome,ruolo,attivo,collab:collab_id(nome)')
+    .eq('auth_user_id', authUser.id)
+    .maybeSingle();
+  if (r.error || !r.data || !r.data.attivo) return null;
+  return {
+    email: authUser.email,
+    nome: r.data.nome,
+    ruolo: r.data.ruolo,
+    collabNome: (r.data.collab && r.data.collab.nome) || ''
+  };
 }
 
-// ── Init Auth ────────────────────────────────────────────────────────────────
-function initAuth(onSuccess, onFail) {
-  var s = _readSession();
-  if (s) {
-    currentUser = { email: s.email };
-    currentNome = s.nome || s.email;
-    currentRole = s.ruolo || 'VIEWER';
-    currentCollabNome = s.collabNome || '';
-    if (onSuccess) { onSuccess(); return; }
-  }
+// ── Init Auth: legge la sessione reale già persistita da Supabase ───────────
+async function initAuth(onSuccess, onFail) {
+  try {
+    var s = await db.auth.getSession();
+    var session = s.data && s.data.session;
+    if (session && session.user) {
+      var profile = await _loadProfile(session.user);
+      if (profile) {
+        currentUser = { email: profile.email };
+        currentNome = profile.nome || profile.email;
+        currentRole = profile.ruolo || 'VIEWER';
+        currentCollabNome = profile.collabNome || '';
+        if (onSuccess) { onSuccess(); return; }
+      }
+    }
+  } catch (e) {}
   if (onFail) onFail();
 }
 
 // ── Login / Logout ───────────────────────────────────────────────────────────
-function doLogin(email, password) {
+async function doLogin(email, password) {
   var key = (email || '').toLowerCase().trim();
-  var u = LOCAL_USERS[key];
-  if (!u) return { error: 'Email non trovata' };
-  if (u.password !== password) return { error: 'Password non corretta' };
-  currentUser = { email: key };
-  currentNome = u.nome;
-  currentRole = u.ruolo;
-  currentCollabNome = u.collabNome || '';
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ email: key, nome: u.nome, ruolo: u.ruolo, collabNome: u.collabNome || '' })); } catch(e) {}
+  var r = await db.auth.signInWithPassword({ email: key, password: password });
+  if (r.error) return { error: 'Email o password non corretta.' };
+  var profile = await _loadProfile(r.data.user);
+  if (!profile) {
+    try { await db.auth.signOut(); } catch (e) {}
+    return { error: 'Utente non abilitato per questa applicazione.' };
+  }
+  currentUser = { email: profile.email };
+  currentNome = profile.nome;
+  currentRole = profile.ruolo;
+  currentCollabNome = profile.collabNome || '';
   return { data: { user: currentUser } };
 }
 
-function doLogout() {
-  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+async function doLogout() {
+  try { await db.auth.signOut(); } catch (e) {}
   currentUser = null; currentRole = 'VIEWER'; currentNome = ''; currentCollabNome = '';
   window.location.href = 'index.html';
 }
 
-// ── Navigazione con sessione nel hash ────────────────────────────────────────
+// ── Navigazione: la sessione Supabase persiste da sola in localStorage ──────
 function navTo(url) {
-  var raw = null;
-  // Prima prova localStorage
-  try { raw = localStorage.getItem(SESSION_KEY); } catch(e) {}
-  // Fallback: usa currentUser in memoria
-  if (!raw && currentUser) {
-    try { raw = JSON.stringify({ email: currentUser.email, nome: currentNome, ruolo: currentRole, collabNome: currentCollabNome }); } catch(e) {}
-  }
-  if (raw) {
-    try {
-      window.location.href = url + '#mbbet=' + btoa(encodeURIComponent(raw));
-      return;
-    } catch(e) {}
-  }
   window.location.href = url;
 }
 

@@ -297,9 +297,9 @@ function showToast(msg,type){
   setTimeout(function(){t.classList.remove('show');},2800);
 }
 
-function doLoginPage(){
+async function doLoginPage(){
   var email=document.getElementById('li-e').value, pw=document.getElementById('li-p').value;
-  var r=doLogin(email,pw);
+  var r=await doLogin(email,pw);
   if(r.error){document.getElementById('li-err').textContent=r.error;return;}
   if(!canAccess('coda')){document.getElementById('li-err').textContent='Non hai i permessi per questa sezione.';return;}
   startApp();

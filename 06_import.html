@@ -778,11 +778,11 @@ function resetImport(){
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 /* ── LOGIN ── */
-function login2(){
+async function login2(){
   var e=g('li-e').value.trim();
   var p=g('li-p').value;
   if(!e||!p){g('l-err').textContent='Inserisci email e password';return;}
-  var r=doLogin(e,p);
+  var r=await doLogin(e,p);
   if(r.error){g('l-err').textContent=r.error;return;}
   if(!requireSection('import'))return;
   g('ls').style.display='none';

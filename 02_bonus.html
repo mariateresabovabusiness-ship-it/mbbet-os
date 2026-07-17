@@ -4873,10 +4873,10 @@ function exportTwCsv(){
 (function tick(){var n=new Date(),p=function(v){return String(v).padStart(2,'0');};sf(function(){g('hdr-clk').textContent=p(n.getHours())+':'+p(n.getMinutes());});setTimeout(tick,15000);})();
 
 /* ── AUTH / BOOT ── */
-function login2(){
+async function login2(){
   var em=(g('li-e').value||'').trim(),pw=g('li-p').value||'';
   g('l-err').textContent='';if(!em||!pw){g('l-err').textContent='Inserisci email e password.';return;}
-  var res=doLogin(em,pw);if(res&&res.error){g('l-err').textContent=res.error;return;}
+  var res=await doLogin(em,pw);if(res&&res.error){g('l-err').textContent=res.error;return;}
   boot();
 }
 function boot(){

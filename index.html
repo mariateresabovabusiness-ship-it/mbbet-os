@@ -1142,11 +1142,11 @@ function updateChartRealData(bns){
 }
 
 /* ── LOGIN ──────────────────────────────────────────────── */
-function login2(){
+async function login2(){
   var em=(g('li-e').value||'').trim(),pw=g('li-p').value||'';
   g('l-err').textContent='';
   if(!em||!pw){g('l-err').textContent='Inserisci email e password.';return;}
-  var res=doLogin(em,pw);
+  var res=await doLogin(em,pw);
   if(res&&res.error){g('l-err').textContent=res.error;return;}
   boot();
 }
