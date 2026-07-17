@@ -595,20 +595,16 @@ async function submitForm(){
 }
 
 async function genClientId(){
-  var n=1;
-  try{
-    var r=await _db.from('clienti').select('id').like('id','MBBET-%').order('id',{ascending:false}).limit(1);
-    if(r.data&&r.data.length){var m=(r.data[0].id||'').match(/MBBET-0*(\d+)/i);if(m)n=parseInt(m[1],10)+1;}
-  }catch(e){}
-  return 'MBBET-'+String(n).padStart(3,'0');
+  try{var r=await _db.rpc('rpc_next_client_id');if(r.data)return r.data;}catch(e){}
+  return 'MBBET-'+String(Math.floor(Math.random()*90000+10000));
 }
 
 async function createBonusRows(cliId,cliNm,operatore,sitiReg,percOp){
   if(!operatore)return;
   var maxN=0;
   try{
-    var rm=await _db.from('bonus').select('id').like('id','BNS-%').order('created_at',{ascending:false}).limit(1);
-    if(rm.data&&rm.data.length){var mm=(rm.data[0].id||'').match(/BNS-0*(\d+)/i);if(mm)maxN=parseInt(mm[1],10);}
+    var rm=await _db.rpc('rpc_next_bonus_seed');
+    if(typeof rm.data==='number')maxN=rm.data;
   }catch(e){}
   var rows=BKS_ALL.map(function(bk){
     maxN++;
