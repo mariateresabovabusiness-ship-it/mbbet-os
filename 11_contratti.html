@@ -588,6 +588,7 @@ async function saveContratto() {
     payload.log_eventi = [{evento:'Contratto creato', data:new Date().toISOString()}];
     await db.from('contratti').insert(payload);
     toast('Contratto creato', 'success');
+    if (payload.stato === 'FIRMATO') notificaContrattoFirmato(payload);
   }
   closeModal('modal-ctr');
   loadContratti();
