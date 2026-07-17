@@ -620,11 +620,11 @@ async function fetchBonusCollab(){
   // Prova con stato_collab+pocket_stato (colonne condivise); se la migration
   // non e' ancora stata eseguita su Supabase, ripiega su query piu' semplici
   // cosi la pagina non si rompe comunque.
-  var r=await db.from('bonus').select(BONUS_COLS+',stato_collab,pocket_stato').not('nome_collab','is',null).neq('nome_collab','');
+  var r=await db.from('bonus').select(BONUS_COLS+',stato_collab,pocket_stato').not('nome_collab','is',null).neq('nome_collab','').limit(20000);
   if(!r.error)return r;
-  r=await db.from('bonus').select(BONUS_COLS+',stato_collab').not('nome_collab','is',null).neq('nome_collab','');
+  r=await db.from('bonus').select(BONUS_COLS+',stato_collab').not('nome_collab','is',null).neq('nome_collab','').limit(20000);
   if(!r.error)return r;
-  return await db.from('bonus').select(BONUS_COLS).not('nome_collab','is',null).neq('nome_collab','');
+  return await db.from('bonus').select(BONUS_COLS).not('nome_collab','is',null).neq('nome_collab','').limit(20000);
 }
 async function loadAll(){
   try{
