@@ -1391,6 +1391,8 @@ async function savePost() {
   } catch(e){ toast('Errore salvataggio: '+e.message,'error'); }
 }
 
+function ymd(d) { return d.toISOString().slice(0,10); }
+
 // ═══════════════════════════════════════════════════════════════
 // GUARDIAN
 // ═══════════════════════════════════════════════════════════════
