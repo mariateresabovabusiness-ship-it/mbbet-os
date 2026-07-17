@@ -616,15 +616,30 @@ function cycleStatus(bonusId,cid){
 
 /* ══ LOAD ══ */
 var BONUS_COLS='id,id_cli,cliente,bookmaker,stato,stato_op,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,bonus_ricevuto,prelievo,costi_extra,created_at';
+// Supabase/PostgREST risponde al massimo 1000 righe per chiamata, qualunque
+// limit venga chiesto dal client — vanno scaricate a pagine con .range(),
+// altrimenti tutte le righe oltre le prime 1000 restano invisibili.
+async function fetchAllMatching(selectCols){
+  var all=[],from=0,step=1000;
+  while(true){
+    var r=await db.from('bonus').select(selectCols).not('nome_collab','is',null).neq('nome_collab','').range(from,from+step-1);
+    if(r.error)return r;
+    var rows=r.data||[];
+    all=all.concat(rows);
+    if(rows.length<step)break;
+    from+=step;
+  }
+  return {data:all,error:null};
+}
 async function fetchBonusCollab(){
   // Prova con stato_collab+pocket_stato (colonne condivise); se la migration
   // non e' ancora stata eseguita su Supabase, ripiega su query piu' semplici
   // cosi la pagina non si rompe comunque.
-  var r=await db.from('bonus').select(BONUS_COLS+',stato_collab,pocket_stato').not('nome_collab','is',null).neq('nome_collab','').limit(20000);
+  var r=await fetchAllMatching(BONUS_COLS+',stato_collab,pocket_stato');
   if(!r.error)return r;
-  r=await db.from('bonus').select(BONUS_COLS+',stato_collab').not('nome_collab','is',null).neq('nome_collab','').limit(20000);
+  r=await fetchAllMatching(BONUS_COLS+',stato_collab');
   if(!r.error)return r;
-  return await db.from('bonus').select(BONUS_COLS).not('nome_collab','is',null).neq('nome_collab','').limit(20000);
+  return await fetchAllMatching(BONUS_COLS);
 }
 async function loadAll(){
   try{
