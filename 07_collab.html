@@ -390,6 +390,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 <script>
 /* ══ GLOBALS ══ */
 var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[], _operatoriList=[], _opTelegram={}, _bkLinks={};
+var _flatCliCache=[], _flatCliCidCache=null, _pocketNomiCache=[], _pocketByClienteCache={}, _pocketCidCache=null;
 /* Avvisa l'operatore su Telegram quando gli viene assegnato un nuovo sito.
    Non blocca mai il salvataggio principale: se manca il chat_id o Telegram
    non risponde, fallisce in silenzio (l'assegnazione resta comunque valida). */
@@ -809,6 +810,55 @@ function apriSitoPerCliente(cid,bookmaker,clienteEsistente){
     setTimeout(function(){var e=g('nb-nome');if(e)e.value=clienteEsistente;},120);
   }
 }
+/* "Già occupato": il cliente ha già un account su quel sito da prima di
+   MBBET (non tramite noi) — va comunque tracciato in bonus/CRM/bookmaker
+   (stessa tabella condivisa con 02_bonus.html) ma senza nessun compenso
+   previsto, quindi niente modale: un clic e via. */
+async function segnaGiaOccupato(cid,bookmaker,cliente){
+  if(isReadOnlyCollab())return;
+  var c=_collabs.find(function(x){return String(x.id)===String(cid);});
+  if(!c)return;
+  if(!confirm('Segnare "'+bookmaker+'" come già occupato per '+cliente+'?\n\nSignifica che il cliente ha già un account su questo sito da prima di MBBET — nessun compenso previsto su questo sito.'))return;
+  var mese=_collabMese?parseInt(_collabMese.split('-')[1]):new Date().getMonth()+1;
+  var anno=_collabMese?parseInt(_collabMese.split('-')[0]):new Date().getFullYear();
+  var payload={
+    id:await genBonusId(),
+    cliente:cliente,
+    bookmaker:bookmaker,
+    nome_collab:c.nome,
+    mese_operativo:mese,
+    anno_operativo:anno,
+    stato:'GIA_REGISTRATO',
+    stato_op:'Già registrato',
+    comp_referral:0
+  };
+  try{
+    var idCli=await collegaClienteCrm(cliente,c.nome,null);
+    if(idCli)payload.id_cli=idCli;
+    var r=await db.from('bonus').insert(payload).select();
+    if(r.error)throw r.error;
+    var newRow=r.data&&r.data[0];
+    if(newRow)_bns.push(newRow);
+    showToast('Segnato come già occupato ✓','ok');
+    renderList();
+    if(c.modello==='POCKET')renderPocketCliente(cid,encodeURIComponent(cliente));
+    else renderFlatCliente(cid,encodeURIComponent(cliente));
+  }catch(e){
+    alert('Errore: '+(e.message||String(e)));
+  }
+}
+async function annullaGiaOccupato(bonusId,cid,clienteEnc){
+  if(isReadOnlyCollab())return;
+  if(!confirm('Annullare "già occupato" per questo sito?'))return;
+  try{
+    var r=await db.from('bonus').delete().eq('id',bonusId);
+    if(r.error)throw r.error;
+    _bns=_bns.filter(function(b){return String(b.id)!==String(bonusId);});
+    showToast('Annullato','ok');
+    renderList();
+    renderPocketCliente(cid,clienteEnc);
+  }catch(e){alert('Errore: '+(e.message||String(e)));}
+}
 function pocketToggleSito(bonusId,cid){
   if(isReadOnlyCollab())return;
   var b=_bns.find(function(x){return String(x.id)===String(bonusId);});
@@ -885,6 +935,25 @@ function renderPocketDetail(c){
     return;
   }
 
+  _pocketNomiCache=nomiClienti; _pocketByClienteCache=byCliente; _pocketCidCache=c.id;
+  html+='<div class="cl-search-wrap" style="margin-bottom:10px">'+
+    '<input type="text" id="pocket-cli-search" placeholder="&#128269; Cerca cliente..." oninput="filterPocketClienti(this.value)" '+
+    'style="width:100%;max-width:320px;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 14px;color:var(--tx);font-size:12.5px;font-family:inherit;outline:none">'+
+  '</div>';
+  html+='<div id="pocket-cli-list">'+buildPocketCliListHtml(c,nomiClienti,byCliente)+'</div>';
+  if(!isReadOnlyCollab())html+='<div style="display:flex;justify-content:flex-end">'+nuovoClientePocketSelectHtml(c,null)+'</div>';
+
+  g('collab-detail').innerHTML=html;
+}
+
+/* Estratta da renderPocketDetail per lo stesso motivo di buildFlatCliListHtml:
+   la ricerca ri-renderizza solo #pocket-cli-list, mai l'input stesso. */
+function buildPocketCliListHtml(c,nomiClienti,byCliente){
+  var html='';
+  if(!nomiClienti.length){
+    html+='<div class="cli-card-empty">Nessun cliente trovato.</div>';
+    return html;
+  }
   if(isReadOnlyCollab()){
     html+='<div style="margin-bottom:6px">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
@@ -957,9 +1026,14 @@ function renderPocketDetail(c){
 
   html+='</tbody></table></div></div>';
   }
-  if(!isReadOnlyCollab())html+='<div style="display:flex;justify-content:flex-end">'+nuovoClientePocketSelectHtml(c,null)+'</div>';
-
-  g('collab-detail').innerHTML=html;
+  return html;
+}
+function filterPocketClienti(q){
+  q=(q||'').toLowerCase().trim();
+  var names=q?_pocketNomiCache.filter(function(cl){return cl.toLowerCase().indexOf(q)>=0;}):_pocketNomiCache;
+  var c=_collabs.find(function(x){return String(x.id)===String(_pocketCidCache);});
+  var el=g('pocket-cli-list');
+  if(el&&c)el.innerHTML=buildPocketCliListHtml(c,names,_pocketByClienteCache);
 }
 
 // I dettagli finanziari (deposito/bonus/prelievo/ricavo/pagato/margine)
@@ -1028,7 +1102,24 @@ function renderPocketCliente(cid,clienteEnc){
         (!isReadOnlyCollab()?'<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>':'')+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-          (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
+          (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
+            '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
+            '<button onclick="segnaGiaOccupato(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" title="Il cliente ha già un account su questo sito da prima di MBBET" style="padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#128274; Già occupato</button>'+
+          '</div>')+
+        '</td></tr>';
+      return;
+    }
+    if(b.stato==='GIA_REGISTRATO'){
+      html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55">'+
+        '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="3" data-lbl="STATO" style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          '<span style="padding:4px 10px;border-radius:999px;background:rgba(245,200,66,.1);color:var(--gold);font-size:10px;font-weight:800;white-space:nowrap">&#128274; Già occupato</span>'+
+        '</td>'+
+        (!isReadOnlyCollab()?'<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">&mdash;</td>':'')+
+        '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
+        '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          (isReadOnlyCollab()?'':'<button onclick="annullaGiaOccupato(\''+b.id+'\',\''+cid+'\',\''+encodeURIComponent(cliente).replace(/'/g,'%27')+'\')" title="Annulla" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px">&#128465;</button>')+
         '</td></tr>';
       return;
     }
@@ -1222,84 +1313,12 @@ function renderDetail(cid){
   });
   var clientiListFlat=Object.values(byClienteFlat).sort(function(a,b){return b.rows.length-a.rows.length;});
 
-  if(isReadOnlyCollab()){
-    html+='<div style="margin-bottom:6px">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
-      '<span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">I TUOI CLIENTI</span>'+
-      '<span style="font-size:10.5px;color:var(--tx3)">clicca per aprire</span></div>';
-    if(!clientiListFlat.length){
-      html+='<div class="cli-card-empty">Nessun cliente ancora.</div>';
-    }else{
-      html+='<div class="cli-card-grid">'+clientiListFlat.map(function(cd,i){
-        var clEnc=encodeURIComponent(cd.cliente).replace(/'/g,'%27');
-        var initials=cd.cliente.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
-        var cardCol=PALETTE[i%PALETTE.length];
-        var doneAll=cd.rows.length>0&&cd.pagati===cd.rows.length;
-        var badge=doneAll?{t:'&#10003; completo',c:'var(--green)',bg:'rgba(0,229,138,.1)'}:cd.scaduti>0?{t:cd.scaduti+' scaduto'+(cd.scaduti>1?'i':''),c:'var(--red)',bg:'rgba(255,87,87,.1)'}:cd.rows.length>0?{t:'in corso',c:'var(--blue)',bg:'rgba(79,157,255,.1)'}:{t:'nuovo',c:'var(--tx3)',bg:'rgba(255,255,255,.05)'};
-        var pctDone=cd.rows.length>0?Math.round(cd.pagati/cd.rows.length*100):0;
-        return '<div class="cli-card" style="--cli-col:'+cardCol+';animation-delay:'+(i*0.03)+'s" onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')">'+
-          '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
-          '<div class="cli-card-mid">'+
-            '<div class="cli-card-nm">'+cd.cliente+'</div>'+
-            '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctDone+'%;background:'+(doneAll?'var(--green)':cardCol)+'"></div></div>'+
-          '</div>'+
-          '<div class="cli-card-foot">'+cd.pagati+' / '+cd.rows.length+' siti'+(cd.inc>0?' &middot; <span style="color:var(--green);font-weight:800">€ '+fmt(cd.inc)+'</span>':'')+'</div>'+
-          '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px;flex-shrink:0">'+badge.t+'</span>'+
-        '</div>';
-      }).join('')+'</div>';
-    }
-    html+='</div>';
-  }else{
-  html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;margin-bottom:6px">'+
-    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(245,200,66,.05),transparent)">'+
-    '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">&#128101; CLIENTI</span>'+
-    '<span style="font-size:10px;color:var(--tx3)">clicca un cliente per vedere i suoi siti</span></div>'+
-    '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
-    '<thead><tr style="background:rgba(255,255,255,.025)">'+
-    '<th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
-    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
-    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PAGATI</th>'+
-    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DA PAGARE</th>'+
-    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SCADUTI</th>'+
-    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">INCASSATO</th>'+
-    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DA INCASSARE</th>'+
-    (canDelete()?'<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)"></th>':'')+
-    '</tr></thead><tbody>';
-
-  clientiListFlat.forEach(function(cd,_ci){
-    /* encodeURIComponent NON scappa l'apostrofo (') — nomi come "Nicolò
-       Vitali" (nessun problema) o "D'Urso"/"Nicolò'" con apostrofo rompono
-       l'attributo onclick a virgolette singole. %27 risolve e si decodifica
-       comunque correttamente con decodeURIComponent. */
-    var clEnc=encodeURIComponent(cd.cliente).replace(/'/g,'%27');
-    var rowCol=PALETTE[_ci%PALETTE.length];
-    var initials=cd.cliente.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
-    html+='<tr onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')" style="cursor:pointer;transition:.12s;border-left:2px solid '+rowCol+'55" '+
-      'onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" '+
-      'onmouseout="this.style.background=\'transparent\'">'+
-      '<td class="mbl-head" style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        '<div style="display:flex;align-items:center;gap:10px">'+
-        '<div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+rowCol+'1f;border:1px solid '+rowCol+'55;color:'+rowCol+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center">'+initials+'</div>'+
-        '<span style="font-weight:800;color:var(--tx);font-size:13px">'+cd.cliente+'</span>'+
-        '</div></td>'+
-      '<td data-lbl="SITI" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)"><span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.06);font-weight:800;font-size:11.5px">'+cd.rows.length+'</span></td>'+
-      '<td data-lbl="PAGATI" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)"><span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(0,229,138,.1);color:var(--green);font-weight:800;font-size:11.5px">'+cd.pagati+'</span></td>'+
-      '<td data-lbl="DA PAGARE" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)"><span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(79,157,255,.1);color:var(--blue);font-weight:800;font-size:11.5px">'+cd.daPagare+'</span></td>'+
-      '<td data-lbl="SCADUTI" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (cd.scaduti>0?'<span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(255,87,87,.12);color:var(--red);font-weight:800;font-size:11.5px">'+cd.scaduti+'</span>':'<span style="color:var(--tx4);font-size:11.5px">0</span>')+
-      '</td>'+
-      '<td data-lbl="INCASSATO" style="padding:10px 14px;text-align:right;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (cd.inc>0?'€ '+fmt(cd.inc):'<span style="color:var(--tx4)">—</span>')+'</td>'+
-      '<td data-lbl="DA INCASSARE" style="padding:10px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':cd.rows.length>0?'var(--green)':'var(--tx4)')+'">'+
-        (cd.daInc>0?'€ '+fmt(cd.daInc):cd.rows.length>0?'✓':'—')+'</td>'+
-      (canDelete()?('<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        '<button onclick="event.stopPropagation();rimuoviClienteDaCollab(\''+cid+'\',\''+clEnc+'\')" title="Rimuovi '+cd.cliente+' da questo collaboratore" '+
-        'style="background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.25);color:var(--red);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px">&#128465;</button></td>'):'')+
-      '</tr>';
-  });
-
-  html+='</tbody></table></div></div>';
-  }
+  _flatCliCache=clientiListFlat; _flatCliCidCache=cid;
+  html+='<div class="cl-search-wrap" style="margin-bottom:10px">'+
+    '<input type="text" id="flat-cli-search" placeholder="&#128269; Cerca cliente..." oninput="filterFlatClienti(this.value)" '+
+    'style="width:100%;max-width:320px;box-sizing:border-box;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 14px;color:var(--tx);font-size:12.5px;font-family:inherit;outline:none">'+
+  '</div>';
+  html+='<div id="flat-cli-list">'+buildFlatCliListHtml(cid,clientiListFlat)+'</div>';
 
   // Legenda (solo vista admin — nella vista a card non serve)
   if(!isReadOnlyCollab())html+='<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:16px 2px 0;border-top:1px solid rgba(255,255,255,.05)">'+
@@ -1341,6 +1360,102 @@ function renderDetail(cid){
   }
 
   g('collab-detail').innerHTML=html;
+}
+
+/* Estratta da renderDetail così la ricerca cliente può ri-renderizzare solo
+   questo blocco (#flat-cli-list) senza toccare l'input di ricerca stesso —
+   altrimenti l'input verrebbe ricreato ad ogni carattere digitato e perderebbe
+   il focus. */
+function buildFlatCliListHtml(cid,clientiListFlat){
+  var html='';
+  if(isReadOnlyCollab()){
+    html+='<div style="margin-bottom:6px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+      '<span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">I TUOI CLIENTI</span>'+
+      '<span style="font-size:10.5px;color:var(--tx3)">clicca per aprire</span></div>';
+    if(!clientiListFlat.length){
+      html+='<div class="cli-card-empty">Nessun cliente trovato.</div>';
+    }else{
+      html+='<div class="cli-card-grid">'+clientiListFlat.map(function(cd,i){
+        var clEnc=encodeURIComponent(cd.cliente).replace(/'/g,'%27');
+        var initials=cd.cliente.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
+        var cardCol=PALETTE[i%PALETTE.length];
+        var doneAll=cd.rows.length>0&&cd.pagati===cd.rows.length;
+        var badge=doneAll?{t:'&#10003; completo',c:'var(--green)',bg:'rgba(0,229,138,.1)'}:cd.scaduti>0?{t:cd.scaduti+' scaduto'+(cd.scaduti>1?'i':''),c:'var(--red)',bg:'rgba(255,87,87,.1)'}:cd.rows.length>0?{t:'in corso',c:'var(--blue)',bg:'rgba(79,157,255,.1)'}:{t:'nuovo',c:'var(--tx3)',bg:'rgba(255,255,255,.05)'};
+        var pctDone=cd.rows.length>0?Math.round(cd.pagati/cd.rows.length*100):0;
+        return '<div class="cli-card" style="--cli-col:'+cardCol+';animation-delay:'+(i*0.03)+'s" onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')">'+
+          '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
+          '<div class="cli-card-mid">'+
+            '<div class="cli-card-nm">'+cd.cliente+'</div>'+
+            '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctDone+'%;background:'+(doneAll?'var(--green)':cardCol)+'"></div></div>'+
+          '</div>'+
+          '<div class="cli-card-foot">'+cd.pagati+' / '+cd.rows.length+' siti'+(cd.inc>0?' &middot; <span style="color:var(--green);font-weight:800">€ '+fmt(cd.inc)+'</span>':'')+'</div>'+
+          '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px;flex-shrink:0">'+badge.t+'</span>'+
+        '</div>';
+      }).join('')+'</div>';
+    }
+    html+='</div>';
+  }else{
+  html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;margin-bottom:6px">'+
+    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(245,200,66,.05),transparent)">'+
+    '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">&#128101; CLIENTI</span>'+
+    '<span style="font-size:10px;color:var(--tx3)">clicca un cliente per vedere i suoi siti</span></div>'+
+    '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
+    '<thead><tr style="background:rgba(255,255,255,.025)">'+
+    '<th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">CLIENTE</th>'+
+    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SITI</th>'+
+    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">PAGATI</th>'+
+    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DA PAGARE</th>'+
+    '<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">SCADUTI</th>'+
+    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">INCASSATO</th>'+
+    '<th style="padding:10px 14px;text-align:right;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)">DA INCASSARE</th>'+
+    (canDelete()?'<th style="padding:10px 14px;text-align:center;font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;border-bottom:1px solid rgba(255,255,255,.06)"></th>':'')+
+    '</tr></thead><tbody>';
+
+  if(!clientiListFlat.length){
+    html+='<tr><td colspan="8" style="padding:22px 16px;text-align:center;color:var(--tx3);font-size:12.5px">Nessun cliente trovato.</td></tr>';
+  }
+  clientiListFlat.forEach(function(cd,_ci){
+    /* encodeURIComponent NON scappa l'apostrofo (') — nomi come "Nicolò
+       Vitali" (nessun problema) o "D'Urso"/"Nicolò'" con apostrofo rompono
+       l'attributo onclick a virgolette singole. %27 risolve e si decodifica
+       comunque correttamente con decodeURIComponent. */
+    var clEnc=encodeURIComponent(cd.cliente).replace(/'/g,'%27');
+    var rowCol=PALETTE[_ci%PALETTE.length];
+    var initials=cd.cliente.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
+    html+='<tr onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')" style="cursor:pointer;transition:.12s;border-left:2px solid '+rowCol+'55" '+
+      'onmouseover="this.style.background=\'rgba(245,200,66,.06)\'" '+
+      'onmouseout="this.style.background=\'transparent\'">'+
+      '<td class="mbl-head" style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+        '<div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+rowCol+'1f;border:1px solid '+rowCol+'55;color:'+rowCol+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center">'+initials+'</div>'+
+        '<span style="font-weight:800;color:var(--tx);font-size:13px">'+cd.cliente+'</span>'+
+        '</div></td>'+
+      '<td data-lbl="SITI" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)"><span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.06);font-weight:800;font-size:11.5px">'+cd.rows.length+'</span></td>'+
+      '<td data-lbl="PAGATI" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)"><span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(0,229,138,.1);color:var(--green);font-weight:800;font-size:11.5px">'+cd.pagati+'</span></td>'+
+      '<td data-lbl="DA PAGARE" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)"><span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(79,157,255,.1);color:var(--blue);font-weight:800;font-size:11.5px">'+cd.daPagare+'</span></td>'+
+      '<td data-lbl="SCADUTI" style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (cd.scaduti>0?'<span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(255,87,87,.12);color:var(--red);font-weight:800;font-size:11.5px">'+cd.scaduti+'</span>':'<span style="color:var(--tx4);font-size:11.5px">0</span>')+
+      '</td>'+
+      '<td data-lbl="INCASSATO" style="padding:10px 14px;text-align:right;color:var(--green);font-weight:700;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        (cd.inc>0?'€ '+fmt(cd.inc):'<span style="color:var(--tx4)">—</span>')+'</td>'+
+      '<td data-lbl="DA INCASSARE" style="padding:10px 14px;text-align:right;font-weight:800;border-bottom:1px solid rgba(255,255,255,.04);color:'+(cd.daInc>0?'var(--gold)':cd.rows.length>0?'var(--green)':'var(--tx4)')+'">'+
+        (cd.daInc>0?'€ '+fmt(cd.daInc):cd.rows.length>0?'✓':'—')+'</td>'+
+      (canDelete()?('<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+        '<button onclick="event.stopPropagation();rimuoviClienteDaCollab(\''+cid+'\',\''+clEnc+'\')" title="Rimuovi '+cd.cliente+' da questo collaboratore" '+
+        'style="background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.25);color:var(--red);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:12px">&#128465;</button></td>'):'')+
+      '</tr>';
+  });
+
+  html+='</tbody></table></div></div>';
+  }
+  return html;
+}
+function filterFlatClienti(q){
+  q=(q||'').toLowerCase().trim();
+  var list=q?_flatCliCache.filter(function(cd){return cd.cliente.toLowerCase().indexOf(q)>=0;}):_flatCliCache;
+  var el=g('flat-cli-list');
+  if(el)el.innerHTML=buildFlatCliListHtml(_flatCliCidCache,list);
 }
 
 function renderBkDetail(cid, bkEnc){
@@ -1535,7 +1650,25 @@ function renderFlatCliente(cid,clienteEnc){
         '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'</td>'+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-          (isReadOnlyCollab()?'':'<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 12px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>')+
+          (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
+            '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
+            '<button onclick="segnaGiaOccupato(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" title="Il cliente ha già un account su questo sito da prima di MBBET" style="padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#128274; Già occupato</button>'+
+          '</div>')+
+        '</td></tr>';
+      return;
+    }
+    if(b.stato==='GIA_REGISTRATO'){
+      html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55">'+
+        '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="4" data-lbl="STATO" style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          '<span style="padding:4px 10px;border-radius:999px;background:rgba(245,200,66,.1);color:var(--gold);font-size:10px;font-weight:800;white-space:nowrap">&#128274; Già occupato</span>'+
+          '<span style="margin-left:8px;font-size:10px;color:var(--tx3);font-style:italic">nessun compenso previsto</span>'+
+        '</td>'+
+        '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">&mdash;</td>'+
+        '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
+        '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          (isReadOnlyCollab()?'':'<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Annulla" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px">&#128465;</button>')+
         '</td></tr>';
       return;
     }

@@ -664,7 +664,13 @@ async function loadAll(){
 }
 
 /* ══ CALCOLI BASE ══ */
-function calcTotali(bns,soloFatto){
+/* speseArr/extraArr sono opzionali: di default (omessi) si usano gli array
+   globali ALL-TIME _spese/_entrateExtra, corretto quando bns è già "tutto lo
+   storico" (es. Divisione Utile, Tasse). Se invece bns è filtrato su un
+   singolo mese (Overview), vanno passati esplicitamente spese/entrate DI
+   QUEL MESE — altrimenti l'utile del mese sottrarrebbe le spese di TUTTI i
+   mesi mai registrati, non solo quelle del mese in questione. */
+function calcTotali(bns,soloFatto,speseArr,extraArr){
   var rows=soloFatto?bns.filter(function(b){return b.stato==='FATTO';}):bns;
   var ric=0,pag=0,costi=0,compOp=0,compCollab=0,compRef=0;
   rows.forEach(function(b){
@@ -674,14 +680,19 @@ function calcTotali(bns,soloFatto){
     compCollab+=r*(parseFloat(b.perc_collab)||0)/100;
     compRef+=parseFloat(b.comp_referral)||0;
   });
-  var speseTot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
-  var entrateExtraTot=_entrateExtra.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var speseTot=(speseArr||_spese).reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
+  var entrateExtraTot=(extraArr||_entrateExtra).reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
   var utile=Math.max(ric+entrateExtraTot-pag-compOp-compCollab-compRef-costi-speseTot,0);
   return {ric:ric,pag:pag,costi:costi,compOp:compOp,compCollab:compCollab,compRef:compRef,utile:utile,speseTot:speseTot,entrateExtraTot:entrateExtraTot,cnt:rows.length};
 }
 
 function bnsOfMonth(mese,anno){
   return _bns.filter(function(b){return b.mese_operativo==mese&&b.anno_operativo==anno;});
+}
+function dataInMese(dataStr,mese,anno){
+  if(!dataStr)return false;
+  var d=new Date(dataStr+'T00:00:00');
+  return (d.getMonth()+1)===mese && d.getFullYear()===anno;
 }
 
 /* ══ OVERVIEW ══ */
@@ -724,7 +735,9 @@ function renderOverview(){
   if(g('op-mese-lbl'))g('op-mese-lbl').innerHTML='&#128197; '+mnome;
 
   var bMese=bnsOfMonth(m,a);
-  var totMese=calcTotali(bMese,false);
+  var speseMese=_spese.filter(function(x){return dataInMese(x.data,m,a);});
+  var extraMese=_entrateExtra.filter(function(x){return dataInMese(x.data,m,a);});
+  var totMese=calcTotali(bMese,false,speseMese,extraMese);
   var totFatto=calcTotali(_bns,true);
   var totAll=calcTotali(_bns,false);
   renderCapitaleAttivo();
@@ -1066,7 +1079,9 @@ async function saveTasseConfig(){
    restano a Mary/Manuele e non vanno "in fattura" loro. */
 function utileNettoAnno(anno){
   var ric=0,pag=0,costi=0,compOp=0,compCollab=0,compRef=0;
-  _bns.filter(function(b){return b.anno_operativo==anno;}).forEach(function(b){
+  // Solo bonus FATTO: la base imponibile non deve contare ricavi non ancora
+  // realizzati/incassati (un bonus IN_CORSO può avere un ric_real "di prova").
+  _bns.filter(function(b){return b.anno_operativo==anno&&b.stato==='FATTO';}).forEach(function(b){
     var r=parseFloat(b.ric_real)||0,p=parseFloat(b.pag_cli)||0,c=parseFloat(b.costi_extra)||0;
     ric+=r;pag+=p;costi+=c;
     compOp+=r*(parseFloat(b.perc_op)||0)/100;
@@ -1219,7 +1234,9 @@ async function saveSplitConfig(){
 }
 
 function utileNettoTotale(){
-  var tot=calcTotali(_bns,false);
+  // Solo bonus FATTO: la quota dei soci non deve mai contare ricavi non
+  // ancora realizzati/incassati di bonus ancora IN_CORSO.
+  var tot=calcTotali(_bns,true);
   var speseTot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
   var entrateExtraTot=_entrateExtra.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
   return Math.max(tot.ric+entrateExtraTot-tot.pag-tot.compOp-tot.compCollab-tot.compRef-speseTot-tot.costi,0);
@@ -1227,7 +1244,10 @@ function utileNettoTotale(){
 
 function renderDivisione(){
   fillSplitForm();
-  var tot=calcTotali(_bns,false);
+  // Solo bonus FATTO, coerente con utileNettoTotale() qui sotto e con
+  // "Ricavi Totali" in Overview — mai dividere tra i soci ricavi non ancora
+  // realizzati di bonus IN_CORSO.
+  var tot=calcTotali(_bns,true);
   var speseTot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
   var utileNetto=utileNettoTotale();
 
