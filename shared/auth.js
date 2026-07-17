@@ -38,22 +38,26 @@ async function _loadProfile(authUser) {
 }
 
 // ── Init Auth: legge la sessione reale già persistita da Supabase ───────────
+// Nota: onSuccess/onFail vengono chiamati FUORI dal try — un errore dentro
+// boot() (onSuccess) non deve mai essere scambiato per un fallimento di login.
 async function initAuth(onSuccess, onFail) {
+  var profile = null;
   try {
     var s = await db.auth.getSession();
     var session = s.data && s.data.session;
     if (session && session.user) {
-      var profile = await _loadProfile(session.user);
-      if (profile) {
-        currentUser = { email: profile.email };
-        currentNome = profile.nome || profile.email;
-        currentRole = profile.ruolo || 'VIEWER';
-        currentCollabNome = profile.collabNome || '';
-        if (onSuccess) { onSuccess(); return; }
-      }
+      profile = await _loadProfile(session.user);
     }
-  } catch (e) {}
-  if (onFail) onFail();
+  } catch (e) { profile = null; }
+  if (profile) {
+    currentUser = { email: profile.email };
+    currentNome = profile.nome || profile.email;
+    currentRole = profile.ruolo || 'VIEWER';
+    currentCollabNome = profile.collabNome || '';
+    if (onSuccess) onSuccess();
+  } else {
+    if (onFail) onFail();
+  }
 }
 
 // ── Login / Logout ───────────────────────────────────────────────────────────
