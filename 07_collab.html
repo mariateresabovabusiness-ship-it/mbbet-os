@@ -1821,7 +1821,6 @@ async function saveNewBonus(){
     else{renderFlatCliente(_newBnsCid,encodeURIComponent(nome));}
   }catch(e){
     var errMsg='Errore: '+(e.message||JSON.stringify(e)||String(e));
-    alert('DEBUG ERRORE AGGIUNGI:\n'+errMsg);
     var errEl=g('nb-err');
     errEl.textContent=errMsg;
     errEl.style.cssText='padding:8px 20px;font-size:12px;color:#fff;background:rgba(255,50,50,.25);border-radius:6px;margin:0 20px 8px;font-weight:700;border:1px solid rgba(255,50,50,.4)';

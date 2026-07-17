@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Modulo Cliente — Isma · MBBET</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#06080f;--gold:#f7cc46;--green:#00f093;--red:#ff4f4f;--blue:#4f9dff;--tx:#edf2ff;--tx2:#b8cee8;--tx3:#48627a;--br:rgba(255,255,255,.07)}
+html,body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.page{max-width:520px;margin:0 auto;padding:44px 20px 80px;animation:fadeUp .4s ease both}
+.logo-wrap{text-align:center;margin-bottom:8px}
+.logo-ic{width:60px;height:60px;border-radius:16px;background:linear-gradient(145deg,#2d1800,#b8890a,var(--gold));display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;box-shadow:0 8px 32px rgba(247,204,70,.15)}
+.logo-t{font-size:20px;font-weight:900;color:var(--gold);letter-spacing:2px}
+.logo-s{font-size:11px;color:var(--tx3);margin-top:4px;letter-spacing:1px}
+.for-collab{text-align:center;margin:18px 0 26px;padding:12px 16px;background:rgba(247,204,70,.06);border:1px solid rgba(247,204,70,.2);border-radius:12px;font-size:13px;color:var(--tx2);line-height:1.6}
+.for-collab b{color:var(--gold)}
+
+/* FAQ — grande, prima del modulo, per rispondere da sola alle domande più comuni */
+.faq-wrap{margin-bottom:28px}
+.faq-hdr{text-align:center;margin-bottom:14px}
+.faq-title{font-size:16px;font-weight:900;color:var(--tx)}
+.faq-sub{font-size:12px;color:var(--tx3);margin-top:4px}
+.faq-item{background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.faq-q{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--tx2)}
+.faq-q .ic{color:var(--gold);font-size:16px;flex-shrink:0;transition:.2s}
+.faq-item.open .faq-q .ic{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:.22s ease;font-size:13px;color:var(--tx3);line-height:1.65}
+.faq-item.open .faq-a{max-height:400px}
+.faq-a-inner{padding:0 16px 16px}
+
+.card{background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:18px;padding:26px 22px}
+.sec-title{font-size:12px;font-weight:800;color:var(--gold);letter-spacing:1.5px;margin:22px 0 14px;text-transform:uppercase}
+.sec-title:first-child{margin-top:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:7px}
+.field label .req{color:var(--red)}
+.inp{width:100%;padding:13px 14px;background:rgba(255,255,255,.03);border:1px solid var(--br);border-radius:10px;color:var(--tx);font-size:14px;font-family:inherit;outline:none;transition:.15s}
+.inp:focus{border-color:var(--gold);background:rgba(247,204,70,.03)}
+.field.err .inp{border-color:var(--red)}
+.err-msg{display:none;font-size:11px;color:var(--red);margin-top:5px}
+.field.err .err-msg{display:block}
+.hint{font-size:10.5px;color:var(--tx3);margin-top:5px}
+.docinp{width:100%;padding:12px 14px;background:rgba(255,255,255,.03);border:1px dashed var(--br);border-radius:10px;color:var(--tx);font-size:13px;font-family:inherit;outline:none}
+.docinp:focus{border-color:var(--gold)}
+.dok-ok{display:none;font-size:11px;color:var(--green);margin-top:5px;font-weight:700}
+.consent{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:12px;margin-top:6px}
+.consent input{width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--gold)}
+.consent label{font-size:12px;color:var(--tx3);line-height:1.6}
+.btn-send{width:100%;padding:15px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:12px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.3px;margin-top:6px;transition:.15s}
+.btn-send:disabled{opacity:.6;cursor:default}
+.btn-send:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(247,204,70,.2)}
+#alert-box,#global-err{display:none;margin-top:14px;padding:11px 14px;border-radius:10px;font-size:12.5px;background:rgba(255,79,79,.08);border:1px solid rgba(255,79,79,.25);color:#fff}
+#success-page{display:none;text-align:center;animation:fadeUp .4s ease both}
+.suc-ic{width:74px;height:74px;border-radius:50%;background:rgba(0,240,147,.1);border:1px solid rgba(0,240,147,.3);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px}
+.suc-t{font-size:20px;font-weight:900;color:var(--tx);margin-bottom:10px}
+.suc-s{font-size:13.5px;color:var(--tx3);line-height:1.7;max-width:380px;margin:0 auto}
+</style>
+</head>
+<body>
+
+<div class="page" id="form-page">
+  <div class="logo-wrap">
+    <div class="logo-ic">👑</div>
+    <div class="logo-t">MBBET OS</div>
+    <div class="logo-s">MODULO NUOVO CLIENTE</div>
+  </div>
+  <div class="for-collab">Ciao! Sei stato messo in contatto con <b>Isma</b> per iniziare il tuo percorso con MBBET.<br>Prima di scriverci, leggi le domande qui sotto: probabilmente trovi già la risposta che cerchi 👇</div>
+
+  <!-- ═══ FAQ — leggi qui prima di scrivere ═══ -->
+  <div class="faq-wrap">
+    <div class="faq-hdr">
+      <div class="faq-title">❓ Domande frequenti</div>
+      <div class="faq-sub">Clicca su una domanda per aprirla</div>
+    </div>
+    <div id="faq-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">I tuoi dati</div>
+    <div class="row2">
+      <div class="field" id="f-nome">
+        <label>Nome <span class="req">*</span></label>
+        <input class="inp" id="nome" type="text" placeholder="Mario" autocomplete="given-name">
+        <div class="err-msg">Obbligatorio</div>
+      </div>
+      <div class="field" id="f-cognome">
+        <label>Cognome <span class="req">*</span></label>
+        <input class="inp" id="cognome" type="text" placeholder="Rossi" autocomplete="family-name">
+        <div class="err-msg">Obbligatorio</div>
+      </div>
+    </div>
+    <div class="field" id="f-tel">
+      <label>Numero di telefono <span class="req">*</span></label>
+      <input class="inp" id="tel" type="tel" placeholder="+39 333 1234567" autocomplete="tel">
+      <div class="err-msg">Inserisci un numero valido</div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input class="inp" id="email" type="email" placeholder="mario.rossi@gmail.com" autocomplete="email">
+      <div class="hint">Facoltativa, ma utile per ricevere le comunicazioni</div>
+    </div>
+    <div class="field">
+      <label>Città</label>
+      <input class="inp" id="citta" type="text" placeholder="Roma" autocomplete="address-level2">
+    </div>
+
+    <div class="sec-title">Documento d'identità</div>
+    <div class="field">
+      <label>Fronte <span class="req">*</span></label>
+      <input class="docinp" id="d_fronte" type="url" placeholder="https://drive.google.com/file/d/..." oninput="chkDoc('dok_fronte',this.value)">
+      <div class="hint">Carica la foto su Google Drive, imposta "Chiunque abbia il link" e incolla qui il link</div>
+      <div class="dok-ok" id="dok_fronte">✓ Link ricevuto</div>
+    </div>
+    <div class="field">
+      <label>Retro <span class="req">*</span></label>
+      <input class="docinp" id="d_retro" type="url" placeholder="https://drive.google.com/file/d/..." oninput="chkDoc('dok_retro',this.value)">
+      <div class="dok-ok" id="dok_retro">✓ Link ricevuto</div>
+    </div>
+
+    <div class="consent">
+      <input type="checkbox" id="consenso" onchange="showFieldErr('consenso',false)">
+      <label for="consenso">Accetto le condizioni operative ed economiche di MBBET e il trattamento dei miei dati personali (documento incluso) per finalità legate all'attivazione del servizio.</label>
+    </div>
+    <div class="err-msg" id="err-consenso" style="display:none;margin-top:8px">Devi accettare per continuare</div>
+
+    <button class="btn-send" id="submit-btn" onclick="submitForm()">Invia i miei dati</button>
+    <div id="global-err"></div>
+  </div>
+</div>
+
+<div class="page" id="success-page">
+  <div class="suc-ic">✓</div>
+  <div class="suc-t">Fatto, ci siamo!</div>
+  <div class="suc-s">Abbiamo ricevuto i tuoi dati. Isma ti contatterà a breve per avviare il primo passo — nel frattempo, se ti torna un dubbio, rileggi le domande frequenti qui sopra: risparmi tempo a te e a noi 🙌</div>
+</div>
+
+<script src="shared/supabase.min.js"></script>
+<script>
+var SUPA_URL='https://ntwqfuvcosvzpqrfpipn.supabase.co';
+var SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+var _db=supabase.createClient(SUPA_URL,SUPA_ANON);
+var COLLAB='Isma';
+
+/* ══ FAQ — piu' domande risolviamo qui, meno messaggi arrivano al team ══ */
+var FAQ=[
+  {q:"Cos'è di preciso il matched betting? È legale?",
+   a:"È un metodo che sfrutta i bonus e le promozioni che i bookmaker offrono legalmente ai nuovi clienti, coprendo la giocata in modo da azzerare il rischio. È completamente legale in Italia: non è una scommessa nel senso classico, è un'operazione matematica sui bonus."},
+  {q:"Quanto tempo ci vuole prima di iniziare davvero?",
+   a:"Dipende dai documenti e dalle verifiche dei singoli siti, ma in genere si parte entro pochi giorni dall'invio del modulo. Isma ti aggiorna passo dopo passo, non devi scrivere per sapere 'a che punto siamo': se c'è un aggiornamento te lo diciamo noi."},
+  {q:"Perché servono i documenti d'identità?",
+   a:"Sono richiesti dai bookmaker stessi per la registrazione (è obbligatorio per legge, come aprire un conto corrente). Senza documento fronte e retro leggibile non possiamo far partire nessun sito."},
+  {q:"Quanto capitale serve per iniziare?",
+   a:"Si parte con cifre contenute, solitamente tra i 50€ e i 150€ a seconda del primo bookmaker: il capitale resta sempre tuo e lo recuperi normalmente durante l'operazione. Non è una spesa, è capitale che gira."},
+  {q:"Come funzionano i guadagni e le commissioni?",
+   a:"Il guadagno arriva dal bonus di ogni sito, al netto dei costi di copertura. Isma segue una parte del percorso; nel gestionale trovi sempre, sito per sito, cosa è stato fatto e cosa manca — non serve chiedere aggiornamenti, sono sempre visibili."},
+  {q:"E se un bookmaker mi limita o blocca il conto?",
+   a:"Può succedere, è una possibilità nota e già gestita: non è un problema tuo da risolvere, ce ne occupiamo noi. Non influisce sugli altri siti né sul resto del percorso."},
+  {q:"Serve esperienza per iniziare?",
+   a:"No. Il percorso è pensato apposta per chi parte da zero: ti viene spiegato passo dopo passo cosa fare, quando farlo e perché."},
+  {q:"Come vengono trattati i miei dati e i miei documenti?",
+   a:"Vengono usati esclusivamente per le verifiche richieste dai bookmaker e per gestire il tuo percorso con noi, in modo riservato. Non vengono ceduti a terzi per altri scopi."},
+  {q:"Ho scritto e non mi ha ancora risposto nessuno: è normale?",
+   a:"Sì — le risposte arrivano in base alle priorità operative del giorno, non è che il messaggio si perde. Se la domanda è già qui sopra, spesso la risposta è già disponibile subito senza dover aspettare."},
+  {q:"A chi scrivo se ho un dubbio che non trovo qui?",
+   a:"Scrivi direttamente a Isma sul canale che vi siete già scambiati. Prova comunque prima a ricontrollare questa lista: la maggior parte delle domande che riceviamo ha già risposta qui sopra."}
+];
+(function(){
+  var wrap=document.getElementById('faq-list');
+  wrap.innerHTML=FAQ.map(function(f,i){
+    return '<div class="faq-item" id="faq-'+i+'">'+
+      '<div class="faq-q" onclick="toggleFaq('+i+')"><span>'+f.q+'</span><span class="ic">+</span></div>'+
+      '<div class="faq-a"><div class="faq-a-inner">'+f.a+'</div></div>'+
+    '</div>';
+  }).join('');
+})();
+function toggleFaq(i){
+  var el=document.getElementById('faq-'+i);
+  if(el)el.classList.toggle('open');
+}
+
+function normalizePhone(t){
+  if(!t)return null;
+  t=t.replace(/\s/g,'').replace(/^0039/,'+39').replace(/^39([0-9]{9})/,'+39$1');
+  if(t.length===10&&!t.startsWith('+'))t='+39'+t;
+  return t;
+}
+function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function v(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function showFieldErr(id,on){
+  var f=document.getElementById('f-'+id);
+  if(f)f.classList.toggle('err',!!on);
+  var e=document.getElementById('err-'+id);
+  if(e)e.style.display=on?'block':'none';
+}
+function chkDoc(okId,val){var el=document.getElementById(okId);if(el)el.style.display=val&&val.length>10?'block':'none';}
+
+async function genClientId(){
+  try{var r=await _db.rpc('rpc_next_client_id');if(r.data)return r.data;}catch(e){}
+  return 'MBBET-'+String(Math.floor(Math.random()*90000+10000));
+}
+async function genBonusSeed(){
+  try{var r=await _db.rpc('rpc_next_bonus_seed');if(typeof r.data==='number')return r.data;}catch(e){}
+  return 0;
+}
+async function checkDup(tel){
+  try{var r=await _db.rpc('rpc_check_dup_cliente',{p_tel:tel});return (r.data&&r.data.length)?r.data[0]:null;}catch(e){return null;}
+}
+
+var ISMA_TARIFFE=[
+  ["Quigioco",7],["Stanleybet",7],["Goldbet",6],["Eplay24",6],
+  ["Sunbet",6],["Eurobet",6],["William Hill",6],["Tombola.it",6]
+];
+
+async function creaListinoIsma(clientId,nomeCompleto,maxN){
+  var mese=new Date().getMonth()+1,anno=new Date().getFullYear();
+  var righe=ISMA_TARIFFE.map(function(t){
+    maxN++;
+    return {
+      id:'BNS-'+String(maxN).padStart(5,'0'),
+      id_cli:clientId,cliente:nomeCompleto,bookmaker:t[0],
+      stato:'LIBERO',stato_op:'In corso',fase_attuale:'Da iniziare',
+      operatore:null,perc_op:20,
+      nome_collab:'Isma',id_collab:'COLLAB-004',perc_collab:50,
+      priorita:'MEDIA',mese_operativo:mese,anno_operativo:anno,
+      deposito:0,bonus_ricevuto:0,prelievo:0,saldo_bk:0,
+      ric_prev:0,ric_real:0,pag_cli:0,costi_extra:0,
+      perc_referral:0,comp_referral:0,
+      cronologia:[],created_at:new Date().toISOString(),updated_at:new Date().toISOString()
+    };
+  });
+  try{await _db.from('bonus').insert(righe);}catch(e){}
+}
+
+async function submitForm(){
+  var nome=v('nome'),cognome=v('cognome');
+  var telRaw=v('tel'),tel=normalizePhone(telRaw);
+  var email=v('email')||null,citta=v('citta')||null;
+  var fronte=v('d_fronte'),retro=v('d_retro');
+  var consenso=document.getElementById('consenso').checked;
+  var errEl=document.getElementById('global-err');
+  errEl.style.display='none';
+
+  var ok=true;
+  showFieldErr('nome',!nome); if(!nome)ok=false;
+  showFieldErr('cognome',!cognome); if(!cognome)ok=false;
+  showFieldErr('tel',!telRaw||telRaw.replace(/\D/g,'').length<9); if(!telRaw||telRaw.replace(/\D/g,'').length<9)ok=false;
+  showFieldErr('consenso',!consenso); if(!consenso)ok=false;
+  if(!ok)return;
+
+  var btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Invio...';
+
+  try{
+    var dup=await checkDup(tel);
+    if(dup){
+      errEl.textContent='Questo numero risulta già registrato nel sistema (cliente '+(dup.id||'')+'). Se pensi sia un errore, scrivi direttamente a Isma.';
+      errEl.style.display='block';
+      btn.disabled=false;btn.textContent='Invia i miei dati';
+      return;
+    }
+
+    var nomeCompleto=(nome+' '+cognome).trim();
+    var clientId=await genClientId();
+    var ts=new Date().toISOString();
+    var payload={
+      id:clientId,nome:nome,cognome:cognome,
+      tel:tel,telefono:tel,email:email,citta:citta,
+      tipologia:'Referral',collab:COLLAB,referral:COLLAB,
+      stato:'LIBERO',stato_acc:'In Attesa',
+      data_ingresso:ts.slice(0,10),
+      accettazione_ok:true,consenso_data:ts,
+      consenso_testo:'Accetto le condizioni operative ed economiche di MBBET e il trattamento dei miei dati personali (documento incluso) per finalità legate all\'attivazione del servizio.',
+      doc_ci_fronte:fronte||null,doc_ci_retro:retro||null,
+      source:'modulo_isma',created_at:ts,updated_at:ts
+    };
+    var res=await _db.from('clienti').insert(payload);
+    if(res.error)throw res.error;
+
+    var seed=await genBonusSeed();
+    await creaListinoIsma(clientId,nomeCompleto,seed);
+
+    document.getElementById('form-page').style.display='none';
+    document.getElementById('success-page').style.display='block';
+  }catch(e){
+    errEl.textContent='Non siamo riusciti a completare l\'invio. Riprova tra qualche istante; se il problema persiste scrivi direttamente a Isma prima di procedere.';
+    errEl.style.display='block';
+    btn.disabled=false;btn.textContent='Invia i miei dati';
+  }
+}
+</script>
+</body>
+</html>
