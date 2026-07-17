@@ -304,6 +304,38 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
         <div class="panel-hdr"><div class="panel-title">&#128202; STORICO MESI</div><div id="anno-lbl" style="font-size:10px;color:var(--tx3)">Anno corrente</div></div>
         <div style="overflow-x:auto"><table class="data-table" id="storico-table"></table></div>
       </div>
+
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">&#128202; CONFRONTA PIÙ MESI INSIEME</div></div>
+        <div style="padding:14px 18px 4px;font-size:10px;color:var(--tx3)">Somma di ricavi/spese su un intervallo di mesi a scelta — es. Giugno + Luglio insieme.</div>
+        <div class="filter-bar" style="padding:6px 18px 16px">
+          <span class="filter-lbl">Da:</span>
+          <select class="filter-sel" id="cf-mese1" onchange="renderConfrontoPeriodo()">
+            <option value="1">Gennaio</option><option value="2">Febbraio</option>
+            <option value="3">Marzo</option><option value="4">Aprile</option>
+            <option value="5">Maggio</option><option value="6">Giugno</option>
+            <option value="7">Luglio</option><option value="8">Agosto</option>
+            <option value="9">Settembre</option><option value="10">Ottobre</option>
+            <option value="11">Novembre</option><option value="12">Dicembre</option>
+          </select>
+          <select class="filter-sel" id="cf-anno1" onchange="renderConfrontoPeriodo()">
+            <option value="2026">2026</option><option value="2025">2025</option>
+          </select>
+          <span class="filter-lbl">A:</span>
+          <select class="filter-sel" id="cf-mese2" onchange="renderConfrontoPeriodo()">
+            <option value="1">Gennaio</option><option value="2">Febbraio</option>
+            <option value="3">Marzo</option><option value="4">Aprile</option>
+            <option value="5">Maggio</option><option value="6">Giugno</option>
+            <option value="7">Luglio</option><option value="8">Agosto</option>
+            <option value="9">Settembre</option><option value="10">Ottobre</option>
+            <option value="11">Novembre</option><option value="12">Dicembre</option>
+          </select>
+          <select class="filter-sel" id="cf-anno2" onchange="renderConfrontoPeriodo()">
+            <option value="2026">2026</option><option value="2025">2025</option>
+          </select>
+        </div>
+        <div class="kpi-row" id="kpi-confronto" style="padding:0 18px 18px"></div>
+      </div>
     </div>
 
     <!-- ═══ ENTRATE ═══ -->
@@ -569,6 +601,14 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 <script>
 /* ══ GLOBALS ══ */
 var _bns=[], _spese=[], _entrateExtra=[], _ops=[], _ovPeriod='3m';
+/* Finché loadAll() non ha finito di caricare TUTTO (bonus paginato incluso,
+   che su migliaia di righe richiede diversi secondi), i pannelli che
+   dipendono da _bns mostravano "€ 0,00" invece di aspettare — indistinguibile
+   da un mese realmente vuoto, ed è esattamente per questo che cambiando mese
+   PRIMA che il caricamento finisse sembrava di vedere "sempre la stessa cosa"
+   (in realtà sempre gli stessi zeri, non i dati reali del mese). */
+var _dataReady=false;
+var _confrontoInit=false;
 /* ══ GLOBAL MESE ══ */
 var MESE_KEY='mbbet_mese';
 var MESI_NOMI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
@@ -656,6 +696,7 @@ async function loadAll(){
     await loadTasseConfig();
     await loadSplitConfig();
     await loadCapitalData();
+    _dataReady=true;
     // Avvia render
     renderOverview();
     renderSpese();
@@ -693,6 +734,59 @@ function dataInMese(dataStr,mese,anno){
   if(!dataStr)return false;
   var d=new Date(dataStr+'T00:00:00');
   return (d.getMonth()+1)===mese && d.getFullYear()===anno;
+}
+
+/* Intervallo di più mesi (es. Giugno+Luglio insieme): confronta mese/anno
+   come un unico numero progressivo (anno*12+mese) così "da" e "a" possono
+   essere messi in qualsiasi ordine e funzionano anche a cavallo di due anni. */
+function meseProgressivo(mese,anno){return anno*12+mese;}
+function bnsOfRange(m1,a1,m2,a2){
+  var lo=Math.min(meseProgressivo(m1,a1),meseProgressivo(m2,a2));
+  var hi=Math.max(meseProgressivo(m1,a1),meseProgressivo(m2,a2));
+  return _bns.filter(function(b){
+    if(!b.mese_operativo||!b.anno_operativo)return false;
+    var v=meseProgressivo(b.mese_operativo,b.anno_operativo);
+    return v>=lo&&v<=hi;
+  });
+}
+function dataInRange(dataStr,m1,a1,m2,a2){
+  if(!dataStr)return false;
+  var d=new Date(dataStr+'T00:00:00');
+  var lo=Math.min(meseProgressivo(m1,a1),meseProgressivo(m2,a2));
+  var hi=Math.max(meseProgressivo(m1,a1),meseProgressivo(m2,a2));
+  var v=meseProgressivo(d.getMonth()+1,d.getFullYear());
+  return v>=lo&&v<=hi;
+}
+function renderConfrontoPeriodo(){
+  var m1=parseInt((g('cf-mese1')||{}).value)||0, a1=parseInt((g('cf-anno1')||{}).value)||0;
+  var m2=parseInt((g('cf-mese2')||{}).value)||0, a2=parseInt((g('cf-anno2')||{}).value)||0;
+  var el=g('kpi-confronto');if(!el)return;
+  if(!_dataReady){el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--tx3);font-size:12px">Caricamento dati…</div>';return;}
+  var bnsRange=bnsOfRange(m1,a1,m2,a2);
+  var speseRange=_spese.filter(function(x){return dataInRange(x.data,m1,a1,m2,a2);});
+  var extraRange=_entrateExtra.filter(function(x){return dataInRange(x.data,m1,a1,m2,a2);});
+  var tot=calcTotali(bnsRange,false,speseRange,extraRange);
+  var kpis=[
+    {l:'RICAVI PERIODO',v:'€ '+fmt(tot.ric),s:bnsRange.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--gold)'},
+    {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),s:'Nel periodo',c:'var(--red)'},
+    {l:'UTILE NETTO PERIODO',v:'€ '+fmt(tot.utile),s:tot.ric>0?Math.round(tot.utile/tot.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'}
+  ];
+  el.innerHTML=kpis.map(function(k,i){
+    return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
+      '<div class="kpi-label">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+(k.c)+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div>'+
+      '</div>';
+  }).join('');
+}
+function initConfrontoPeriodoDefault(){
+  // di default confronta il mese scorso con quello corrente (es. Giugno+Luglio)
+  var gm=getGlobalMese();
+  var prevM=gm.m-1,prevA=gm.anno; if(prevM<1){prevM=12;prevA--;}
+  if(g('cf-mese1'))g('cf-mese1').value=prevM;
+  if(g('cf-anno1'))g('cf-anno1').value=prevA;
+  if(g('cf-mese2'))g('cf-mese2').value=gm.m;
+  if(g('cf-anno2'))g('cf-anno2').value=gm.anno;
 }
 
 /* ══ OVERVIEW ══ */
@@ -734,6 +828,15 @@ function renderOverview(){
   if(g('mese-lbl'))g('mese-lbl').innerHTML='&#128197; '+mnome;
   if(g('op-mese-lbl'))g('op-mese-lbl').innerHTML='&#128197; '+mnome;
 
+  // _bns (paginato, migliaia di righe) può richiedere alcuni secondi: prima
+  // d'ora, cambiare mese in questa finestra mostrava "€ 0,00" per QUALSIASI
+  // mese (indistinguibile da un mese vuoto) invece di aspettare i dati veri.
+  if(!_dataReady){
+    if(g('kpi-overview'))g('kpi-overview').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--tx3);font-size:12px">Caricamento dati…</div>';
+    renderConfrontoPeriodo();
+    return;
+  }
+
   var bMese=bnsOfMonth(m,a);
   var speseMese=_spese.filter(function(x){return dataInMese(x.data,m,a);});
   var extraMese=_entrateExtra.filter(function(x){return dataInMese(x.data,m,a);});
@@ -763,6 +866,8 @@ function renderOverview(){
   buildOvChart();
   buildTopOps(m,a);
   buildStorico(a);
+  if(!_confrontoInit){_confrontoInit=true;initConfrontoPeriodoDefault();}
+  renderConfrontoPeriodo();
 }
 
 function setOvPeriod(p,el){
@@ -885,6 +990,8 @@ function buildStorico(anno){
 
 /* ══ ENTRATE ══ */
 function renderEntrate(){
+  var body=g('entrate-body');
+  if(!_dataReady){if(body)body.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--tx3)">Caricamento dati…</td></tr>';return;}
   var mn=parseInt((g('f-mese')||{}).value||0);
   var an=parseInt((g('f-anno')||{}).value||2026);
   var stato=(g('f-stato')||{}).value||''
@@ -895,7 +1002,7 @@ function renderEntrate(){
     return (parseFloat(b.ric_real)||0)>0||(parseFloat(b.pag_cli)||0)>0||stato;
   });
   if(g('ent-count'))g('ent-count').textContent=rows.length+' righe';
-  var body=g('entrate-body');if(!body)return;
+  if(!body)return;
   if(!rows.length){
     body.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--tx3)">Nessun dato per il periodo selezionato</td></tr>';
     return;
@@ -1106,6 +1213,7 @@ function calcTassePersona(nome,pct,fatturatoTotale,col){
 }
 function renderTasse(){
   fillTasseForm();
+  if(!_dataReady){var kEl=g('kpi-tasse');if(kEl)kEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--tx3);font-size:12px">Caricamento dati…</div>';return;}
   var anno=new Date().getFullYear();
   var baseImponibileAzienda=utileNettoAnno(anno);
   var pctMary=_splitPct.mary||0, pctManuele=_splitPct.manuele||0;
@@ -1151,6 +1259,7 @@ function renderPersonaTasseCardSimple(t){
 
 /* ══ PER OPERATORE ══ */
 function renderOperatori(){
+  if(!_dataReady){var elL=g('op-cards');if(elL)elL.innerHTML='<div style="padding:40px;text-align:center;color:var(--tx3)">Caricamento dati…</div>';return;}
   var mn=parseInt((g('op-f-mese')||{}).value||0);
   var an=parseInt((g('op-f-anno')||{}).value||2026);
   var bns=mn?_bns.filter(function(b){return b.mese_operativo==mn&&b.anno_operativo==an;}):_bns;
@@ -1244,6 +1353,7 @@ function utileNettoTotale(){
 
 function renderDivisione(){
   fillSplitForm();
+  if(!_dataReady){var kEl0=g('div-kpi');if(kEl0)kEl0.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--tx3);font-size:12px">Caricamento dati…</div>';return;}
   // Solo bonus FATTO, coerente con utileNettoTotale() qui sotto e con
   // "Ricavi Totali" in Overview — mai dividere tra i soci ricavi non ancora
   // realizzati di bonus IN_CORSO.
@@ -1382,6 +1492,7 @@ var MV_TIPO_META={
 };
 
 function renderCapital(){
+  if(!_dataReady){var kEl1=g('cap-kpi');if(kEl1)kEl1.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--tx3);font-size:12px">Caricamento dati…</div>';return;}
   var gm=getGlobalMese();
   var w=calcWaterfall(gm.m,gm.anno);
 
