@@ -442,7 +442,7 @@ async function submitForm(){
       await _db.from('contratti').insert({
         cliente_id:clientId,nome_cliente:nomeCompleto,email_cliente:email,
         tipo_contratto:'Collaborazione Isma',stato:'DA_INVIARE',
-        note:'Creato automaticamente dal modulo Isma — documento fronte/retro già caricati, pronto per l\'invio.',
+        note:'Creato automaticamente dal modulo Isma — documento fronte/retro già caricati, pronto per l\'invio.\nTelefono cliente: '+tel,
         operatore:'Isma'
       });
     }catch(e){}

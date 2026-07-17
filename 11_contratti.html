@@ -534,6 +534,25 @@ async function uploadContrattoFirmato(files) {
   toast('PDF caricato', 'success');
 }
 
+// Cliente pronto (contratto firmato) -> avviso al team, Serena inclusa
+async function notificaContrattoFirmato(c) {
+  var tel = '';
+  try {
+    if (c.cliente_id) {
+      var r = await db.from('clienti').select('tel,telefono').eq('id', c.cliente_id).maybeSingle();
+      tel = (r.data && (r.data.tel || r.data.telefono)) || '';
+    }
+  } catch (e) {}
+  try {
+    await fetch('/.netlify/functions/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        titolo: 'Cliente pronto per Serena: ' + (c.nome_cliente || ''),
+        messaggio: 'Contratto firmato. Cliente: ' + (c.nome_cliente || '') + ' · Tel: ' + (tel || '—') + ' · Email: ' + (c.email_cliente || '—') + '<br>Pronto per essere preso in carico.'
+      })
+    });
+  } catch (e) {}
+}
+
 async function saveContratto() {
   var clienteId = document.getElementById('c-cliente-id').value;
   var nomeCliente = document.getElementById('c-cliente-search').value.trim();
@@ -557,12 +576,14 @@ async function saveContratto() {
   if (_ctrEditId) {
     var prev = await db.from('contratti').select('stato,log_eventi').eq('id',_ctrEditId).single();
     var log = (prev.data && prev.data.log_eventi) || [];
+    var appenaFirmato = prev.data && prev.data.stato !== 'FIRMATO' && payload.stato === 'FIRMATO';
     if (prev.data && prev.data.stato !== payload.stato) {
       log.push({evento:'Stato cambiato: '+prev.data.stato+' → '+payload.stato, data:new Date().toISOString()});
     }
     payload.log_eventi = log;
     await db.from('contratti').update(payload).eq('id',_ctrEditId);
     toast('Contratto aggiornato', 'success');
+    if (appenaFirmato) notificaContrattoFirmato(payload);
   } else {
     payload.log_eventi = [{evento:'Contratto creato', data:new Date().toISOString()}];
     await db.from('contratti').insert(payload);
