@@ -5,135 +5,221 @@
 <title>Modulo Cliente — Isma · MBBET</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#06080f;--gold:#f7cc46;--green:#00f093;--red:#ff4f4f;--blue:#4f9dff;--tx:#edf2ff;--tx2:#b8cee8;--tx3:#48627a;--br:rgba(255,255,255,.07)}
-html,body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif}
+:root{--bg:#0b0b0d;--bg2:#131316;--red:#e31b23;--red-glow:rgba(227,27,35,.35);--tx:#ffffff;--tx2:#bdbdbd;--tx3:#7a7a7a;--br:rgba(255,255,255,.08)}
+html,body{min-height:100vh;background:radial-gradient(circle at 50% 0%,#161618,var(--bg) 60%);color:var(--tx);font-family:system-ui,-apple-system,sans-serif}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.page{max-width:520px;margin:0 auto;padding:44px 20px 80px;animation:fadeUp .4s ease both}
-.logo-wrap{text-align:center;margin-bottom:8px}
-.logo-ic{width:60px;height:60px;border-radius:16px;background:linear-gradient(145deg,#2d1800,#b8890a,var(--gold));display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;box-shadow:0 8px 32px rgba(247,204,70,.15)}
-.logo-t{font-size:20px;font-weight:900;color:var(--gold);letter-spacing:2px}
-.logo-s{font-size:11px;color:var(--tx3);margin-top:4px;letter-spacing:1px}
-.for-collab{text-align:center;margin:18px 0 26px;padding:12px 16px;background:rgba(247,204,70,.06);border:1px solid rgba(247,204,70,.2);border-radius:12px;font-size:13px;color:var(--tx2);line-height:1.6}
-.for-collab b{color:var(--gold)}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 var(--red-glow)}50%{box-shadow:0 0 0 8px rgba(227,27,35,0)}}
+.page{max-width:540px;margin:0 auto;padding:36px 18px 90px}
+.step{display:none;animation:fadeUp .35s ease both}
+.step.act{display:block}
+.logo-wrap{text-align:center;margin-bottom:18px}
+.logo-ic{width:58px;height:58px;border-radius:16px;background:linear-gradient(150deg,#3a0507,var(--red));display:inline-flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px;box-shadow:0 8px 30px var(--red-glow)}
+.logo-t{font-size:19px;font-weight:900;color:var(--tx);letter-spacing:2px}
+.logo-s{font-size:11px;color:var(--tx3);margin-top:4px;letter-spacing:2px;text-transform:uppercase}
 
-/* FAQ — grande, prima del modulo, per rispondere da sola alle domande più comuni */
-.faq-wrap{margin-bottom:28px}
-.faq-hdr{text-align:center;margin-bottom:14px}
-.faq-title{font-size:16px;font-weight:900;color:var(--tx)}
-.faq-sub{font-size:12px;color:var(--tx3);margin-top:4px}
-.faq-item{background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:12px;margin-bottom:8px;overflow:hidden}
-.faq-q{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--tx2)}
-.faq-q .ic{color:var(--gold);font-size:16px;flex-shrink:0;transition:.2s}
+/* PROGRESS BAR */
+.prog{display:flex;align-items:center;justify-content:center;gap:0;margin:22px 0 26px;flex-wrap:wrap}
+.prog-step{display:flex;align-items:center}
+.prog-dot{width:26px;height:26px;border-radius:50%;background:var(--bg2);border:1px solid var(--br);color:var(--tx3);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
+.prog-lbl{font-size:9.5px;color:var(--tx3);margin-top:6px;text-align:center;white-space:nowrap;letter-spacing:.3px}
+.prog-col{display:flex;flex-direction:column;align-items:center}
+.prog-line{width:22px;height:1px;background:var(--br);margin:0 2px;flex-shrink:0;transition:.25s}
+.prog-col.done .prog-dot{background:var(--red);border-color:var(--red);color:#fff}
+.prog-col.done .prog-lbl{color:var(--tx2)}
+.prog-col.cur .prog-dot{border-color:var(--red);color:var(--red);animation:glowPulse 1.8s infinite}
+.prog-col.cur .prog-lbl{color:var(--tx)}
+.prog-line.done{background:var(--red)}
+
+.card{background:var(--bg2);border:1px solid var(--br);border-radius:18px;padding:26px 22px}
+.card-title{font-size:15px;font-weight:900;color:var(--tx);margin-bottom:4px}
+.card-sub{font-size:12.5px;color:var(--tx3);margin-bottom:20px;line-height:1.6}
+
+/* FAQ */
+.faq-item{background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:12px;margin-bottom:9px;overflow:hidden;transition:.2s}
+.faq-item:hover{border-color:rgba(227,27,35,.4)}
+.faq-q{padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--tx2)}
+.faq-q .emoji{font-size:16px;flex-shrink:0}
+.faq-q .ic{margin-left:auto;color:var(--red);font-size:16px;flex-shrink:0;transition:.25s}
 .faq-item.open .faq-q .ic{transform:rotate(45deg)}
-.faq-a{max-height:0;overflow:hidden;transition:.22s ease;font-size:13px;color:var(--tx3);line-height:1.65}
-.faq-item.open .faq-a{max-height:400px}
-.faq-a-inner{padding:0 16px 16px}
+.faq-a{max-height:0;overflow:hidden;transition:.25s ease;font-size:12.5px;color:var(--tx3);line-height:1.7}
+.faq-item.open .faq-a{max-height:420px}
+.faq-a-inner{padding:0 16px 16px;padding-left:42px}
 
-.card{background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:18px;padding:26px 22px}
-.sec-title{font-size:12px;font-weight:800;color:var(--gold);letter-spacing:1.5px;margin:22px 0 14px;text-transform:uppercase}
+.sec-title{font-size:11.5px;font-weight:800;color:var(--red);letter-spacing:1.5px;margin:20px 0 14px;text-transform:uppercase}
 .sec-title:first-child{margin-top:0}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field{margin-bottom:18px}
+.field{margin-bottom:16px}
 .field label{display:block;font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:7px}
 .field label .req{color:var(--red)}
 .inp{width:100%;padding:13px 14px;background:rgba(255,255,255,.03);border:1px solid var(--br);border-radius:10px;color:var(--tx);font-size:14px;font-family:inherit;outline:none;transition:.15s}
-.inp:focus{border-color:var(--gold);background:rgba(247,204,70,.03)}
-.field.err .inp{border-color:var(--red)}
+.inp:focus{border-color:var(--red);background:rgba(227,27,35,.04)}
+.field.err .inp{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
 .err-msg{display:none;font-size:11px;color:var(--red);margin-top:5px}
 .field.err .err-msg{display:block}
 .hint{font-size:10.5px;color:var(--tx3);margin-top:5px}
-.docinp{width:100%;padding:12px 14px;background:rgba(255,255,255,.03);border:1px dashed var(--br);border-radius:10px;color:var(--tx);font-size:13px;font-family:inherit;outline:none}
-.docinp:focus{border-color:var(--gold)}
-.dok-ok{display:none;font-size:11px;color:var(--green);margin-top:5px;font-weight:700}
-.consent{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:12px;margin-top:6px}
-.consent input{width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--gold)}
-.consent label{font-size:12px;color:var(--tx3);line-height:1.6}
-.btn-send{width:100%;padding:15px;background:linear-gradient(135deg,#6b4500,var(--gold));border:none;border-radius:12px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.3px;margin-top:6px;transition:.15s}
-.btn-send:disabled{opacity:.6;cursor:default}
-.btn-send:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(247,204,70,.2)}
-#alert-box,#global-err{display:none;margin-top:14px;padding:11px 14px;border-radius:10px;font-size:12.5px;background:rgba(255,79,79,.08);border:1px solid rgba(255,79,79,.25);color:#fff}
-#success-page{display:none;text-align:center;animation:fadeUp .4s ease both}
-.suc-ic{width:74px;height:74px;border-radius:50%;background:rgba(0,240,147,.1);border:1px solid rgba(0,240,147,.3);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px}
+
+/* DRAG & DROP */
+.drop{border:1.5px dashed var(--br);border-radius:14px;padding:22px 16px;text-align:center;cursor:pointer;transition:.18s;background:rgba(255,255,255,.015)}
+.drop:hover,.drop.drag{border-color:var(--red);background:rgba(227,27,35,.05)}
+.drop.done{border-color:var(--red);border-style:solid;background:rgba(227,27,35,.06)}
+.drop-ic{font-size:24px;margin-bottom:8px}
+.drop-t{font-size:12.5px;font-weight:700;color:var(--tx2)}
+.drop-s{font-size:10.5px;color:var(--tx3);margin-top:3px}
+.drop-file{font-size:11.5px;color:var(--red);font-weight:700;margin-top:6px;word-break:break-all}
+.drop input{display:none}
+.upl-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:10px;overflow:hidden;display:none}
+.upl-bar.on{display:block}
+.upl-bar-fill{height:100%;background:var(--red);width:0%;transition:.2s}
+
+.consent{display:flex;align-items:flex-start;gap:10px;padding:13px 15px;background:rgba(255,255,255,.02);border:1px solid var(--br);border-radius:12px;margin-top:10px}
+.consent input{width:18px;height:18px;flex-shrink:0;margin-top:2px;accent-color:var(--red)}
+.consent label{font-size:11.5px;color:var(--tx3);line-height:1.6}
+.consent label a{color:var(--red);text-decoration:none;font-weight:700}
+
+.btn{width:100%;padding:15px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.3px;margin-top:8px;transition:.15s}
+.btn-primary{background:linear-gradient(135deg,#8f0e14,var(--red));color:#fff}
+.btn-primary:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 26px var(--red-glow)}
+.btn-primary:disabled{opacity:.55;cursor:default}
+.btn-ghost{background:transparent;border:1px solid var(--br);color:var(--tx3);margin-top:10px}
+.btn-ghost:hover{border-color:var(--tx3);color:var(--tx2)}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{margin-top:8px}
+
+.contratto-box{text-align:center;padding:10px 0 6px}
+.contratto-ic{font-size:40px;margin-bottom:14px}
+#global-err{display:none;margin-top:14px;padding:11px 14px;border-radius:10px;font-size:12.5px;background:rgba(227,27,35,.1);border:1px solid rgba(227,27,35,.3);color:#fff}
+
+#success-page{text-align:center}
+.suc-ic{width:74px;height:74px;border-radius:50%;background:rgba(227,27,35,.1);border:1px solid rgba(227,27,35,.3);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px}
 .suc-t{font-size:20px;font-weight:900;color:var(--tx);margin-bottom:10px}
-.suc-s{font-size:13.5px;color:var(--tx3);line-height:1.7;max-width:380px;margin:0 auto}
+.suc-s{font-size:13.5px;color:var(--tx3);line-height:1.75;max-width:400px;margin:0 auto}
 </style>
 </head>
 <body>
 
-<div class="page" id="form-page">
+<div class="page">
   <div class="logo-wrap">
-    <div class="logo-ic">👑</div>
-    <div class="logo-t">MBBET OS</div>
-    <div class="logo-s">MODULO NUOVO CLIENTE</div>
+    <div class="logo-ic">🔥</div>
+    <div class="logo-t">MBBET × ISMA</div>
+    <div class="logo-s">Modulo nuovo cliente</div>
   </div>
-  <div class="for-collab">Ciao! Sei stato messo in contatto con <b>Isma</b> per iniziare il tuo percorso con MBBET.<br>Prima di scriverci, leggi le domande qui sotto: probabilmente trovi già la risposta che cerchi 👇</div>
 
-  <!-- ═══ FAQ — leggi qui prima di scrivere ═══ -->
-  <div class="faq-wrap">
-    <div class="faq-hdr">
-      <div class="faq-title">❓ Domande frequenti</div>
-      <div class="faq-sub">Clicca su una domanda per aprirla</div>
+  <div class="prog" id="prog"></div>
+
+  <!-- STEP 1 — FAQ -->
+  <div class="step act" id="step-1">
+    <div class="card">
+      <div class="card-title">Tutto quello che devi sapere prima di iniziare</div>
+      <div class="card-sub">Sei arrivato qui tramite <b style="color:var(--tx2)">Isma</b> — leggi queste domande, in 2 minuti capisci come funziona tutto il percorso.</div>
+      <div id="faq-list"></div>
+      <button class="btn btn-primary" onclick="goStep(2)">Ho letto, continua →</button>
     </div>
-    <div id="faq-list"></div>
   </div>
 
-  <div class="card">
-    <div class="sec-title">I tuoi dati</div>
-    <div class="row2">
-      <div class="field" id="f-nome">
-        <label>Nome <span class="req">*</span></label>
-        <input class="inp" id="nome" type="text" placeholder="Mario" autocomplete="given-name">
-        <div class="err-msg">Obbligatorio</div>
+  <!-- STEP 2 — DATI -->
+  <div class="step" id="step-2">
+    <div class="card">
+      <div class="card-title">I tuoi dati</div>
+      <div class="card-sub">Ci servono per aprire la tua pratica.</div>
+      <div class="row2">
+        <div class="field" id="f-nome">
+          <label>Nome <span class="req">*</span></label>
+          <input class="inp" id="nome" type="text" placeholder="Mario" autocomplete="given-name">
+          <div class="err-msg">Obbligatorio</div>
+        </div>
+        <div class="field" id="f-cognome">
+          <label>Cognome <span class="req">*</span></label>
+          <input class="inp" id="cognome" type="text" placeholder="Rossi" autocomplete="family-name">
+          <div class="err-msg">Obbligatorio</div>
+        </div>
       </div>
-      <div class="field" id="f-cognome">
-        <label>Cognome <span class="req">*</span></label>
-        <input class="inp" id="cognome" type="text" placeholder="Rossi" autocomplete="family-name">
-        <div class="err-msg">Obbligatorio</div>
+      <div class="field" id="f-tel">
+        <label>Telefono <span class="req">*</span></label>
+        <input class="inp" id="tel" type="tel" placeholder="+39 333 1234567" autocomplete="tel">
+        <div class="err-msg">Inserisci un numero valido</div>
       </div>
+      <div class="field">
+        <label>Email</label>
+        <input class="inp" id="email" type="email" placeholder="mario.rossi@gmail.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Città</label>
+        <input class="inp" id="citta" type="text" placeholder="Roma" autocomplete="address-level2">
+      </div>
+      <button class="btn btn-primary" onclick="goStep(3)">Continua →</button>
+      <button class="btn btn-ghost" onclick="goStep(1)">&#8592; Indietro</button>
     </div>
-    <div class="field" id="f-tel">
-      <label>Numero di telefono <span class="req">*</span></label>
-      <input class="inp" id="tel" type="tel" placeholder="+39 333 1234567" autocomplete="tel">
-      <div class="err-msg">Inserisci un numero valido</div>
-    </div>
-    <div class="field">
-      <label>Email</label>
-      <input class="inp" id="email" type="email" placeholder="mario.rossi@gmail.com" autocomplete="email">
-      <div class="hint">Facoltativa, ma utile per ricevere le comunicazioni</div>
-    </div>
-    <div class="field">
-      <label>Città</label>
-      <input class="inp" id="citta" type="text" placeholder="Roma" autocomplete="address-level2">
-    </div>
-
-    <div class="sec-title">Documento d'identità</div>
-    <div class="field">
-      <label>Fronte <span class="req">*</span></label>
-      <input class="docinp" id="d_fronte" type="url" placeholder="https://drive.google.com/file/d/..." oninput="chkDoc('dok_fronte',this.value)">
-      <div class="hint">Carica la foto su Google Drive, imposta "Chiunque abbia il link" e incolla qui il link</div>
-      <div class="dok-ok" id="dok_fronte">✓ Link ricevuto</div>
-    </div>
-    <div class="field">
-      <label>Retro <span class="req">*</span></label>
-      <input class="docinp" id="d_retro" type="url" placeholder="https://drive.google.com/file/d/..." oninput="chkDoc('dok_retro',this.value)">
-      <div class="dok-ok" id="dok_retro">✓ Link ricevuto</div>
-    </div>
-
-    <div class="consent">
-      <input type="checkbox" id="consenso" onchange="showFieldErr('consenso',false)">
-      <label for="consenso">Accetto le condizioni operative ed economiche di MBBET e il trattamento dei miei dati personali (documento incluso) per finalità legate all'attivazione del servizio.</label>
-    </div>
-    <div class="err-msg" id="err-consenso" style="display:none;margin-top:8px">Devi accettare per continuare</div>
-
-    <button class="btn-send" id="submit-btn" onclick="submitForm()">Invia i miei dati</button>
-    <div id="global-err"></div>
   </div>
-</div>
 
-<div class="page" id="success-page">
-  <div class="suc-ic">✓</div>
-  <div class="suc-t">Fatto, ci siamo!</div>
-  <div class="suc-s">Abbiamo ricevuto i tuoi dati. Isma ti contatterà a breve per avviare il primo passo — nel frattempo, se ti torna un dubbio, rileggi le domande frequenti qui sopra: risparmi tempo a te e a noi 🙌</div>
+  <!-- STEP 3 — DOCUMENTO -->
+  <div class="step" id="step-3">
+    <div class="card">
+      <div class="card-title">Documento d'identità</div>
+      <div class="card-sub">Serve solo per verificare la tua identità, preparare il contratto e rispettare la normativa italiana. Nessun altro uso.</div>
+
+      <div class="field">
+        <label>Fronte <span class="req">*</span></label>
+        <div class="drop" id="drop-fronte" onclick="document.getElementById('file-fronte').click()">
+          <div class="drop-ic">📷</div>
+          <div class="drop-t">Trascina qui la foto o clicca per scegliere</div>
+          <div class="drop-s">JPG, PNG o PDF — max 10MB</div>
+          <div class="drop-file" id="name-fronte"></div>
+          <div class="upl-bar" id="bar-fronte"><div class="upl-bar-fill" id="barfill-fronte"></div></div>
+        </div>
+        <input type="file" id="file-fronte" accept="image/*,.pdf">
+      </div>
+
+      <div class="field">
+        <label>Retro <span class="req">*</span></label>
+        <div class="drop" id="drop-retro" onclick="document.getElementById('file-retro').click()">
+          <div class="drop-ic">📷</div>
+          <div class="drop-t">Trascina qui la foto o clicca per scegliere</div>
+          <div class="drop-s">JPG, PNG o PDF — max 10MB</div>
+          <div class="drop-file" id="name-retro"></div>
+          <div class="upl-bar" id="bar-retro"><div class="upl-bar-fill" id="barfill-retro"></div></div>
+        </div>
+        <input type="file" id="file-retro" accept="image/*,.pdf">
+      </div>
+
+      <div class="consent">
+        <input type="checkbox" id="consenso-privacy" onchange="clearErr('privacy')">
+        <label for="consenso-privacy">Confermo di aver letto l'informativa privacy e acconsento al trattamento dei miei dati personali e del documento allegato per l'attivazione del servizio.</label>
+      </div>
+      <div class="err-msg" id="err-privacy" style="display:none;margin-top:6px">Devi confermare per continuare</div>
+
+      <div class="consent">
+        <input type="checkbox" id="consenso-contratto" onchange="clearErr('contratto')">
+        <label for="consenso-contratto">Confermo di aver letto e accettato le condizioni operative ed economiche della collaborazione con Isma e MBBET.</label>
+      </div>
+      <div class="err-msg" id="err-contratto" style="display:none;margin-top:6px">Devi confermare per continuare</div>
+
+      <button class="btn btn-primary" id="btn-step3" onclick="validateStep3()">Continua →</button>
+      <button class="btn btn-ghost" onclick="goStep(2)">&#8592; Indietro</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 — CONTRATTO -->
+  <div class="step" id="step-4">
+    <div class="card">
+      <div class="contratto-box">
+        <div class="contratto-ic">✍️</div>
+        <div class="card-title">Ultimo passo: il contratto</div>
+        <div class="card-sub" style="margin-bottom:6px">Il contratto tutela sia te che MBBET. Appena invii i tuoi dati, il sistema prepara automaticamente il contratto con le tue informazioni e te lo invieremo via email per la firma digitale — richiede solo pochi secondi.</div>
+      </div>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitForm()">Invia i miei dati →</button>
+      <button class="btn btn-ghost" onclick="goStep(3)">&#8592; Indietro</button>
+      <div id="global-err"></div>
+    </div>
+  </div>
+
+  <!-- STEP 5 — COMPLETATO -->
+  <div class="step" id="step-5">
+    <div id="success-page">
+      <div class="suc-ic">✓</div>
+      <div class="suc-t">Fatto, ci siamo!</div>
+      <div class="suc-s">Abbiamo ricevuto i tuoi dati e il documento. Il contratto ti arriverà via email per la firma, poi Isma ti contatterà per avviare il primo passo. Se ti torna un dubbio, rileggi le domande frequenti dell'inizio: risparmi tempo a te e a noi 🙌</div>
+    </div>
+  </div>
 </div>
 
 <script src="shared/supabase.min.js"></script>
@@ -142,60 +228,135 @@ var SUPA_URL='https://ntwqfuvcosvzpqrfpipn.supabase.co';
 var SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
 var _db=supabase.createClient(SUPA_URL,SUPA_ANON);
 var COLLAB='Isma';
+var STEPS=['FAQ','Dati','Documento','Contratto','Completato'];
+var curStep=1;
+var uploaded={fronte:null,retro:null};
 
-/* ══ FAQ — piu' domande risolviamo qui, meno messaggi arrivano al team ══ */
+/* ══ PROGRESS BAR ══ */
+function renderProg(){
+  var html='';
+  STEPS.forEach(function(lbl,i){
+    var n=i+1;
+    var cls=n<curStep?'done':n===curStep?'cur':'';
+    if(i>0)html+='<div class="prog-line'+(n<=curStep?' done':'')+'"></div>';
+    html+='<div class="prog-col '+cls+'"><div class="prog-dot">'+(n<curStep?'✓':n)+'</div><div class="prog-lbl">'+lbl+'</div></div>';
+  });
+  document.getElementById('prog').innerHTML=html;
+}
+function goStep(n){
+  curStep=n;
+  for(var i=1;i<=5;i++){
+    var el=document.getElementById('step-'+i);
+    if(el)el.classList.toggle('act',i===n);
+  }
+  renderProg();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+renderProg();
+
+/* ══ FAQ ══ */
 var FAQ=[
-  {q:"Cos'è di preciso il matched betting? È legale?",
-   a:"È un metodo che sfrutta i bonus e le promozioni che i bookmaker offrono legalmente ai nuovi clienti, coprendo la giocata in modo da azzerare il rischio. È completamente legale in Italia: non è una scommessa nel senso classico, è un'operazione matematica sui bonus."},
-  {q:"Quanto tempo ci vuole prima di iniziare davvero?",
-   a:"Dipende dai documenti e dalle verifiche dei singoli siti, ma in genere si parte entro pochi giorni dall'invio del modulo. Isma ti aggiorna passo dopo passo, non devi scrivere per sapere 'a che punto siamo': se c'è un aggiornamento te lo diciamo noi."},
-  {q:"Perché servono i documenti d'identità?",
-   a:"Sono richiesti dai bookmaker stessi per la registrazione (è obbligatorio per legge, come aprire un conto corrente). Senza documento fronte e retro leggibile non possiamo far partire nessun sito."},
-  {q:"Quanto capitale serve per iniziare?",
-   a:"Si parte con cifre contenute, solitamente tra i 50€ e i 150€ a seconda del primo bookmaker: il capitale resta sempre tuo e lo recuperi normalmente durante l'operazione. Non è una spesa, è capitale che gira."},
-  {q:"Come funzionano i guadagni e le commissioni?",
-   a:"Il guadagno arriva dal bonus di ogni sito, al netto dei costi di copertura. Isma segue una parte del percorso; nel gestionale trovi sempre, sito per sito, cosa è stato fatto e cosa manca — non serve chiedere aggiornamenti, sono sempre visibili."},
-  {q:"E se un bookmaker mi limita o blocca il conto?",
-   a:"Può succedere, è una possibilità nota e già gestita: non è un problema tuo da risolvere, ce ne occupiamo noi. Non influisce sugli altri siti né sul resto del percorso."},
-  {q:"Serve esperienza per iniziare?",
-   a:"No. Il percorso è pensato apposta per chi parte da zero: ti viene spiegato passo dopo passo cosa fare, quando farlo e perché."},
-  {q:"Come vengono trattati i miei dati e i miei documenti?",
-   a:"Vengono usati esclusivamente per le verifiche richieste dai bookmaker e per gestire il tuo percorso con noi, in modo riservato. Non vengono ceduti a terzi per altri scopi."},
-  {q:"Ho scritto e non mi ha ancora risposto nessuno: è normale?",
-   a:"Sì — le risposte arrivano in base alle priorità operative del giorno, non è che il messaggio si perde. Se la domanda è già qui sopra, spesso la risposta è già disponibile subito senza dover aspettare."},
-  {q:"A chi scrivo se ho un dubbio che non trovo qui?",
-   a:"Scrivi direttamente a Isma sul canale che vi siete già scambiati. Prova comunque prima a ricontrollare questa lista: la maggior parte delle domande che riceviamo ha già risposta qui sopra."}
+  {emoji:'💰',q:'Quanto posso guadagnare?',
+   a:"Con la collaborazione Isma × MBBET puoi ottenere fino a 50€. L'importo finale dipende dai siti di gioco sui quali sei ancora registrabile: ogni bookmaker ha un valore economico. Se hai già un conto aperto su alcuni siti, il valore di quei siti verrà escluso — se hai tutti i bookmaker disponibili ottieni l'intero importo previsto."},
+  {emoji:'💳',q:'Devo usare soldi miei?',
+   a:"Assolutamente no. Non dovrai anticipare capitale: tutta la parte economica viene gestita direttamente dal team MBBET. Il tuo compito è solo seguire le istruzioni che ti verranno inviate."},
+  {emoji:'📱',q:'Cosa dovrò fare praticamente?',
+   a:"Il procedimento è semplice: nella maggior parte dei casi dovrai solo ricevere un SMS, confermare alcuni passaggi e seguire le istruzioni del nostro operatore. Non serve nessuna esperienza nel matched betting, pensiamo noi a tutto il resto."},
+  {emoji:'⏱️',q:'Quanto dura il percorso?',
+   a:"Generalmente la collaborazione viene completata entro circa 7 giorni. I tempi possono variare leggermente in base alle verifiche dei vari siti."},
+  {emoji:'📄',q:'Perché mi chiedete il documento?',
+   a:"Il documento non serve per altro: serve esclusivamente per verificare la tua identità, preparare il contratto e rispettare gli obblighi previsti dalla normativa italiana. I tuoi dati vengono usati solo per questa collaborazione."},
+  {emoji:'✍️',q:'Devo firmare qualcosa?',
+   a:"Sì — prima di iniziare riceverai un contratto digitale, che tutela sia te sia MBBET. Potrai leggerlo con calma e firmarlo online in pochi secondi."},
+  {emoji:'🔒',q:'I miei dati sono al sicuro?',
+   a:"Sì, tutti i dati vengono trattati nel rispetto della normativa GDPR e usati esclusivamente per la gestione della collaborazione. Non vengono ceduti a terzi."},
+  {emoji:'📞',q:'Dopo aver compilato il modulo cosa succede?',
+   a:"Il nostro sistema genera automaticamente la tua pratica, prepara il contratto e verifica che tutta la documentazione sia completa. Subito dopo verrai contattato dal nostro team per iniziare il percorso."},
+  {emoji:'❓',q:'Ho già un account su qualche bookmaker',
+   a:"Nessun problema: lo comunicherai durante la verifica. Semplicemente quel sito non verrà conteggiato nel compenso finale."},
+  {emoji:'🏦',q:'Quando riceverò il compenso?',
+   a:"Una volta completata correttamente tutta la procedura prevista dalla collaborazione. Il pagamento viene effettuato secondo gli accordi stabiliti con Isma."}
 ];
 (function(){
   var wrap=document.getElementById('faq-list');
   wrap.innerHTML=FAQ.map(function(f,i){
     return '<div class="faq-item" id="faq-'+i+'">'+
-      '<div class="faq-q" onclick="toggleFaq('+i+')"><span>'+f.q+'</span><span class="ic">+</span></div>'+
+      '<div class="faq-q" onclick="toggleFaq('+i+')"><span class="emoji">'+f.emoji+'</span><span>'+f.q+'</span><span class="ic">+</span></div>'+
       '<div class="faq-a"><div class="faq-a-inner">'+f.a+'</div></div>'+
     '</div>';
   }).join('');
 })();
-function toggleFaq(i){
-  var el=document.getElementById('faq-'+i);
-  if(el)el.classList.toggle('open');
-}
+function toggleFaq(i){var el=document.getElementById('faq-'+i);if(el)el.classList.toggle('open');}
 
+/* ══ UTIL ══ */
 function normalizePhone(t){
   if(!t)return null;
   t=t.replace(/\s/g,'').replace(/^0039/,'+39').replace(/^39([0-9]{9})/,'+39$1');
   if(t.length===10&&!t.startsWith('+'))t='+39'+t;
   return t;
 }
-function esc(s){return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function v(id){var e=document.getElementById(id);return e?e.value.trim():'';}
 function showFieldErr(id,on){
   var f=document.getElementById('f-'+id);
   if(f)f.classList.toggle('err',!!on);
-  var e=document.getElementById('err-'+id);
-  if(e)e.style.display=on?'block':'none';
 }
-function chkDoc(okId,val){var el=document.getElementById(okId);if(el)el.style.display=val&&val.length>10?'block':'none';}
+function clearErr(name){document.getElementById('err-'+name).style.display='none';}
 
+/* ══ DRAG & DROP UPLOAD (a Supabase Storage, bucket 'contratti') ══ */
+function setupDrop(kind){
+  var drop=document.getElementById('drop-'+kind);
+  var input=document.getElementById('file-'+kind);
+  input.addEventListener('change',function(){if(input.files[0])handleFile(kind,input.files[0]);});
+  drop.addEventListener('dragover',function(e){e.preventDefault();drop.classList.add('drag');});
+  drop.addEventListener('dragleave',function(){drop.classList.remove('drag');});
+  drop.addEventListener('drop',function(e){
+    e.preventDefault();drop.classList.remove('drag');
+    if(e.dataTransfer.files[0])handleFile(kind,e.dataTransfer.files[0]);
+  });
+}
+async function handleFile(kind,file){
+  if(file.size>10*1024*1024){alert('Il file supera i 10MB, scegline uno più leggero.');return;}
+  var bar=document.getElementById('bar-'+kind),fill=document.getElementById('barfill-'+kind);
+  var nameEl=document.getElementById('name-'+kind),drop=document.getElementById('drop-'+kind);
+  bar.classList.add('on');fill.style.width='15%';
+  nameEl.textContent=file.name;
+  var ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  var path='isma-clienti/'+Date.now()+'-'+Math.floor(Math.random()*99999)+'-'+kind+'.'+ext;
+  try{
+    fill.style.width='55%';
+    var up=await _db.storage.from('contratti').upload(path,file,{contentType:file.type||'application/octet-stream'});
+    if(up.error)throw up.error;
+    fill.style.width='85%';
+    var signed=await _db.storage.from('contratti').createSignedUrl(path,315360000);
+    if(signed.error)throw signed.error;
+    uploaded[kind]=signed.data.signedUrl;
+    fill.style.width='100%';
+    drop.classList.add('done');
+    nameEl.textContent='✓ '+file.name;
+  }catch(e){
+    nameEl.textContent='Errore nel caricamento, riprova';
+    bar.classList.remove('on');
+    uploaded[kind]=null;
+  }
+}
+setupDrop('fronte');setupDrop('retro');
+
+function validateStep3(){
+  var ok=true;
+  if(!uploaded.fronte){document.getElementById('drop-fronte').style.borderColor='var(--red)';ok=false;}
+  if(!uploaded.retro){document.getElementById('drop-retro').style.borderColor='var(--red)';ok=false;}
+  var privacyOk=document.getElementById('consenso-privacy').checked;
+  var contrattoOk=document.getElementById('consenso-contratto').checked;
+  if(!privacyOk){document.getElementById('err-privacy').style.display='block';ok=false;}
+  if(!contrattoOk){document.getElementById('err-contratto').style.display='block';ok=false;}
+  if(!ok){
+    if(!uploaded.fronte||!uploaded.retro)alert('Carica entrambe le foto del documento prima di continuare.');
+    return;
+  }
+  goStep(4);
+}
+
+/* ══ RPC condivise con gli altri moduli ══ */
 async function genClientId(){
   try{var r=await _db.rpc('rpc_next_client_id');if(r.data)return r.data;}catch(e){}
   return 'MBBET-'+String(Math.floor(Math.random()*90000+10000));
@@ -212,7 +373,6 @@ var ISMA_TARIFFE=[
   ["Quigioco",7],["Stanleybet",7],["Goldbet",6],["Eplay24",6],
   ["Sunbet",6],["Eurobet",6],["William Hill",6],["Tombola.it",6]
 ];
-
 async function creaListinoIsma(clientId,nomeCompleto,maxN){
   var mese=new Date().getMonth()+1,anno=new Date().getFullYear();
   var righe=ISMA_TARIFFE.map(function(t){
@@ -237,27 +397,24 @@ async function submitForm(){
   var nome=v('nome'),cognome=v('cognome');
   var telRaw=v('tel'),tel=normalizePhone(telRaw);
   var email=v('email')||null,citta=v('citta')||null;
-  var fronte=v('d_fronte'),retro=v('d_retro');
-  var consenso=document.getElementById('consenso').checked;
   var errEl=document.getElementById('global-err');
   errEl.style.display='none';
 
-  var ok=true;
-  showFieldErr('nome',!nome); if(!nome)ok=false;
-  showFieldErr('cognome',!cognome); if(!cognome)ok=false;
-  showFieldErr('tel',!telRaw||telRaw.replace(/\D/g,'').length<9); if(!telRaw||telRaw.replace(/\D/g,'').length<9)ok=false;
-  showFieldErr('consenso',!consenso); if(!consenso)ok=false;
-  if(!ok)return;
+  if(!nome||!cognome||!telRaw||telRaw.replace(/\D/g,'').length<9){
+    errEl.textContent='Mancano dei dati nel passo "Dati" — torna indietro e controlla nome, cognome e telefono.';
+    errEl.style.display='block';
+    return;
+  }
 
   var btn=document.getElementById('submit-btn');
-  btn.disabled=true;btn.textContent='Invio...';
+  btn.disabled=true;btn.textContent='Invio in corso...';
 
   try{
     var dup=await checkDup(tel);
     if(dup){
       errEl.textContent='Questo numero risulta già registrato nel sistema (cliente '+(dup.id||'')+'). Se pensi sia un errore, scrivi direttamente a Isma.';
       errEl.style.display='block';
-      btn.disabled=false;btn.textContent='Invia i miei dati';
+      btn.disabled=false;btn.textContent='Invia i miei dati →';
       return;
     }
 
@@ -271,8 +428,8 @@ async function submitForm(){
       stato:'LIBERO',stato_acc:'In Attesa',
       data_ingresso:ts.slice(0,10),
       accettazione_ok:true,consenso_data:ts,
-      consenso_testo:'Accetto le condizioni operative ed economiche di MBBET e il trattamento dei miei dati personali (documento incluso) per finalità legate all\'attivazione del servizio.',
-      doc_ci_fronte:fronte||null,doc_ci_retro:retro||null,
+      consenso_testo:"Informativa privacy e condizioni operative/economiche della collaborazione con Isma accettate dal modulo 15_modulo_isma.",
+      doc_ci_fronte:uploaded.fronte||null,doc_ci_retro:uploaded.retro||null,
       source:'modulo_isma',created_at:ts,updated_at:ts
     };
     var res=await _db.from('clienti').insert(payload);
@@ -281,12 +438,28 @@ async function submitForm(){
     var seed=await genBonusSeed();
     await creaListinoIsma(clientId,nomeCompleto,seed);
 
-    document.getElementById('form-page').style.display='none';
-    document.getElementById('success-page').style.display='block';
+    try{
+      await _db.from('contratti').insert({
+        cliente_id:clientId,nome_cliente:nomeCompleto,email_cliente:email,
+        tipo_contratto:'Collaborazione Isma',stato:'DA_INVIARE',
+        note:'Creato automaticamente dal modulo Isma — documento fronte/retro già caricati, pronto per l\'invio.',
+        operatore:'Isma'
+      });
+    }catch(e){}
+
+    try{
+      await fetch('/.netlify/functions/send-email',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          titolo:'Nuovo cliente Isma pronto per il contratto: '+nomeCompleto,
+          messaggio:'Cliente: '+nomeCompleto+' · Tel: '+tel+' · Email: '+(email||'—')+'<br>Modulo e documento completati, cliente creato in CRM (ID '+clientId+'). Il contratto è già in coda in Contratti, pronto per l\'invio.'
+        })});
+    }catch(e){}
+
+    goStep(5);
   }catch(e){
     errEl.textContent='Non siamo riusciti a completare l\'invio. Riprova tra qualche istante; se il problema persiste scrivi direttamente a Isma prima di procedere.';
     errEl.style.display='block';
-    btn.disabled=false;btn.textContent='Invia i miei dati';
+    btn.disabled=false;btn.textContent='Invia i miei dati →';
   }
 }
 </script>
