@@ -767,7 +767,7 @@ function renderConfrontoPeriodo(){
   var extraRange=_entrateExtra.filter(function(x){return dataInRange(x.data,m1,a1,m2,a2);});
   var tot=calcTotali(bnsRange,false,speseRange,extraRange);
   var kpis=[
-    {l:'RICAVI PERIODO',v:'€ '+fmt(tot.ric),s:bnsRange.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--gold)'},
+    {l:'RICAVI PERIODO',v:'€ '+fmt(tot.ric),s:bnsRange.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--green)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),s:'Nel periodo',c:'var(--red)'},
     {l:'UTILE NETTO PERIODO',v:'€ '+fmt(tot.utile),s:tot.ric>0?Math.round(tot.utile/tot.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'}
   ];
@@ -847,7 +847,7 @@ function renderOverview(){
 
   // KPI
   var kpis=[
-    {l:'RICAVI MESE',v:'€ '+fmt(totMese.ric),s:bMese.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--gold)'},
+    {l:'RICAVI MESE',v:'€ '+fmt(totMese.ric),s:bMese.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--green)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(totMese.pag),s:'Mese corrente',c:'var(--red)'},
     {l:'UTILE NETTO',v:'€ '+fmt(totMese.utile),s:totMese.ric>0?Math.round(totMese.utile/totMese.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'},
     {l:'RICAVI TOTALI',v:'€ '+fmt(totFatto.ric),s:totFatto.cnt+' bonus completati',c:'var(--cyan)'},
@@ -1222,8 +1222,8 @@ function renderTasse(){
   tMary.pctLabelSrc=pctMary;tManuele.pctLabelSrc=pctManuele;
 
   var kpis=[
-    {l:'UTILE NETTO AZIENDA ANNO '+anno,v:'€ '+fmt(baseImponibileAzienda),s:'Già senza compensi operatori/collab/costi',c:'var(--gold)'},
-    {l:'QUOTA MARY ('+pctMary+'%)',v:'€ '+fmt(tMary.fatturato),s:'da accantonare € '+fmt(tMary.totAccantonare),c:'#e31b23'},
+    {l:'UTILE NETTO AZIENDA ANNO '+anno,v:'€ '+fmt(baseImponibileAzienda),s:'Già senza compensi operatori/collab/costi',c:'var(--green)'},
+    {l:'QUOTA MARY ('+pctMary+'%)',v:'€ '+fmt(tMary.fatturato),s:'da accantonare € '+fmt(tMary.totAccantonare),c:'var(--green)'},
     {l:'QUOTA MANUELE ('+pctManuele+'%)',v:'€ '+fmt(tManuele.fatturato),s:'da accantonare € '+fmt(tManuele.totAccantonare),c:'#5aaaff'}
   ];
   var kpi=g('kpi-tasse');
@@ -1298,7 +1298,7 @@ function renderOperatori(){
 
 /* ══ DIVISIONE — 4 soci ══ */
 var SOCI=[
-  {key:'mary',nm:'Mary Bova',col:'#e31b23'},
+  {key:'mary',nm:'Mary Bova',col:'#f0b429'},
   {key:'manuele',nm:'Manuele',col:'#5aaaff'},
   {key:'serena',nm:'Serena',col:'#c4a4f8'},
   {key:'samuele',nm:'Samuele',col:'#00f093'}
@@ -1364,7 +1364,7 @@ function renderDivisione(){
   // KPI
   var kpiEl=g('div-kpi');
   if(kpiEl)kpiEl.innerHTML=[
-    {l:'RICAVI TOTALI',v:'€ '+fmt(tot.ric),c:'var(--gold)'},
+    {l:'RICAVI TOTALI',v:'€ '+fmt(tot.ric),c:'var(--green)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),c:'var(--red)'},
     {l:'COMPENSI OPERATORI',v:'€ '+fmt(tot.compOp),c:'var(--blue)'},
     {l:'SPESE GENERALI',v:'€ '+fmt(speseTot),c:'var(--orange)'},
@@ -1392,7 +1392,7 @@ function renderDivisione(){
   // Dettaglio
   var detEl=g('div-dettaglio');
   if(detEl)detEl.innerHTML=[
-    {l:'Ricavi lordi',v:tot.ric,c:'var(--gold)',sign:'+'},
+    {l:'Ricavi lordi',v:tot.ric,c:'var(--green)',sign:'+'},
     {l:'Pagato ai clienti',v:-tot.pag,c:'var(--red)',sign:'-'},
     {l:'Compensi operatori (~perc_op)',v:-tot.compOp,c:'var(--blue)',sign:'-'},
     {l:'Compensi collab + referral',v:-(tot.compCollab+tot.compRef),c:'var(--purple)',sign:'-'},
