@@ -504,8 +504,8 @@
 }
 .sb-logo { width:56px; height:64px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid var(--br2, rgba(255,255,255,.03)); flex-shrink:0; }
 .sb-crown {
-  width:36px; height:36px; border-radius:10px;
-  background: linear-gradient(145deg,#2d1800,#b8890a,var(--gold));
+  width:50px; height:36px; border-radius:10px;
+  background: linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));
   display:flex; align-items:center; justify-content:center; font-size:16px;
   box-shadow: 0 2px 8px rgba(247,204,70,.25), 0 0 20px rgba(247,204,70,.1), inset 0 1px 0 rgba(255,255,255,.15);
 }
@@ -566,7 +566,7 @@
 
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo"><h1>MBBET</h1><p>Operating System</p></div>
+    <div class="login-logo"><img src="mbbet_logo_transparent.png" alt="MBBET" style="height:52px;width:auto;object-fit:contain;margin-bottom:10px"><h1>MBBET</h1><p>Operating System</p></div>
     <form onsubmit="handleLogin(event)">
       <input type="email" id="l-email" class="login-input" placeholder="Email" required autocomplete="email">
       <input type="password" id="l-pwd" class="login-input" placeholder="Password" required autocomplete="current-password">
@@ -578,7 +578,7 @@
 
 <div id="app" style="display:none">
   <nav class="sb">
-    <div class="sb-logo"><div class="sb-crown">&#128081;</div></div>
+    <div class="sb-logo"><div class="sb-crown"><img src="mbbet_logo_transparent.png" alt="MBBET" style="width:100%;height:100%;object-fit:contain"></div></div>
     <a class="sbl" title="Mission Control" onclick="navTo('index.html')">&#127968;</a>
     <a class="sbl" title="CRM Clienti" onclick="navTo('01_clienti.html')">&#128100;</a>
     <a class="sbl" title="Bookmaker Intelligence" onclick="navTo('02_bonus.html')">&#127919;</a>

@@ -7,7 +7,7 @@
 <style>html.mb-auth #ls{display:none!important}</style>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#05070d;--card:rgba(13,17,36,.97);--gold:#f7cc46;--green:#00f093;--blue:#5aaaff;--cyan:#22eeff;--purple:#c4a4f8;--red:#ff4f4f;--orange:#ff9040;--teal:#00d4b0;--tx:#edf2ff;--tx2:#b8cee8;--tx3:#48627a;--br:rgba(255,255,255,.06)}
+:root{--bg:#05070d;--card:rgba(13,17,36,.97);--gold:#e31b23;--green:#00f093;--blue:#5aaaff;--cyan:#22eeff;--purple:#c4a4f8;--red:#ff4f4f;--orange:#ff9040;--teal:#00d4b0;--tx:#edf2ff;--tx2:#b8cee8;--tx3:#48627a;--br:rgba(255,255,255,.06)}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif}
 body{min-height:100vh;padding:0}
 *::-webkit-scrollbar{width:4px}*::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
@@ -17,7 +17,7 @@ body{min-height:100vh;padding:0}
 
 /* HEADER */
 .hdr{height:64px;display:flex;align-items:center;padding:0 28px;background:linear-gradient(180deg,rgba(9,12,26,.99),rgba(7,9,20,.99));border-bottom:1px solid rgba(255,255,255,.07);gap:14px;position:sticky;top:0;z-index:50}
-.hdr-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#2d1800,#b8890a,var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px}
+.hdr-logo{width:70px;height:36px;border-radius:10px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px}
 .hdr-title{font-size:15px;font-weight:900;color:var(--gold);letter-spacing:1.5px}
 .hdr-sub{font-size:10px;color:var(--tx3);margin-top:1px}
 .hdr-sp{flex:1}
@@ -38,11 +38,11 @@ body{min-height:100vh;padding:0}
 /* STATUS STRIP */
 .status-strip{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:20px}
 .ss-idle{background:rgba(255,255,255,.03);border:1px solid var(--br);color:var(--tx3)}
-.ss-loading{background:rgba(247,204,70,.06);border:1px solid rgba(247,204,70,.2);color:var(--gold)}
+.ss-loading{background:rgba(227,27,35,.06);border:1px solid rgba(227,27,35,.2);color:var(--gold)}
 .ss-ready{background:rgba(0,240,147,.06);border:1px solid rgba(0,240,147,.2);color:var(--green)}
 .ss-error{background:rgba(255,79,79,.06);border:1px solid rgba(255,79,79,.2);color:var(--red)}
 .ss-running{background:rgba(0,212,176,.06);border:1px solid rgba(0,212,176,.2);color:var(--teal)}
-.spin-ic{display:inline-block;width:14px;height:14px;border:2px solid rgba(247,204,70,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+.spin-ic{display:inline-block;width:14px;height:14px;border:2px solid rgba(227,27,35,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
 
 /* BUTTONS */
 .btn{padding:10px 22px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;border:none;letter-spacing:.5px}
@@ -63,7 +63,7 @@ body{min-height:100vh;padding:0}
 .prev-tbl tr:last-child td{border-bottom:none}
 .badge{display:inline-flex;padding:2px 8px;border-radius:12px;font-size:8.5px;font-weight:800;white-space:nowrap}
 .badge-new{background:rgba(0,240,147,.1);border:1px solid rgba(0,240,147,.25);color:var(--green)}
-.badge-dup{background:rgba(247,204,70,.1);border:1px solid rgba(247,204,70,.25);color:var(--gold)}
+.badge-dup{background:rgba(227,27,35,.1);border:1px solid rgba(227,27,35,.25);color:var(--gold)}
 .badge-upd{background:rgba(90,170,255,.1);border:1px solid rgba(90,170,255,.25);color:var(--blue)}
 .badge-err{background:rgba(255,79,79,.1);border:1px solid rgba(255,79,79,.25);color:var(--red)}
 .badge-skip{background:rgba(72,98,122,.08);border:1px solid rgba(72,98,122,.2);color:var(--tx3)}
@@ -95,11 +95,11 @@ body{min-height:100vh;padding:0}
 /* LOGIN */
 #ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 .li{background:linear-gradient(155deg,rgba(14,19,42,.99),rgba(8,11,24,.99));border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:42px 38px;width:360px}
-.li-logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(145deg,#2d1800,#b8890a,var(--gold));display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 18px}
+.li-logo{width:130px;height:52px;border-radius:14px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 18px}
 .li-t{font-size:21px;font-weight:900;color:var(--gold);text-align:center;margin-bottom:22px;letter-spacing:1.5px}
 .li-inp{width:100%;padding:12px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;color:var(--tx);font-size:13px;outline:none;font-family:inherit;margin-bottom:9px;display:block}
-.li-inp:focus{border-color:rgba(247,204,70,.3)}
-.li-btn{width:100%;padding:13px;background:linear-gradient(135deg,#5c3800,#b8890a,var(--gold));border:none;border-radius:10px;color:#000;font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:2px;margin-top:4px}
+.li-inp:focus{border-color:rgba(227,27,35,.3)}
+.li-btn{width:100%;padding:13px;background:linear-gradient(135deg,#3a0507,#8f0e14,var(--gold));border:none;border-radius:10px;color:#000;font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:2px;margin-top:4px}
 .li-err{font-size:10px;color:var(--red);text-align:center;min-height:16px;margin-top:4px}
 </style>
 <script src="shared/supabase.min.js"></script>
@@ -109,7 +109,7 @@ body{min-height:100vh;padding:0}
 
 <div id="ls">
   <div class="li">
-    <div class="li-logo">&#128081;</div>
+    <div class="li-logo"><img src="mbbet_logo_transparent.png" alt="MBBET" style="width:100%;height:100%;object-fit:contain"></div>
     <div class="li-t">MBBET OS</div>
     <input class="li-inp" type="email" id="li-e" placeholder="Email aziendale">
     <input class="li-inp" type="password" id="li-p" placeholder="Password" onkeydown="if(event.key==='Enter')login2()">
@@ -119,7 +119,7 @@ body{min-height:100vh;padding:0}
 </div>
 
 <header class="hdr">
-  <div class="hdr-logo">&#128081;</div>
+  <div class="hdr-logo"><img src="mbbet_logo_transparent.png" alt="MBBET" style="width:100%;height:100%;object-fit:contain"></div>
   <div><div class="hdr-title">IMPORT CLIENTI</div><div class="hdr-sub">Vecchio Modulo Google Form → MBBET OS</div></div>
   <div class="hdr-sp"></div>
   <a href="01_clienti.html" class="back-btn">← CRM Clienti</a>
