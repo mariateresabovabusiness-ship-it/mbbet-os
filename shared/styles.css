@@ -28,14 +28,14 @@
   --violet-b:    rgba(123,97,255,.22);
   --violet-bg:   rgba(123,97,255,.08);
 
-  --gold:        #dc2440;
+  --gold:        #ff1440;
   --gold-lt:     #ff4d55;
   --gold-dk:     #8f0e14;
-  --gold-dim:    rgba(220,36,64,0.041);
-  --gold-glow:   rgba(220,36,64,0.108);
-  --gold-b:      rgba(220,36,64,0.099);
-  --gold-bg:     rgba(220,36,64,0.041);
-  --gold-border: rgba(220,36,64,0.099);
+  --gold-dim:    rgba(255,20,64,0.091);
+  --gold-glow:   rgba(255,20,64,0.24);
+  --gold-b:      rgba(255,20,64,0.22);
+  --gold-bg:     rgba(255,20,64,0.091);
+  --gold-border: rgba(255,20,64,0.22);
 
   --green:       #00E5A0;
   --green-bg:    rgba(0,229,160,.08);
@@ -449,7 +449,7 @@ a { color: inherit; text-decoration: none; }
   text-transform:uppercase; letter-spacing:.5px; white-space:nowrap;
 }
 .r-socio-admin   { background:var(--gold-dim);    color:var(--gold); }
-.r-socio         { background:rgba(220,36,64,0.027); color:var(--gold-dk); }
+.r-socio         { background:rgba(255,20,64,0.06); color:var(--gold-dk); }
 .r-operatore     { background:var(--cyan-dim);    color:var(--cyan); }
 .r-collab        { background:var(--violet-dim);  color:var(--violet); }
 .r-referral      { background:var(--green-bg);    color:var(--green); }

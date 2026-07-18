@@ -5,36 +5,36 @@
 <title>MBBET OS — Collaboratori</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#050714;--gold:#dc2440;--glow-g:rgba(220,36,64,0.126);--green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;--tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--sb:224px}
+:root{--bg:#050714;--gold:#ffb020;--glow-g:rgba(255,176,32,.4);--green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;--tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--sb:224px}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;overflow:hidden;font-size:14px}
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(220,36,64,0.09);border-radius:2px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,20,64,0.2);border-radius:2px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,87,87,.4)}50%{box-shadow:0 0 0 6px rgba(255,87,87,0)}}
 @keyframes flicker{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.85}}
 
 /* SIDEBAR */
 .sb{width:var(--sb);height:100vh;flex-shrink:0;background:rgba(3,4,14,.99);border-right:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;position:relative;z-index:30}
-.sb::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(220,36,64,0.113) 30%,rgba(220,36,64,0.113) 70%,transparent)}
+.sb::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(255,20,64,0.251) 30%,rgba(255,20,64,0.251) 70%,transparent)}
 .sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:12px}
 .sb-crown{width:70px;height:42px;border-radius:12px;background:linear-gradient(135deg,#3a0507,var(--gold));display:flex;align-items:center;justify-content:center;font-size:20px;}
 .sb-nm{font-size:14px;font-weight:900;letter-spacing:1.5px;color:var(--gold)}
 .sb-sub{font-size:11px;color:var(--tx3);letter-spacing:2px;margin-top:2px}
 .sb-sec{padding:13px 16px 3px;font-size:11px;font-weight:800;color:var(--tx4);letter-spacing:2.5px}
 .sb-lnk{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--tx3);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:.14s;text-decoration:none;position:relative}
-.sb-lnk:hover{color:var(--tx2);background:rgba(255,255,255,.022);border-left-color:rgba(220,36,64,0.09)}
-.sb-lnk.act{color:var(--gold);background:rgba(220,36,64,0.036);border-left-color:var(--gold);font-weight:700}
+.sb-lnk:hover{color:var(--tx2);background:rgba(255,255,255,.022);border-left-color:rgba(255,20,64,0.2)}
+.sb-lnk.act{color:var(--gold);background:rgba(255,176,32,.14);border-left-color:var(--gold);font-weight:700}
 .sb-lnk .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
 .sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.05)}
-.sb-mode{background:rgba(220,36,64,0.027);border:1px solid rgba(220,36,64,0.063);border-radius:9px;padding:9px 12px}
+.sb-mode{background:rgba(255,20,64,0.06);border:1px solid rgba(255,20,64,0.14);border-radius:9px;padding:9px 12px}
 .sb-ml{font-size:11px;color:var(--tx3);letter-spacing:1.5px;margin-bottom:4px}
 .sb-mv{font-size:13px;font-weight:800;color:var(--gold)}
 
 /* TOPBAR */
 .pg{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{height:62px;padding:0 20px;flex-shrink:0;display:flex;align-items:center;gap:10px;background:rgba(3,4,14,.98);border-bottom:1px solid rgba(255,255,255,.06);position:relative;z-index:20}
-.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(220,36,64,0.113),transparent)}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,20,64,0.251),transparent)}
 .tb-back{display:flex;align-items:center;gap:7px;padding:7px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx3);text-decoration:none;transition:.14s;flex-shrink:0}
-.tb-back:hover{border-color:rgba(220,36,64,0.135);color:var(--gold)}
+.tb-back:hover{border-color:rgba(255,20,64,0.3);color:var(--gold)}
 .tb-title{flex:1;text-align:center}
 .tb-g{font-size:18px;font-weight:900;letter-spacing:3px;color:var(--gold);}
 .tb-sub{font-size:11.5px;color:var(--tx3);margin-top:3px}
@@ -59,17 +59,17 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .cl-hdr{padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .cl-title{font-size:11.5px;font-weight:800;color:var(--tx3);letter-spacing:2px;margin-bottom:8px}
 .cl-search{width:100%;padding:7px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:var(--tx);font-size:12px;outline:none;font-family:inherit}
-.cl-search:focus{border-color:rgba(220,36,64,0.135)}
+.cl-search:focus{border-color:rgba(255,20,64,0.3)}
 .cl-scroll{flex:1;overflow-y:auto}
 .cl-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);transition:.14s;display:flex;align-items:center;gap:10px;border-left:2px solid transparent}
-.cl-item:hover{background:rgba(255,255,255,.03);border-left-color:rgba(220,36,64,0.09)}
-.cl-item.act{background:rgba(220,36,64,0.032);border-left-color:var(--gold)}
+.cl-item:hover{background:rgba(255,255,255,.03);border-left-color:rgba(255,20,64,0.2)}
+.cl-item.act{background:rgba(255,20,64,0.071);border-left-color:var(--gold)}
 .cl-av{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
 .cl-nm{font-size:12px;font-weight:700;color:var(--tx2);line-height:1.3}
 .cl-sub{font-size:11.5px;color:var(--tx3);margin-top:2px}
 .cl-badge{width:16px;height:16px;border-radius:50%;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0}
-.btn-add-cl{margin:10px 14px;padding:8px;background:rgba(220,36,64,0.027);border:1px dashed rgba(220,36,64,0.09);border-radius:8px;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:calc(100% - 28px);transition:.14s}
-.btn-add-cl:hover{background:rgba(220,36,64,0.054)}
+.btn-add-cl{margin:10px 14px;padding:8px;background:rgba(255,20,64,0.06);border:1px dashed rgba(255,20,64,0.2);border-radius:8px;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:calc(100% - 28px);transition:.14s}
+.btn-add-cl:hover{background:rgba(255,20,64,0.12)}
 
 /* MAIN CONTENT */
 .main-area{flex:1;overflow-y:auto;padding:20px 22px 40px;min-width:0}
@@ -91,20 +91,20 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .data-table td{padding:10px 14px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx2);vertical-align:middle}
 .data-table tr:last-child td{border-bottom:none}
 .data-table tr:hover td{background:rgba(255,255,255,.018)}
-.data-table .total-row td{border-top:1px solid rgba(255,255,255,.1);background:rgba(220,36,64,0.02);font-weight:800}
+.data-table .total-row td{border-top:1px solid rgba(255,255,255,.1);background:rgba(255,20,64,0.044);font-weight:800}
 
 /* STATUS BADGES */
 .st-badge{font-size:13px;font-weight:800;padding:7px 16px;border-radius:20px;display:inline-block;letter-spacing:.4px;cursor:pointer;transition:.14s;user-select:none}
 .tariffe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.tariffa-card{background:linear-gradient(160deg,rgba(220,36,64,0.032),rgba(10,13,32,.95) 55%);border:1px solid rgba(220,36,64,0.081);border-radius:14px;padding:16px;text-align:center;transition:.16s}
-.tariffa-card:hover{border-color:rgba(220,36,64,0.203);transform:translateY(-3px);box-shadow:0 8px 20px rgba(220,36,64,0.045)}
+.tariffa-card{background:linear-gradient(160deg,rgba(255,20,64,0.071),rgba(10,13,32,.95) 55%);border:1px solid rgba(255,20,64,0.18);border-radius:14px;padding:16px;text-align:center;transition:.16s}
+.tariffa-card:hover{border-color:rgba(255,20,64,0.451);transform:translateY(-3px);box-shadow:0 8px 20px rgba(255,20,64,0.1)}
 .tariffa-nome{font-size:12.5px;font-weight:800;color:var(--tx2);letter-spacing:.3px}
 .tariffa-nota{font-size:11.5px;color:var(--tx3);margin-top:2px;font-style:italic}
 .tariffa-prezzo{font-size:26px;font-weight:900;color:var(--tx);margin-top:8px;}
 .tariffa-toggle{display:flex;gap:4px;margin-top:10px;background:rgba(255,255,255,.04);border-radius:8px;padding:3px}
 .tg-opt{flex:1;padding:6px 6px;font-size:11.5px;font-weight:700;border:none;border-radius:6px;background:transparent;color:var(--tx3);cursor:pointer;transition:.14s;font-family:inherit}
-.tg-opt.act{background:rgba(220,36,64,0.081);color:var(--gold)}
-.listino-banner{margin-top:24px;padding:22px;border-radius:18px;background:linear-gradient(135deg,rgba(220,36,64,0.041),rgba(10,13,32,.98) 60%);border:1px solid rgba(220,36,64,0.126);}
+.tg-opt.act{background:rgba(255,20,64,0.18);color:var(--gold)}
+.listino-banner{margin-top:24px;padding:22px;border-radius:18px;background:linear-gradient(135deg,rgba(255,20,64,0.091),rgba(10,13,32,.98) 60%);border:1px solid rgba(255,20,64,0.28);}
 .listino-hdr{display:flex;align-items:center;gap:14px;margin-bottom:18px}
 .listino-fire{font-size:30px;filter:drop-shadow(0 0 12px rgba(255,138,61,.65));animation:flicker 2.2s ease-in-out infinite;display:inline-block}
 .listino-title{font-size:17px;font-weight:900;color:var(--gold);letter-spacing:2.5px;}
@@ -114,12 +114,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 /* Wrapper per le tabelle larghe: scrollbar sempre visibile + ombra sul
    bordo destro finche' c'e' altro da scorrere, cosi' su schermi piu'
    stretti (laptop) si capisce subito che la tabella continua di la'. */
-.mbl-scroll-wrap{overflow-x:auto;position:relative;scrollbar-width:thin;scrollbar-color:rgba(220,36,64,0.158) transparent}
+.mbl-scroll-wrap{overflow-x:auto;position:relative;scrollbar-width:thin;scrollbar-color:rgba(255,20,64,0.351) transparent}
 .mbl-scroll-wrap::-webkit-scrollbar{height:8px}
-.mbl-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(220,36,64,0.158);border-radius:4px}
-.mbl-scroll-wrap::-webkit-scrollbar-thumb:hover{background:rgba(220,36,64,0.248)}
+.mbl-scroll-wrap::-webkit-scrollbar-thumb{background:rgba(255,20,64,0.351);border-radius:4px}
+.mbl-scroll-wrap::-webkit-scrollbar-thumb:hover{background:rgba(255,20,64,0.551)}
 
-.welcome-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:20px 24px;margin-bottom:20px;border-radius:16px;background:linear-gradient(120deg,rgba(220,36,64,0.045),rgba(10,13,32,.98) 65%);border:1px solid rgba(220,36,64,0.113)}
+.welcome-banner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:20px 24px;margin-bottom:20px;border-radius:16px;background:linear-gradient(120deg,rgba(255,20,64,0.1),rgba(10,13,32,.98) 65%);border:1px solid rgba(255,20,64,0.251)}
 .welcome-hi{font-size:20px;font-weight:900;color:var(--tx)}
 .welcome-hi span{color:var(--gold)}
 .welcome-sub{font-size:11px;color:var(--tx3);margin-top:4px}
@@ -177,7 +177,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 #form-modal.open{display:flex}
 #nc-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:20px}
 #nc-modal.open{display:flex}
-.fm-box{background:rgba(8,10,28,.99);border:1px solid rgba(220,36,64,0.081);border-radius:18px;padding:28px;width:420px;max-width:100%;animation:fadeUp .2s ease}
+.fm-box{background:rgba(8,10,28,.99);border:1px solid rgba(255,20,64,0.18);border-radius:18px;padding:28px;width:420px;max-width:100%;animation:fadeUp .2s ease}
 .fm-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
 .fm-close{cursor:pointer;color:var(--tx3);font-size:18px;line-height:1;transition:.14s}
 .fm-close:hover{color:var(--red)}
@@ -185,7 +185,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg label{font-size:11.5px;font-weight:700;color:var(--tx3);letter-spacing:1.5px}
 .fg input,.fg select,.fg textarea{padding:9px 13px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:9px;color:var(--tx);font-size:13px;outline:none;transition:.18s;font-family:inherit;width:100%;-webkit-appearance:none}
-.fg input:focus,.fg select:focus{border-color:rgba(220,36,64,0.189);background:rgba(220,36,64,0.02)}
+.fg input:focus,.fg select:focus{border-color:rgba(255,20,64,0.42);background:rgba(255,20,64,0.044)}
 .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn-save{width:100%;padding:11px;background:linear-gradient(135deg,#3a0507,var(--gold));border:none;border-radius:10px;color:#000;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px;transition:.16s}
 .btn-save:hover{opacity:.9}
@@ -196,12 +196,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 
 /* LOGIN */
 #ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
-.li-box{background:rgba(10,13,32,.99);border:1px solid rgba(220,36,64,0.081);border-radius:20px;padding:40px 36px;width:340px}
+.li-box{background:rgba(10,13,32,.99);border:1px solid rgba(255,20,64,0.18);border-radius:20px;padding:40px 36px;width:340px}
 .li-t{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:2px;text-align:center}
 .li-s{font-size:10px;color:var(--tx3);text-align:center;margin-top:4px;margin-bottom:28px}
 .li-f{display:flex;flex-direction:column;gap:12px}
 .li-inp{padding:11px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--tx);font-size:13px;outline:none;width:100%;font-family:inherit}
-.li-inp:focus{border-color:rgba(220,36,64,0.18)}
+.li-inp:focus{border-color:rgba(255,20,64,0.4)}
 .li-btn{padding:12px;background:linear-gradient(135deg,#3a0507,var(--gold));border:none;border-radius:10px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:1px}
 .li-err{font-size:11px;color:var(--red);text-align:center;min-height:16px}
 
@@ -232,7 +232,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
   .mbl-table td:last-child{border-bottom:none!important}
   .mbl-table td[data-lbl]:before{content:attr(data-lbl);font-size:9px;font-weight:800;letter-spacing:1px;color:var(--tx3);flex-shrink:0}
   .mbl-table td.mbl-idx{display:none!important}
-  .mbl-table td.mbl-head{padding:12px 14px!important;background:rgba(220,36,64,0.023)}
+  .mbl-table td.mbl-head{padding:12px 14px!important;background:rgba(255,20,64,0.051)}
   .mbl-table td.mbl-actions{justify-content:flex-end}
 }
 </style>
@@ -355,7 +355,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       </div>
       <button class="btn-save" id="nc-save-btn" onclick="salvaNuovoClienteManuale()">&#43; Aggiungi</button>
       <div style="text-align:center;font-size:10.5px;color:var(--tx3);margin:4px 0">oppure</div>
-      <button onclick="nuovoClienteCondividiModulo()" style="cursor:pointer;padding:10px 14px;border-radius:9px;border:1px solid rgba(220,36,64,0.135);background:rgba(220,36,64,0.027);color:var(--gold);font-size:12px;font-weight:800;font-family:inherit">&#128279; Condividi il modulo con il cliente</button>
+      <button onclick="nuovoClienteCondividiModulo()" style="cursor:pointer;padding:10px 14px;border-radius:9px;border:1px solid rgba(255,20,64,0.3);background:rgba(255,20,64,0.06);color:var(--gold);font-size:12px;font-weight:800;font-family:inherit">&#128279; Condividi il modulo con il cliente</button>
     </div>
   </div>
 </div>
@@ -411,7 +411,7 @@ function tgMsgNuovoSito(cliNm,bk,completo){
 var PAG_KEY='mbbet_collab_pag_v1'; // localStorage key for payment statuses
 var STATI=['PAGATO','IN_CORSO','IN_SCADENZA','URGENTE','SCADUTO'];
 var STATI_LABEL={PAGATO:'PAGATO',IN_CORSO:'IN CORSO',IN_SCADENZA:'IN SCADENZA',URGENTE:'URGENTE',SCADUTO:'SCADUTO'};
-var PALETTE=['#dc2440','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
+var PALETTE=['#ff1440','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
 var MESI=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 var MESE_KEY='mbbet_mese';
 function getGlobalMese(){
@@ -762,7 +762,7 @@ function renderList(filter){
       '<div class="cl-sub">'+(c.tipo||'REFERRAL')+'</div>'+
       '</div>'+
       (stats.scaduti>0?'<div class="cl-badge" style="background:rgba(255,87,87,.2);color:var(--red)">'+stats.scaduti+'</div>':
-       stats.daIncassare>0?'<div class="cl-badge" style="background:rgba(220,36,64,0.068);color:var(--tx)">€</div>':'')+
+       stats.daIncassare>0?'<div class="cl-badge" style="background:rgba(255,20,64,0.151);color:var(--tx)">€</div>':'')+
       '</div>';
   }).join('');
 }
@@ -924,7 +924,7 @@ function renderPocketDetail(c){
     '<div><div style="font-size:18px;font-weight:900;color:var(--tx)">'+(c.nome||'')+'</div>'+
     '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+(isReadOnlyCollab()?'Ogni sito completato avvicina il cliente al traguardo':'Modello a soglia: si accumula sito per sito, si paga quando un cliente arriva a € '+POCKET_SOGLIA)+'</div></div></div>'+
     (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
-    (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11.5px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(220,36,64,0.135);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
+    (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11.5px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,20,64,0.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
 
@@ -981,7 +981,7 @@ function buildPocketCliListHtml(c,nomiClienti,byCliente){
       }).join('')+'</div></div>';
   }else{
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:14px">'+
-    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(220,36,64,0.023),transparent)">'+
+    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(255,20,64,0.051),transparent)">'+
     '<span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:2px">&#128101; CLIENTI</span>'+
     '<span style="font-size:10.5px;color:var(--tx3)">clicca un cliente per vedere username/password/siti</span></div>'+
     '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
@@ -1003,7 +1003,7 @@ function buildPocketCliListHtml(c,nomiClienti,byCliente){
     var initials=cl.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
     var pctRowAdmin=Math.min(100,accumulato/POCKET_SOGLIA*100);
     var clEnc=encodeURIComponent(cl).replace(/'/g,'%27');
-    html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')" style="cursor:pointer;transition:.12s;border-left:2px solid '+rowCol+'55" onmouseover="this.style.background=\'rgba(220,36,64,0.027)\'" onmouseout="this.style.background=\'transparent\'">'+
+    html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')" style="cursor:pointer;transition:.12s;border-left:2px solid '+rowCol+'55" onmouseover="this.style.background=\'rgba(255,20,64,0.06)\'" onmouseout="this.style.background=\'transparent\'">'+
       '<td style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--tx);font-size:13px">'+
         '<div style="display:flex;align-items:center;gap:10px">'+
         '<div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+rowCol+'1f;border:1px solid '+rowCol+'55;color:'+rowCol+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center">'+initials+'</div>'+
@@ -1078,7 +1078,7 @@ function renderPocketCliente(cid,clienteEnc){
 
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
     '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
-    '<thead><tr style="background:rgba(220,36,64,0.027)">'+
+    '<thead><tr style="background:rgba(255,20,64,0.06)">'+
     '<th style="padding:8px 12px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
@@ -1103,7 +1103,7 @@ function renderPocketCliente(cid,clienteEnc){
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
-            '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(220,36,64,0.036);border:1px solid rgba(220,36,64,0.113);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
+            '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(255,20,64,0.08);border:1px solid rgba(255,20,64,0.251);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
             '<button onclick="segnaGiaOccupato(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" title="Il cliente ha già un account su questo sito da prima di MBBET" style="padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#128274; Già occupato</button>'+
           '</div>')+
         '</td></tr>';
@@ -1114,7 +1114,7 @@ function renderPocketCliente(cid,clienteEnc){
         '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
         '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
         '<td colspan="3" data-lbl="STATO" style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">'+
-          '<span style="padding:4px 10px;border-radius:999px;background:rgba(220,36,64,0.045);color:var(--gold);font-size:10px;font-weight:800;white-space:nowrap">&#128274; Già occupato</span>'+
+          '<span style="padding:4px 10px;border-radius:999px;background:rgba(255,20,64,0.1);color:var(--gold);font-size:10px;font-weight:800;white-space:nowrap">&#128274; Già occupato</span>'+
         '</td>'+
         (!isReadOnlyCollab()?'<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">&mdash;</td>':'')+
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
@@ -1125,9 +1125,9 @@ function renderPocketCliente(cid,clienteEnc){
     }
     var st=b.pocket_stato||null;
     var badgeColor=st==='PAGATO'?'var(--green)':st==='ACCUMULATO'?'var(--gold)':'var(--tx3)';
-    var badgeBg=st==='PAGATO'?'rgba(0,229,138,.1)':st==='ACCUMULATO'?'rgba(220,36,64,0.045)':'rgba(255,255,255,.05)';
+    var badgeBg=st==='PAGATO'?'rgba(0,229,138,.1)':st==='ACCUMULATO'?'rgba(255,20,64,0.1)':'rgba(255,255,255,.05)';
     var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
-    html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(220,36,64,0.02)\'" onmouseout="this.style.background=\''+bg+'\'">'+
+    html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(255,20,64,0.044)\'" onmouseout="this.style.background=\''+bg+'\'">'+
       '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
       '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);'+(isReadOnlyCollab()?'':'cursor:pointer')+'" '+(isReadOnlyCollab()?'':'onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Apri dettaglio"')+'>'+chip+'</td>'+
       '<td data-lbl="USERNAME" style="padding:8px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
@@ -1140,10 +1140,10 @@ function renderPocketCliente(cid,clienteEnc){
       (!isReadOnlyCollab()?'<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>':'')+
       '<td data-lbl="STATO" style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (st?'<span style="padding:4px 10px;border-radius:999px;background:'+badgeBg+';color:'+badgeColor+';font-size:10px;font-weight:800;white-space:nowrap">'+badgeLabel+'</span>':
-          (isReadOnlyCollab()?'<span style="font-size:10px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(220,36,64,0.045);border:1px solid rgba(220,36,64,0.135);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">Metti da parte</button>'))+
+          (isReadOnlyCollab()?'<span style="font-size:10px;color:var(--tx3)">In corso</span>':'<button onclick="pocketToggleSito(\''+b.id+'\',\''+cid+'\')" style="padding:5px 12px;background:rgba(255,20,64,0.1);border:1px solid rgba(255,20,64,0.3);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">Metti da parte</button>'))+
       '</td>'+
       '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
-        (isReadOnlyCollab()?'':'<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(220,36,64,0.18)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>')+
+        (isReadOnlyCollab()?'':'<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,20,64,0.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>')+
       '</td></tr>';
   });
   html+='</tbody></table></div></div>';
@@ -1259,7 +1259,7 @@ function renderDetail(cid){
       '</div>'+
     '<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(c.contatto||'')+(c.tipo?' · '+c.tipo:'')+'</div></div></div>'+
     (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
-    (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(220,36,64,0.135);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
+    (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,20,64,0.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
 
@@ -1272,7 +1272,7 @@ function renderDetail(cid){
     html+='<button onclick="setCollabMese(\''+cid+'\',null)" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:.12s;border:1px solid '+(isTutti?'rgba(255,255,255,.4)':'rgba(255,255,255,.1)')+';background:'+(isTutti?'rgba(255,255,255,.1)':'transparent')+';color:'+(isTutti?'var(--tx)':'var(--tx3)')+'">Tutti</button>';
     mesiList.forEach(function(m){
       var isAct=m===_collabMese;
-      html+='<button onclick="setCollabMese(\''+cid+'\',\''+m+'\')" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:.12s;border:1px solid '+(isAct?'var(--gold)':'rgba(255,255,255,.1)')+';background:'+(isAct?'rgba(220,36,64,0.068)':'transparent')+';color:'+(isAct?'var(--gold)':'var(--tx3)')+'">'+meseLabel(m)+'</button>';
+      html+='<button onclick="setCollabMese(\''+cid+'\',\''+m+'\')" style="padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:.12s;border:1px solid '+(isAct?'var(--gold)':'rgba(255,255,255,.1)')+';background:'+(isAct?'rgba(255,20,64,0.151)':'transparent')+';color:'+(isAct?'var(--gold)':'var(--tx3)')+'">'+meseLabel(m)+'</button>';
     });
     html+='</div>';
   }
@@ -1283,7 +1283,7 @@ function renderDetail(cid){
     {l:'PAGATI',v:totPagati,c:'#00e58a',s:'€ '+fmt(totInc)+' incassati',ic:'&#9989;'},
     {l:'DA PAGARE',v:totDaPagare,c:'#4f9dff',s:'in attesa',ic:'&#8987;'},
     {l:'SCADUTI',v:totScaduti,c:'#ff5757',s:'da gestire',ic:'&#9888;&#65039;'},
-    {l:'DA INCASSARE',v:'€ '+fmt(totDaInc),c:'#dc2440',s:'totale residuo',ic:'&#128176;'}
+    {l:'DA INCASSARE',v:'€ '+fmt(totDaInc),c:'#ff1440',s:'totale residuo',ic:'&#128176;'}
   ].map(function(k){
     return '<div class="alan-kpi" style="border-top-color:'+k.c+';background:linear-gradient(160deg,'+k.c+'14,rgba(10,13,32,.95) 60%)">'+
       '<div class="alan-kpi-top"><span class="alan-kpi-ic" style="background:'+k.c+'22;color:'+k.c+'">'+k.ic+'</span><span class="alan-kpi-lbl">'+k.l+'</span></div>'+
@@ -1397,7 +1397,7 @@ function buildFlatCliListHtml(cid,clientiListFlat){
     html+='</div>';
   }else{
   html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;margin-bottom:6px">'+
-    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(220,36,64,0.023),transparent)">'+
+    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,rgba(255,20,64,0.051),transparent)">'+
     '<span style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px">&#128101; CLIENTI</span>'+
     '<span style="font-size:10px;color:var(--tx3)">clicca un cliente per vedere i suoi siti</span></div>'+
     '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
@@ -1424,7 +1424,7 @@ function buildFlatCliListHtml(cid,clientiListFlat){
     var rowCol=PALETTE[_ci%PALETTE.length];
     var initials=cd.cliente.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
     html+='<tr onclick="renderFlatCliente(\''+cid+'\',\''+clEnc+'\')" style="cursor:pointer;transition:.12s;border-left:2px solid '+rowCol+'55" '+
-      'onmouseover="this.style.background=\'rgba(220,36,64,0.027)\'" '+
+      'onmouseover="this.style.background=\'rgba(255,20,64,0.06)\'" '+
       'onmouseout="this.style.background=\'transparent\'">'+
       '<td class="mbl-head" style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<div style="display:flex;align-items:center;gap:10px">'+
@@ -1484,7 +1484,7 @@ function renderBkDetail(cid, bkEnc){
   // ← BACK BUTTON + HEADER
   html+='<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">'+
     '<button onclick="renderDetail(\''+cid+'\')" style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:var(--tx2);font-size:12px;font-weight:700;cursor:pointer;transition:.14s" '+
-    'onmouseover="this.style.borderColor=\'rgba(220,36,64,0.18)\';this.style.color=\'var(--gold)\'" '+
+    'onmouseover="this.style.borderColor=\'rgba(255,20,64,0.4)\';this.style.color=\'var(--gold)\'" '+
     'onmouseout="this.style.borderColor=\'rgba(255,255,255,.1)\';this.style.color=\'var(--tx2)\'">'+
     '← Riepilogo</button>'+
     '<div style="flex:1">'+
@@ -1510,7 +1510,7 @@ function renderBkDetail(cid, bkEnc){
   // TABELLA CLIENTI
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
     '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">'+
-    '<thead><tr style="background:rgba(220,36,64,0.027)">'+
+    '<thead><tr style="background:rgba(255,20,64,0.06)">'+
     '<th style="padding:10px 16px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">NOME CLIENTE</th>'+
     '<th style="padding:10px 14px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME SITO</th>'+
@@ -1560,14 +1560,14 @@ function renderBkDetail(cid, bkEnc){
       '</td>'+
       '<td style="padding:6px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<div style="display:flex;gap:4px;justify-content:center">'+
-        '<button onclick="openEditBonus(\''+r.b.id+'\',\''+cid+'\',\''+bkEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(220,36,64,0.18)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>'+
+        '<button onclick="openEditBonus(\''+r.b.id+'\',\''+cid+'\',\''+bkEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,20,64,0.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>'+
         '<button onclick="deleteBonus(\''+r.b.id+'\',\''+cid+'\',\''+bkEnc+'\')" title="Elimina" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,87,87,.5)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'rgba(255,87,87,.15)\';this.style.color=\'rgba(255,87,87,.5)\'">&#128465;</button>'+
         '</div>'+
       '</td></tr>';
   });
 
   // Riga totale
-  html+='<tr style="background:rgba(220,36,64,0.02);border-top:1px solid rgba(220,36,64,0.068)">'+
+  html+='<tr style="background:rgba(255,20,64,0.044);border-top:1px solid rgba(255,20,64,0.151)">'+
     '<td></td><td colspan="5" style="padding:9px 14px;font-size:11.5px;font-weight:800;color:var(--tx3);letter-spacing:1px">TOTALE '+bkName.toUpperCase()+'</td>'+
     '<td style="padding:9px 14px;text-align:right;color:var(--tx);font-weight:900;font-size:14px">€ '+fmt(rowsData.reduce(function(s,r){return s+r.val;},0))+'</td>'+
     '<td></td>'+
@@ -1625,7 +1625,7 @@ function renderFlatCliente(cid,clienteEnc){
 
   html+='<div style="background:rgba(6,8,22,.98);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden">'+
     '<div class="mbl-scroll-wrap"><table class="mbl-table" style="width:100%;border-collapse:collapse">'+
-    '<thead><tr style="background:rgba(220,36,64,0.027)">'+
+    '<thead><tr style="background:rgba(255,20,64,0.06)">'+
     '<th style="padding:8px 12px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">#</th>'+
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">SITO</th>'+
     '<th style="padding:8px 10px;font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1.5px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">USERNAME</th>'+
@@ -1651,7 +1651,7 @@ function renderFlatCliente(cid,clienteEnc){
         '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
         '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
           (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
-            '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(220,36,64,0.036);border:1px solid rgba(220,36,64,0.113);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
+            '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(255,20,64,0.08);border:1px solid rgba(255,20,64,0.251);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
             '<button onclick="segnaGiaOccupato(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" title="Il cliente ha già un account su questo sito da prima di MBBET" style="padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#128274; Già occupato</button>'+
           '</div>')+
         '</td></tr>';
@@ -1662,7 +1662,7 @@ function renderFlatCliente(cid,clienteEnc){
         '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
         '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
         '<td colspan="4" data-lbl="STATO" style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">'+
-          '<span style="padding:4px 10px;border-radius:999px;background:rgba(220,36,64,0.045);color:var(--gold);font-size:10px;font-weight:800;white-space:nowrap">&#128274; Già occupato</span>'+
+          '<span style="padding:4px 10px;border-radius:999px;background:rgba(255,20,64,0.1);color:var(--gold);font-size:10px;font-weight:800;white-space:nowrap">&#128274; Già occupato</span>'+
           '<span style="margin-left:8px;font-size:10px;color:var(--tx3);font-style:italic">nessun compenso previsto</span>'+
         '</td>'+
         '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">&mdash;</td>'+
@@ -1678,7 +1678,7 @@ function renderFlatCliente(cid,clienteEnc){
     var isPaid=st==='PAGATO';
     var ggCol=isPaid||gg===null?'var(--tx3)':(gg<=2?'var(--red)':'var(--green)');
     var ggTxt=gg===null?'—':(gg<0?Math.abs(gg)+'gg fa':gg===0?'oggi':gg+'gg');
-    html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(220,36,64,0.02)\'" onmouseout="this.style.background=\''+bg+'\'">'+
+    html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(255,20,64,0.044)\'" onmouseout="this.style.background=\''+bg+'\'">'+
       '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
       '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);'+(isReadOnlyCollab()?'':'cursor:pointer')+'" '+(isReadOnlyCollab()?'':'onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Apri dettaglio"')+'>'+chip+'</td>'+
       '<td data-lbl="USERNAME" style="padding:8px 10px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04)">'+
@@ -1695,7 +1695,7 @@ function renderFlatCliente(cid,clienteEnc){
       '</td>'+
       '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
-          '<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(220,36,64,0.18)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>'+
+          '<button onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Modifica" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--tx3);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,20,64,0.4)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.color=\'var(--tx3)\'">&#9998;</button>'+
           '<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Elimina" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px;transition:.12s" onmouseover="this.style.borderColor=\'rgba(255,87,87,.5)\';this.style.color=\'var(--red)\'" onmouseout="this.style.borderColor=\'rgba(255,87,87,.15)\';this.style.color=\'rgba(255,87,87,.5)\'">&#128465;</button>'+
         '</div>')+
       '</td></tr>';
