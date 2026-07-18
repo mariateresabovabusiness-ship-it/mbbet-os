@@ -9,7 +9,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#05070d;--card:rgba(13,17,36,.97);--card2:rgba(8,11,24,.99);
-  --gold:#ff0009;--gold2:#a01218;--green:#00f093;--blue:#5aaaff;--cyan:#22eeff;
+  --gold:#dc2440;--gold2:#a01218;--green:#00f093;--blue:#5aaaff;--cyan:#22eeff;
   --purple:#c4a4f8;--red:#ff4f4f;--orange:#ff9040;--teal:#00d4b0;--pink:#ff4f80;
   --tx:#edf2ff;--tx2:#b8cee8;--tx3:#48627a;--tx4:#18283a;
   --br:rgba(255,255,255,.06);--br2:rgba(255,255,255,.03)}
@@ -24,7 +24,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 /* ── SIDEBAR ── */
 .sb{background:var(--card2);border-right:1px solid var(--br);display:flex;flex-direction:column;align-items:center;overflow:hidden;z-index:30}
 .sb-logo{width:56px;height:64px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--br2);flex-shrink:0}
-.sb-crown{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(255,0,9,.25),inset 0 1px 0 rgba(255,255,255,.15)}
+.sb-crown{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(220,36,64,0.113),inset 0 1px 0 rgba(255,255,255,.15)}
 .sbl{width:56px;height:52px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--tx3);cursor:pointer;border-left:2px solid transparent;transition:.14s;position:relative}
 .sbl:hover{color:var(--tx2);background:rgba(255,255,255,.028)}
 .sbl.act{color:var(--blue);background:rgba(90,170,255,.04);border-left-color:var(--blue)}
@@ -39,7 +39,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .hdr{height:64px;flex-shrink:0;display:flex;align-items:center;padding:0 24px;background:linear-gradient(180deg,rgba(9,12,26,.99),rgba(7,9,20,.99));border-bottom:1px solid rgba(255,255,255,.05);position:relative;z-index:10}
 .hdr::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(90,170,255,.2) 25%,rgba(90,170,255,.2) 75%,transparent)}
 .hdr-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;cursor:pointer}
-.hdr-crown{width:70px;height:36px;border-radius:10px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(255,0,9,.22)}
+.hdr-crown{width:70px;height:36px;border-radius:10px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(220,36,64,0.099)}
 .hdr-bname{font-size:13px;font-weight:900;color:var(--gold);letter-spacing:2px}
 .hdr-bsub{font-size:7px;color:var(--tx3);letter-spacing:2px;margin-top:1px}
 .hdr-div{width:1px;height:28px;background:var(--br);margin:0 18px;flex-shrink:0}
@@ -53,7 +53,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .hdr-bell{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;position:relative}
 .bell-n{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:var(--red);font-size:7px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;border:2px solid var(--card2)}
 .hdr-usr{display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(255,255,255,.025);border:1px solid var(--br);border-radius:10px;cursor:pointer}
-.hdr-av{width:30px;height:30px;border-radius:8px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000;box-shadow:0 2px 6px rgba(255,0,9,.2)}
+.hdr-av{width:30px;height:30px;border-radius:8px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#000;box-shadow:0 2px 6px rgba(220,36,64,0.09)}
 .hdr-unm{font-size:11.5px;font-weight:700;color:var(--tx2)}.hdr-url{font-size:8px;color:var(--gold);font-weight:700;margin-top:1px}
 .hdr-x{width:28px;height:28px;border-radius:8px;background:rgba(255,79,79,.04);border:1px solid rgba(255,79,79,.1);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--red);cursor:pointer;transition:.14s}
 .hdr-x:hover{background:rgba(255,79,79,.14)}
@@ -185,8 +185,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .ws-pill{display:flex;flex-direction:column;align-items:center;padding:7px 16px;border-radius:11px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.022);min-width:72px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .ws-pill-v{font-size:15px;font-weight:900;line-height:1;letter-spacing:-.2px}
 .ws-pill-l{font-size:7.5px;color:var(--tx3);margin-top:3px;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
-.ws-bk-next{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:11px;background:rgba(255,0,9,.06);border:1px solid rgba(255,0,9,.15);flex-shrink:0;cursor:pointer;transition:.14s}
-.ws-bk-next:hover{background:rgba(255,0,9,.1)}
+.ws-bk-next{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:11px;background:rgba(220,36,64,0.027);border:1px solid rgba(220,36,64,0.068);flex-shrink:0;cursor:pointer;transition:.14s}
+.ws-bk-next:hover{background:rgba(220,36,64,0.045)}
 .ws-bk-nm{font-size:12px;font-weight:800;color:var(--gold)}
 .ws-bk-sub{font-size:8.5px;color:var(--tx3);margin-top:2px}
 .ws-close{width:36px;height:36px;border-radius:10px;background:rgba(255,79,79,.05);border:1px solid rgba(255,79,79,.12);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--red);cursor:pointer;transition:.14s;flex-shrink:0}
@@ -234,7 +234,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .bk-status{display:inline-flex;padding:2px 8px;border-radius:5px;font-size:8.5px;font-weight:800;margin-bottom:6px}
 .bk-done{background:rgba(0,240,147,.08);border:1px solid rgba(0,240,147,.2);color:var(--green)}
 .bk-prog{background:rgba(90,170,255,.08);border:1px solid rgba(90,170,255,.2);color:var(--blue)}
-.bk-avail{background:rgba(255,0,9,.06);border:1px solid rgba(255,0,9,.18);color:var(--gold)}
+.bk-avail{background:rgba(220,36,64,0.027);border:1px solid rgba(220,36,64,0.081);color:var(--gold)}
 .bk-lim{background:rgba(255,144,64,.06);border:1px solid rgba(255,144,64,.18);color:var(--orange)}
 .bk-greg{background:rgba(196,164,248,.08);border:1px solid rgba(196,164,248,.22);color:#c4a4f8}
 .bk-detail{font-size:10px;color:var(--tx3);line-height:1.5}
@@ -289,8 +289,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .doc-btn-apri:hover{background:rgba(90,170,255,.15)}
 .doc-btn-edit{padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;color:var(--tx3);font-size:11px;cursor:pointer;flex-shrink:0}
 .doc-btn-edit:hover{border-color:rgba(255,255,255,.2);color:var(--tx1)}
-.doc-btn-add{display:block;width:100%;margin-top:9px;padding:7px 0;border-radius:7px;border:1px solid rgba(255,0,9,.15);background:rgba(255,0,9,.04);color:var(--gold);font-size:10px;font-weight:700;cursor:pointer;transition:.13s;box-sizing:border-box}
-.doc-btn-add:hover{background:rgba(255,0,9,.1);border-color:rgba(255,0,9,.3)}
+.doc-btn-add{display:block;width:100%;margin-top:9px;padding:7px 0;border-radius:7px;border:1px solid rgba(220,36,64,0.068);background:rgba(220,36,64,0.02);color:var(--gold);font-size:10px;font-weight:700;cursor:pointer;transition:.13s;box-sizing:border-box}
+.doc-btn-add:hover{background:rgba(220,36,64,0.045);border-color:rgba(220,36,64,0.135)}
 
 /* ── TIMELINE ── */
 .tl-feed{display:flex;flex-direction:column}
@@ -340,12 +340,12 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 /* ── LOGIN ── */
 #ls{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg)}
 .li{background:linear-gradient(155deg,rgba(14,19,42,.99),rgba(8,11,24,.99));border:1px solid rgba(255,255,255,.07);border-top:1px solid rgba(255,255,255,.13);border-radius:20px;padding:42px 38px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,.7)}
-.li-logo{width:110px;height:56px;border-radius:16px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 22px;box-shadow:0 4px 16px rgba(255,0,9,.3)}
+.li-logo{width:110px;height:56px;border-radius:16px;background:linear-gradient(145deg,#2d0000,#8f0e14,var(--gold));display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 22px;box-shadow:0 4px 16px rgba(220,36,64,0.135)}
 .li-t{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:1.5px;text-align:center;margin-bottom:4px}
 .li-s{font-size:8px;color:var(--tx3);letter-spacing:2px;text-align:center;margin-bottom:26px;text-transform:uppercase}
 .li-inp{width:100%;padding:13px 15px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;color:var(--tx);font-size:13.5px;outline:none;font-family:inherit;transition:.14s;margin-bottom:10px;display:block}
-.li-inp:focus{border-color:rgba(255,0,9,.3);background:rgba(255,0,9,.02)}
-.li-btn{width:100%;padding:14px;background:linear-gradient(135deg,#3a0507,#8f0e14,var(--gold));border:none;border-radius:10px;color:#000;font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:2px;margin-top:4px;box-shadow:0 4px 14px rgba(255,0,9,.25)}
+.li-inp:focus{border-color:rgba(220,36,64,0.135);background:rgba(220,36,64,0.02)}
+.li-btn{width:100%;padding:14px;background:linear-gradient(135deg,#3a0507,#8f0e14,var(--gold));border:none;border-radius:10px;color:#000;font-size:11px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:2px;margin-top:4px;box-shadow:0 4px 14px rgba(220,36,64,0.113)}
 .li-err{font-size:10px;color:var(--red);text-align:center;min-height:16px;margin-top:4px}
 
 /* ── NUOVO CLIENTE MODAL ── */
@@ -515,8 +515,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
     <div class="hdr-sp"></div>
     <!-- SELETTORE MESE GLOBALE -->
     <div style="display:flex;align-items:center;gap:6px">
-      <button id="btn-tutti-mesi" onclick="setTuttiMesi()" style="padding:5px 12px;background:rgba(255,0,9,.2);border:1px solid rgba(255,0,9,.5);border-radius:20px;color:var(--gold);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s">Tutti</button>
-      <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(255,0,9,.08);border:1px solid rgba(255,0,9,.2);border-radius:20px;cursor:default">
+      <button id="btn-tutti-mesi" onclick="setTuttiMesi()" style="padding:5px 12px;background:rgba(220,36,64,0.09);border:1px solid rgba(220,36,64,0.225);border-radius:20px;color:var(--gold);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s">Tutti</button>
+      <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(220,36,64,0.036);border:1px solid rgba(220,36,64,0.09);border-radius:20px;cursor:default">
         <button onclick="shiftMese(-1)" style="background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;padding:0 2px;line-height:1">◀</button>
         <span id="g-mese-lbl" style="font-size:11px;font-weight:800;color:var(--gold);white-space:nowrap;min-width:90px;text-align:center">Luglio 2026</span>
         <button onclick="shiftMese(1)" style="background:none;border:none;color:var(--gold);font-size:14px;cursor:pointer;padding:0 2px;line-height:1">▶</button>
@@ -626,7 +626,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
         </div>
         <span style="color:var(--gold);font-size:16px">&#9654;</span>
       </div>
-      <button onclick="openEditCli(_ws&&_ws.id)" style="padding:5px 12px;background:rgba(255,0,9,.1);border:1px solid rgba(255,0,9,.25);border-radius:8px;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;transition:.14s" onmouseover="this.style.background='rgba(255,0,9,.2)'" onmouseout="this.style.background='rgba(255,0,9,.1)'">&#9998; Modifica</button>
+      <button onclick="openEditCli(_ws&&_ws.id)" style="padding:5px 12px;background:rgba(220,36,64,0.045);border:1px solid rgba(220,36,64,0.113);border-radius:8px;color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;transition:.14s" onmouseover="this.style.background='rgba(220,36,64,0.09)'" onmouseout="this.style.background='rgba(220,36,64,0.045)'">&#9998; Modifica</button>
       <div class="ws-close" onclick="closeWs()">&#10005;</div>
     </div>
     <div class="ws-tabs">
@@ -674,10 +674,10 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
    valori di partenza servono solo come rete di sicurezza nel primissimo
    istante prima che la query risponda. */
 var BKS=['Sisal','Goldbet','Snai','Bet365','William Hill','Betfair'];
-var BKC={'Sisal':'#00f093','Goldbet':'#ff0009','Snai':'#5aaaff','Bet365':'#22eeff','William Hill':'#5aaaff','Betfair':'#00f093'};
+var BKC={'Sisal':'#00f093','Goldbet':'#dc2440','Snai':'#5aaaff','Bet365':'#22eeff','William Hill':'#5aaaff','Betfair':'#00f093'};
 var BKR={'Sisal':18,'Goldbet':14,'Snai':16,'Bet365':22,'William Hill':19,'Betfair':24};
 
-var _TIER_COL_DEF={'S+':'#22eeff','S':'#5aaaff','A':'#00f093','B':'#ff0009','C':'#9ca3af'};
+var _TIER_COL_DEF={'S+':'#22eeff','S':'#5aaaff','A':'#00f093','B':'#dc2440','C':'#9ca3af'};
 var _TIER_ROI_DEF={'S+':22,'S':17,'A':16,'B':14,'C':10};
 async function loadBookmakerData(){
   try{
@@ -695,7 +695,7 @@ async function loadBookmakerData(){
 }
 var OPS=['Riccardo Tavagnacco','Alessia Ciman','Ciro Bisogno','Antonio La Barbera','Francesco Bova','Emilian Cozmiuc','Alessia Maffioli','Elisa Qualantonio','Maria A. Catania','Luca Alberti','Mary + Samuele'];
 var _bnsCache={};
-var AVB=['145deg,#041840,#5aaaff','145deg,#1c0840,#c4a4f8','145deg,#021c2c,#22eeff','145deg,#002818,#00f093','145deg,#3a2200,#ff0009','145deg,#240c00,#ff9040','145deg,#200828,#ff4f80','145deg,#002820,#00d4b0'];
+var AVB=['145deg,#041840,#5aaaff','145deg,#1c0840,#c4a4f8','145deg,#021c2c,#22eeff','145deg,#002818,#00f093','145deg,#3a2200,#dc2440','145deg,#240c00,#ff9040','145deg,#200828,#ff4f80','145deg,#002820,#00d4b0'];
 
 var MOCK=[
   {id:1,nome:'Marco',cognome:'Rossi',tel:'+39 347 123 4567',email:'marco.rossi@gmail.com',stato:'ATTIVO',operatore:'Riccardo Tavagnacco',collab:'Luigi Bianchi',referral:'Luca Esposito',data_ingresso:'2025-03-15',provincia:'Milano',bk_completati:['Sisal','GoldBet','SNAI','Betflag'],bk_in_corso:['Bet365'],bk_limitati:[],spid:true,cie:true,iban:'IT60X0542811101000000123456',potenziale:580,score:84,ultima_attivita:'2026-07-02',note:'Cliente ottimo. Sempre disponibile.',pagamenti:[{data:'2026-06-30',tipo:'Entrata',importo:68,bk:'Betflag',stato:'ok'},{data:'2026-07-05',tipo:'Sospeso',importo:68,bk:'Bet365',stato:'attesa'}]},
@@ -782,7 +782,7 @@ function aggiornaBottoneTutti(){
   var btn=g('btn-tutti-mesi');
   if(!btn)return;
   if(_tuttiMesi){
-    btn.style.background='rgba(255,0,9,.2)';btn.style.color='var(--gold)';btn.style.borderColor='rgba(255,0,9,.5)';
+    btn.style.background='rgba(220,36,64,0.09)';btn.style.color='var(--gold)';btn.style.borderColor='rgba(220,36,64,0.225)';
   }else{
     btn.style.background='transparent';btn.style.color='var(--tx3)';btn.style.borderColor='rgba(255,255,255,.15)';
   }
@@ -847,7 +847,7 @@ function buildOpSel(){
 var SMART=[
   {id:'urg',ic:'&#9889;',nm:'Urgenti',c:'#ff4f4f',fn:function(c){return c.stato==='SOSPESO';}},
   {id:'cont',ic:'&#128222;',nm:'Da contattare',c:'#ff9040',fn:function(c){var d=new Date(c.ultima_attivita||'2020-01-01');return (Date.now()-d)>7*864e5;}},
-  {id:'nobn',ic:'&#127881;',nm:'Senza bonus',c:'#ff0009',fn:function(c){return !(c.bk_completati&&c.bk_completati.length);}},
+  {id:'nobn',ic:'&#127881;',nm:'Senza bonus',c:'#dc2440',fn:function(c){return !(c.bk_completati&&c.bk_completati.length);}},
   {id:'nodoc',ic:'&#128196;',nm:'Doc mancanti',c:'#c4a4f8',fn:function(c){return !c.spid||!c.cie||!c.iban;}},
   {id:'pagsos',ic:'&#128179;',nm:'Pag. sospesi',c:'#22eeff',fn:function(c){return (c.pagamenti||[]).some(function(p){return p.stato==='attesa';});}},
   {id:'toppot',ic:'&#128142;',nm:'Top potenziale',c:'#00f093',fn:function(c){return (c.potenziale||0)>=500;}},
@@ -946,7 +946,7 @@ function renderList(){
           var ops=bkOps(c);
           if(!ops.length)return '<div class="cli-op"><span style="color:var(--tx4)">—</span></div>';
           var short=(c.operatore||ops[0]).split(' ').slice(0,2).join(' ');
-          var extra=ops.length>1?' <span style="font-size:7.5px;font-weight:800;padding:1px 5px;border-radius:3px;background:rgba(255,0,9,.1);color:var(--gold);border:1px solid rgba(255,0,9,.2)">+'+( ops.length-1)+'</span>':'';
+          var extra=ops.length>1?' <span style="font-size:7.5px;font-weight:800;padding:1px 5px;border-radius:3px;background:rgba(220,36,64,0.045);color:var(--gold);border:1px solid rgba(220,36,64,0.09)">+'+( ops.length-1)+'</span>':'';
           return '<div class="cli-op">'+short+extra+'</div>';
         })()
         +'<div style="padding:0 6px">'+statoHtml(c.stato)+'</div>'
@@ -1359,7 +1359,7 @@ function renderTl(c){
     {dt:fmtDate(c.ultima_attivita),act:'Ultima attività',det:'Aggiornamento stato cliente',c:'#22eeff'},
     {dt:'1 settimana fa',act:'Bonus '+bk0+' completato',det:'Tutto ok',amt:'€'+Math.round((BKR[bk0]||15)*0.9+8),c:'#00f093'},
     {dt:'2 settimane fa',act:'Assegnazione operatore',det:'Assegnato a '+(c.operatore||'operatore'),c:'#c4a4f8'},
-    {dt:new Date(c.data_ingresso||Date.now()).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}),act:'Ingresso in MBBET',det:'Cliente registrato nel sistema',c:'#ff0009'}
+    {dt:new Date(c.data_ingresso||Date.now()).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}),act:'Ingresso in MBBET',det:'Cliente registrato nel sistema',c:'#dc2440'}
   ];
   g('wp-tl').innerHTML='<div class="tl-feed">'+ev.map(function(e,i){
     return '<div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:'+e.c+';box-shadow:0 0 8px '+e.c+'55"></div>'+(i<ev.length-1?'<div class="tl-line"></div>':'')+'</div>'
