@@ -1291,6 +1291,33 @@ function renderDetail(cid){
       '<div class="alan-kpi-sub">'+k.s+'</div></div>';
   }).join('')+'</div>';
 
+  // DIVISIONE GUADAGNO 50/50 + LISTINO SITO PER SITO — solo per i collaboratori
+  // a percentuale sul profitto reale (Isma, Alan): comp_referral è già SOLO
+  // la quota del collaboratore, quindi il generato totale è il doppio e la
+  // quota MBBET è identica alla sua.
+  if(c.perc>0&&c.modello!=='POCKET'){
+    var totGenerato=totInc*2;
+    html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;margin-bottom:22px">'+
+      '<div style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px;margin-bottom:14px">&#129568; DIVISIONE GUADAGNO — '+c.perc+'% / '+(100-c.perc)+'%</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:'+(tariffe.length?'18px':'0')+'">'+
+        '<div><div style="font-size:20px;font-weight:900;color:var(--tx)">€ '+fmt(totGenerato)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Generato totale (incassato)</div></div>'+
+        '<div><div style="font-size:20px;font-weight:900;color:var(--green)">€ '+fmt(totInc)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Quota '+(c.nome||'')+' ('+c.perc+'%)</div></div>'+
+        '<div><div style="font-size:20px;font-weight:900;color:var(--gold)">€ '+fmt(totGenerato-totInc)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Quota MBBET ('+(100-c.perc)+'%)</div></div>'+
+      '</div>'+
+      (tariffe.length?(
+        '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:14px;display:flex;flex-wrap:wrap;gap:8px">'+
+        tariffe.map(function(t){
+          return '<div style="display:flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px">'+
+            '<span style="font-size:11px;color:var(--tx2);font-weight:600">'+t.bookmaker+'</span>'+
+            '<span style="font-size:11px;color:var(--tx3)">·</span>'+
+            '<span style="font-size:11px;color:var(--tx);font-weight:800">€ '+fmt(t.prezzo)+'</span>'+
+          '</div>';
+        }).join('')+
+        '</div>'
+      ):'')+
+    '</div>';
+  }
+
   // TABELLA CLIENTI (parte dal cliente, non dal sito — click apre i suoi siti)
   var byClienteFlat={};
   allBns.forEach(function(b){

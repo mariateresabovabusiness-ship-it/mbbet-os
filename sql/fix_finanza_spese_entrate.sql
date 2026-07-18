@@ -4,14 +4,14 @@
 --   SAFE: usa IF NOT EXISTS, si può rieseguire senza problemi.
 -- ═══════════════════════════════════════════════════════════════════
 
--- 1) SPESE: mancava la colonna "ricorrente" e il numero automatico dell'id
+-- 1) SPESE: mancava la colonna "ricorrente" e il valore automatico dell'id
 --    (per questo ogni volta che provavi ad aggiungere una spesa falliva)
+--    NB: spese.id è di tipo text (non numero) -> id generato come UUID testuale
 alter table spese
   add column if not exists ricorrente boolean default false;
 
-create sequence if not exists spese_id_seq owned by spese.id;
-select setval('spese_id_seq', coalesce((select max(id) from spese), 0) + 1, false);
-alter table spese alter column id set default nextval('spese_id_seq');
+alter table spese
+  alter column id set default gen_random_uuid()::text;
 
 -- 2) ENTRATE EXTRA: la tabella era sparita dalla cache del database
 create table if not exists entrate_extra (
