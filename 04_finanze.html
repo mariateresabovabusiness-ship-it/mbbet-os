@@ -7,7 +7,7 @@
 <style>html.mb-auth #ls{display:none!important}</style>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#050714;--gold:#00e58a;--glow-g:rgba(0,229,138,.28);--green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;--tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--br:rgba(255,255,255,.07);--sb:224px}
+:root{--bg:#050714;--gold:#ff0009;--glow-g:rgba(255,0,9,.28);--green:#00e58a;--blue:#4f9dff;--purple:#b794f4;--red:#ff5757;--orange:#ff8a3d;--cyan:#22e4ff;--tx:#fff;--tx2:#c8d6e8;--tx3:#6b83a0;--tx4:#1a2840;--br:rgba(255,255,255,.07);--sb:224px}
 html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif;overflow:hidden;font-size:14px}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,0,9,.2);border-radius:2px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -23,8 +23,8 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .sb-sec{padding:13px 16px 3px;font-size:8px;font-weight:800;color:var(--tx4);letter-spacing:2.5px}
 .sb-lnk{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--tx3);font-size:13px;font-weight:500;border-left:2px solid transparent;transition:.14s;text-decoration:none;position:relative}
 .sb-lnk:hover{color:var(--tx2);background:rgba(255,255,255,.022);border-left-color:rgba(255,0,9,.2)}
-.sb-lnk.act{color:var(--green);background:rgba(0,229,138,.1);border-left-color:var(--green);font-weight:700}
-.sb-lnk.act::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--green);box-shadow:0 0 16px rgba(0,229,138,.28)}
+.sb-lnk.act{color:var(--gold);background:rgba(255,0,9,.08);border-left-color:var(--gold);font-weight:700}
+.sb-lnk.act::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;background:var(--gold);box-shadow:0 0 16px var(--glow-g)}
 .sb-lnk .ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
 .sb-bot{margin-top:auto;padding:12px 14px;border-top:1px solid rgba(255,255,255,.05)}
 .sb-mode{background:rgba(255,0,9,.06);border:1px solid rgba(255,0,9,.14);border-radius:9px;padding:9px 12px}
@@ -767,7 +767,7 @@ function renderConfrontoPeriodo(){
   var extraRange=_entrateExtra.filter(function(x){return dataInRange(x.data,m1,a1,m2,a2);});
   var tot=calcTotali(bnsRange,false,speseRange,extraRange);
   var kpis=[
-    {l:'RICAVI PERIODO',v:'€ '+fmt(tot.ric),s:bnsRange.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--green)'},
+    {l:'RICAVI PERIODO',v:'€ '+fmt(tot.ric),s:bnsRange.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--tx)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),s:'Nel periodo',c:'var(--red)'},
     {l:'UTILE NETTO PERIODO',v:'€ '+fmt(tot.utile),s:tot.ric>0?Math.round(tot.utile/tot.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'}
   ];
@@ -847,7 +847,7 @@ function renderOverview(){
 
   // KPI
   var kpis=[
-    {l:'RICAVI MESE',v:'€ '+fmt(totMese.ric),s:bMese.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--green)'},
+    {l:'RICAVI MESE',v:'€ '+fmt(totMese.ric),s:bMese.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--tx)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(totMese.pag),s:'Mese corrente',c:'var(--red)'},
     {l:'UTILE NETTO',v:'€ '+fmt(totMese.utile),s:totMese.ric>0?Math.round(totMese.utile/totMese.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'},
     {l:'RICAVI TOTALI',v:'€ '+fmt(totFatto.ric),s:totFatto.cnt+' bonus completati',c:'var(--cyan)'},
@@ -1222,8 +1222,8 @@ function renderTasse(){
   tMary.pctLabelSrc=pctMary;tManuele.pctLabelSrc=pctManuele;
 
   var kpis=[
-    {l:'UTILE NETTO AZIENDA ANNO '+anno,v:'€ '+fmt(baseImponibileAzienda),s:'Già senza compensi operatori/collab/costi',c:'var(--green)'},
-    {l:'QUOTA MARY ('+pctMary+'%)',v:'€ '+fmt(tMary.fatturato),s:'da accantonare € '+fmt(tMary.totAccantonare),c:'var(--green)'},
+    {l:'UTILE NETTO AZIENDA ANNO '+anno,v:'€ '+fmt(baseImponibileAzienda),s:'Già senza compensi operatori/collab/costi',c:'var(--tx)'},
+    {l:'QUOTA MARY ('+pctMary+'%)',v:'€ '+fmt(tMary.fatturato),s:'da accantonare € '+fmt(tMary.totAccantonare),c:'var(--tx)'},
     {l:'QUOTA MANUELE ('+pctManuele+'%)',v:'€ '+fmt(tManuele.fatturato),s:'da accantonare € '+fmt(tManuele.totAccantonare),c:'#5aaaff'}
   ];
   var kpi=g('kpi-tasse');
@@ -1298,7 +1298,7 @@ function renderOperatori(){
 
 /* ══ DIVISIONE — 4 soci ══ */
 var SOCI=[
-  {key:'mary',nm:'Mary Bova',col:'#f0b429'},
+  {key:'mary',nm:'Mary Bova',col:'#ffffff'},
   {key:'manuele',nm:'Manuele',col:'#5aaaff'},
   {key:'serena',nm:'Serena',col:'#c4a4f8'},
   {key:'samuele',nm:'Samuele',col:'#00f093'}
@@ -1364,7 +1364,7 @@ function renderDivisione(){
   // KPI
   var kpiEl=g('div-kpi');
   if(kpiEl)kpiEl.innerHTML=[
-    {l:'RICAVI TOTALI',v:'€ '+fmt(tot.ric),c:'var(--green)'},
+    {l:'RICAVI TOTALI',v:'€ '+fmt(tot.ric),c:'var(--tx)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),c:'var(--red)'},
     {l:'COMPENSI OPERATORI',v:'€ '+fmt(tot.compOp),c:'var(--blue)'},
     {l:'SPESE GENERALI',v:'€ '+fmt(speseTot),c:'var(--orange)'},
@@ -1392,7 +1392,7 @@ function renderDivisione(){
   // Dettaglio
   var detEl=g('div-dettaglio');
   if(detEl)detEl.innerHTML=[
-    {l:'Ricavi lordi',v:tot.ric,c:'var(--green)',sign:'+'},
+    {l:'Ricavi lordi',v:tot.ric,c:'var(--tx)',sign:'+'},
     {l:'Pagato ai clienti',v:-tot.pag,c:'var(--red)',sign:'-'},
     {l:'Compensi operatori (~perc_op)',v:-tot.compOp,c:'var(--blue)',sign:'-'},
     {l:'Compensi collab + referral',v:-(tot.compCollab+tot.compRef),c:'var(--purple)',sign:'-'},

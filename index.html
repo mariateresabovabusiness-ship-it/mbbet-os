@@ -103,7 +103,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
   font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;
   transition:.14s}
 .hdr-tag.r{background:rgba(255,79,79,.07);border:1px solid rgba(255,79,79,.16);color:var(--red)}
-.hdr-tag.g{background:rgba(255,0,9,.06);border:1px solid rgba(255,0,9,.16);color:var(--gold)}
+.hdr-tag.g{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:var(--tx)}
 .hdr-tag.b{background:rgba(90,170,255,.05);border:1px solid rgba(90,170,255,.14);color:var(--blue)}
 .hdr-sp{flex:1}
 .hdr-right{display:flex;align-items:center;gap:16px;flex-shrink:0}
@@ -542,9 +542,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <div class="kpi-s" id="k2s">aperti oggi</div>
     </div>
     <div class="kpi" onclick="navTo('04_finanze.html')">
-      <div class="kpi-acc" style="background:linear-gradient(90deg,transparent,var(--gold),transparent)"></div>
+      <div class="kpi-acc" style="background:linear-gradient(90deg,transparent,var(--tx),transparent)"></div>
       <div class="kpi-l">Utile del Mese</div>
-      <div class="kpi-v" id="k3" style="color:var(--gold)">€ —</div>
+      <div class="kpi-v" id="k3" style="color:var(--tx)">€ —</div>
       <div class="kpi-s">Luglio 2026</div>
     </div>
     <div class="kpi">
@@ -694,14 +694,14 @@ function initMeseLabel(){
 
 var MODS=[
   {nm:'CRM Clienti',ic:'&#128100;',c:'#ff0009',rgb:'255,0,9',sub:'Gestione clienti, schede, documenti, follow-up',href:'01_clienti.html'},
-  {nm:'Bookmaker Intelligence',ic:'&#127919;',c:'#f0b429',rgb:'240,180,41',sub:'Database bookmaker, promo, ROI, disponibilità',href:'02_bonus.html'},
-  {nm:'Promo Center',ic:'&#127881;',c:'#00f093',rgb:'0,240,147',sub:'Tutte le promozioni attive, assegnazione AI',href:'02_bonus.html'},
+  {nm:'Bookmaker Intelligence',ic:'&#127919;',c:'#ff0009',rgb:'255,0,9',sub:'Database bookmaker, promo, ROI, disponibilità',href:'02_bonus.html'},
+  {nm:'Promo Center',ic:'&#127881;',c:'#ff0009',rgb:'255,0,9',sub:'Tutte le promozioni attive, assegnazione AI',href:'02_bonus.html'},
   {nm:'Task & Workflow',ic:'&#9989;',c:'#ff0009',rgb:'255,0,9',sub:'Attività, scadenze, assegnazioni, stati',href:'01_clienti.html'},
-  {nm:'Team MBBET',ic:'&#128101;',c:'#f0b429',rgb:'240,180,41',sub:'Operatori, performance, clienti assegnati',href:'03_team.html'},
-  {nm:'Revenue & Finanza',ic:'&#128184;',c:'#00f093',rgb:'0,240,147',sub:'Ricavi, spese, margini, divisione utile soci',href:'04_finanze.html'},
+  {nm:'Team MBBET',ic:'&#128101;',c:'#ff0009',rgb:'255,0,9',sub:'Operatori, performance, clienti assegnati',href:'03_team.html'},
+  {nm:'Revenue & Finanza',ic:'&#128184;',c:'#ff0009',rgb:'255,0,9',sub:'Ricavi, spese, margini, divisione utile soci',href:'04_finanze.html'},
   {nm:'Documenti',ic:'&#128196;',c:'#ff0009',rgb:'255,0,9',sub:'IBAN, SPID, CIE, contratti, archivio',href:'01_clienti.html'},
-  {nm:'Social MBBET',ic:'&#128241;',c:'#f0b429',rgb:'240,180,41',sub:'Calendario editoriale, script, Social Guardian AI',href:'09_social.html'},
-  {nm:'Report & Analytics',ic:'&#128202;',c:'#00f093',rgb:'0,240,147',sub:'Statistiche, export, andamento storico',href:''},
+  {nm:'Social MBBET',ic:'&#128241;',c:'#ff0009',rgb:'255,0,9',sub:'Calendario editoriale, script, Social Guardian AI',href:'09_social.html'},
+  {nm:'Report & Analytics',ic:'&#128202;',c:'#ff0009',rgb:'255,0,9',sub:'Statistiche, export, andamento storico',href:''},
   {nm:'Configurazione',ic:'&#9881;',c:'#7a98b0',rgb:'122,152,176',sub:'Impostazioni, utenti, permessi, sistema',href:''}
 ];
 var BKS=[
