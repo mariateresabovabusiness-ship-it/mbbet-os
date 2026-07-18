@@ -1,10 +1,19 @@
 -- ═══════════════════════════════════════════════════════════════════
---   Fix: tabella entrate_extra sparita dalla schema cache di PostgREST
---   (stesso problema già capitato con le funzioni rpc_* in questa sessione)
---   SAFE: usa IF NOT EXISTS, riseguibile
---   Incolla nella SQL Editor di Supabase e clicca RUN
+--   Fix Finanza: Spese non si aggiungono + Entrate Extra rotta
+--   Incolla TUTTO questo blocco nella SQL Editor di Supabase e clicca RUN.
+--   SAFE: usa IF NOT EXISTS, si può rieseguire senza problemi.
 -- ═══════════════════════════════════════════════════════════════════
 
+-- 1) SPESE: mancava la colonna "ricorrente" e il numero automatico dell'id
+--    (per questo ogni volta che provavi ad aggiungere una spesa falliva)
+alter table spese
+  add column if not exists ricorrente boolean default false;
+
+create sequence if not exists spese_id_seq owned by spese.id;
+select setval('spese_id_seq', coalesce((select max(id) from spese), 0) + 1, false);
+alter table spese alter column id set default nextval('spese_id_seq');
+
+-- 2) ENTRATE EXTRA: la tabella era sparita dalla cache del database
 create table if not exists entrate_extra (
   id            bigserial primary key,
   descrizione   text not null,
@@ -28,4 +37,4 @@ create index if not exists idx_entrate_extra_data on entrate_extra(data);
 
 NOTIFY pgrst, 'reload schema';
 
-select 'Fix entrate_extra completato.' as risultato;
+select 'Fix Spese + Entrate Extra completato.' as risultato;
