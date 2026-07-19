@@ -1022,6 +1022,11 @@ async function doSubmit(){
       data_ingresso:oggi,created_at:ts,updated_at:ts
     };
     var r=await db.from('clienti').insert(payload);
+    for(var _idAttempt=0;r.error&&r.error.code==='23505'&&_idAttempt<3;_idAttempt++){
+      clientId=await genClientId();
+      payload.id=clientId;
+      r=await db.from('clienti').insert(payload);
+    }
     if(r.error)throw r.error;
 
     try{await db.from('notifiche').insert({tipo:'Cliente',titolo:'Nuovo cliente compilato: '+nomeCpl,messaggio:'Operatore: '+(op||'da assegnare'),priorita:'Alta',destinatario:op||null,letto:false});}catch(e){}

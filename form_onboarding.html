@@ -372,10 +372,33 @@ async function submitForm(){
     created_at:new Date().toISOString(),
   };
 
+  if(payload.telefono){
+    try{
+      var dup=await db.rpc('rpc_check_dup_cliente',{p_tel:payload.telefono});
+      if(dup.data&&dup.data.length){
+        var ge0=document.getElementById('global-err');
+        ge0.textContent='Risulta già una registrazione con questo numero di telefono. Se pensi sia un errore contatta il tuo operatore prima di procedere.';
+        ge0.style.display='block';
+        btn.disabled=false;btn.textContent='✅ INVIA REGISTRAZIONE';
+        return;
+      }
+    }catch(e){}
+  }
+
   try{
-    var r=await db.from('clienti').insert(payload).select('id').single();
-    if(r.error){throw new Error(r.error.message);}
-    showSuccess(r.data&&r.data.id?r.data.id:'');
+    var newId=null,lastErr=null;
+    for(var attempt=0;attempt<3;attempt++){
+      newId=null;
+      try{var idr=await db.rpc('rpc_next_client_id');if(idr.data)newId=idr.data;}catch(e){}
+      if(!newId)newId='MBBET-'+Date.now().toString().slice(-6)+'-'+attempt;
+      payload.id=newId;
+      var r=await db.from('clienti').insert(payload);
+      if(!r.error){lastErr=null;break;}
+      lastErr=r.error;
+      if(r.error.code!=='23505')break;
+    }
+    if(lastErr){throw new Error(lastErr.message);}
+    showSuccess(newId);
   }catch(ex){
     console.warn('DB insert failed:',ex.message);
     var ge=document.getElementById('global-err');
@@ -392,8 +415,7 @@ function showSuccess(id){
   document.querySelector('.step-bar').style.display='none';
   document.querySelector('.card-title').style.display='none';
   document.querySelector('.card-sub').style.display='none';
-  var ref='MBBET-'+String(Math.floor(Math.random()*900000+100000));
-  document.getElementById('success-ref').textContent='Codice riferimento: #'+ref;
+  document.getElementById('success-ref').textContent='Codice riferimento: #'+(id||'—');
   var ss=document.getElementById('success-screen');
   ss.style.display='block';
 }

@@ -14,6 +14,9 @@ create unique index if not exists clienti_email_uniq
   on clienti (email)
   where email is not null and email <> '';
 
--- Nota: 'telefono' è una colonna duplicata di 'tel' (vedi migration_colonne_clienti.sql) —
--- non le mettiamo un vincolo separato per non rischiare falsi conflitti tra le due colonne
--- finché non vengono unificate in una futura pulizia dati.
+-- 'telefono' è una colonna duplicata di 'tel' (vedi migration_colonne_clienti.sql), popolata
+-- da form_onboarding.html (che non scrive mai su 'tel') — senza un vincolo qui i duplicati
+-- inseriti da quel modulo pubblico non erano protetti a livello database.
+create unique index if not exists clienti_telefono_uniq
+  on clienti (telefono)
+  where telefono is not null and telefono <> '';
