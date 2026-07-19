@@ -275,7 +275,6 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 
 <script src="shared/supabase.min.js"></script>
 <script src="shared/auth.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
 <script>
 var _clienti=[], _bonusByClient={}, _pending=null, _operatoriList=[];
 var PALETTE=['#ff1440','#5aaaff','#00f093','#c4a4f8','#ff9040','#22eeff','#a8e6cf','#ffd3b6'];
@@ -754,11 +753,13 @@ function zoomDoc(src,cap){
 }
 function closeZoomDoc(){document.getElementById('zoom-overlay').classList.remove('open');}
 
-// Lettura automatica del testo sul documento (nome, indirizzo, CAP...) via
-// Tesseract.js, tutto dentro il browser — nessuna immagine lascia il PC
-// verso servizi esterni di terzi. Non è perfetta su foto storte/sfocate:
-// va sempre controllata prima di usarla, per questo resta sempre visibile
-// l'avviso e il testo originale, non solo il CAP che trovo.
+// Lettura automatica del documento (nome, cognome, data di nascita,
+// indirizzo, CAP...) via Claude vision (netlify/functions/ocr-extract.js),
+// molto più affidabile del solo riconoscimento testo su foto storte/sfocate.
+// L'immagine passa dal server solo per la lettura, mai salvata; il modello
+// è istruito a lasciare vuoto un campo piuttosto che inventarlo — verifica
+// comunque sempre i dati prima di usarli, per questo resta sempre visibile
+// l'avviso sopra ai campi letti.
 // Parte da sola non appena l'immagine è pronta (autoOcr), invece di
 // aspettare un click — se l'immagine sta ancora caricando aggancia
 // load/error e riprova quando arriva davvero.
@@ -775,26 +776,38 @@ function autoOcr(i){
     },{once:true});
   }
 }
+function imgToBase64(img){
+  var canvas=document.createElement('canvas');
+  canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+  canvas.getContext('2d').drawImage(img,0,0);
+  var dataUrl=canvas.toDataURL('image/jpeg',0.9);
+  var m=dataUrl.match(/^data:([^;]+);base64,(.*)$/);
+  return m?{mediaType:m[1],data:m[2]}:null;
+}
+var OCR_FIELD_LABELS={nome:'Nome',cognome:'Cognome',data_nascita:'Data di nascita',indirizzo:'Indirizzo',citta:'Città'};
 async function runOcrOnImg(i){
   var img=document.getElementById('doc-img-'+i);
   var btn=document.getElementById('ocr-btn-'+i);
   var out=document.getElementById('ocr-out-'+i);
   if(!img||!out)return;
   if(btn){btn.disabled=true;btn.textContent='⏳ Leggo il documento...';}
-  out.innerHTML='<div class="ocr-warn">⏳ Lettura automatica in corso...</div>';
+  out.innerHTML='<div class="ocr-warn">⏳ Lettura automatica in corso (AI)...</div>';
   try{
-    var result=await Tesseract.recognize(img.src,'ita');
-    var text=(result&&result.data&&result.data.text||'').trim();
-    if(!text){out.innerHTML='<div class="ocr-err">Non ho trovato testo leggibile in questa foto.</div>';}
+    var img64=imgToBase64(img);
+    if(!img64)throw new Error('immagine non leggibile');
+    var r=await fetch('/.netlify/functions/ocr-extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(img64)});
+    var res=await r.json();
+    if(!r.ok||!res.ok)throw new Error(res.error||'errore lettura');
+    var campi=res.campi||{};
+    var trovati=Object.keys(campi).filter(function(k){return campi[k];});
+    if(!trovati.length){out.innerHTML='<div class="ocr-err">Non sono riuscita a leggere dati chiari in questa foto.</div>';}
     else{
-      var capMatch=text.match(/\b\d{5}\b/);
-      if(capMatch)addCapField(capMatch[0],'documento');
-      out.innerHTML='<div class="ocr-warn">⚠ Testo letto automaticamente — verifica sempre prima di usarlo</div>'+
-        (capMatch?'<div class="ocr-cap">📮 CAP trovato e aggiunto ai dati sopra: <b>'+capMatch[0]+'</b></div>':'')+
-        '<textarea class="ocr-text" readonly onclick="this.select()">'+text+'</textarea>';
+      trovati.forEach(function(k){addOcrField(k,campi[k]);});
+      out.innerHTML='<div class="ocr-warn">⚠ Letto con AI — verifica sempre prima di usare i dati</div>'+
+        '<div class="ocr-cap">'+trovati.map(function(k){return (OCR_FIELD_LABELS[k]||k)+': <b>'+campi[k]+'</b>';}).join(' · ')+'</div>';
     }
   }catch(e){
-    out.innerHTML='<div class="ocr-err">Non sono riuscita a leggere il testo (documento non accessibile o immagine poco chiara).</div>';
+    out.innerHTML='<div class="ocr-err">Non sono riuscita a leggere il documento (foto non accessibile o poco chiara).</div>';
   }
   if(btn){btn.disabled=false;btn.textContent='🔎 Rileggi';}
 }
@@ -817,6 +830,25 @@ function addCapField(cap,source){
   var existing=document.getElementById('cap-field-row');
   if(existing)existing.outerHTML=html;else container.insertAdjacentHTML('beforeend',html);
   if(_prepCtx){_prepCtx.capTrovato=cap;_prepCtx.capSource=source;}
+}
+
+// Campi letti dal documento via AI (nome, cognome, data di nascita,
+// indirizzo, città) — stesso trattamento del CAP: riga copiabile aggiunta
+// una sola volta, aggiornata se il documento viene riletto. Il CAP letto
+// dal documento passa comunque da addCapField per non duplicare la logica
+// "documento batte stima dalla città".
+function addOcrField(key,value){
+  if(!value)return;
+  if(key==='cap'){addCapField(value,'documento');return;}
+  var container=document.getElementById('prep-fields');
+  if(!container)return;
+  var rowId='ocr-field-'+key;
+  var label=(OCR_FIELD_LABELS[key]||key)+' (dal documento)';
+  var html='<div class="prep-field" id="'+rowId+'"><span class="prep-field-l">'+label+'</span>'+
+    '<span style="display:flex;align-items:center;gap:8px"><span class="prep-field-v">'+value+'</span>'+
+    '<button class="prep-copy" onclick="copyText('+JSON.stringify(String(value)).replace(/"/g,'&quot;')+')" title="Copia">📋</button></span></div>';
+  var existing=document.getElementById(rowId);
+  if(existing)existing.outerHTML=html;else container.insertAdjacentHTML('beforeend',html);
 }
 
 // Elenco pubblico dei comuni italiani con CAP (matteocontrini/comuni-json,
