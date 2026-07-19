@@ -667,7 +667,6 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 
 <script>
 /* ── COSTANTI ─────────────────────────────────────────── */
-var SPESE_KEY='mbbet_spese_v1';
 var _cli=[],_period='sett',_rAF=null,_sweepA=-Math.PI/2;
 
 /* ══ GLOBAL MESE ══ */
@@ -768,24 +767,31 @@ function buildMods(){
 }
 
 /* ── KPI ───────────────────────────────────────────────── */
-function updateKpi(cli){
+function updateKpi(cli,bns,speseMese,extraMese){
+  bns=bns||[];speseMese=speseMese||0;extraMese=extraMese||0;
   var att=cli.filter(function(c){return c.stato==='ATTIVO';}).length;
   var lav=cli.filter(function(c){return c.stato==='IN_LAVORAZIONE';}).length;
   var sosp=cli.filter(function(c){return c.stato==='SOSPESO';}).length;
   var lib=cli.filter(function(c){return c.stato==='LIBERO';}).length;
-  var spese=(JSON.parse(localStorage.getItem(SPESE_KEY)||'[]')||[]).reduce(function(s,x){return s+(x.imp||0);},0);
-  var fat=att*68+lav*34;
-  var utile=Math.max(fat-spese,0);
+  var ric=0,pag=0,costi=0,compOp=0,compCollab=0,compRef=0;
+  bns.forEach(function(b){
+    var rr=parseFloat(b.ric_real)||0;
+    ric+=rr;pag+=parseFloat(b.pag_cli)||0;costi+=parseFloat(b.costi_extra)||0;
+    compOp+=rr*(parseFloat(b.perc_op)||0)/100;
+    compCollab+=rr*(parseFloat(b.perc_collab)||0)/100;
+    compRef+=parseFloat(b.comp_referral)||0;
+  });
+  var utile=ric+extraMese-pag-compOp-compCollab-compRef-costi-speseMese;
   sf(function(){
     g('k1').textContent=att;g('k1s').textContent=lav+' in lavorazione';
     g('k2').textContent=lav;g('k2s').textContent=att+' completati questo mese';
-    g('k3').textContent=fmtE(utile);
+    g('k3').textContent=fmtE(utile);g('k3').style.color=utile<0?'var(--red)':'';
     g('k4').textContent=sosp+lib;
-    g('k5').textContent=fmtE(Math.round(fat*.82));
-    g('k6').textContent=fmtE(Math.round(fat*.14)+spese);
+    g('k5').textContent=fmtE(Math.round(ric*.82));
+    g('k6').textContent=fmtE(Math.round(ric*.14)+speseMese);
     g('k8').textContent=sosp+lib;
     g('hdr-urg').innerHTML='&#9679; '+(sosp+lib)+' urgenti';
-    g('hdr-pot').innerHTML='&#128200; Potenziale '+fmtE(att*68);
+    g('hdr-pot').innerHTML='&#128200; Potenziale '+fmtE(ric);
   });
 }
 
@@ -1083,15 +1089,19 @@ async function loadData(){
     // Carica clienti e bonus del mese in parallelo (query indipendenti)
     var risultati=await Promise.all([
       db.from('clienti').select('id,nome,cognome,stato,operatore,is_nuovo,bookmaker_completati,created_at').gte('created_at',mStart).lt('created_at',mEnd),
-      db.from('bonus').select('id,cliente,bookmaker,stato,ric_real,pag_cli,costi_extra,mese_operativo,anno_operativo,updated_at,created_at').eq('mese_operativo',gm.m).eq('anno_operativo',gm.anno)
+      db.from('bonus').select('id,cliente,bookmaker,stato,ric_real,pag_cli,costi_extra,perc_op,perc_collab,comp_referral,mese_operativo,anno_operativo,updated_at,created_at').eq('mese_operativo',gm.m).eq('anno_operativo',gm.anno),
+      db.from('spese').select('importo,data').gte('data',mStart).lt('data',mEnd),
+      db.from('entrate_extra').select('importo,data').gte('data',mStart).lt('data',mEnd)
     ]);
     var r=risultati[0], rb=risultati[1];
     if(!r.data)throw new Error('no clienti');
     _cli=r.data;
     _bns=rb.data||[];
+    var speseMese=(risultati[2].data||[]).reduce(function(s,x){return s+(parseFloat(x.importo)||0);},0);
+    var extraMese=(risultati[3].data||[]).reduce(function(s,x){return s+(parseFloat(x.importo)||0);},0);
 
     // Aggiorna tutto
-    updateKpi(_cli,_bns);
+    updateKpi(_cli,_bns,speseMese,extraMese);
     buildOps(_cli);
     buildTimeline(_cli,_bns);
     updateChartRealData(_bns);
