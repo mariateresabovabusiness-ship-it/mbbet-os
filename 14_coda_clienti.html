@@ -784,7 +784,7 @@ function imgToBase64(img){
   var m=dataUrl.match(/^data:([^;]+);base64,(.*)$/);
   return m?{mediaType:m[1],data:m[2]}:null;
 }
-var OCR_FIELD_LABELS={nome:'Nome',cognome:'Cognome',data_nascita:'Data di nascita',indirizzo:'Indirizzo',citta:'Città'};
+var OCR_FIELD_LABELS={nome:'Nome',cognome:'Cognome',data_nascita:'Data di nascita',indirizzo:'Indirizzo',citta:'Città',numero_documento:'N. documento',data_rilascio:'Data rilascio',data_scadenza:'Data scadenza'};
 async function runOcrOnImg(i){
   var img=document.getElementById('doc-img-'+i);
   var btn=document.getElementById('ocr-btn-'+i);
