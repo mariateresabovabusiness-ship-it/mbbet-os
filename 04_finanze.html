@@ -336,6 +336,18 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
         </div>
         <div class="kpi-row" id="kpi-confronto" style="padding:0 18px 18px"></div>
       </div>
+
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">&#128197; PERIODO LIBERO (DA DATA A DATA)</div></div>
+        <div style="padding:14px 18px 4px;font-size:10px;color:var(--tx3)">Per periodi a cavallo tra due mesi (es. poca operatività: contate dal 1 giugno al 19 luglio) — non legato ai mesi di calendario.</div>
+        <div class="filter-bar" style="padding:6px 18px 16px">
+          <span class="filter-lbl">Da:</span>
+          <input type="date" class="filter-sel" id="pl-da" onchange="renderPeriodoLibero()">
+          <span class="filter-lbl">A:</span>
+          <input type="date" class="filter-sel" id="pl-a" onchange="renderPeriodoLibero()">
+        </div>
+        <div class="kpi-row" id="kpi-periodo-libero" style="padding:0 18px 18px"></div>
+      </div>
     </div>
 
     <!-- ═══ ENTRATE ═══ -->
@@ -670,7 +682,7 @@ function switchTab(name,el){
 async function fetchAllBonusFin(){
   var out=[],step=1000,from=0;
   while(true){
-    var r=await db.from('bonus').select('id,cliente,operatore,bookmaker,ric_real,pag_cli,costi_extra,perc_op,perc_collab,nome_collab,comp_referral,stato,mese_operativo,anno_operativo,deposito,prelievo,saldo_bk,incassato,data_incasso,updated_at,created_at').order('created_at',{ascending:false}).range(from,from+step-1);
+    var r=await db.from('bonus').select('id,cliente,operatore,bookmaker,ric_real,pag_cli,costi_extra,perc_op,perc_collab,nome_collab,comp_referral,stato,mese_operativo,anno_operativo,deposito,prelievo,saldo_bk,incassato,data_incasso,data_inizio,updated_at,created_at').order('created_at',{ascending:false}).range(from,from+step-1);
     var rows=r.data||[];
     out=out.concat(rows);
     if(rows.length<step)break;
@@ -715,7 +727,7 @@ function calcTotali(bns,soloFatto,speseArr,extraArr){
   });
   var speseTot=(speseArr||_spese).reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
   var entrateExtraTot=(extraArr||_entrateExtra).reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
-  var utile=Math.max(ric+entrateExtraTot-pag-compOp-compCollab-compRef-costi-speseTot,0);
+  var utile=ric+entrateExtraTot-pag-compOp-compCollab-compRef-costi-speseTot;
   return {ric:ric,pag:pag,costi:costi,compOp:compOp,compCollab:compCollab,compRef:compRef,utile:utile,speseTot:speseTot,entrateExtraTot:entrateExtraTot,cnt:rows.length};
 }
 
@@ -741,6 +753,24 @@ function bnsOfRange(m1,a1,m2,a2){
     return v>=lo&&v<=hi;
   });
 }
+// Periodo libero (es. "1 giugno → 19 luglio"), non legato ai mesi di
+// calendario — usa la data reale di ogni bonus (data_inizio, la stessa
+// da cui deriva mese_operativo quando non impostato a mano), non il
+// mese/anno di competenza a cui è stato assegnato.
+function effDate(b){return b.data_inizio||b.created_at||null;}
+function bnsOfExactRange(dataDa,dataA){
+  if(!dataDa||!dataA)return [];
+  return _bns.filter(function(b){
+    var d=effDate(b);if(!d)return false;
+    var ds=d.slice(0,10);
+    return ds>=dataDa&&ds<=dataA;
+  });
+}
+function dataInExactRange(dataStr,dataDa,dataA){
+  if(!dataStr||!dataDa||!dataA)return false;
+  var ds=dataStr.slice(0,10);
+  return ds>=dataDa&&ds<=dataA;
+}
 function dataInRange(dataStr,m1,a1,m2,a2){
   if(!dataStr)return false;
   var d=new Date(dataStr+'T00:00:00');
@@ -761,7 +791,29 @@ function renderConfrontoPeriodo(){
   var kpis=[
     {l:'RICAVI PERIODO',v:'€ '+fmt(tot.ric),s:bnsRange.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--tx)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),s:'Nel periodo',c:'var(--red)'},
-    {l:'UTILE NETTO PERIODO',v:'€ '+fmt(tot.utile),s:tot.ric>0?Math.round(tot.utile/tot.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'}
+    {l:'UTILE NETTO PERIODO',v:'€ '+fmt(tot.utile),s:tot.ric>0?Math.round(tot.utile/tot.ric*100)+'% margine':'Dati insufficienti',c:tot.utile<0?'var(--red)':'var(--green)'}
+  ];
+  el.innerHTML=kpis.map(function(k,i){
+    return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
+      '<div class="kpi-label">'+k.l+'</div>'+
+      '<div class="kpi-val" style="color:'+(k.c)+'">'+k.v+'</div>'+
+      '<div class="kpi-sub">'+k.s+'</div>'+
+      '</div>';
+  }).join('');
+}
+function renderPeriodoLibero(){
+  var dataDa=(g('pl-da')||{}).value,dataA=(g('pl-a')||{}).value;
+  var el=g('kpi-periodo-libero');if(!el)return;
+  if(!_dataReady){el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--tx3);font-size:12px">Caricamento dati…</div>';return;}
+  if(!dataDa||!dataA){el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--tx3);font-size:12px">Scegli le due date</div>';return;}
+  var bnsRange=bnsOfExactRange(dataDa,dataA);
+  var speseRange=_spese.filter(function(x){return dataInExactRange(x.data,dataDa,dataA);});
+  var extraRange=_entrateExtra.filter(function(x){return dataInExactRange(x.data,dataDa,dataA);});
+  var tot=calcTotali(bnsRange,false,speseRange,extraRange);
+  var kpis=[
+    {l:'RICAVI PERIODO',v:'€ '+fmt(tot.ric),s:bnsRange.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--tx)'},
+    {l:'PAGATO CLIENTI',v:'€ '+fmt(tot.pag),s:'Nel periodo',c:'var(--red)'},
+    {l:'UTILE NETTO PERIODO',v:'€ '+fmt(tot.utile),s:tot.ric>0?Math.round(tot.utile/tot.ric*100)+'% margine':'Dati insufficienti',c:tot.utile<0?'var(--red)':'var(--green)'}
   ];
   el.innerHTML=kpis.map(function(k,i){
     return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
@@ -779,6 +831,14 @@ function initConfrontoPeriodoDefault(){
   if(g('cf-anno1'))g('cf-anno1').value=prevA;
   if(g('cf-mese2'))g('cf-mese2').value=gm.m;
   if(g('cf-anno2'))g('cf-anno2').value=gm.anno;
+}
+function initPeriodoLiberoDefault(){
+  // default: dal 1° del mese scorso a oggi (poi modificabile a piacere)
+  var oggi=new Date();
+  var primoMeseScorso=new Date(oggi.getFullYear(),oggi.getMonth()-1,1);
+  var iso=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+  if(g('pl-da'))g('pl-da').value=iso(primoMeseScorso);
+  if(g('pl-a'))g('pl-a').value=iso(oggi);
 }
 
 /* ══ OVERVIEW ══ */
@@ -841,11 +901,11 @@ function renderOverview(){
   var kpis=[
     {l:'RICAVI MESE',v:'€ '+fmt(totMese.ric),s:bMese.filter(function(b){return b.ric_real>0;}).length+' bonus',c:'var(--tx)'},
     {l:'PAGATO CLIENTI',v:'€ '+fmt(totMese.pag),s:'Mese corrente',c:'var(--red)'},
-    {l:'UTILE NETTO',v:'€ '+fmt(totMese.utile),s:totMese.ric>0?Math.round(totMese.utile/totMese.ric*100)+'% margine':'Dati insufficienti',c:'var(--green)'},
+    {l:'UTILE NETTO',v:'€ '+fmt(totMese.utile),s:totMese.ric>0?Math.round(totMese.utile/totMese.ric*100)+'% margine':'Dati insufficienti',c:totMese.utile<0?'var(--red)':'var(--green)'},
     {l:'RICAVI TOTALI',v:'€ '+fmt(totFatto.ric),s:totFatto.cnt+' bonus completati',c:'var(--cyan)'},
-    {l:'COMPENSI OP.',v:'€ '+fmt(totAll.compOp),s:'Stimati su ric_real×perc_op',c:'var(--blue)'},
-    {l:'SPESE GENERALI',v:'€ '+fmt(totAll.speseTot),s:_spese.length+' voci registrate',c:'var(--orange)'},
-    {l:'ENTRATE EXTRA',v:'€ '+fmt(totAll.entrateExtraTot),s:_entrateExtra.length+' voci (non da bonus)',c:'var(--teal)'}
+    {l:'COMPENSI OP. (TOTALI)',v:'€ '+fmt(totAll.compOp),s:'Stimati su ric_real×perc_op — non solo mese',c:'var(--blue)'},
+    {l:'SPESE GENERALI (TOTALI)',v:'€ '+fmt(totAll.speseTot),s:_spese.length+' voci registrate — non solo mese',c:'var(--orange)'},
+    {l:'ENTRATE EXTRA (TOTALI)',v:'€ '+fmt(totAll.entrateExtraTot),s:_entrateExtra.length+' voci (non da bonus) — non solo mese',c:'var(--teal)'}
   ];
   if(g('kpi-overview'))g('kpi-overview').innerHTML=kpis.map(function(k,i){
     return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
@@ -858,8 +918,9 @@ function renderOverview(){
   buildOvChart();
   buildTopOps(m,a);
   buildStorico(a);
-  if(!_confrontoInit){_confrontoInit=true;initConfrontoPeriodoDefault();}
+  if(!_confrontoInit){_confrontoInit=true;initConfrontoPeriodoDefault();initPeriodoLiberoDefault();}
   renderConfrontoPeriodo();
+  renderPeriodoLibero();
 }
 
 function setOvPeriod(p,el){
@@ -1340,7 +1401,7 @@ function utileNettoTotale(){
   var tot=calcTotali(_bns,true);
   var speseTot=_spese.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
   var entrateExtraTot=_entrateExtra.reduce(function(s,x){return s+(parseFloat(x.imp)||0);},0);
-  return Math.max(tot.ric+entrateExtraTot-tot.pag-tot.compOp-tot.compCollab-tot.compRef-speseTot-tot.costi,0);
+  return tot.ric+entrateExtraTot-tot.pag-tot.compOp-tot.compCollab-tot.compRef-speseTot-tot.costi;
 }
 
 function renderDivisione(){
@@ -1361,7 +1422,7 @@ function renderDivisione(){
     {l:'COMPENSI OPERATORI',v:'€ '+fmt(tot.compOp),c:'var(--blue)'},
     {l:'SPESE GENERALI',v:'€ '+fmt(speseTot),c:'var(--orange)'},
     {l:'COMP. COLLAB/REF',v:'€ '+fmt(tot.compCollab+tot.compRef),c:'var(--purple)'},
-    {l:'UTILE NETTO SOCI',v:'€ '+fmt(utileNetto),c:'var(--green)'}
+    {l:'UTILE NETTO SOCI',v:'€ '+fmt(utileNetto),c:utileNetto<0?'var(--red)':'var(--green)'}
   ].map(function(k,i){
     return '<div class="kpi-card" style="animation-delay:'+(i*60)+'ms;border-top:2px solid '+(k.c)+'">'+
       '<div class="kpi-label">'+k.l+'</div>'+
