@@ -13,7 +13,7 @@ var ROLE_SECTIONS = {
   'SOCIO_ADMIN':    ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import'],
   'SOCIO':          ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab','coda','import'],
   'OPERATORE':      ['clienti','bonus','task','social','collab','coda'],
-  'OPERATORE_SELF': ['bonus'],
+  'OPERATORE_SELF': ['bonus','collab'],
   'COLLAB':         ['clienti','bonus','social','collab'],
   'COLLAB_SELF':    ['collab'],
   'REFERRAL':       ['report'],
