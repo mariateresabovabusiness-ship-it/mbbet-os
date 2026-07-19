@@ -135,7 +135,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 .prep-doc-cap{font-size:9.5px;color:var(--tx3);margin-top:5px}
 .ocr-warn{font-size:9px;color:var(--orange);margin-top:7px;text-align:left}
 .ocr-err{font-size:9.5px;color:var(--red);margin-top:7px;text-align:left}
-.ocr-cap{font-size:11px;color:var(--tx2);margin-top:6px;text-align:left;display:flex;align-items:center;gap:6px;background:rgba(0,229,138,.08);border:1px solid rgba(0,229,138,.25);border-radius:7px;padding:5px 8px}
+.ocr-cap{font-size:11px;color:var(--tx2);margin-top:6px;text-align:left;background:rgba(0,229,138,.08);border:1px solid rgba(0,229,138,.25);border-radius:7px;padding:5px 8px}
 .ocr-cap b{color:var(--green)}
 .ocr-text{width:100%;margin-top:6px;min-height:70px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:var(--tx3);font-size:9.5px;font-family:inherit;padding:6px;resize:vertical}
 .prep-doc-item img{cursor:zoom-in}
@@ -803,8 +803,8 @@ async function runOcrOnImg(i){
     if(!trovati.length){out.innerHTML='<div class="ocr-err">Non sono riuscita a leggere dati chiari in questa foto.</div>';}
     else{
       trovati.forEach(function(k){addOcrField(k,campi[k]);});
-      out.innerHTML='<div class="ocr-warn">⚠ Letto con AI — verifica sempre prima di usare i dati</div>'+
-        '<div class="ocr-cap">'+trovati.map(function(k){return (OCR_FIELD_LABELS[k]||k)+': <b>'+campi[k]+'</b>';}).join(' · ')+'</div>';
+      var etichette=trovati.map(function(k){return k==='cap'?'CAP':(OCR_FIELD_LABELS[k]||k);});
+      out.innerHTML='<div class="ocr-cap">✓ Letto con AI: '+etichette.join(', ')+' — vedi i dati copiabili qui sopra</div>';
     }
   }catch(e){
     out.innerHTML='<div class="ocr-err">Non sono riuscita a leggere il documento (foto non accessibile o poco chiara).</div>';
