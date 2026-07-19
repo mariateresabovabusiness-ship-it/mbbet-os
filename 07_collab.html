@@ -177,6 +177,9 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 #form-modal.open{display:flex}
 #nc-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:20px}
 #nc-modal.open{display:flex}
+#report-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);display:none;align-items:flex-start;justify-content:center;padding:30px 20px;overflow-y:auto}
+#report-modal.open{display:flex}
+.rp-box{background:rgba(8,10,28,.99);border:1px solid rgba(79,157,255,.28);border-radius:18px;padding:28px;width:640px;max-width:100%;animation:fadeUp .2s ease}
 .fm-box{background:rgba(8,10,28,.99);border:1px solid rgba(255,20,64,0.18);border-radius:18px;padding:28px;width:420px;max-width:100%;animation:fadeUp .2s ease}
 .fm-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
 .fm-close{cursor:pointer;color:var(--tx3);font-size:18px;line-height:1;transition:.14s}
@@ -356,6 +359,29 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
       <button class="btn-save" id="nc-save-btn" onclick="salvaNuovoClienteManuale()">&#43; Aggiungi</button>
       <div style="text-align:center;font-size:10.5px;color:var(--tx3);margin:4px 0">oppure</div>
       <button onclick="nuovoClienteCondividiModulo()" style="cursor:pointer;padding:10px 14px;border-radius:9px;border:1px solid rgba(255,20,64,0.3);background:rgba(255,20,64,0.06);color:var(--gold);font-size:12px;font-weight:800;font-family:inherit">&#128279; Condividi il modulo con il cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT COLLABORATORE (numerico + AI), disponibile per qualsiasi collaboratore -->
+<div id="report-modal">
+  <div class="rp-box">
+    <div class="fm-title">
+      <span>&#128202; Report <span id="rp-nome" style="color:var(--tx3);font-weight:700"></span></span>
+      <span class="fm-close" onclick="closeReportPanel()">&#10005;</span>
+    </div>
+    <div class="fm-body">
+      <div>
+        <label style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:1.5px;display:block;margin-bottom:8px">PERIODO</label>
+        <div id="rp-periodo-pills" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div id="rp-custom-dates" class="fg-row" style="display:none">
+        <div class="fg"><label>DA</label><input type="date" id="rp-da" onchange="computeAndRenderReportStats()"></div>
+        <div class="fg"><label>A</label><input type="date" id="rp-a" onchange="computeAndRenderReportStats()"></div>
+      </div>
+      <div id="rp-stats"></div>
+      <button class="btn-save" id="rp-ai-btn" style="background:linear-gradient(135deg,#0d2b57,var(--blue));color:#fff" onclick="generaReportAI()">&#10024; Genera report AI</button>
+      <div id="rp-ai-box"></div>
     </div>
   </div>
 </div>
@@ -608,7 +634,7 @@ function cycleStatus(bonusId,cid){
 }
 
 /* ══ LOAD ══ */
-var BONUS_COLS='id,id_cli,cliente,bookmaker,stato,stato_op,ric_real,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,bonus_ricevuto,prelievo,costi_extra,created_at';
+var BONUS_COLS='id,id_cli,cliente,bookmaker,stato,stato_op,ric_real,ric_prev,pag_cli,nome_collab,perc_collab,comp_referral,mese_operativo,anno_operativo,operatore,data_inizio,username_bk,password_bk,deposito,bonus_ricevuto,prelievo,costi_extra,saldo_bk,created_at,updated_at';
 // Supabase/PostgREST risponde al massimo 1000 righe per chiamata, qualunque
 // limit venga chiesto dal client — vanno scaricate a pagine con .range(),
 // altrimenti tutte le righe oltre le prime 1000 restano invisibili.
@@ -640,7 +666,7 @@ async function loadAll(){
       db.from('collab').select('*').order('created_at',{ascending:false}),
       fetchBonusCollab(),
       db.from('collab_tariffe').select('*').order('ordine'),
-      db.from('clienti').select('id,nome,collab').not('collab','is',null),
+      db.from('clienti').select('id,nome,collab,data_ingresso').not('collab','is',null),
       db.from('operatori').select('nome,is_joint,telegram_chat_id').eq('stato','Attivo'),
       db.from('bookmaker').select('nome,link_promo,link_sito')
     ]);
@@ -721,16 +747,38 @@ function tariffeForCollab(c){
     return tn===nm||tn.includes(nm)||(nm.length>2&&nm.includes(tn));
   }).sort(function(a,b){return (a.ordine||0)-(b.ordine||0);});
 }
+/* BUG FIX (badge sidebar): i collaboratori modello POCKET (Gas, Ale e Fede,
+   Lorenzo Cestola) non scrivono mai bonus.stato_collab — usano invece
+   bonus.pocket_stato ('ACCUMULATO'/'PAGATO', vedi pocketToggleSito/
+   pagaClientePocket). getPagMap() legge solo stato_collab, quindi per questi
+   3 collaboratori risultava sempre "tutto da pagare, mai scaduto": il badge
+   rosso/oro nella sidebar era perciò sempre disallineato dalla realtà.
+   Qui, per un collaboratore POCKET, lo stato pagato/da-pagare va letto da
+   pocket_stato, e "scaduti" (che nel modello POCKET non esiste come stato
+   bonus — solo ACCUMULATO/PAGATO) diventa "quanti clienti hanno un motivo
+   di urgenza reale" secondo computeCollabUrgency, cosi il badge torna a
+   significare qualcosa anche per questi collaboratori. */
 function collabStats(c){
   var bns=bnsForCollab(c);
   var pag=getPagMap();
+  var isPocket=c.modello==='POCKET';
   var pagati=0,daPagare=0,scaduti=0,incassato=0,daIncassare=0;
   bns.forEach(function(b){
-    var st=pag[String(b.id)]||'IN_CORSO';
+    var st=isPocket?(b.pocket_stato==='PAGATO'?'PAGATO':'IN_CORSO'):(pag[String(b.id)]||'IN_CORSO');
     var val=(parseFloat(b.comp_referral)||0)+((parseFloat(b.ric_real)||0)*(parseFloat(b.perc_collab)||0)/100);
     if(st==='PAGATO'){pagati++;incassato+=val;}
     else{daPagare++;daIncassare+=val;if(st==='SCADUTO'||st==='URGENTE')scaduti++;}
   });
+  if(isPocket){
+    scaduti=0;
+    var byClientePocket={};
+    bns.forEach(function(b){var cl=b.cliente||'—';if(!byClientePocket[cl])byClientePocket[cl]=[];byClientePocket[cl].push(b);});
+    Object.keys(byClientePocket).forEach(function(cl){
+      var cc=_clientiCollab.find(function(x){return x.nome===cl&&(x.collab||'')===c.nome;});
+      var reasons=computeCollabUrgency({nome:cl,data_ingresso:cc?cc.data_ingresso:null},byClientePocket[cl]);
+      if(reasons.length)scaduti++;
+    });
+  }
   return{tot:bns.length,pagati:pagati,daPagare:daPagare,scaduti:scaduti,incassato:incassato,daIncassare:daIncassare};
 }
 
@@ -897,6 +945,149 @@ function nuovoClientePocketSelectHtml(c,clienteEsistente){
     '</select>';
 }
 
+/* ══ URGENZA CLIENTE PER COLLABORATORE ══
+   Stesso stile di computeUrgency() in 14_coda_clienti.html: ritorna un
+   array di stringhe-motivo (mai un singolo stato rigido), cosi' piu' segnali
+   possono convivere e chi la chiama decide come mostrarli. Array vuoto =
+   cliente regolare.
+   cliente: {nome, data_ingresso} — righe: i bonus di QUEL cliente per QUESTO
+   collaboratore (non tutti i bonus del cliente su altri collaboratori). */
+function computeCollabUrgency(cliente,righe){
+  var reasons=[];
+  righe=righe||[];
+  // Problema attivo: bonus limitato/bannato o segnalato Problema/Bloccato
+  // in Vista Operativa
+  righe.forEach(function(b){
+    if(b.stato==='LIMITATO'||b.stato==='BANNATO'||b.stato_op==='Problema'||b.stato_op==='Bloccato'){
+      reasons.push('Problema attivo su '+(b.bookmaker||'—'));
+    }
+  });
+  // N giorni senza attivita': nessun sito FATTO/GIA_REGISTRATO, contati dal
+  // piu' recente tra data_ingresso del cliente e l'ultimo bonus.updated_at
+  var nessunoFatto=!righe.some(function(b){return b.stato==='FATTO'||b.stato==='GIA_REGISTRATO';});
+  if(nessunoFatto){
+    var rif=[];
+    if(cliente&&cliente.data_ingresso)rif.push(new Date(cliente.data_ingresso).getTime());
+    righe.forEach(function(b){if(b.updated_at)rif.push(new Date(b.updated_at).getTime());});
+    if(rif.length){
+      var giorni=Math.floor((Date.now()-Math.max.apply(null,rif))/864e5);
+      if(giorni>=10)reasons.push(giorni+' giorni senza attività');
+    }
+  }
+  // Scadenza vicina: stessa formula-7gg del modello FLAT (data_inizio+7,
+  // vedi renderFlatCliente/renderBkDetail), riusata identica anche qui
+  righe.forEach(function(b){
+    if(b.data_inizio&&b.stato!=='FATTO'&&b.stato!=='GIA_REGISTRATO'){
+      var scad=new Date(b.data_inizio);scad.setDate(scad.getDate()+7);
+      var gg=Math.floor((scad-Date.now())/864e5);
+      if(gg<=2)reasons.push('Scadenza vicina su '+(b.bookmaker||'—'));
+    }
+  });
+  return reasons;
+}
+function _dataIngressoCollabCliente(c,nome){
+  var cc=_clientiCollab.find(function(x){return x.nome===nome&&(x.collab||'')===c.nome;});
+  return cc?cc.data_ingresso:null;
+}
+function _giorniInattivitaFromReasons(reasons){
+  for(var i=0;i<reasons.length;i++){
+    var m=/^(\d+) giorni senza attività/.exec(reasons[i]);
+    if(m)return parseInt(m[1]);
+  }
+  return 0;
+}
+/* Ordina i clienti di un collaboratore per priorita' reale invece che per
+   ordine alfabetico: prima chi ha un Problema attivo, poi per numero di
+   motivi d'urgenza decrescente, poi per giorni di inattivita' decrescente,
+   infine alfabetico come ultimo criterio (fallback stabile). */
+function sortNomiClientiPerPriorita(c,nomi,byCliente){
+  return nomi.slice().sort(function(a,b){
+    var ra=computeCollabUrgency({nome:a,data_ingresso:_dataIngressoCollabCliente(c,a)},byCliente[a]);
+    var rb=computeCollabUrgency({nome:b,data_ingresso:_dataIngressoCollabCliente(c,b)},byCliente[b]);
+    var pa=ra.some(function(r){return r.indexOf('Problema attivo')===0;});
+    var pb=rb.some(function(r){return r.indexOf('Problema attivo')===0;});
+    if(pa!==pb)return pa?-1:1;
+    if(ra.length!==rb.length)return rb.length-ra.length;
+    var ga=_giorniInattivitaFromReasons(ra),gb=_giorniInattivitaFromReasons(rb);
+    if(ga!==gb)return gb-ga;
+    return a.localeCompare(b);
+  });
+}
+/* Identica logica di capitaleRiga(b) in 04_finanze.html (pagina separata,
+   non inclusa qui): se c'e' un saldo bookmaker noto lo usa, altrimenti
+   ricava il capitale ancora dentro dal deposito meno il prelievo. */
+function capitaleRiga(b){
+  var saldo=parseFloat(b.saldo_bk)||0;
+  if(saldo>0)return saldo;
+  var dep=parseFloat(b.deposito)||0,prel=parseFloat(b.prelievo)||0;
+  return Math.max(dep-prel,0);
+}
+function fmtRelativo(dataStr){
+  if(!dataStr)return null;
+  var giorni=Math.floor((Date.now()-new Date(dataStr).getTime())/864e5);
+  if(giorni<0)return null;
+  if(giorni===0)return 'oggi';
+  if(giorni===1)return '1gg fa';
+  return giorni+'gg fa';
+}
+/* Riepilogo arricchito di un singolo cliente per la lista clienti del
+   collaboratore (siti fatti/mancanti, prossimo passaggio suggerito, ultima
+   attivita', capitale attivo, guadagno previsto/effettivo) — tutti calcolati
+   da dati reali gia' in memoria (bonus/collab_tariffe), mai stimati. */
+function collabClienteInsight(c,cliente,righe){
+  righe=righe||[];
+  var reasons=computeCollabUrgency({nome:cliente,data_ingresso:_dataIngressoCollabCliente(c,cliente)},righe);
+  var tariffe=tariffeForCollab(c);
+  var fattiSet={};
+  righe.forEach(function(b){
+    if(b.stato==='FATTO'||b.stato==='GIA_REGISTRATO')fattiSet[(b.bookmaker||'').toLowerCase()]=true;
+  });
+  var fatti=tariffe.filter(function(t){return fattiSet[t.bookmaker.toLowerCase()];}).length;
+  var prossimo=null;
+  for(var i=0;i<tariffe.length;i++){
+    if(!fattiSet[tariffe[i].bookmaker.toLowerCase()]){prossimo=tariffe[i].bookmaker;break;}
+  }
+  var ultimaTs=null;
+  righe.forEach(function(b){
+    if(!b.updated_at)return;
+    var t=new Date(b.updated_at).getTime();
+    if(ultimaTs===null||t>ultimaTs)ultimaTs=t;
+  });
+  var capitale=righe.filter(function(b){return b.stato==='IN_CORSO';}).reduce(function(s,b){return s+capitaleRiga(b);},0);
+  var guadPrev=righe.reduce(function(s,b){return s+(parseFloat(b.ric_prev)||0);},0);
+  // Solo bonus FATTO: un bonus ancora IN_CORSO può avere un ric_real "di prova"
+  // non ancora reale (stessa regola già in vigore in 04_finanze.html) — coerente
+  // col pannello Report, che filtra allo stesso modo.
+  var guadEff=righe.filter(function(b){return b.stato==='FATTO';}).reduce(function(s,b){return s+(parseFloat(b.ric_real)||0);},0);
+  return{reasons:reasons,fatti:fatti,mancanti:Math.max(tariffe.length-fatti,0),totaleTariffe:tariffe.length,
+    prossimo:prossimo,ultimaTs:ultimaTs,capitale:capitale,guadPrev:guadPrev,guadEff:guadEff};
+}
+function urgencyBadgeHtml(reasons){
+  if(!reasons||!reasons.length){
+    return '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:rgba(0,229,138,.08);color:var(--green);display:inline-flex;align-items:center;gap:5px;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0"></span>regolare</span>';
+  }
+  var isProblema=reasons[0].indexOf('Problema attivo')===0;
+  var col=isProblema?'var(--red)':'var(--orange)';
+  var bg=isProblema?'rgba(255,87,87,.1)':'rgba(255,138,61,.1)';
+  var title=reasons.join(' · ').replace(/"/g,'&quot;');
+  return '<span title="'+title+'" style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+bg+';color:'+col+';cursor:help;white-space:nowrap">&#9888; '+reasons[0]+(reasons.length>1?' (+'+(reasons.length-1)+')':'')+'</span>';
+}
+/* Riga compatta di badge/dati sotto il nome cliente, riusata sia nella
+   vista a card (collaboratore in sola consultazione) sia nella tabella
+   admin, cosi' l'arricchimento resta uno solo e coerente nei due posti. */
+function collabClienteMetaLineHtml(insight){
+  var ultimaTxt=insight.ultimaTs?fmtRelativo(insight.ultimaTs):'—';
+  var parts=[urgencyBadgeHtml(insight.reasons)];
+  if(insight.totaleTariffe>0){
+    parts.push('<span>'+insight.fatti+'/'+insight.totaleTariffe+' siti fatti</span>');
+    parts.push('<span>'+(insight.prossimo?'Prossimo: <b style="color:var(--tx2)">'+insight.prossimo+'</b>':'tutti i siti fatti')+'</span>');
+  }
+  parts.push('<span>Ultima attività: '+ultimaTxt+'</span>');
+  if(insight.capitale>0)parts.push('<span>Capitale attivo: <b style="color:var(--tx2)">€ '+fmt(insight.capitale)+'</b></span>');
+  if(insight.guadPrev>0||insight.guadEff>0)parts.push('<span>Guadagno: <b style="color:var(--green)">€ '+fmt(insight.guadEff)+'</b> / € '+fmt(insight.guadPrev)+' prev.</span>');
+  return '<div style="display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:6px;font-size:10.5px;color:var(--tx3)">'+parts.join('<span style="color:rgba(255,255,255,.15)">&middot;</span>')+'</div>';
+}
+
 function renderPocketDetail(c){
   var allBns=bnsForCollab(c);
   var col=PALETTE[_collabs.indexOf(c)%PALETTE.length];
@@ -907,7 +1098,9 @@ function renderPocketDetail(c){
   _clientiCollab.filter(function(cc){return (cc.collab||'')===c.nome;}).forEach(function(cc){
     if(!byCliente[cc.nome])byCliente[cc.nome]=[];
   });
-  var nomiClienti=Object.keys(byCliente).sort();
+  // Priorita' reale invece dell'alfabetico: Problema attivo prima, poi piu'
+  // motivi d'urgenza, poi piu' giorni fermo, alfabetico come ultimo criterio.
+  var nomiClienti=sortNomiClientiPerPriorita(c,Object.keys(byCliente),byCliente);
 
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">'+
     '<div style="display:flex;align-items:center;gap:12px">'+
@@ -917,6 +1110,7 @@ function renderPocketDetail(c){
     '<div style="font-size:11.5px;color:var(--tx3);margin-top:2px">'+(isReadOnlyCollab()?'Ogni sito completato avvicina il cliente al traguardo':'Modello a soglia: si accumula sito per sito, si paga quando un cliente arriva a € '+POCKET_SOGLIA)+'</div></div></div>'+
     (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
     (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11.5px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,20,64,0.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
+    '<span onclick="openReportPanel(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--blue);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(79,157,255,.35);background:rgba(79,157,255,.08);white-space:nowrap">&#128202; Report</span>'+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11.5px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
 
@@ -961,11 +1155,13 @@ function buildPocketCliListHtml(c,nomiClienti,byCliente){
         var initials=cl.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
         var cardCol=PALETTE[i%PALETTE.length];
         var badge=giaPagato?{t:'&#10003; concluso',c:'var(--green)',bg:'rgba(0,229,138,.1)'}:pronto?{t:'quasi concluso',c:'var(--green)',bg:'rgba(0,229,138,.08)'}:righe.length>0?{t:'in corso',c:'var(--blue)',bg:'rgba(79,157,255,.1)'}:{t:'nuovo',c:'var(--tx3)',bg:'rgba(255,255,255,.05)'};
+        var insight=collabClienteInsight(c,cl,righe);
         return '<div class="cli-card" style="--cli-col:'+cardCol+';animation-delay:'+(i*0.03)+'s" onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')">'+
           '<div class="cli-card-av" style="background:'+cardCol+'1f;border-color:'+cardCol+'55;color:'+cardCol+'">'+initials+'</div>'+
           '<div class="cli-card-mid">'+
             '<div class="cli-card-nm">'+cl+'</div>'+
             '<div class="cli-card-bar"><div class="cli-card-bar-fill" style="width:'+pctRow+'%;background:'+(pronto||giaPagato?'var(--green)':cardCol)+'"></div></div>'+
+            collabClienteMetaLineHtml(insight)+
           '</div>'+
           '<div class="cli-card-foot">'+righe.length+' siti</div>'+
           '<span style="font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:'+badge.bg+';color:'+badge.c+';text-transform:uppercase;letter-spacing:.4px;flex-shrink:0">'+badge.t+'</span>'+
@@ -995,11 +1191,12 @@ function buildPocketCliListHtml(c,nomiClienti,byCliente){
     var initials=cl.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();
     var pctRowAdmin=Math.min(100,accumulato/POCKET_SOGLIA*100);
     var clEnc=encodeURIComponent(cl).replace(/'/g,'%27');
+    var insightAdmin=collabClienteInsight(c,cl,righe);
     html+='<tr onclick="renderPocketCliente(\''+c.id+'\',\''+encodeURIComponent(cl).replace(/'/g,'%27')+'\')" style="cursor:pointer;transition:.12s;border-left:2px solid '+rowCol+'55" onmouseover="this.style.background=\'rgba(255,20,64,0.06)\'" onmouseout="this.style.background=\'transparent\'">'+
       '<td style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-weight:800;color:var(--tx);font-size:13px">'+
-        '<div style="display:flex;align-items:center;gap:10px">'+
-        '<div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+rowCol+'1f;border:1px solid '+rowCol+'55;color:'+rowCol+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center">'+initials+'</div>'+
-        '<span>'+cl+'</span></div></td>'+
+        '<div style="display:flex;align-items:flex-start;gap:10px">'+
+        '<div style="width:26px;height:26px;border-radius:8px;flex-shrink:0;background:'+rowCol+'1f;border:1px solid '+rowCol+'55;color:'+rowCol+';font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:1px">'+initials+'</div>'+
+        '<div style="min-width:0"><span>'+cl+'</span>'+collabClienteMetaLineHtml(insightAdmin)+'</div></div></td>'+
       '<td style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)"><span style="display:inline-block;min-width:24px;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.06);font-weight:800;font-size:11.5px">'+righe.length+'</span></td>'+
       '<td style="padding:10px 14px;text-align:right;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<div style="font-weight:800;color:'+(pronto?'var(--green)':'var(--tx)')+';margin-bottom:4px">€ '+fmt(accumulato)+' / '+POCKET_SOGLIA+'</div>'+
@@ -1252,6 +1449,7 @@ function renderDetail(cid){
     '<div style="font-size:10px;color:var(--tx3);margin-top:2px">'+(c.contatto||'')+(c.tipo?' · '+c.tipo:'')+'</div></div></div>'+
     (!isReadOnlyCollab()?'<span onclick="openNuovoClienteChoice(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--green);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,192,122,.35);background:rgba(0,192,122,.08);white-space:nowrap">&#43; Nuovo Cliente</span>':'')+
     (!isReadOnlyCollab()?'<span onclick="copyModuloLink(\''+(c.nome||'').replace(/'/g,"\\'")+'\')" style="cursor:pointer;font-size:11px;color:var(--gold);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,20,64,0.3);white-space:nowrap">&#128279; Copia link modulo</span>':'')+
+    '<span onclick="openReportPanel(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--blue);font-weight:800;padding:5px 12px;border-radius:7px;border:1px solid rgba(79,157,255,.35);background:rgba(79,157,255,.08);white-space:nowrap">&#128202; Report</span>'+
     (!c._virtual&&!isReadOnlyCollab()?'<span onclick="openForm(\''+c.id+'\')" style="cursor:pointer;font-size:11px;color:var(--tx3);padding:5px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.1)">&#9998; Modifica</span>':'')+
     '</div>';
 
@@ -2096,6 +2294,176 @@ async function saveCollab(){
     closeForm();renderList();
     if(_selectedId)renderDetail(_selectedId);
   }catch(e){showToast('Errore: '+(e.message||String(e)),'er');}
+}
+
+/* ══ REPORT COLLABORATORE (numerico + testo AI) ══
+   Disponibile per QUALSIASI collaboratore aperto, sia modello POCKET che
+   FLAT: la parte numerica è calcolata qui, lato client, sempre da dati reali
+   già in memoria (mai stimati) e filtrati per il periodo scelto; il testo
+   AI si genera solo quando si clicca "Genera report AI" (mai in automatico
+   al cambio periodo, per non sprecare chiamate). */
+var _rpCid=null,_rpPeriodo='oggi',_rpStats=null;
+var REPORT_PERIODI=[{k:'oggi',l:'Oggi'},{k:'7gg',l:'Ultimi 7 giorni'},{k:'mese',l:'Mese corrente'},{k:'personalizzato',l:'Personalizzato'}];
+function openReportPanel(cid){
+  _rpCid=cid;_rpPeriodo='oggi';_rpStats=null;
+  var c=_collabs.find(function(x){return String(x.id)===String(cid);});
+  if(g('rp-nome'))g('rp-nome').textContent=c?('· '+c.nome):'';
+  if(g('rp-ai-box'))g('rp-ai-box').innerHTML='';
+  renderReportPeriodPills();
+  computeAndRenderReportStats();
+  var m=g('report-modal');if(m)m.classList.add('open');
+}
+function closeReportPanel(){var m=g('report-modal');if(m)m.classList.remove('open');}
+function setReportPeriodo(p){
+  _rpPeriodo=p;
+  renderReportPeriodPills();
+  computeAndRenderReportStats();
+}
+function renderReportPeriodPills(){
+  var el=g('rp-periodo-pills');if(!el)return;
+  el.innerHTML=REPORT_PERIODI.map(function(p){
+    var act=p.k===_rpPeriodo;
+    return '<button type="button" onclick="setReportPeriodo(\''+p.k+'\')" style="padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;border:1px solid '+(act?'var(--blue)':'rgba(255,255,255,.1)')+';background:'+(act?'rgba(79,157,255,.151)':'transparent')+';color:'+(act?'var(--blue)':'var(--tx3)')+'">'+p.l+'</button>';
+  }).join('');
+  var cd=g('rp-custom-dates');if(cd)cd.style.display=_rpPeriodo==='personalizzato'?'grid':'none';
+}
+function reportPeriodRange(){
+  var oggi=new Date(),oggiIso=oggi.toISOString().slice(0,10);
+  if(_rpPeriodo==='oggi')return{da:oggiIso,a:oggiIso};
+  if(_rpPeriodo==='7gg'){var d=new Date();d.setDate(d.getDate()-6);return{da:d.toISOString().slice(0,10),a:oggiIso};}
+  if(_rpPeriodo==='mese'){var d2=new Date(oggi.getFullYear(),oggi.getMonth(),1);return{da:d2.toISOString().slice(0,10),a:oggiIso};}
+  var da=(g('rp-da')&&g('rp-da').value)||oggiIso;
+  var a=(g('rp-a')&&g('rp-a').value)||oggiIso;
+  return{da:da,a:a};
+}
+/* Calcola tutti i numeri del report da dati reali già caricati (bonus,
+   collab_tariffe, clienti). "siti completati" è filtrato per periodo su
+   bonus.updated_at; il resto sono totali attuali (bonus attivi, capitale
+   fermo, ecc. sono "fotografie di oggi", non ha senso filtrarle per data
+   passata). Il tempo medio di lavorazione viene omesso — non mostrato come
+   zero/finto — se non ci sono abbastanza dati per calcolarlo davvero. */
+function computeCollabReportStats(cid,periodo){
+  var c=_collabs.find(function(x){return String(x.id)===String(cid);});
+  if(!c)return null;
+  var righeTot=bnsForCollab(c);
+  var range=reportPeriodRange();
+  var inRange=function(dateStr){
+    if(!dateStr)return false;
+    var d=String(dateStr).slice(0,10);
+    return d>=range.da&&d<=range.a;
+  };
+  var byCliente={};
+  righeTot.forEach(function(b){var cl=b.cliente||'—';if(!byCliente[cl])byCliente[cl]=[];byCliente[cl].push(b);});
+  _clientiCollab.filter(function(cc){return (cc.collab||'')===c.nome;}).forEach(function(cc){
+    if(!byCliente[cc.nome])byCliente[cc.nome]=[];
+  });
+  var nomi=Object.keys(byCliente);
+  var tariffe=tariffeForCollab(c);
+  var clientiAttivi=0,clientiFermi=0,clientiConProblemi=0,clientiConclusi=0,sitiMancantiTot=0;
+  var problemi=[],giorniLavTot=0,giorniLavCnt=0;
+
+  nomi.forEach(function(cl){
+    var righe=byCliente[cl];
+    var dataIngresso=_dataIngressoCollabCliente(c,cl);
+    var reasons=computeCollabUrgency({nome:cl,data_ingresso:dataIngresso},righe);
+    var hasProblema=false,hasFermo=false;
+    reasons.forEach(function(r){
+      if(r.indexOf('Problema attivo')===0){
+        hasProblema=true;
+        problemi.push({cliente:cl,motivo:r,giorni_fermo:0});
+      }else if(/giorni senza attività$/.test(r)){
+        hasFermo=true;
+        var m=/^(\d+) giorni/.exec(r);
+        problemi.push({cliente:cl,motivo:r,giorni_fermo:m?parseInt(m[1]):0});
+      }
+    });
+    if(hasProblema)clientiConProblemi++;
+    if(hasFermo)clientiFermi++;
+    if(!reasons.length)clientiAttivi++;
+
+    var fattiSet={};
+    righe.forEach(function(b){if(b.stato==='FATTO'||b.stato==='GIA_REGISTRATO')fattiSet[(b.bookmaker||'').toLowerCase()]=true;});
+    var fattiCount=tariffe.filter(function(t){return fattiSet[t.bookmaker.toLowerCase()];}).length;
+    if(tariffe.length&&fattiCount===tariffe.length)clientiConclusi++;
+    sitiMancantiTot+=Math.max(tariffe.length-fattiCount,0);
+
+    if(dataIngresso){
+      var primoFatto=righe.filter(function(b){return b.stato==='FATTO'&&b.updated_at;})
+        .sort(function(a,b){return new Date(a.updated_at)-new Date(b.updated_at);})[0];
+      if(primoFatto){
+        var ggLav=Math.round((new Date(primoFatto.updated_at)-new Date(dataIngresso))/864e5);
+        if(ggLav>=0){giorniLavTot+=ggLav;giorniLavCnt++;}
+      }
+    }
+  });
+
+  var sitiCompletatiPeriodo=0,bonusAttivi=0,capitaleFermo=0,guadagnoPrevisto=0,guadagnoCompletato=0;
+  righeTot.forEach(function(b){
+    if((b.stato==='FATTO'||b.stato==='GIA_REGISTRATO')&&inRange(b.updated_at))sitiCompletatiPeriodo++;
+    if(b.stato==='IN_CORSO'){bonusAttivi++;capitaleFermo+=capitaleRiga(b);}
+    guadagnoPrevisto+=parseFloat(b.ric_prev)||0;
+    if(b.stato==='FATTO')guadagnoCompletato+=parseFloat(b.ric_real)||0;
+  });
+
+  var stats={
+    totale_clienti:nomi.length,
+    clienti_attivi:clientiAttivi,
+    clienti_fermi:clientiFermi,
+    clienti_con_problemi:clientiConProblemi,
+    clienti_conclusi:clientiConclusi,
+    siti_completati:sitiCompletatiPeriodo,
+    siti_mancanti:sitiMancantiTot,
+    bonus_attivi:bonusAttivi,
+    capitale_fermo:capitaleFermo,
+    guadagno_previsto:guadagnoPrevisto,
+    guadagno_completato:guadagnoCompletato
+  };
+  // Tempo medio di lavorazione: omesso (non impostato) se non calcolabile
+  // con dati reali sufficienti, mai mostrato come stima finta.
+  if(giorniLavCnt>0)stats.giorni_inattivita_media=Math.round(giorniLavTot/giorniLavCnt*10)/10;
+  return{stats:stats,problemi:problemi,collabNome:c.nome,periodo:periodo};
+}
+function computeAndRenderReportStats(){
+  if(!_rpCid)return;
+  _rpStats=computeCollabReportStats(_rpCid,_rpPeriodo);
+  if(g('rp-stats'))g('rp-stats').innerHTML=_rpStats?renderReportStatsHtml(_rpStats):'';
+}
+function renderReportStatsHtml(data){
+  var s=data.stats;
+  var chips=[
+    {l:'CLIENTI TOTALI',v:s.totale_clienti},
+    {l:'ATTIVI',v:s.clienti_attivi},
+    {l:'FERMI',v:s.clienti_fermi},
+    {l:'CON PROBLEMA',v:s.clienti_con_problemi},
+    {l:'CONCLUSI',v:s.clienti_conclusi},
+    {l:'SITI COMPLETATI (periodo)',v:s.siti_completati},
+    {l:'SITI MANCANTI',v:s.siti_mancanti},
+    {l:'BONUS ATTIVI',v:s.bonus_attivi},
+    {l:'CAPITALE FERMO',v:'€ '+fmt(s.capitale_fermo)},
+    {l:'GUADAGNO PREVISTO',v:'€ '+fmt(s.guadagno_previsto)},
+    {l:'GUADAGNO COMPLETATO',v:'€ '+fmt(s.guadagno_completato)}
+  ];
+  if(s.giorni_inattivita_media!=null)chips.push({l:'TEMPO MEDIO LAVORAZIONE',v:s.giorni_inattivita_media+' gg'});
+  return '<div class="kpi-strip" style="grid-template-columns:repeat(3,1fr);margin:6px 0 4px">'+
+    chips.map(function(k){return '<div class="kpi-chip" style="padding:10px 12px"><div class="kc-label" style="font-size:9.5px">'+k.l+'</div><div class="kc-val" style="font-size:17px;color:var(--tx)">'+k.v+'</div></div>';}).join('')+
+  '</div>';
+}
+async function generaReportAI(){
+  if(!_rpCid||!_rpStats){showToast('Nessun dato da mandare al report','er');return;}
+  var box=g('rp-ai-box');if(!box)return;
+  var btn=g('rp-ai-btn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Genero il report...';}
+  box.innerHTML='<div style="padding:14px 4px;text-align:center;color:var(--tx3);font-size:12px">⏳ Genero il report...</div>';
+  try{
+    var payload={nome:_rpStats.collabNome,periodo:_rpPeriodo,stats:_rpStats.stats,problemi:_rpStats.problemi};
+    var r=await fetch('/.netlify/functions/report-collab',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var res=await r.json();
+    if(!r.ok||!res.ok)throw new Error(res.error||'Errore nella generazione del report');
+    box.innerHTML='<div style="margin-top:6px;padding:16px 18px;background:rgba(10,13,32,.9);border:1px solid rgba(79,157,255,.25);border-radius:12px;font-size:12.5px;color:var(--tx2);line-height:1.6;white-space:pre-wrap">'+String(res.testo||'').replace(/</g,'&lt;')+'</div>';
+  }catch(e){
+    box.innerHTML='<div style="margin-top:6px;padding:12px 16px;background:rgba(255,87,87,.08);border:1px solid rgba(255,87,87,.25);border-radius:10px;color:var(--red);font-size:12px;font-weight:700">Errore nella generazione del report: '+((e&&e.message)||'riprova più tardi')+'</div>';
+  }
+  if(btn){btn.disabled=false;btn.innerHTML='&#10024; Genera report AI';}
 }
 
 /* ══ RUOLO SOLA CONSULTAZIONE (collaboratore che vede solo se stesso) ══ */
