@@ -803,6 +803,12 @@ async function runOcrOnImg(i){
     if(!trovati.length){out.innerHTML='<div class="ocr-err">Non sono riuscita a leggere dati chiari in questa foto.</div>';}
     else{
       trovati.forEach(function(k){addOcrField(k,campi[k]);});
+      // Molti documenti (tessera sanitaria, spesso anche carta d'identità)
+      // non riportano il CAP per niente — se l'AI ha trovato almeno la
+      // città, uso comunque la stima già esistente invece di lasciare il
+      // campo sempre vuoto. Non sovrascrive un CAP letto davvero da un
+      // altro documento (vedi guardia in addCapField).
+      if(!campi.cap&&campi.citta){lookupCapByCitta(campi.citta).then(function(cap){if(cap)addCapField(cap,'citta');});}
       var etichette=trovati.map(function(k){return k==='cap'?'CAP':(OCR_FIELD_LABELS[k]||k);});
       out.innerHTML='<div class="ocr-cap">✓ Letto con AI: '+etichette.join(', ')+' — vedi i dati copiabili qui sopra</div>';
     }
