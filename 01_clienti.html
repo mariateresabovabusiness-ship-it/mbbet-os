@@ -695,6 +695,12 @@ async function loadBookmakerData(){
 }
 var OPS=['Riccardo Tavagnacco','Alessia Ciman','Ciro Bisogno','Antonio La Barbera','Francesco Bova','Emilian Cozmiuc','Alessia Maffioli','Elisa Qualantonio','Maria A. Catania','Luca Alberti','Mary + Samuele'];
 var _bnsCache={};
+var _pagCache={};
+// Margine medio reale per bookmaker (da bonus.ric_real, calcolato in loadData) —
+// usato per stimare "Potenziale"/"Guadagno stimato" invece di cifre inventate.
+var _avgMargineBk={};
+function avgMargBk(bk){return _avgMargineBk[bk]||_avgMargineBkFallback||20;}
+var _avgMargineBkFallback=20;
 var AVB=['145deg,#041840,#5aaaff','145deg,#1c0840,#c4a4f8','145deg,#021c2c,#22eeff','145deg,#002818,#00f093','145deg,#3a2200,#ff1440','145deg,#240c00,#ff9040','145deg,#200828,#ff4f80','145deg,#002820,#00d4b0'];
 
 var MOCK=[
@@ -725,9 +731,12 @@ function enrichMock(data){
     var myOps=[mainOp, altOps[_n%altOps.length], altOps[(_n+3)%altOps.length]];
     var assegn=[];
     (c.bk_completati||[]).forEach(function(bk,i){
+      // Solo di riserva: usato SOLO se manca la riga bonus reale corrispondente
+      // (renderBk preferisce sempre il dato vero quando c'è) — margine medio
+      // reale del bookmaker, non più una formula sul ROI%; nessuna data finta.
       assegn.push({bk:bk,op:myOps[i%myOps.length],stato:'completato',
-        data:'2026-'+String(Math.max(1,Math.min(7,Math.floor(i/2)+2))).padStart(2,'0')+'-'+String(Math.min(28,8+i*4)).padStart(2,'0'),
-        margine:Math.round((BKR[bk]||15)*0.88+6)});
+        data:null,
+        margine:Math.round(avgMargBk(bk)),stima:true});
     });
     (c.bk_in_corso||[]).forEach(function(bk,i){
       assegn.push({bk:bk,op:myOps[((c.bk_completati||[]).length+i)%myOps.length],stato:'in_corso',data:null,margine:null});
@@ -992,6 +1001,7 @@ function openWs(id){
   renderWsPane('pan');
   g('ws-bd').classList.add('open');g('ws-panel').classList.add('open');
   fetchClientBonus(String(id));
+  fetchClientPagamenti(String(id));
   document.addEventListener('keydown',wsEsc);
 }
 function closeWs(){
@@ -1102,7 +1112,7 @@ function renderBk(c){
     var st=SC_LBL[stato]||'◎ Disponibile';
     var detParts=[];
     if(bnRow){if(parseFloat(bnRow.deposito)>0)detParts.push('Dep: €'+bnRow.deposito);if(parseFloat(bnRow.bonus_ricevuto)>0)detParts.push('Bonus: €'+bnRow.bonus_ricevuto);if(parseFloat(bnRow.prelievo)>0)detParts.push('Prelievo: €'+bnRow.prelievo);}
-    var mg=detParts.length?detParts.join(' · '):(asgn&&asgn.margine?'€'+asgn.margine+(asgn.data?' &mdash; '+new Date(asgn.data).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}):''):'Potenziale: €'+Math.round(roi*1.2+10));
+    var mg=detParts.length?detParts.join(' · '):(asgn&&asgn.margine?'~€'+asgn.margine+' (stima, nessun bonus registrato)':'Potenziale: €'+Math.round(avgMargBk(bk)));
     var opHtml=op?'<div style="display:flex;align-items:center;gap:6px;margin:8px 0 6px">'
       +'<div style="width:22px;height:22px;border-radius:6px;background:linear-gradient('+opBg(op)+');display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,.3)">'+opInitials(op)+'</div>'
       +'<span style="font-size:9.5px;color:var(--tx2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+op.split(' ').slice(0,2).join(' ')+'</span>'
@@ -1122,12 +1132,27 @@ function renderBk(c){
 
 async function fetchClientBonus(cliId){
   if(!db)return;
-  var r=await db.from('bonus').select('id,bookmaker,stato,operatore,deposito,bonus_ricevuto,prelievo,note').eq('id_cli',cliId);
+  var r=await db.from('bonus').select('id,bookmaker,stato,operatore,deposito,bonus_ricevuto,prelievo,note,ric_real,pag_cli,costi_extra,data_inizio,updated_at').eq('id_cli',cliId);
   if(r.error||!r.data)return;
   _bnsCache[cliId]=r.data;
   if(_ws&&String(_ws.id)===String(cliId)){
     var ap=document.querySelector('.ws-pane.on');
-    if(ap&&ap.id==='wp-bk')renderBk(_ws);
+    var pid=ap?ap.id:'';
+    if(pid==='wp-bk')renderBk(_ws);
+    else if(pid==='wp-tl')renderTl(_ws);
+    else if(pid==='wp-stat')renderStat(_ws);
+    else if(pid==='wp-ai')renderAi(_ws);
+  }
+}
+
+async function fetchClientPagamenti(cliId){
+  if(!db)return;
+  var r=await db.from('pagamenti').select('id,data_pag,tipo,beneficiario,importo,metodo,causale,stato').eq('id_cli',cliId).order('data_pag',{ascending:false});
+  if(r.error||!r.data)return;
+  _pagCache[cliId]=r.data;
+  if(_ws&&String(_ws.id)===String(cliId)){
+    var ap=document.querySelector('.ws-pane.on');
+    if(ap&&ap.id==='wp-pag')renderPag(_ws);
   }
 }
 
@@ -1208,18 +1233,21 @@ async function saveBkEdit(bonusId,cliId){
 }
 
 /* PAGAMENTI */
+// Legge la tabella "pagamenti" reale (fetchClientPagamenti), non più un
+// array sempre vuoto — prima questa tab non poteva mostrare nessun
+// pagamento vero per nessun cliente, qualunque cosa fosse registrata.
 function renderPag(c){
-  var p=c.pagamenti||[];
-  var ok=p.filter(function(x){return x.stato==='ok';}).reduce(function(s,x){return s+x.importo;},0);
-  var att=p.filter(function(x){return x.stato==='attesa';}).reduce(function(s,x){return s+x.importo;},0);
+  var p=_pagCache[c.id]||[];
+  var ok=p.filter(function(x){return x.stato==='Pagato';}).reduce(function(s,x){return s+(parseFloat(x.importo)||0);},0);
+  var att=p.filter(function(x){return x.stato!=='Pagato';}).reduce(function(s,x){return s+(parseFloat(x.importo)||0);},0);
   g('wp-pag').innerHTML='<div class="pag-summary">'
-    +'<div class="pag-box"><div class="pag-v" style="color:var(--green)">€'+ok+'</div><div class="pag-l">Ricevuti</div></div>'
-    +'<div class="pag-box"><div class="pag-v" style="color:var(--orange)">€'+att+'</div><div class="pag-l">In Attesa</div></div>'
+    +'<div class="pag-box"><div class="pag-v" style="color:var(--green)">€'+ok.toFixed(2)+'</div><div class="pag-l">Pagati</div></div>'
+    +'<div class="pag-box"><div class="pag-v" style="color:var(--orange)">€'+att.toFixed(2)+'</div><div class="pag-l">Altri stati</div></div>'
     +'<div class="pag-box"><div class="pag-v" style="color:var(--blue)">'+p.length+'</div><div class="pag-l">Transazioni</div></div>'
-    +'<div class="pag-box"><div class="pag-v" style="color:var(--cyan)">€'+(c.potenziale||0)+'</div><div class="pag-l">Potenziale Residuo</div></div>'
+    +'<div class="pag-box"><div class="pag-v" style="color:var(--cyan)">€'+(c.potenziale||0)+'</div><div class="pag-l">Potenziale Residuo (stima)</div></div>'
     +'</div>'
-    +(p.length?'<table class="pag-table"><thead><tr><th>DATA</th><th>TIPO</th><th>BOOKMAKER</th><th>IMPORTO</th><th>STATO</th></tr></thead><tbody>'
-      +p.map(function(x){var sc=x.stato==='ok'?'var(--green)':'var(--orange)';return '<tr><td>'+new Date(x.data).toLocaleDateString('it-IT')+'</td><td>'+x.tipo+'</td><td>'+x.bk+'</td><td style="font-weight:800;color:var(--cyan)">€'+x.importo+'</td><td style="color:'+sc+';font-weight:700">'+(x.stato==='ok'?'✓ Pagato':'⟳ Attesa')+'</td></tr>';}).join('')
+    +(p.length?'<table class="pag-table"><thead><tr><th>DATA</th><th>TIPO</th><th>BENEFICIARIO</th><th>IMPORTO</th><th>STATO</th></tr></thead><tbody>'
+      +p.map(function(x){var sc=x.stato==='Pagato'?'var(--green)':'var(--orange)';return '<tr><td>'+(x.data_pag?new Date(x.data_pag).toLocaleDateString('it-IT'):'—')+'</td><td>'+(x.tipo||'—')+'</td><td>'+(x.beneficiario||x.causale||'—')+'</td><td style="font-weight:800;color:var(--cyan)">€'+(parseFloat(x.importo)||0).toFixed(2)+'</td><td style="color:'+sc+';font-weight:700">'+(x.stato||'—')+'</td></tr>';}).join('')
       +'</tbody></table>'
     :'<div class="list-empty"><div class="list-empty-ic">&#128179;</div><div class="list-empty-t">Nessun pagamento registrato</div></div>');
 }
@@ -1352,15 +1380,29 @@ async function toggleDocField(cliId,field,current){
 }
 
 /* TIMELINE */
+// Un evento per ogni bonus FATTO davvero (bookmaker/data/importo reali dal
+// database), non più due voci finte a "1/2 settimane fa" identiche per
+// ogni cliente.
 function renderTl(c){
-  var bk0=(c.bk_completati&&c.bk_completati[0])||'bookmaker';
+  var bns=_bnsCache[c.id]||[];
+  var bkEvents=bns.filter(function(b){return b.stato==='FATTO';}).map(function(b){
+    var d=b.updated_at||b.data_inizio;
+    var rr=parseFloat(b.ric_real)||0;
+    return {
+      _ts:d?new Date(d).getTime():0,
+      dt:d?new Date(d).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}):'Data non disponibile',
+      act:'Bonus '+b.bookmaker+' completato',
+      det:rr>0?'Ricavo registrato':'Nessun importo registrato',
+      amt:rr>0?'€'+rr.toFixed(2):null,
+      c:'#00f093'
+    };
+  }).sort(function(a,b){return b._ts-a._ts;});
   var ev=[
     {dt:'Oggi',act:'Scheda aperta',det:'Workspace cliente aperta',c:'#5aaaff'},
-    {dt:fmtDate(c.ultima_attivita),act:'Ultima attività',det:'Aggiornamento stato cliente',c:'#22eeff'},
-    {dt:'1 settimana fa',act:'Bonus '+bk0+' completato',det:'Tutto ok',amt:'€'+Math.round((BKR[bk0]||15)*0.9+8),c:'#00f093'},
-    {dt:'2 settimane fa',act:'Assegnazione operatore',det:'Assegnato a '+(c.operatore||'operatore'),c:'#c4a4f8'},
+    {dt:fmtDate(c.ultima_attivita),act:'Ultima attività',det:'Aggiornamento stato cliente',c:'#22eeff'}
+  ].concat(bkEvents).concat([
     {dt:new Date(c.data_ingresso||Date.now()).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}),act:'Ingresso in MBBET',det:'Cliente registrato nel sistema',c:'#ff1440'}
-  ];
+  ]);
   g('wp-tl').innerHTML='<div class="tl-feed">'+ev.map(function(e,i){
     return '<div class="tl-item"><div class="tl-left"><div class="tl-dot" style="background:'+e.c+';box-shadow:0 0 8px '+e.c+'55"></div>'+(i<ev.length-1?'<div class="tl-line"></div>':'')+'</div>'
       +'<div class="tl-con"><div class="tl-date">'+e.dt+'</div><div class="tl-act">'+e.act+'</div><div class="tl-det">'+e.det+'</div>'+(e.amt?'<div class="tl-amt">+'+e.amt+'</div>':'')+'</div></div>';
@@ -1387,14 +1429,14 @@ function renderTask(c){
 function renderAi(c){
   var done=c.bk_completati||[],prog=c.bk_in_corso||[],lim=c.bk_limitati||[];
   var avail=BKS.filter(function(b){return done.indexOf(b)<0&&prog.indexOf(b)<0&&lim.indexOf(b)<0;});
-  avail.sort(function(a,b){return (BKR[b]||0)-(BKR[a]||0);});
+  avail.sort(function(a,b){return avgMargBk(b)-avgMargBk(a);});
   var nb=avail[0]||'—';
-  var potR=avail.reduce(function(s,b){return s+(BKR[b]||0)*1.4;},0);
+  var potR=avail.reduce(function(s,b){return s+avgMargBk(b);},0);
   g('wp-ai').innerHTML='<div class="ai-hero">'
     +'<div class="ai-hero-top"><div class="ai-ic">&#129302;</div><div><div class="ai-t">MBBET AI Analysis</div><div class="ai-sub">Analisi cliente '+fullNm(c)+' &mdash; aggiornata oggi</div></div></div>'
     +'<div class="ai-rec-grid">'
-    +'<div class="ai-rec"><div class="ai-rec-t">&#9670; Prossimo BK Consigliato</div><div class="ai-rec-v" style="color:var(--gold)">'+nb+'</div><div class="ai-rec-s">ROI previsto: '+(BKR[nb]||'?')+'% &mdash; Guadagno stimato: €'+Math.round((BKR[nb]||15)*1.2)+'</div></div>'
-    +'<div class="ai-rec"><div class="ai-rec-t">&#9670; Potenziale Residuo</div><div class="ai-rec-v" style="color:var(--cyan)">€'+Math.round(potR)+'</div><div class="ai-rec-s">'+avail.length+' bookmaker ancora disponibili</div></div>'
+    +'<div class="ai-rec"><div class="ai-rec-t">&#9670; Prossimo BK Consigliato</div><div class="ai-rec-v" style="color:var(--gold)">'+nb+'</div><div class="ai-rec-s">ROI medio: '+(BKR[nb]||'?')+'% &mdash; Guadagno stimato: €'+Math.round(avgMargBk(nb))+' <span style="opacity:.6">(media reale su bonus fatti)</span></div></div>'
+    +'<div class="ai-rec"><div class="ai-rec-t">&#9670; Potenziale Residuo (stima)</div><div class="ai-rec-v" style="color:var(--cyan)">€'+Math.round(potR)+'</div><div class="ai-rec-s">'+avail.length+' bookmaker ancora disponibili &mdash; stima su margine medio reale</div></div>'
     +'<div class="ai-rec"><div class="ai-rec-t">&#9670; Score Cliente</div><div class="ai-rec-v" style="color:'+scCol(c.score||0)+'">'+(c.score||0)+'/100</div><div class="ai-rec-s">'+(c.score>=70?'Cliente affidabile, alta priorità':c.score>=40?'Cliente medio, monitorare':'Attenzione richiesta')+'</div></div>'
     +'<div class="ai-rec"><div class="ai-rec-t">&#9670; Azione Consigliata</div><div class="ai-rec-v" style="color:var(--purple);font-size:13px">'+(c.stato==='SOSPESO'?'Ricontattare urgente':c.stato==='LIBERO'?'Attivare subito':'Proseguire con '+nb)+'</div><div class="ai-rec-s">Priorità: '+(c.stato==='SOSPESO'||c.stato==='LIBERO'?'ALTA':'MEDIA')+'</div></div>'
     +'</div>'
@@ -1414,12 +1456,18 @@ function renderStat(c){
     +'<div class="stat-panel"><div class="stat-panel-t">Margine Cumulativo (€)</div><canvas id="scv2" height="160" style="width:100%"></canvas></div>'
     +'</div>';
   setTimeout(function(){
-    var n=(c.bk_completati||[]).length;
+    // Ordinati per data reale del bonus (data_inizio/updated_at), non per
+    // ordine casuale dell'array bk_completati — l'importo è il ric_real
+    // vero (0 se non ancora registrato, mai una stima al posto del dato reale).
+    var doneReal=(_bnsCache[c.id]||[]).filter(function(b){return b.stato==='FATTO';})
+      .sort(function(a,b){var da=a.data_inizio||a.updated_at||'',db=b.data_inizio||b.updated_at||'';return da<db?-1:da>db?1:0;});
+    var bkList=doneReal.length?doneReal.map(function(b){return b.bookmaker;}):(c.bk_completati||[]);
+    var n=bkList.length;
     var vals=Array.from({length:n},function(_,i){return i+1;});
-    var amts=Array.from({length:n},function(_,i){var bk=(c.bk_completati||[])[i]||'';return Math.round((BKR[bk]||15)*0.9+i*5);});
+    var amts=doneReal.length?doneReal.map(function(b){return parseFloat(b.ric_real)||0;}):Array.from({length:n},function(){return 0;});
     var cum=amts.reduce(function(a,v,i){a.push((a[i-1]||0)+v);return a;},[]);
-    miniChart('scv1',vals,(c.bk_completati||[]).map(function(b){return b.slice(0,4);}),'#5aaaff');
-    miniChart('scv2',cum,(c.bk_completati||[]).map(function(b){return b.slice(0,4);}),'#00f093');
+    miniChart('scv1',vals,bkList.map(function(b){return (b||'').slice(0,4);}),'#5aaaff');
+    miniChart('scv2',cum,bkList.map(function(b){return (b||'').slice(0,4);}),'#00f093');
   },60);
 }
 function miniChart(id,vals,lbls,col){
@@ -1446,7 +1494,7 @@ function miniChart(id,vals,lbls,col){
 async function fetchAllBonusLite(){
   var all=[],from=0,step=1000;
   while(true){
-    var r=await db.from('bonus').select('id_cli,bookmaker,stato').range(from,from+step-1);
+    var r=await db.from('bonus').select('id_cli,bookmaker,stato,ric_real').range(from,from+step-1);
     if(r.error)throw r.error;
     var rows=r.data||[];
     all=all.concat(rows);
@@ -1470,6 +1518,10 @@ async function loadData(){
     var rCli=results[0],rBnsRows=results[1];
     if(rCli.data&&rCli.data.length>0){
       var bnsMap={};
+      // Margine medio VERO per bookmaker, calcolato da tutti i bonus FATTO
+      // con un ric_real registrato — sostituisce la vecchia tabella ROI%
+      // inventata usata per "Potenziale"/"Guadagno stimato".
+      var margSum={},margCnt={};
       if(rBnsRows){rBnsRows.forEach(function(row){
         var cId=row.id_cli;if(!cId)return;
         if(!bnsMap[cId])bnsMap[cId]={c:[],p:[],l:[],g:[]};
@@ -1477,14 +1529,27 @@ async function loadData(){
         else if(row.stato==='IN_CORSO')bnsMap[cId].p.push(row.bookmaker);
         else if(row.stato==='LIMITATO'||row.stato==='BANNATO')bnsMap[cId].l.push(row.bookmaker);
         else if(row.stato==='GIA_REGISTRATO')bnsMap[cId].g.push(row.bookmaker);
+        var rr=parseFloat(row.ric_real)||0;
+        if(row.stato==='FATTO'&&rr>0&&row.bookmaker){
+          margSum[row.bookmaker]=(margSum[row.bookmaker]||0)+rr;
+          margCnt[row.bookmaker]=(margCnt[row.bookmaker]||0)+1;
+        }
       });}
+      _avgMargineBk={};
+      Object.keys(margSum).forEach(function(bk){_avgMargineBk[bk]=margSum[bk]/margCnt[bk];});
+      var _vals=Object.keys(_avgMargineBk).map(function(k){return _avgMargineBk[k];});
+      _avgMargineBkFallback=_vals.length?(_vals.reduce(function(a,b){return a+b;},0)/_vals.length):20;
       data=rCli.data.map(function(c,i){
         var bm=bnsMap[c.id]||{c:[],p:[],l:[],g:[]};
         var bkC=(c.bk_completati&&c.bk_completati.length)?c.bk_completati:bm.c;
         var bkP=(c.bk_in_corso&&c.bk_in_corso.length)?c.bk_in_corso:bm.p;
         var bkL=(c.bk_limitati&&c.bk_limitati.length)?c.bk_limitati:bm.l;
         var bkG=(c.bk_gia_registrato&&c.bk_gia_registrato.length)?c.bk_gia_registrato:bm.g;
-        return Object.assign({},{id:i+1,potenziale:c.stato==='ATTIVO'?680:c.stato==='IN_LAVORAZIONE'?340:120,score:c.stato==='ATTIVO'?72+Math.floor(Math.random()*20):c.stato==='IN_LAVORAZIONE'?42+Math.floor(Math.random()*22):18+Math.floor(Math.random()*20),bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL,bk_gia_registrato:bkG,pagamenti:[],ultima_attivita:c.updated_at||new Date().toISOString(),data_ingresso:c.created_at||new Date().toISOString(),note:'',provincia:'—'},c,{bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL,bk_gia_registrato:bkG});
+        // Potenziale reale: bookmaker non ancora fatti × margine medio VERO
+        // di quel bookmaker (da bonus.ric_real), non più una cifra fissa per stato.
+        var avail=BKS.filter(function(b){return bkC.indexOf(b)<0&&bkP.indexOf(b)<0&&bkL.indexOf(b)<0;});
+        var potenzialeReale=Math.round(avail.reduce(function(s,b){return s+avgMargBk(b);},0));
+        return Object.assign({},{id:i+1,potenziale:potenzialeReale,score:c.stato==='ATTIVO'?72+Math.floor(Math.random()*20):c.stato==='IN_LAVORAZIONE'?42+Math.floor(Math.random()*22):18+Math.floor(Math.random()*20),bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL,bk_gia_registrato:bkG,pagamenti:[],ultima_attivita:c.updated_at||new Date().toISOString(),data_ingresso:c.created_at||new Date().toISOString(),note:'',provincia:'—'},c,{bk_completati:bkC,bk_in_corso:bkP,bk_limitati:bkL,bk_gia_registrato:bkG});
       });
     }
   }catch(e){console.warn('Mock data in uso');}
