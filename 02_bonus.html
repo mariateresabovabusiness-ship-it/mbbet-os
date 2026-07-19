@@ -2254,6 +2254,14 @@ async function loadData(){
   if(rbonRows&&rbonRows.length){BONUS_CLI=rbonRows.map(mapBonusRow);_DATA_REAL=true;}
   else genMock();
 
+  // Operatore con accesso limitato a bookmaker specifici (es. Nico → Sunbet/Goldbet):
+  // vede solo quei bookmaker, sia nell'elenco a sinistra sia nei dati.
+  if(typeof isOperatoreSelf==='function'&&isOperatoreSelf()&&currentBookmakerScope&&currentBookmakerScope.length){
+    var _scope=currentBookmakerScope;
+    BKS=BKS.filter(function(b){return _scope.indexOf(b.nome)>=0;});
+    BONUS_CLI=BONUS_CLI.filter(function(r){return _scope.indexOf(r.bk_nm)>=0;});
+  }
+
   PROMO=_lsLoadPromos();_promoTableMissing=false;
   _migratePromoLinks();
 

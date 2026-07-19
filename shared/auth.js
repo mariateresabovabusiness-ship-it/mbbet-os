@@ -7,25 +7,27 @@ var currentUser = null;
 var currentRole = 'VIEWER';
 var currentNome = '';
 var currentCollabNome = '';
+var currentBookmakerScope = null;
 
 var ROLE_SECTIONS = {
-  'SOCIO_ADMIN':   ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import'],
-  'SOCIO':         ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab','coda','import'],
-  'OPERATORE':     ['clienti','bonus','task','social','collab','coda'],
-  'COLLAB':        ['clienti','bonus','social','collab'],
-  'COLLAB_SELF':   ['collab'],
-  'REFERRAL':      ['report'],
-  'VIEWER':        ['clienti'],
-  'ADMIN_TECNICO': ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import']
+  'SOCIO_ADMIN':    ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import'],
+  'SOCIO':          ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab','coda','import'],
+  'OPERATORE':      ['clienti','bonus','task','social','collab','coda'],
+  'OPERATORE_SELF': ['bonus'],
+  'COLLAB':         ['clienti','bonus','social','collab'],
+  'COLLAB_SELF':    ['collab'],
+  'REFERRAL':       ['report'],
+  'VIEWER':         ['clienti'],
+  'ADMIN_TECNICO':  ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import']
 };
 
-var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','COLLAB':'Collab','COLLAB_SELF':'Collaboratore','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
-var ROLE_COLORS  = {'SOCIO_ADMIN':'#f59e0b','SOCIO':'#d97706','OPERATORE':'#3b82f6','COLLAB':'#a78bfa','COLLAB_SELF':'#22c55e','REFERRAL':'#10b981','VIEWER':'#6b7280','ADMIN_TECNICO':'#ef4444'};
+var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','OPERATORE_SELF':'Operatore','COLLAB':'Collab','COLLAB_SELF':'Collaboratore','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};
+var ROLE_COLORS  = {'SOCIO_ADMIN':'#f59e0b','SOCIO':'#d97706','OPERATORE':'#3b82f6','OPERATORE_SELF':'#3b82f6','COLLAB':'#a78bfa','COLLAB_SELF':'#22c55e','REFERRAL':'#10b981','VIEWER':'#6b7280','ADMIN_TECNICO':'#ef4444'};
 
-// ── Legge il profilo (ruolo/nome/collab) dell'utente autenticato da utenti_crm ──
+// ── Legge il profilo (ruolo/nome/collab/bookmaker assegnati) dell'utente autenticato ──
 async function _loadProfile(authUser) {
   var r = await db.from('utenti_crm')
-    .select('nome,ruolo,attivo,collab:collab_id(nome)')
+    .select('nome,ruolo,attivo,bookmaker_scope,collab:collab_id(nome)')
     .eq('auth_user_id', authUser.id)
     .maybeSingle();
   if (r.error || !r.data || !r.data.attivo) return null;
@@ -33,7 +35,8 @@ async function _loadProfile(authUser) {
     email: authUser.email,
     nome: r.data.nome,
     ruolo: r.data.ruolo,
-    collabNome: (r.data.collab && r.data.collab.nome) || ''
+    collabNome: (r.data.collab && r.data.collab.nome) || '',
+    bookmakerScope: r.data.bookmaker_scope || null
   };
 }
 
@@ -54,6 +57,7 @@ async function initAuth(onSuccess, onFail) {
     currentNome = profile.nome || profile.email;
     currentRole = profile.ruolo || 'VIEWER';
     currentCollabNome = profile.collabNome || '';
+    currentBookmakerScope = profile.bookmakerScope || null;
     if (onSuccess) onSuccess();
   } else {
     if (onFail) onFail();
@@ -74,12 +78,13 @@ async function doLogin(email, password) {
   currentNome = profile.nome;
   currentRole = profile.ruolo;
   currentCollabNome = profile.collabNome || '';
+  currentBookmakerScope = profile.bookmakerScope || null;
   return { data: { user: currentUser } };
 }
 
 async function doLogout() {
   try { await db.auth.signOut(); } catch (e) {}
-  currentUser = null; currentRole = 'VIEWER'; currentNome = ''; currentCollabNome = '';
+  currentUser = null; currentRole = 'VIEWER'; currentNome = ''; currentCollabNome = ''; currentBookmakerScope = null;
   window.location.href = 'index.html';
 }
 
@@ -98,7 +103,8 @@ function requireSection(s) {
 }
 function isSocioAdmin() { return currentRole === 'SOCIO_ADMIN'; }
 function isSocio()      { return currentRole === 'SOCIO_ADMIN' || currentRole === 'SOCIO'; }
-function canWrite()     { return ['SOCIO_ADMIN','SOCIO','OPERATORE','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
+function canWrite()     { return ['SOCIO_ADMIN','SOCIO','OPERATORE','OPERATORE_SELF','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
 function canDelete()    { return currentRole === 'SOCIO_ADMIN' || currentRole === 'ADMIN_TECNICO'; }
 function seeFinanze()   { return ['SOCIO_ADMIN','SOCIO','ADMIN_TECNICO'].indexOf(currentRole) >= 0; }
 function isReadOnlyCollab() { return currentRole === 'COLLAB_SELF'; }
+function isOperatoreSelf()  { return currentRole === 'OPERATORE_SELF'; }
