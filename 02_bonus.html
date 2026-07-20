@@ -2284,7 +2284,7 @@ function mapBonusRow(r){
   var mo=parseInt(r.mese_operativo)||null;var ao=parseInt(r.anno_operativo)||null;
   if(!mo&&r.data_inizio){var d=new Date(r.data_inizio);mo=d.getMonth()+1;ao=d.getFullYear();}
   return {id:r.id,cli_id:r.id_cli,cli_nm:r.cliente||'—',cli_op:r.operatore||'—',bk_nm:r.bookmaker,bk_col:bk?bk._col:'#5aaaff',stato:r.stato||'LIBERO',ricavo_prev:parseFloat(r.ric_prev)||0,ricavo_reale:rr||null,pag_cli:parseFloat(r.pag_cli)||null,comp_op:co,comp_col:cc,costi_extra:parseFloat(r.costi_extra)||0,perc_op:po,perc_collab:pc,margine:marg,priorita:r.priorita||'MEDIA',ultima_az:r.ult_azione||null,prox_az:r.pross_azione||null,note:r.note||'',
-  username:r.username_bk||'',password:r.password_bk||'',stato_op:r.stato_op||'In corso',fase:r.fase_attuale||'Da iniziare',data_inizio:r.data_inizio||null,deposito:dep,bonus_ric:bonRic,prelievo:prel,guad_tot:gt,guad_op:gop,profitto_mb:pmb,alert:r.alert_msg||'',cronologia:Array.isArray(r.cronologia)?r.cronologia:[],saldo_bk:parseFloat(r.saldo_bk)||0,mese_op:mo,anno_op:ao,incassato:!!r.incassato,data_incasso:r.data_incasso||null,nome_collab:r.nome_collab||null,id_collab:r.id_collab||null,pocket_stato:r.pocket_stato||null,_real:true};
+  username:r.username_bk||'',password:r.password_bk||'',stato_op:r.stato_op||'In corso',fase:r.fase_attuale||'Da iniziare',data_inizio:r.data_inizio||null,deposito:dep,bonus_ric:bonRic,prelievo:prel,guad_tot:gt,guad_op:gop,profitto_mb:pmb,alert:r.alert_msg||'',cronologia:Array.isArray(r.cronologia)?r.cronologia:[],saldo_bk:parseFloat(r.saldo_bk)||0,mese_op:mo,anno_op:ao,incassato:!!r.incassato,data_incasso:r.data_incasso||null,nome_collab:r.nome_collab||null,id_collab:r.id_collab||null,pocket_stato:r.pocket_stato||null,comp_referral:parseFloat(r.comp_referral)||0,_real:true};
 }
 
 function reloadData(){loadData();}
@@ -3124,8 +3124,10 @@ async function doSt(rid){
 /* ── AGGIORNA RICAVO ── */
 function modalAggRicavo(rid){
   var r=BONUS_CLI.find(function(x){return x.id===rid;});if(!r)return;_editRow=r;
+  var senzaOp=!r.cli_op||r.cli_op==='—';
   openModal('&#8364; Aggiorna Ricavo',
-    '<div class="mod-row-info">&#128100; <b>'+r.cli_nm+'</b> &nbsp;&#8212;&nbsp; <b>'+r.bk_nm+'</b></div>'
+    '<div class="mod-row-info">&#128100; <b>'+r.cli_nm+'</b> &nbsp;&#8212;&nbsp; <b>'+r.bk_nm+'</b>'+(r.nome_collab?' &nbsp;&#8212;&nbsp; <span style="color:var(--tx3);font-weight:400">chiuso da '+r.nome_collab+'</span>':'')+'</div>'
+    +(senzaOp?('<div class="mod-field" style="margin-bottom:12px"><label>&#128100; Chi verifica/prende in carico questo sito? (opzionale)</label><select id="i-op-claim" class="mod-sel"><option value="">— Nessuno per ora —</option>'+OPS_LIST.map(function(o){return '<option value="'+escQ(o)+'">'+o+'</option>';}).join('')+'</select></div>'):'')
     +'<div class="mod-grid">'
       +'<div class="mod-field"><label>Deposito (€)</label><input id="i-dep" type="number" step="1" class="mod-inp" value="'+(r.deposito||'')+'" oninput="calcPrev()" placeholder="Es. 50"></div>'
       +'<div class="mod-field"><label>Bonus Ottenuto (€)</label><input id="i-bon" type="number" step="1" class="mod-inp" value="'+(r.bonus_ric||'')+'" oninput="calcPrev()" placeholder="Es. 30"></div>'
@@ -3200,10 +3202,14 @@ async function doRic(rid){
   // Collaboratori pagati a percentuale del profitto reale (es. Isma, 50%):
   // la commissione si ricalcola da sola qui, non va inserita a mano.
   if(r.perc_collab>0)upd.comp_referral=Math.round(rr*r.perc_collab/100*100)/100;
+  var opClaimEl=g('i-op-claim');
+  var opClaim=opClaimEl?(opClaimEl.value||''):'';
+  if(opClaim)upd.operatore=opClaim;
   if(r._real){modLoad();var res=await db.from('bonus').update(upd).eq('id',rid);if(res.error){modErr(res.error.message);return;}}
   var rettOk=true;
   if(chiusura&&deltaRic!==0)rettOk=await registraRettifica(chiusura,deltaRic,'Modifica ricavo bonus dopo chiusura mese','bonus',rid);
   r.deposito=dep;r.bonus_ric=bon;r.prelievo=prel;r.ricavo_reale=rr;r.pag_cli=pc;r.costi_extra=ce;r.comp_op=rr?Math.round(rr*(r.perc_op||20)/100*100)/100:null;r.comp_col=rr&&r.perc_collab?Math.round(rr*r.perc_collab/100*100)/100:null;r.margine=rr?(rr-pc-(r.comp_op||0)-(r.comp_col||0)-ce):null;r.incassato=inc;r.data_incasso=dInc;
+  if(opClaim)r.cli_op=opClaim;
   closeModal();
   if(g('tab-ws')&&g('tab-ws').classList.contains('open'))renderTwContent();else renderView();
   if(rettOk)showToast('Ricavo aggiornato','ok');
@@ -3781,18 +3787,18 @@ function renderOtGrid(){
   var needRicavo=BONUS_CLI.filter(function(r){
     var chiuso=r.stato==='FATTO'||r.pocket_stato==='ACCUMULATO'||r.pocket_stato==='PAGATO';
     return r.nome_collab&&chiuso&&!(r.ricavo_reale>0);
-  });
+  }).sort(function(a,b){return (b.comp_referral||0)-(a.comp_referral||0);});
   if(needRicavo.length){
     h+='<div style="margin-bottom:18px;padding:14px 18px;background:rgba(90,170,255,.06);border:1px solid rgba(90,170,255,.25);border-left:4px solid var(--blue);border-radius:12px">'
       +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:'+(needRicavo.length?'10px':'0')+'">'
         +'<div style="font-size:22px">€</div>'
         +'<div style="flex:1">'
           +'<div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:3px">'+needRicavo.length+' '+(needRicavo.length===1?'sito chiuso da un collaboratore':'siti chiusi dai collaboratori')+' senza ricavo reale inserito</div>'
-          +'<div style="font-size:11px;color:var(--tx3)">Il collaboratore ha già chiuso (ed è stato pagato) ma nessun operatore ha ancora verificato quanto ha reso davvero il sito — finché resta così, questo guadagno non compare in Finanza. Clicca per inserirlo.</div>'
+          +'<div style="font-size:11px;color:var(--tx3)">Il collaboratore ha già chiuso (ed è stato pagato) ma nessun operatore ha ancora verificato quanto ha reso davvero il sito — finché resta così, questo guadagno non compare in Finanza. Ordinati dal compenso più alto pagato al collaboratore: clicca per inserire il ricavo (puoi anche prenderlo in carico).</div>'
         +'</div>'
       +'</div>'
       +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
-        +needRicavo.slice(0,12).map(function(r){return '<button class="ta" style="font-size:10px;padding:4px 10px;background:rgba(90,170,255,.1);border:1px solid rgba(90,170,255,.25);color:var(--blue);border-radius:6px;cursor:pointer;font-family:inherit" onclick="modalAggRicavo(\''+r.id+'\')">'+r.cli_nm+' · '+r.bk_nm+' ('+r.nome_collab+')</button>';}).join('')
+        +needRicavo.slice(0,12).map(function(r){return '<button class="ta" style="font-size:10px;padding:4px 10px;background:rgba(90,170,255,.1);border:1px solid rgba(90,170,255,.25);color:var(--blue);border-radius:6px;cursor:pointer;font-family:inherit" onclick="modalAggRicavo(\''+r.id+'\')">'+r.cli_nm+' · '+r.bk_nm+' ('+r.nome_collab+(r.comp_referral?' · €'+r.comp_referral.toFixed(0):'')+')</button>';}).join('')
         +(needRicavo.length>12?'<span style="font-size:10px;color:var(--tx3);padding:4px 6px">+altri '+(needRicavo.length-12)+'</span>':'')
       +'</div>'
     +'</div>';
