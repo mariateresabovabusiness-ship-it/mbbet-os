@@ -407,7 +407,40 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
 <script src="shared/auth.js"></script>
 <script>
 /* ══ GLOBALS ══ */
-var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[], _operatoriList=[], _opTelegram={}, _bkLinks={};
+var _collabs=[], _bns=[], _selectedId=null, _collabMese=null, _collabTariffe=[], _clientiCollab=[], _operatoriList=[], _opTelegram={}, _bkLinks={}, _gruppoPagatoSet={};
+
+/* Bonus "gruppo" extra: alcuni collaboratori (dati da collab.bonus_extra_gruppo,
+   MAI un nome hardcoded — oggi è Alan, con € 20, ma il codice non lo sa) hanno un
+   accordo economico a parte, un importo fisso una tantum per ogni cliente portato,
+   indipendente dal listino a sito. Il "quando" è una scelta manuale di Mary
+   (dipende dallo storico reale del cliente), non un calcolo automatico — qui c'è
+   solo un interruttore da/pagato che lei aziona quando decide. */
+function gruppoPagato(cliente,collabNome){return !!_gruppoPagatoSet[(cliente||'')+'|'+(collabNome||'')];}
+async function toggleBonusGruppo(cliente,collabNome,importo,cid,clienteEnc){
+  if(isReadOnlyCollab())return;
+  var key=(cliente||'')+'|'+(collabNome||'');
+  var giaPagato=!!_gruppoPagatoSet[key];
+  if(giaPagato){
+    if(!confirm('Annullare il bonus gruppo (€ '+fmt(importo)+') già segnato come pagato a '+collabNome+' per '+cliente+'?'))return;
+    try{
+      var rDel=await db.from('collab_payout').delete().eq('cliente',cliente).eq('nome_collab',collabNome).eq('dettaglio','Bonus gruppo');
+      if(rDel.error)throw rDel.error;
+      delete _gruppoPagatoSet[key];
+      showToast('Bonus gruppo annullato','ok');
+    }catch(e){showToast('Errore: '+(e.message||e),'er');return;}
+  }else{
+    if(!confirm('Segnare come pagato il bonus gruppo di € '+fmt(importo)+' a '+collabNome+' per '+cliente+'?'))return;
+    try{
+      var rIns=await db.from('collab_payout').insert({cliente:cliente,nome_collab:collabNome,importo_totale:importo,dettaglio:'Bonus gruppo',created_by:(typeof currentNome!=='undefined'?currentNome:null)});
+      if(rIns.error)throw rIns.error;
+      _gruppoPagatoSet[key]=true;
+      showToast('Bonus gruppo segnato come pagato ✓','ok');
+    }catch(e){showToast('Errore: '+(e.message||e),'er');return;}
+  }
+  var cRef=_collabs.find(function(x){return String(x.id)===String(cid);});
+  if(cRef&&cRef.modello==='POCKET')renderPocketCliente(cid,clienteEnc);
+  else renderFlatCliente(cid,clienteEnc);
+}
 var _flatCliCache=[], _flatCliCidCache=null, _pocketNomiCache=[], _pocketByClienteCache={}, _pocketCidCache=null;
 /* Avvisa l'operatore su Telegram quando gli viene assegnato un nuovo sito.
    Non blocca mai il salvataggio principale: se manca il chat_id o Telegram
@@ -668,9 +701,11 @@ async function loadAll(){
       db.from('collab_tariffe').select('*').order('ordine'),
       db.from('clienti').select('id,nome,collab,data_ingresso').not('collab','is',null),
       db.from('operatori').select('nome,is_joint,telegram_chat_id').eq('stato','Attivo'),
-      db.from('bookmaker').select('nome,link_promo,link_sito')
+      db.from('bookmaker').select('nome,link_promo,link_sito'),
+      db.from('collab_payout').select('cliente,nome_collab,dettaglio').eq('dettaglio','Bonus gruppo')
     ]);
-    var rc=risultati[0], rb=risultati[1], rt=risultati[2], rcl=risultati[3], rop=risultati[4], rbk=risultati[5];
+    var rc=risultati[0], rb=risultati[1], rt=risultati[2], rcl=risultati[3], rop=risultati[4], rbk=risultati[5], rgp=risultati[6];
+    _gruppoPagatoSet={};(rgp&&rgp.data||[]).forEach(function(p){_gruppoPagatoSet[(p.cliente||'')+'|'+(p.nome_collab||'')]=true;});
     _collabTariffe=(rt&&rt.data)||[];
     _clientiCollab=(rcl&&rcl.data)||[];
     _operatoriList=(rop&&rop.data)?rop.data.map(function(o){return o.nome;}):['Mary','Manuele','Serena','Samuele'];
@@ -850,15 +885,28 @@ function apriSitoPerCliente(cid,bookmaker,clienteEsistente){
     setTimeout(function(){var e=g('nb-nome');if(e)e.value=clienteEsistente;},120);
   }
 }
-/* "Già occupato": il cliente ha già un account su quel sito da prima di
-   MBBET (non tramite noi) — va comunque tracciato in bonus/CRM/bookmaker
-   (stessa tabella condivisa con 02_bonus.html) ma senza nessun compenso
-   previsto, quindi niente modale: un clic e via. */
-async function segnaGiaOccupato(cid,bookmaker,cliente){
+/* Esiti "classici" che può avere un sito per un cliente, oltre a "fatto":
+   il cliente ha già un account da prima (GIA_REGISTRATO), il sito ha
+   limitato/bannato l'account, il cliente non è idoneo (es. doppio account,
+   restrizione), o manca ancora qualcosa dal cliente/da verificare. Tutti
+   tracciati nella stessa tabella condivisa con 02_bonus.html, tutti senza
+   compenso previsto (non sono un sito completato con successo) — un clic
+   e via, nessuna modale. */
+var ESITO_BK_MSG={
+  GIA_REGISTRATO:function(bk,cl){return 'Segnare "'+bk+'" come già occupato per '+cl+'?\n\nSignifica che il cliente ha già un account su questo sito da prima di MBBET — nessun compenso previsto su questo sito.';},
+  LIMITATO:function(bk,cl){return 'Segnare "'+bk+'" come limitato per '+cl+'?\n\nSignifica che il sito ha ridotto le quote/lo stake sull\'account — nessun compenso previsto su questo sito.';},
+  BANNATO:function(bk,cl){return 'Segnare "'+bk+'" come bannato per '+cl+'?\n\nSignifica che l\'account è stato chiuso dal sito — nessun compenso previsto su questo sito.';},
+  NON_IDONEO:function(bk,cl){return 'Segnare '+cl+' come non idoneo per "'+bk+'"?\n\nEs. doppio account o restrizione — nessun compenso previsto su questo sito.';},
+  IN_ATTESA_CLIENTE:function(bk,cl){return 'Segnare "'+bk+'" come in attesa del cliente per '+cl+'?\n\nEs. manca ancora un documento o un dato da parte sua.';},
+  DA_VERIFICARE:function(bk,cl){return 'Segnare "'+bk+'" come da verificare per '+cl+'?\n\nEsito incerto — verrà segnalato per un controllo.';}
+};
+var ESITO_BK_STATO_OP={GIA_REGISTRATO:'Già registrato',LIMITATO:'Problema',BANNATO:'Problema',NON_IDONEO:'Bloccato',IN_ATTESA_CLIENTE:'In corso',DA_VERIFICARE:'In corso'};
+async function segnaEsitoBk(cid,bookmaker,cliente,stato){
   if(isReadOnlyCollab())return;
   var c=_collabs.find(function(x){return String(x.id)===String(cid);});
   if(!c)return;
-  if(!confirm('Segnare "'+bookmaker+'" come già occupato per '+cliente+'?\n\nSignifica che il cliente ha già un account su questo sito da prima di MBBET — nessun compenso previsto su questo sito.'))return;
+  var msgFn=ESITO_BK_MSG[stato];
+  if(!confirm(msgFn?msgFn(bookmaker,cliente):('Segnare "'+bookmaker+'" come '+stato+' per '+cliente+'?')))return;
   var mese=_collabMese?parseInt(_collabMese.split('-')[1]):new Date().getMonth()+1;
   var anno=_collabMese?parseInt(_collabMese.split('-')[0]):new Date().getFullYear();
   var payload={
@@ -868,8 +916,8 @@ async function segnaGiaOccupato(cid,bookmaker,cliente){
     nome_collab:c.nome,
     mese_operativo:mese,
     anno_operativo:anno,
-    stato:'GIA_REGISTRATO',
-    stato_op:'Già registrato',
+    stato:stato,
+    stato_op:ESITO_BK_STATO_OP[stato]||'In corso',
     comp_referral:0
   };
   try{
@@ -879,7 +927,7 @@ async function segnaGiaOccupato(cid,bookmaker,cliente){
     if(r.error)throw r.error;
     var newRow=r.data&&r.data[0];
     if(newRow)_bns.push(newRow);
-    showToast('Segnato come già occupato ✓','ok');
+    showToast('Segnato ✓','ok');
     renderList();
     if(c.modello==='POCKET')renderPocketCliente(cid,encodeURIComponent(cliente));
     else renderFlatCliente(cid,encodeURIComponent(cliente));
@@ -887,6 +935,7 @@ async function segnaGiaOccupato(cid,bookmaker,cliente){
     alert('Errore: '+(e.message||String(e)));
   }
 }
+async function segnaGiaOccupato(cid,bookmaker,cliente){return segnaEsitoBk(cid,bookmaker,cliente,'GIA_REGISTRATO');}
 async function annullaGiaOccupato(bonusId,cid,clienteEnc){
   if(isReadOnlyCollab())return;
   if(!confirm('Annullare "già occupato" per questo sito?'))return;
@@ -1295,6 +1344,14 @@ function renderPocketCliente(cid,clienteEnc){
           (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
             '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(255,20,64,0.08);border:1px solid rgba(255,20,64,0.251);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
             '<button onclick="segnaGiaOccupato(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" title="Il cliente ha già un account su questo sito da prima di MBBET" style="padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#128274; Già occupato</button>'+
+            '<select onchange="if(this.value){segnaEsitoBk(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\',this.value);this.value=\'\';}" title="Altri esiti possibili" style="padding:5px 6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">'+
+              '<option value="">&#8942; Altro</option>'+
+              '<option value="LIMITATO">&#9888; Limitato</option>'+
+              '<option value="BANNATO">&#10005; Bannato</option>'+
+              '<option value="NON_IDONEO">&#8212; Non idoneo</option>'+
+              '<option value="IN_ATTESA_CLIENTE">&#8987; Attesa cliente</option>'+
+              '<option value="DA_VERIFICARE">? Da verificare</option>'+
+            '</select>'+
           '</div>')+
         '</td></tr>';
       return;
@@ -1314,9 +1371,12 @@ function renderPocketCliente(cid,clienteEnc){
       return;
     }
     var st=b.pocket_stato||null;
-    var badgeColor=st==='PAGATO'?'var(--green)':st==='ACCUMULATO'?'var(--gold)':'var(--tx3)';
-    var badgeBg=st==='PAGATO'?'rgba(0,229,138,.1)':st==='ACCUMULATO'?'rgba(255,20,64,0.1)':'rgba(255,255,255,.05)';
-    var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':'In corso';
+    var esitoNeg=!st&&(b.stato==='LIMITATO'||b.stato==='BANNATO'||b.stato==='NON_IDONEO');
+    var esitoAttesa=!st&&(b.stato==='IN_ATTESA_CLIENTE'||b.stato==='DA_VERIFICARE');
+    var ESITO_LBL={LIMITATO:'&#9888; Limitato',BANNATO:'&#10005; Bannato',NON_IDONEO:'&#8212; Non idoneo',IN_ATTESA_CLIENTE:'&#8987; Attesa cliente',DA_VERIFICARE:'? Da verificare'};
+    var badgeColor=st==='PAGATO'?'var(--green)':st==='ACCUMULATO'?'var(--gold)':esitoNeg?'var(--red)':'var(--tx3)';
+    var badgeBg=st==='PAGATO'?'rgba(0,229,138,.1)':st==='ACCUMULATO'?'rgba(255,20,64,0.1)':esitoNeg?'rgba(255,79,79,.1)':'rgba(255,255,255,.05)';
+    var badgeLabel=st==='PAGATO'?'Pagato':st==='ACCUMULATO'?'Accumulato':(esitoNeg||esitoAttesa)?ESITO_LBL[b.stato]:'In corso';
     html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(255,20,64,0.044)\'" onmouseout="this.style.background=\''+bg+'\'">'+
       '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
       '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);'+(isReadOnlyCollab()?'':'cursor:pointer')+'" '+(isReadOnlyCollab()?'':'onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\'\')" title="Apri dettaglio"')+'>'+chip+'</td>'+
@@ -1836,6 +1896,18 @@ function renderFlatCliente(cid,clienteEnc){
     (scaduti>0?'<div style="text-align:right"><div style="font-size:16px;font-weight:900;color:var(--red)">'+scaduti+'</div><div style="font-size:9px;color:var(--tx3)">scaduti</div></div>':'')+
     '</div></div>';
 
+  // Bonus "gruppo" extra una tantum per cliente (solo se questo collaboratore
+  // ha un importo impostato in collab.bonus_extra_gruppo — non è automatico,
+  // è un interruttore manuale che aziona chi decide, non il collaboratore).
+  if(!isReadOnlyCollab()&&parseFloat(c.bonus_extra_gruppo)>0){
+    var impGruppo=parseFloat(c.bonus_extra_gruppo);
+    var giaPagatoGruppo=gruppoPagato(cliente,c.nome);
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 16px;background:'+(giaPagatoGruppo?'rgba(0,229,138,.06)':'rgba(255,144,64,.06)')+';border:1px solid '+(giaPagatoGruppo?'rgba(0,229,138,.2)':'rgba(255,144,64,.25)')+';border-radius:10px">'+
+      '<div style="flex:1;font-size:11px;color:var(--tx3)">Bonus gruppo per questo cliente (accordo separato dal listino a sito)</div>'+
+      '<button onclick="toggleBonusGruppo(\''+cliente.replace(/'/g,"\\'")+'\',\''+c.nome+'\','+impGruppo+',\''+cid+'\',\''+clienteEnc+'\')" style="padding:6px 14px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;border:1px solid '+(giaPagatoGruppo?'rgba(0,229,138,.35)':'rgba(255,144,64,.35)')+';background:'+(giaPagatoGruppo?'rgba(0,229,138,.1)':'rgba(255,144,64,.12)')+';color:'+(giaPagatoGruppo?'var(--green)':'var(--orange)')+'">'+(giaPagatoGruppo?'&#10003; € '+fmt(impGruppo)+' pagato':'€ '+fmt(impGruppo)+' da pagare')+'</button>'+
+    '</div>';
+  }
+
   var tariffe=tariffeForCollab(c);
   var righeBySito={};
   righe.forEach(function(b){righeBySito[(b.bookmaker||'').toLowerCase()]=b;});
@@ -1871,6 +1943,14 @@ function renderFlatCliente(cid,clienteEnc){
           (isReadOnlyCollab()?'':'<div style="display:flex;gap:4px;justify-content:center">'+
             '<button onclick="apriSitoPerCliente(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:rgba(255,20,64,0.08);border:1px solid rgba(255,20,64,0.251);border-radius:7px;color:var(--gold);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#43; Segna fatto</button>'+
             '<button onclick="segnaGiaOccupato(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\')" title="Il cliente ha già un account su questo sito da prima di MBBET" style="padding:5px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">&#128274; Già occupato</button>'+
+            '<select onchange="if(this.value){segnaEsitoBk(\''+cid+'\',\''+t.bookmaker+'\',\''+cliente.replace(/'/g,"\\'")+'\',this.value);this.value=\'\';}" title="Altri esiti possibili" style="padding:5px 6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:var(--tx3);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">'+
+              '<option value="">&#8942; Altro</option>'+
+              '<option value="LIMITATO">&#9888; Limitato</option>'+
+              '<option value="BANNATO">&#10005; Bannato</option>'+
+              '<option value="NON_IDONEO">&#8212; Non idoneo</option>'+
+              '<option value="IN_ATTESA_CLIENTE">&#8987; Attesa cliente</option>'+
+              '<option value="DA_VERIFICARE">? Da verificare</option>'+
+            '</select>'+
           '</div>')+
         '</td></tr>';
       return;
@@ -1881,6 +1961,23 @@ function renderFlatCliente(cid,clienteEnc){
         '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
         '<td colspan="4" data-lbl="STATO" style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">'+
           '<span style="padding:4px 10px;border-radius:999px;background:rgba(255,20,64,0.1);color:var(--gold);font-size:10px;font-weight:800;white-space:nowrap">&#128274; Già occupato</span>'+
+          '<span style="margin-left:8px;font-size:10px;color:var(--tx3);font-style:italic">nessun compenso previsto</span>'+
+        '</td>'+
+        '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">&mdash;</td>'+
+        '<td class="mbl-idx" style="border-bottom:1px solid rgba(255,255,255,.04)"></td>'+
+        '<td class="mbl-actions" style="padding:6px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          (isReadOnlyCollab()?'':'<button onclick="deleteBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Annulla" style="background:rgba(255,87,87,.06);border:1px solid rgba(255,87,87,.15);border-radius:6px;color:rgba(255,87,87,.5);font-size:11px;cursor:pointer;padding:4px 8px">&#128465;</button>')+
+        '</td></tr>';
+      return;
+    }
+    if(b.stato==='LIMITATO'||b.stato==='BANNATO'||b.stato==='NON_IDONEO'||b.stato==='IN_ATTESA_CLIENTE'||b.stato==='DA_VERIFICARE'){
+      var esitoColNeg=(b.stato==='LIMITATO'||b.stato==='BANNATO'||b.stato==='NON_IDONEO');
+      var ESITO_LBL2={LIMITATO:'&#9888; Limitato',BANNATO:'&#10005; Bannato',NON_IDONEO:'&#8212; Non idoneo',IN_ATTESA_CLIENTE:'&#8987; Attesa cliente',DA_VERIFICARE:'? Da verificare'};
+      html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55">'+
+        '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
+        '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx2);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+chip+'</td>'+
+        '<td colspan="4" data-lbl="STATO" style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)">'+
+          '<span style="padding:4px 10px;border-radius:999px;background:'+(esitoColNeg?'rgba(255,79,79,.1)':'rgba(255,255,255,.05)')+';color:'+(esitoColNeg?'var(--red)':'var(--tx3)')+';font-size:10px;font-weight:800;white-space:nowrap">'+ESITO_LBL2[b.stato]+'</span>'+
           '<span style="margin-left:8px;font-size:10px;color:var(--tx3);font-style:italic">nessun compenso previsto</span>'+
         '</td>'+
         '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx3);font-weight:700;font-size:12px;border-bottom:1px solid rgba(255,255,255,.04)">&mdash;</td>'+
