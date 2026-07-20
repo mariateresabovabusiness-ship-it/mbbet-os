@@ -2284,7 +2284,7 @@ function mapBonusRow(r){
   var mo=parseInt(r.mese_operativo)||null;var ao=parseInt(r.anno_operativo)||null;
   if(!mo&&r.data_inizio){var d=new Date(r.data_inizio);mo=d.getMonth()+1;ao=d.getFullYear();}
   return {id:r.id,cli_id:r.id_cli,cli_nm:r.cliente||'—',cli_op:r.operatore||'—',bk_nm:r.bookmaker,bk_col:bk?bk._col:'#5aaaff',stato:r.stato||'LIBERO',ricavo_prev:parseFloat(r.ric_prev)||0,ricavo_reale:rr||null,pag_cli:parseFloat(r.pag_cli)||null,comp_op:co,comp_col:cc,costi_extra:parseFloat(r.costi_extra)||0,perc_op:po,perc_collab:pc,margine:marg,priorita:r.priorita||'MEDIA',ultima_az:r.ult_azione||null,prox_az:r.pross_azione||null,note:r.note||'',
-  username:r.username_bk||'',password:r.password_bk||'',stato_op:r.stato_op||'In corso',fase:r.fase_attuale||'Da iniziare',data_inizio:r.data_inizio||null,deposito:dep,bonus_ric:bonRic,prelievo:prel,guad_tot:gt,guad_op:gop,profitto_mb:pmb,alert:r.alert_msg||'',cronologia:Array.isArray(r.cronologia)?r.cronologia:[],saldo_bk:parseFloat(r.saldo_bk)||0,mese_op:mo,anno_op:ao,incassato:!!r.incassato,data_incasso:r.data_incasso||null,nome_collab:r.nome_collab||null,id_collab:r.id_collab||null,_real:true};
+  username:r.username_bk||'',password:r.password_bk||'',stato_op:r.stato_op||'In corso',fase:r.fase_attuale||'Da iniziare',data_inizio:r.data_inizio||null,deposito:dep,bonus_ric:bonRic,prelievo:prel,guad_tot:gt,guad_op:gop,profitto_mb:pmb,alert:r.alert_msg||'',cronologia:Array.isArray(r.cronologia)?r.cronologia:[],saldo_bk:parseFloat(r.saldo_bk)||0,mese_op:mo,anno_op:ao,incassato:!!r.incassato,data_incasso:r.data_incasso||null,nome_collab:r.nome_collab||null,id_collab:r.id_collab||null,pocket_stato:r.pocket_stato||null,_real:true};
 }
 
 function reloadData(){loadData();}
@@ -3770,6 +3770,30 @@ function renderOtGrid(){
           +orphans.slice(0,5).map(function(r){return '<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,144,64,.1);border:1px solid rgba(255,144,64,.2);color:var(--orange)">'+r.cli_nm+(r.bk_nm?' · '+r.bk_nm:'')+'</span>';}).join('')
           +(orphans.length>5?'<span style="font-size:10px;color:var(--tx3);padding:2px 6px">+altri '+(orphans.length-5)+'</span>':'')
         +'</div>'
+      +'</div>'
+    +'</div>';
+  }
+  /* Siti chiusi da un collaboratore (Gas, Ale e Fede, Lorenzo, Isma...) —
+     compenso già pagato/accumulato — ma nessun operatore MBBET ha ancora
+     verificato e inserito il ricavo reale del bookmaker. Finché resta a 0
+     qui, quel guadagno NON compare in "Entrate" su Finanza anche se il
+     sito è di fatto chiuso: va cercato attivamente, non emerge da solo. */
+  var needRicavo=BONUS_CLI.filter(function(r){
+    var chiuso=r.stato==='FATTO'||r.pocket_stato==='ACCUMULATO'||r.pocket_stato==='PAGATO';
+    return r.nome_collab&&chiuso&&!(r.ricavo_reale>0);
+  });
+  if(needRicavo.length){
+    h+='<div style="margin-bottom:18px;padding:14px 18px;background:rgba(90,170,255,.06);border:1px solid rgba(90,170,255,.25);border-left:4px solid var(--blue);border-radius:12px">'
+      +'<div style="display:flex;align-items:center;gap:14px;margin-bottom:'+(needRicavo.length?'10px':'0')+'">'
+        +'<div style="font-size:22px">€</div>'
+        +'<div style="flex:1">'
+          +'<div style="font-size:13px;font-weight:800;color:var(--blue);margin-bottom:3px">'+needRicavo.length+' '+(needRicavo.length===1?'sito chiuso da un collaboratore':'siti chiusi dai collaboratori')+' senza ricavo reale inserito</div>'
+          +'<div style="font-size:11px;color:var(--tx3)">Il collaboratore ha già chiuso (ed è stato pagato) ma nessun operatore ha ancora verificato quanto ha reso davvero il sito — finché resta così, questo guadagno non compare in Finanza. Clicca per inserirlo.</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+        +needRicavo.slice(0,12).map(function(r){return '<button class="ta" style="font-size:10px;padding:4px 10px;background:rgba(90,170,255,.1);border:1px solid rgba(90,170,255,.25);color:var(--blue);border-radius:6px;cursor:pointer;font-family:inherit" onclick="modalAggRicavo(\''+r.id+'\')">'+r.cli_nm+' · '+r.bk_nm+' ('+r.nome_collab+')</button>';}).join('')
+        +(needRicavo.length>12?'<span style="font-size:10px;color:var(--tx3);padding:4px 6px">+altri '+(needRicavo.length-12)+'</span>':'')
       +'</div>'
     +'</div>';
   }
