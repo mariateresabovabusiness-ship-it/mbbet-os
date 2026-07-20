@@ -2284,7 +2284,7 @@ function mapBonusRow(r){
   var mo=parseInt(r.mese_operativo)||null;var ao=parseInt(r.anno_operativo)||null;
   if(!mo&&r.data_inizio){var d=new Date(r.data_inizio);mo=d.getMonth()+1;ao=d.getFullYear();}
   return {id:r.id,cli_id:r.id_cli,cli_nm:r.cliente||'—',cli_op:r.operatore||'—',bk_nm:r.bookmaker,bk_col:bk?bk._col:'#5aaaff',stato:r.stato||'LIBERO',ricavo_prev:parseFloat(r.ric_prev)||0,ricavo_reale:rr||null,pag_cli:parseFloat(r.pag_cli)||null,comp_op:co,comp_col:cc,costi_extra:parseFloat(r.costi_extra)||0,perc_op:po,perc_collab:pc,margine:marg,priorita:r.priorita||'MEDIA',ultima_az:r.ult_azione||null,prox_az:r.pross_azione||null,note:r.note||'',
-  username:r.username_bk||'',password:r.password_bk||'',stato_op:r.stato_op||'In corso',fase:r.fase_attuale||'Da iniziare',data_inizio:r.data_inizio||null,deposito:dep,bonus_ric:bonRic,prelievo:prel,guad_tot:gt,guad_op:gop,profitto_mb:pmb,alert:r.alert_msg||'',cronologia:Array.isArray(r.cronologia)?r.cronologia:[],saldo_bk:parseFloat(r.saldo_bk)||0,mese_op:mo,anno_op:ao,incassato:!!r.incassato,data_incasso:r.data_incasso||null,_real:true};
+  username:r.username_bk||'',password:r.password_bk||'',stato_op:r.stato_op||'In corso',fase:r.fase_attuale||'Da iniziare',data_inizio:r.data_inizio||null,deposito:dep,bonus_ric:bonRic,prelievo:prel,guad_tot:gt,guad_op:gop,profitto_mb:pmb,alert:r.alert_msg||'',cronologia:Array.isArray(r.cronologia)?r.cronologia:[],saldo_bk:parseFloat(r.saldo_bk)||0,mese_op:mo,anno_op:ao,incassato:!!r.incassato,data_incasso:r.data_incasso||null,nome_collab:r.nome_collab||null,id_collab:r.id_collab||null,_real:true};
 }
 
 function reloadData(){loadData();}
@@ -3750,14 +3750,22 @@ function renderOtGrid(){
     +otKpi(fmtE(totDep),'Depositi','var(--purple)')
     +otKpi(fmtE(totPmb),'Profitto MBBET','var(--teal)')
     +'</div>';
-  /* righe orfane: in DB ma senza operatore o bookmaker assegnato */
-  var orphans=BONUS_CLI.filter(function(r){return !r.cli_op||r.cli_op==='—'||!r.bk_nm;});
+  /* righe orfane: in DB ma senza operatore, senza bookmaker, E senza un
+     collaboratore (nome_collab/id_collab) a cui appartengono. Le righe dei
+     collaboratori a modello POCKET/referral (Gas, Ale e Fede, Lorenzo,
+     Isma...) sono legittimamente senza operatore MBBET assegnato — non
+     sono "orfane", appartengono a un modello di lavoro diverso. */
+  var orphans=BONUS_CLI.filter(function(r){
+    var noOp=!r.cli_op||r.cli_op==='—';
+    var noCollab=!r.nome_collab&&!r.id_collab;
+    return !r.bk_nm||(noOp&&noCollab);
+  });
   if(orphans.length){
     h+='<div style="margin-bottom:18px;padding:14px 18px;background:rgba(255,144,64,.06);border:1px solid rgba(255,144,64,.25);border-left:4px solid var(--orange);border-radius:12px;display:flex;align-items:center;gap:14px">'
       +'<div style="font-size:22px">⚠️</div>'
       +'<div style="flex:1">'
-        +'<div style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:3px">'+orphans.length+' '+(orphans.length===1?'riga':'righe')+' nel database senza operatore/bookmaker assegnato</div>'
-        +'<div style="font-size:11px;color:var(--tx3)">Queste pratiche esistono nel DB ma non compaiono nel workspace. Soluzione: esegui <b style="color:var(--gold)">sql/migration_vecchi_bonus.sql</b> su Supabase, oppure usa "Assegna Sito" per ricrearle correttamente.</div>'
+        +'<div style="font-size:13px;font-weight:800;color:var(--orange);margin-bottom:3px">'+orphans.length+' '+(orphans.length===1?'riga':'righe')+' nel database senza operatore né collaboratore assegnato</div>'
+        +'<div style="font-size:11px;color:var(--tx3)">Queste pratiche non appartengono a nessun operatore MBBET né a un collaboratore (Gas, Ale e Fede, Isma...) — vanno assegnate manualmente con "Assegna Sito", oppure verificate: potrebbero essere righe di test o incomplete.</div>'
         +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'
           +orphans.slice(0,5).map(function(r){return '<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(255,144,64,.1);border:1px solid rgba(255,144,64,.2);color:var(--orange)">'+r.cli_nm+(r.bk_nm?' · '+r.bk_nm:'')+'</span>';}).join('')
           +(orphans.length>5?'<span style="font-size:10px;color:var(--tx3);padding:2px 6px">+altri '+(orphans.length-5)+'</span>':'')
