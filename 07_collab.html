@@ -1610,17 +1610,23 @@ function renderDetail(cid){
   }).join('')+'</div>';
 
   // DIVISIONE GUADAGNO 50/50 + LISTINO SITO PER SITO — solo per i collaboratori
-  // a percentuale sul profitto reale (Isma, Alan): comp_referral è già SOLO
-  // la quota del collaboratore, quindi il generato totale è il doppio e la
-  // quota MBBET è identica alla sua.
+  // a percentuale sul profitto reale (es. Isma). Calcolata dal ricavo reale
+  // VERO (ric_real, solo bonus FATTO — stessa regola di 04_finanze.html: un
+  // bonus IN_CORSO può avere un ric_real "di prova", non ancora confermato),
+  // non dallo stato di pagamento locale che si cicla a mano: così il totale
+  // si aggiorna da solo appena un operatore inserisce il ricavo su Bookmaker,
+  // senza bisogno che nessuno scriva o clicchi nulla qui.
   if(c.perc>0&&c.modello!=='POCKET'){
-    var totGenerato=totInc*2;
+    var totGenerato=0;
+    bnsFiltered.forEach(function(b){if(b.stato==='FATTO')totGenerato+=(parseFloat(b.ric_real)||0);});
+    var quotaCollabReale=Math.round(totGenerato*c.perc/100*100)/100;
+    var quotaMbbetReale=Math.round((totGenerato-quotaCollabReale)*100)/100;
     html+='<div style="background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px 20px;margin-bottom:22px">'+
-      '<div style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px;margin-bottom:14px">&#129568; DIVISIONE GUADAGNO — '+c.perc+'% / '+(100-c.perc)+'%</div>'+
+      '<div style="font-size:10px;font-weight:800;color:var(--tx3);letter-spacing:2px;margin-bottom:14px">&#129568; DIVISIONE GUADAGNO — '+c.perc+'% / '+(100-c.perc)+'% <span style="font-weight:600;text-transform:none;letter-spacing:0">(dai ricavi reali già verificati dagli operatori su Bookmaker)</span></div>'+
       '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:'+(tariffe.length?'18px':'0')+'">'+
-        '<div><div style="font-size:20px;font-weight:900;color:var(--tx)">€ '+fmt(totGenerato)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Generato totale (incassato)</div></div>'+
-        '<div><div style="font-size:20px;font-weight:900;color:var(--green)">€ '+fmt(totInc)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Quota '+(c.nome||'')+' ('+c.perc+'%)</div></div>'+
-        '<div><div style="font-size:20px;font-weight:900;color:var(--gold)">€ '+fmt(totGenerato-totInc)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Quota MBBET ('+(100-c.perc)+'%)</div></div>'+
+        '<div><div style="font-size:20px;font-weight:900;color:var(--tx)">€ '+fmt(totGenerato)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Ricavo reale totale generato</div></div>'+
+        '<div><div style="font-size:20px;font-weight:900;color:var(--green)">€ '+fmt(quotaCollabReale)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Quota '+(c.nome||'')+' ('+c.perc+'%)</div></div>'+
+        '<div><div style="font-size:20px;font-weight:900;color:var(--gold)">€ '+fmt(quotaMbbetReale)+'</div><div style="font-size:10px;color:var(--tx3);margin-top:2px">Quota MBBET ('+(100-c.perc)+'%)</div></div>'+
       '</div>'+
       (tariffe.length?(
         '<div style="border-top:1px solid rgba(255,255,255,.06);padding-top:14px;display:flex;flex-wrap:wrap;gap:8px">'+
