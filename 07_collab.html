@@ -907,6 +907,7 @@ async function segnaEsitoBk(cid,bookmaker,cliente,stato){
   if(!c)return;
   var msgFn=ESITO_BK_MSG[stato];
   if(!confirm(msgFn?msgFn(bookmaker,cliente):('Segnare "'+bookmaker+'" come '+stato+' per '+cliente+'?')))return;
+  var nota=(prompt('Motivo (opzionale, es. "non ha SPID") — lascia vuoto se non serve:','')||'').trim();
   var mese=_collabMese?parseInt(_collabMese.split('-')[1]):new Date().getMonth()+1;
   var anno=_collabMese?parseInt(_collabMese.split('-')[0]):new Date().getFullYear();
   var payload={
@@ -918,7 +919,8 @@ async function segnaEsitoBk(cid,bookmaker,cliente,stato){
     anno_operativo:anno,
     stato:stato,
     stato_op:ESITO_BK_STATO_OP[stato]||'In corso',
-    comp_referral:0
+    comp_referral:0,
+    note:nota||null
   };
   try{
     var idCli=await collegaClienteCrm(cliente,c.nome,null);
@@ -1397,7 +1399,7 @@ function renderPocketCliente(cid,clienteEnc){
     var b=righeBySito[t.bookmaker.toLowerCase()];
     var bg=idx%2===0?'rgba(255,255,255,.012)':'transparent';
     var col2=PALETTE[idx%PALETTE.length];
-    var chip='<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:22px;border-radius:7px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
+    var chip='<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:22px;border-radius:7px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span>'+(b&&b.note?'<span title="'+b.note.replace(/"/g,'&quot;')+'" style="cursor:help;opacity:.75;font-size:12px">&#128221;</span>':'')+'</div>';
     if(!b){
       html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
         '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
@@ -1996,7 +1998,7 @@ function renderFlatCliente(cid,clienteEnc){
     var b=righeBySito[t.bookmaker.toLowerCase()];
     var bg=idx%2===0?'rgba(255,255,255,.012)':'transparent';
     var col2=PALETTE[idx%PALETTE.length];
-    var chip='<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:22px;border-radius:7px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span></div>';
+    var chip='<div style="display:flex;align-items:center;gap:7px"><div style="width:22px;height:22px;border-radius:7px;flex-shrink:0;background:'+col2+'22;border:1px solid '+col2+'44;color:'+col2+';font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center">'+t.bookmaker.charAt(0)+'</div><span>'+(b?b.bookmaker:t.bookmaker)+'</span>'+(b&&b.note?'<span title="'+b.note.replace(/"/g,'&quot;')+'" style="cursor:help;opacity:.75;font-size:12px">&#128221;</span>':'')+'</div>';
     if(!b){
       html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'30;opacity:.55" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.55">'+
         '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
