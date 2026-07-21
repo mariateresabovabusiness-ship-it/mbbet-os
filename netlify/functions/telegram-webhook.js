@@ -53,7 +53,7 @@ async function gestisciCallback(token, cq) {
   upd.ult_azione = new Date().toISOString();
 
   const res = await fetch(SUPA_URL + '/rest/v1/bonus?id=eq.' + encodeURIComponent(bonusId), {
-    method: 'PATCH', headers: supaHeaders(), body: JSON.stringify(upd)
+    method: 'PATCH', headers: supaHeaders({ Prefer: 'return=representation' }), body: JSON.stringify(upd)
   });
 
   if (!res.ok) {
@@ -70,6 +70,48 @@ async function gestisciCallback(token, cq) {
       text: nuovoTesto, parse_mode: 'HTML'
     });
   }
+
+  // Operatore con accesso limitato a pochi bookmaker (es. Nico): appena
+  // segna "Fatto" da qui (bottone Telegram, non solo dall'app), avvisa chi
+  // coordina il lavoro dopo di lui — sostituisce l'avviso manuale su
+  // WhatsApp. Il destinatario è configurabile (tabella config), mai un
+  // nome scritto fisso nel codice.
+  if (azione === 'fatto') {
+    try {
+      const nomeOp = await trovaOperatorePerChat(cq.message.chat.id);
+      const scope = nomeOp ? await trovaScopeOperatore(nomeOp) : null;
+      if (scope && scope.length) {
+        const destinatario = await leggiConfig('Notifica completamento operatore limitato');
+        if (destinatario) {
+          const destChatId = await trovaChatIdOperatore(destinatario);
+          const righe = await res.json();
+          const b = Array.isArray(righe) && righe[0];
+          if (destChatId && b) {
+            await tg(token, 'sendMessage', {
+              chat_id: destChatId, parse_mode: 'HTML',
+              text: '✅ <b>' + nomeOp + '</b> ha completato ' + b.bookmaker + ' per <b>' + b.cliente + '</b> — pronto per il prossimo passo.'
+            });
+          }
+        }
+      }
+    } catch (e) {}
+  }
+}
+
+async function trovaScopeOperatore(nome) {
+  const res = await fetch(SUPA_URL + '/rest/v1/utenti_crm?nome=eq.' + encodeURIComponent(nome) + '&select=bookmaker_scope', { headers: supaHeaders() });
+  const rows = await res.json();
+  return Array.isArray(rows) && rows[0] ? rows[0].bookmaker_scope : null;
+}
+async function leggiConfig(chiave) {
+  const res = await fetch(SUPA_URL + '/rest/v1/config?chiave=eq.' + encodeURIComponent(chiave) + '&select=valore', { headers: supaHeaders() });
+  const rows = await res.json();
+  return Array.isArray(rows) && rows[0] ? rows[0].valore : null;
+}
+async function trovaChatIdOperatore(nome) {
+  const res = await fetch(SUPA_URL + '/rest/v1/operatori?nome=eq.' + encodeURIComponent(nome) + '&select=telegram_chat_id', { headers: supaHeaders() });
+  const rows = await res.json();
+  return Array.isArray(rows) && rows[0] ? rows[0].telegram_chat_id : null;
 }
 
 async function trovaOperatorePerChat(chatId) {

@@ -693,6 +693,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx);font-family:system-ui
   <a class="sbl" data-sec="task" title="Task & Workflow">&#9989;</a>
   <a class="sbl" data-sec="team" title="Team MBBET" onclick="navTo('03_team.html')">&#128101;</a>
   <a class="sbl" data-sec="collab" title="Collaboratori" onclick="navTo('07_collab.html')">&#129309;</a>
+  <a class="sbl" data-sec="numeri" title="Numeri SMS" onclick="navTo('16_numeri_sms.html')">&#128246;</a>
   <a class="sbl" data-sec="finanze" title="Revenue & Finanza" onclick="navTo('04_finanze.html')">&#128184;</a>
   <a class="sbl" data-sec="documenti" title="Documenti">&#128196;</a>
   <a class="sbl" data-sec="social" title="Social MBBET" onclick="navTo('09_social.html')">&#128241;</a>
@@ -836,7 +837,7 @@ var FB_COLS=['#ff1440','#5aaaff','#00f093','#22eeff','#c4a4f8','#ff9040','#00d4b
 var FB_RGBS=['247,204,70','90,170,255','0,240,147','34,238,255','196,164,248','255,144,64','0,212,176','255,79,128','255,79,79'];
 
 /* ── STATE ── */
-var BKS=[],OPS_LIST=[],BONUS_CLI=[],PROMO=[],_opTelegram={};
+var BKS=[],OPS_LIST=[],BONUS_CLI=[],PROMO=[],_opTelegram={},_notificaOperatoreLimitato=null;
 
 /* ── GUIDE BOOKMAKER ── testo incollato dall'utente per ogni BK ── */
 var _BK_GUIDE_PDF={
@@ -2239,11 +2240,14 @@ async function loadData(){
   var settled=await Promise.allSettled([
     db.from('bookmaker').select('*').eq('attivo',true).order('priorita_num',{ascending:true,nullsFirst:false}),
     db.from('operatori').select('nome,colore,is_joint,telegram_chat_id').eq('stato','Attivo'),
-    fetchAllBonus()
+    fetchAllBonus(),
+    db.from('config').select('valore').eq('chiave','Notifica completamento operatore limitato').maybeSingle()
   ]);
   var rb=settled[0].status==='fulfilled'?settled[0].value:null;
   var ro=settled[1].status==='fulfilled'?settled[1].value:null;
   var rbonRows=settled[2].status==='fulfilled'?settled[2].value:null;
+  var rcfg=settled[3].status==='fulfilled'?settled[3].value:null;
+  _notificaOperatoreLimitato=(rcfg&&rcfg.data&&rcfg.data.valore)||null;
 
   if(rb&&rb.data&&rb.data.length)BKS=rb.data.map(function(b,i){return enrichBk(b,i);});
   if(!BKS.length){BKS=[{nome:'Bet365',tier:'S+',roi_medio:0},{nome:'Snai',tier:'S+',roi_medio:0},{nome:'Goldbet',tier:'S',roi_medio:0},{nome:'Sisal',tier:'A',roi_medio:0},{nome:'Betfair',tier:'A',roi_medio:0},{nome:'William Hill',tier:'S',roi_medio:0},{nome:'Lottomatica',tier:'S',roi_medio:0},{nome:'Eurobet',tier:'A',roi_medio:0},{nome:'Unibet',tier:'A',roi_medio:0},{nome:'Bwin',tier:'A',roi_medio:0},{nome:'Planetwin',tier:'S',roi_medio:0}].map(function(b,i){return enrichBk(b,i);});}
@@ -3118,6 +3122,13 @@ async function doSt(rid){
   if(ns==='FATTO'){
     addNotif('Bonus','Bonus completato: '+r.cli_nm,r.bk_nm+' — bonus segnato come FATTO','Alta',r.cli_op);
     fetch('/.netlify/functions/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({titolo:'Bonus completato: '+r.cli_nm,messaggio:r.bk_nm+' — bonus segnato come FATTO'})}).catch(function(){});
+    // Operatore con accesso limitato a pochi bookmaker (es. Nico): appena
+    // completa la sua parte, avvisa chi coordina il lavoro dopo di lui
+    // (config "Notifica completamento operatore limitato") via Telegram —
+    // sostituisce l'avviso manuale su WhatsApp, non aggiunto in più.
+    if(typeof isOperatoreSelf==='function'&&isOperatoreSelf()&&_notificaOperatoreLimitato){
+      notificaOperatoreTelegram(_notificaOperatoreLimitato,'✅ <b>'+(currentNome||'Operatore')+'</b> ha completato '+r.bk_nm+' per <b>'+r.cli_nm+'</b> — pronto per il prossimo passo.',rid);
+    }
   }
 }
 
