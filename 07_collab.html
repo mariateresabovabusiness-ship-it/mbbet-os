@@ -2060,6 +2060,15 @@ function renderFlatCliente(cid,clienteEnc){
     var isPaid=st==='PAGATO';
     var ggCol=isPaid||gg===null?'var(--tx3)':(gg<=2?'var(--red)':'var(--green)');
     var ggTxt=gg===null?'—':(gg<0?Math.abs(gg)+'gg fa':gg===0?'oggi':gg+'gg');
+    // Collaboratori a percentuale sul profitto reale (es. Isma, 50%): finché
+    // nessun operatore MBBET ha inserito il ricavo reale del sito su
+    // Bookmaker, comp_referral resta a 0 — non vuol dire "nessun prezzo",
+    // vuol dire "ancora da verificare". Mostriamo il prezzo di riferimento
+    // del listino come stima invece di un fuorviante €0,00.
+    var stimatoImporto=(!b.comp_referral||b.comp_referral===0)&&c.perc>0&&t.prezzo;
+    var importoCellHtml=stimatoImporto?
+      ('<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--gold);font-weight:700;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(t.prezzo)+'<div style="font-size:9px;color:var(--tx3);font-weight:600;font-style:italic">stima, in attesa del ricavo reale</div></td>'):
+      ('<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>');
     html+='<tr style="background:'+bg+';border-left:2px solid '+col2+'55" onmouseover="this.style.background=\'rgba(255,20,64,0.044)\'" onmouseout="this.style.background=\''+bg+'\'">'+
       '<td class="mbl-idx" style="padding:8px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">'+(idx+1)+'</td>'+
       '<td class="mbl-head" style="padding:8px 10px;font-weight:700;color:var(--tx);white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04);'+(isReadOnlyCollab()?'':'cursor:pointer')+'" '+(isReadOnlyCollab()?'':'onclick="openEditBonus(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" title="Apri dettaglio"')+'>'+chip+'</td>'+
@@ -2071,7 +2080,7 @@ function renderFlatCliente(cid,clienteEnc){
       '</td>'+
       '<td data-lbl="DATA" style="padding:8px 10px;color:var(--tx2);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)">'+fmtDate(b.data_inizio)+'</td>'+
       '<td data-lbl="SCADENZA" style="padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.04)"><div style="color:var(--tx2);font-size:11px">'+(scad?fmtDate(scad):'—')+'</div><div style="color:'+ggCol+';font-weight:800;font-size:10.5px;margin-top:2px">'+ggTxt+'</div></td>'+
-      '<td data-lbl="IMPORTO" style="padding:8px 10px;text-align:right;color:var(--tx);font-weight:800;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)">€ '+fmt(b.comp_referral)+'</td>'+
+      importoCellHtml+
       '<td data-lbl="STATO" style="padding:8px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<span class="st-badge st-'+st+'" '+(isReadOnlyCollab()?'style="cursor:default"':'onclick="cycleStatusCliente(\''+b.id+'\',\''+cid+'\',\''+clienteEnc+'\')" style="cursor:pointer"')+'>'+STATI_LABEL[st]+'</span>'+
       '</td>'+
