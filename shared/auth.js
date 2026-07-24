@@ -10,15 +10,15 @@ var currentCollabNome = '';
 var currentBookmakerScope = null;
 
 var ROLE_SECTIONS = {
-  'SOCIO_ADMIN':    ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import','numeri'],
-  'SOCIO':          ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab','coda','import','numeri'],
-  'OPERATORE':      ['clienti','bonus','task','social','collab','coda','numeri'],
+  'SOCIO_ADMIN':    ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import','numeri','contratti','promo'],
+  'SOCIO':          ['clienti','bonus','team','finanze','documenti','task','report','social','email','collab','coda','import','numeri','contratti','promo'],
+  'OPERATORE':      ['clienti','bonus','coda'],
   'OPERATORE_SELF': ['bonus','collab','coda','numeri'],
   'COLLAB':         ['clienti','bonus','social','collab'],
   'COLLAB_SELF':    ['collab'],
   'REFERRAL':       ['report'],
   'VIEWER':         ['clienti'],
-  'ADMIN_TECNICO':  ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import','numeri']
+  'ADMIN_TECNICO':  ['clienti','bonus','team','finanze','documenti','task','report','config','social','email','collab','coda','import','numeri','contratti','promo']
 };
 
 var ROLE_LABELS  = {'SOCIO_ADMIN':'Socio Admin','SOCIO':'Socio','OPERATORE':'Operatore','OPERATORE_SELF':'Operatore','COLLAB':'Collab','COLLAB_SELF':'Collaboratore','REFERRAL':'Referral','VIEWER':'Viewer','ADMIN_TECNICO':'Admin Tecnico'};

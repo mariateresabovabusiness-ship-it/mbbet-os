@@ -271,7 +271,7 @@ var CTR_STATO_COLORS = {
 };
 
 function onLoginSuccess() {
-  if (!requireSection('clienti')) return;
+  if (!requireSection('contratti')) return;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'grid';
   document.getElementById('topbar').innerHTML = buildTopbar('Contratti', '');
